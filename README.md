@@ -4,7 +4,7 @@
 This repository delves into a research field we refer to as "deeplifting". Deeplifting merges the domains of deep learning and optimization, proposing a novel approach to solve optimization problems. By using neural networks to reparameterize input spaces, we can significantly improve solutions, making them both more potent and robust.
 
 ## Setup ⚙️
-Note 📝: Repostory was configured using Python 🐍 version 3.9.11
+**Note** 📝: Repostory was configured using Python 🐍 version 3.9.11
 
 IPOPT ("Interior Point OPTimizer, pronounced I-P-Opt") is a software package for large-scale nonlinear optimization.
 
@@ -25,6 +25,8 @@ Here's a step-by-step guide on how to set it up on Mac and Linux.
 ```bash
 brew install ipopt
 ```
+
+**Note 📝: It's crucial to mention that to successfully install IPOPT on a Mac, I needed to update my operating system to the latest version. As of the time this was written, that version is Ventura 13.4.**
 
 ### Linux:
 

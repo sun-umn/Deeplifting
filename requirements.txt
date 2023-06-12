@@ -7,7 +7,7 @@ pre-commit
 
 # Third party tools
 # Requires the ipopt library
-# ipopt==1.0.3
+ipopt==1.0.3
 pandas==2.0.2
 pyomo==6.6.1
 gurobipy==10.0.1
@@ -15,6 +15,8 @@ osqp>=0.6.2
 numpy>=1.20.3
 scipy>=1.7.1
 torch==2.0.1
+jupyterlab==4.0.2
+matplotlib
 
 # PyGranso Solver
 git+https://github.com/sun-umn/PyGRANSO.git
