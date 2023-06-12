@@ -65,7 +65,7 @@ pip install pre-commit
 2. Then, navigate to your project directory, where the `.pre-commit-config.yaml` file is located:
 
 ```bash
-cd your_project_directory
+cd deeplifting
 ```
 
 3. In the project directory, run the following command to install the pre-commit hooks:
