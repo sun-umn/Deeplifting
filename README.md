@@ -76,4 +76,11 @@ pre-commit install
 
 With these steps completed, the pre-commit hooks are now set up. They will automatically run checks on your code each time you try to commit changes in this repository. If the checks pass, the commit will be allowed; if they fail, the commit will be blocked, and you'll need to fix the issues before trying again.
 
+### Project Documents 📃
+
+Make sure to review the essential documents related to this project, provided in the list below. If you need access, please get in touch with one of the document administrators.
+
+-  [Deeplifting Initial Ideas & Tasks](https://docs.google.com/document/d/1SN8HvfS9WYqoirlbcRCgr1iush3Vrgw9o4GqonQ6qk8/edit) 💡
+
+
 
