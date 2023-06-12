@@ -1,5 +1,19 @@
+# Configuration
 isort
 black
 flake8
 mypy
 pre-commit
+
+# Third party tools
+# Requires the ipopt library
+# ipopt==1.0.3
+pandas==2.0.2
+pyomo==6.6.1
+gurobipy==10.0.1
+osqp>=0.6.2
+numpy>=1.20.3
+scipy>=1.7.1
+
+# PyGranso Solver
+git+https://github.com/sun-umn/PyGRANSO.git
