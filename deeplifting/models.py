@@ -4,7 +4,13 @@ import torch.nn as nn
 
 
 class MLP(nn.Module):
-    def __init__(self, input_size, layer_sizes, output_size):
+    """
+    Class that implements a standard MLP from
+    pytorch. We will utilize this as one of many
+    NN architectures for our deep lifting project.
+    """
+
+    def __init__(self, input_size, layer_sizes, output_size):  # noqa
         super(MLP, self).__init__()
 
         layers = []
@@ -22,7 +28,7 @@ class MLP(nn.Module):
         self.output_layer = nn.Linear(prev_layer_size, output_size)
         nn.init.orthogonal_(self.output_layer.weight)  # Apply orthogonal initialization
 
-    def forward(self, x):
+    def forward(self, x):  # noqa
         x = self.layers(x)
         x = self.output_layer(x)
         return x
