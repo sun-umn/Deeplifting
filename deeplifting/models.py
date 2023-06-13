@@ -3,6 +3,19 @@ import torch
 import torch.nn as nn
 
 
+class SinActivation(nn.Module):
+    """
+    Class that makes the sin function
+    an activation function
+    """
+
+    def __init__(self):  # noqa
+        super(SinActivation, self).__init__()
+
+    def forward(self, x):  # noqa
+        return torch.sin(x)
+
+
 class DeepliftingMLP(nn.Module):
     """
     Class that implements a standard MLP from
@@ -10,7 +23,7 @@ class DeepliftingMLP(nn.Module):
     NN architectures for our deep lifting project.
     """
 
-    def __init__(self, input_size, layer_sizes, output_size, bounds):  # noqa
+    def __init__(self, input_size, layer_sizes, output_size):  # noqa
         super(DeepliftingMLP, self).__init__()
 
         layers = []
@@ -20,7 +33,7 @@ class DeepliftingMLP(nn.Module):
             nn.init.orthogonal_(linear_layer.weight)  # Apply orthogonal initialization
             layers.append(linear_layer)
             layers.append(nn.BatchNorm1d(size))  # Add batch normalization
-            layers.append(torch.sin)
+            layers.append(SinActivation())
             prev_layer_size = size
 
         # Output layer
@@ -32,10 +45,9 @@ class DeepliftingMLP(nn.Module):
         # optimization is also let the input be variable. Some
         # of the problems we have looked at so far also are
         # between bounds
-        a, b = bounds
-        self.x = a + (b - a) * torch.rand((20, 1))
+        self.x = nn.Parameter(torch.randn(3, input_size))
 
-    def forward(self, x=None):  # noqa
+    def forward(self, inputs=None):  # noqa
         output = self.layers(self.x)
         output = self.output_layer(output)
-        return output
+        return output.mean(axis=0)
