@@ -53,8 +53,7 @@ Note: These instructions assume that you have Python and pip already installed o
 Always refer to the official IPOPT documentation or source for the most up-to-date and detailed setup instructions.
 
 ### Pre-Commit Hooks 🤖
-[Pre-Commit Documentation]
-(https://pre-commit.com/)
+[Precommit Documentation](https://pre-commit.com)
 
 To conclude, we've integrated pre-commit hooks to maintain a consistent standard and style across all contributed code.
 
