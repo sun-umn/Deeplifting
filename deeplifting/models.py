@@ -10,7 +10,7 @@ class MLP(nn.Module):
     NN architectures for our deep lifting project.
     """
 
-    def __init__(self, input_size, layer_sizes, output_size):  # noqa
+    def __init__(self, input_size, layer_sizes, output_size, bounds):  # noqa
         super(MLP, self).__init__()
 
         layers = []
@@ -27,6 +27,13 @@ class MLP(nn.Module):
         self.layers = nn.Sequential(*layers)
         self.output_layer = nn.Linear(prev_layer_size, output_size)
         nn.init.orthogonal_(self.output_layer.weight)  # Apply orthogonal initialization
+
+        # One of the things that we did with the topology
+        # optimization is also let the input be variable. Some
+        # of the problems we have looked at so far also are
+        # between bounds
+        a, b = bounds
+        self.x = a + (b - a) * torch.rand((20, 1))
 
     def forward(self, x):  # noqa
         x = self.layers(x)
