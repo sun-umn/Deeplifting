@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 
 
-class MLP(nn.Module):
+class DeepliftingMLP(nn.Module):
     """
     Class that implements a standard MLP from
     pytorch. We will utilize this as one of many
@@ -11,7 +11,7 @@ class MLP(nn.Module):
     """
 
     def __init__(self, input_size, layer_sizes, output_size, bounds):  # noqa
-        super(MLP, self).__init__()
+        super(DeepliftingMLP, self).__init__()
 
         layers = []
         prev_layer_size = input_size
