@@ -35,7 +35,7 @@ class MLP(nn.Module):
         a, b = bounds
         self.x = a + (b - a) * torch.rand((20, 1))
 
-    def forward(self, x):  # noqa
-        x = self.layers(x)
-        x = self.output_layer(x)
-        return x
+    def forward(self, x=None):  # noqa
+        output = self.layers(self.x)
+        output = self.output_layer(output)
+        return output
