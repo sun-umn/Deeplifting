@@ -30,24 +30,22 @@ class DeepliftingMLP(nn.Module):
         prev_layer_size = input_size
         for size in layer_sizes:
             linear_layer = nn.Linear(prev_layer_size, size)
-            nn.init.orthogonal_(linear_layer.weight)  # Apply orthogonal initialization
             layers.append(linear_layer)
-            layers.append(nn.BatchNorm1d(size))  # Add batch normalization
+            # layers.append(nn.BatchNorm1d(size))  # Add batch normalization
             layers.append(SinActivation())
             prev_layer_size = size
 
         # Output layer
         self.layers = nn.Sequential(*layers)
         self.output_layer = nn.Linear(prev_layer_size, output_size)
-        nn.init.orthogonal_(self.output_layer.weight)  # Apply orthogonal initialization
 
         # One of the things that we did with the topology
         # optimization is also let the input be variable. Some
         # of the problems we have looked at so far also are
         # between bounds
-        self.x = nn.Parameter(torch.randn(3, input_size))
+        self.x = nn.Parameter(torch.randn(20, input_size))
 
     def forward(self, inputs=None):  # noqa
         output = self.layers(self.x)
         output = self.output_layer(output)
-        return output.mean(axis=0)
+        return torch.mean(output, axis=0)
