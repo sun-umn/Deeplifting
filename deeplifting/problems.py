@@ -27,3 +27,24 @@ def ackley(x, y, version='numpy'):
         )
 
     return result
+
+
+def bukin_n6(x, y, version='numpy'):
+    """
+    Function that implements the Bukin Function N.6 in both
+    numpy and pytorch.
+    """
+    if version == 'numpy':
+        term1 = 100 * np.sqrt(np.abs(y - 0.01 * x**2))
+        term2 = 0.01 * np.abs(x + 10)
+        result = term1 + term2
+    elif version == 'pytorch':
+        term1 = 100 * torch.sqrt(torch.abs(y - 0.01 * x**2))
+        term2 = 0.01 * torch.abs(x + 10)
+        result = term1 + term2
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    return result
