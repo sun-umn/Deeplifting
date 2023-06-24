@@ -2,6 +2,7 @@
 import math
 
 # third party
+import numpy as np
 import torch
 
 # first party
@@ -17,13 +18,13 @@ def test_ackley_has_correct_global_minimum():
     f(x*) = 0
     """
     # Test the numpy version
-    x, y = 0.0, 0.0
-    result = ackley(x, y, version='numpy')
+    x = np.array([0.0, 0.0])
+    result = ackley(x, version='numpy')
     math.isclose(result, 0.0, abs_tol=1e-15)
 
     # Test the torch version
-    x, y = torch.tensor(0.0), torch.tensor(0.0)
-    torch_result = ackley(x, y, version='pytorch').numpy()
+    x = torch.tensor([0.0, 0.0])
+    torch_result = ackley(x, version='pytorch').numpy()
     math.isclose(torch_result, 0.0, abs_tol=1e-7)
 
 
@@ -36,13 +37,13 @@ def test_bukin_n6_has_correct_global_minimum():
     f(x*) = 0
     """
     # Test the numpy version
-    x, y = -10.0, 1.0
-    result = bukin_n6(x, y, version='numpy')
+    x = np.array([-10.0, 1.0])
+    result = bukin_n6(x, version='numpy')
     math.isclose(result, 0.0, abs_tol=1e-7)
 
     # Test the torch version
-    x, y = torch.tensor(-10.0), torch.tensor(1.0)
-    torch_result = bukin_n6(x, y, version='pytorch').numpy()
+    x = torch.tensor([-10.0, 1.0])
+    torch_result = bukin_n6(x, version='pytorch').numpy()
     math.isclose(torch_result, 0.0, abs_tol=1e-7)
 
 
@@ -55,13 +56,13 @@ def test_drop_wave_has_correct_global_minimum():
     f(x*) = -1
     """
     # Test the numpy version
-    x, y = 0.0, 0.0
-    result = drop_wave(x, y, version='numpy')
+    x = np.array([0.0, 0.0])
+    result = drop_wave(x, version='numpy')
     math.isclose(result, -1.0, abs_tol=1e-7)
 
     # Test the torch version
-    x, y = torch.tensor(0.0), torch.tensor(0.0)
-    torch_result = drop_wave(x, y, version='pytorch').numpy()
+    x = torch.tensor([0.0, 0.0])
+    torch_result = drop_wave(x, version='pytorch').numpy()
     math.isclose(torch_result, -1.0, abs_tol=1e-7)
 
 
@@ -74,11 +75,11 @@ def test_eggholder_has_correct_global_minimum():
     f(x*) = -959.6407
     """
     # Test the numpy version
-    x, y = 512.0, 404.2319
-    result = eggholder(x, y, version='numpy')
+    x = np.array([512.0, 404.2319])
+    result = eggholder(x, version='numpy')
     math.isclose(result, -959.6407, abs_tol=1e-3)
 
     # Test the torch version
-    x, y = torch.tensor(512.0), torch.tensor(404.2319)
-    torch_result = eggholder(x, y, version='pytorch').numpy()
+    x = torch.tensor([512.0, 404.2319])
+    torch_result = eggholder(x, version='pytorch').numpy()
     math.isclose(torch_result, -959.6407, abs_tol=1e-3)

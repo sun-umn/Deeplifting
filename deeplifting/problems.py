@@ -3,7 +3,7 @@ import numpy as np
 import torch
 
 
-def ackley(x, y, version='numpy'):
+def ackley(x, version='numpy'):
     """
     Function that implements the Ackley function in
     numpy or pytorch. We will use this for our deeplifting experiments.
@@ -13,13 +13,16 @@ def ackley(x, y, version='numpy'):
     b = 0.2
     c = 2 * np.pi
 
+    # Get x1 & x2
+    x1, x2 = x.flatten()
+
     if version == 'numpy':
-        sum_sq_term = -a * np.exp(-b * np.sqrt(0.5 * (x**2 + y**2)))
-        cos_term = -np.exp(0.5 * (np.cos(c * x) + np.cos(c * y)))
+        sum_sq_term = -a * np.exp(-b * np.sqrt(0.5 * (x1**2 + x2**2)))
+        cos_term = -np.exp(0.5 * (np.cos(c * x1) + np.cos(c * x2)))
         result = sum_sq_term + cos_term + a + np.exp(1)
     elif version == 'pytorch':
-        sum_sq_term = -a * torch.exp(-b * torch.sqrt(0.5 * (x**2 + y**2)))
-        cos_term = -torch.exp(0.5 * (torch.cos(c * x) + torch.cos(c * y)))
+        sum_sq_term = -a * torch.exp(-b * torch.sqrt(0.5 * (x1**2 + x2**2)))
+        cos_term = -torch.exp(0.5 * (torch.cos(c * x1) + torch.cos(c * x2)))
         result = sum_sq_term + cos_term + a + torch.exp(torch.tensor(1.0))
     else:
         raise ValueError(
@@ -29,18 +32,19 @@ def ackley(x, y, version='numpy'):
     return result
 
 
-def bukin_n6(x, y, version='numpy'):
+def bukin_n6(x, version='numpy'):
     """
     Function that implements the Bukin Function N.6 in both
     numpy and pytorch.
     """
+    x1, x2 = x.flatten()
     if version == 'numpy':
-        term1 = 100 * np.sqrt(np.abs(y - 0.01 * x**2))
-        term2 = 0.01 * np.abs(x + 10)
+        term1 = 100 * np.sqrt(np.abs(x2 - 0.01 * x1**2))
+        term2 = 0.01 * np.abs(x1 + 10)
         result = term1 + term2
     elif version == 'pytorch':
-        term1 = 100 * torch.sqrt(torch.abs(y - 0.01 * x**2))
-        term2 = 0.01 * torch.abs(x + 10)
+        term1 = 100 * torch.sqrt(torch.abs(x2 - 0.01 * x1**2))
+        term2 = 0.01 * torch.abs(x1 + 10)
         result = term1 + term2
     else:
         raise ValueError(
@@ -50,7 +54,7 @@ def bukin_n6(x, y, version='numpy'):
     return result
 
 
-def drop_wave(x, y, version='numpy'):
+def drop_wave(x, version='numpy'):
     """
     Implementation of the 2D Drop-Wave function. This
     function has a global minimum at (x, y) = (0, 0).
@@ -73,13 +77,14 @@ def drop_wave(x, y, version='numpy'):
     ValueError
         If the version is not 'numpy' or 'pytorch'.
     """
+    x1, x2 = x.flatten()
     if version == 'numpy':
-        numerator = 1 + np.cos(12 * np.sqrt(x**2 + y**2))
-        denominator = 0.5 * (x**2 + y**2) + 2
+        numerator = 1 + np.cos(12 * np.sqrt(x1**2 + x2**2))
+        denominator = 0.5 * (x1**2 + x2**2) + 2
         result = -numerator / denominator
     elif version == 'pytorch':
-        numerator = 1 + torch.cos(12 * torch.sqrt(x**2 + y**2))
-        denominator = 0.5 * (x**2 + y**2) + 2
+        numerator = 1 + torch.cos(12 * torch.sqrt(x1**2 + x2**2))
+        denominator = 0.5 * (x1**2 + x2**2) + 2
         result = -numerator / denominator
     else:
         raise ValueError(
@@ -89,7 +94,7 @@ def drop_wave(x, y, version='numpy'):
     return result
 
 
-def eggholder(x, y, version='numpy'):
+def eggholder(x, version='numpy'):
     """
     Implementation of the 2D Eggholder function.
     This function has numerous local minima and a global minimum.
@@ -112,13 +117,14 @@ def eggholder(x, y, version='numpy'):
     ValueError
         If the version is not 'numpy' or 'pytorch'.
     """
+    x1, x2 = x.flatten()
     if version == 'numpy':
-        term1 = -(y + 47) * np.sin(np.sqrt(np.abs(x / 2 + (y + 47))))
-        term2 = -x * np.sin(np.sqrt(np.abs(x - (y + 47))))
+        term1 = -(x2 + 47) * np.sin(np.sqrt(np.abs(x1 / 2 + (x2 + 47))))
+        term2 = -x1 * np.sin(np.sqrt(np.abs(x1 - (x2 + 47))))
         result = term1 + term2
     elif version == 'pytorch':
-        term1 = -(y + 47) * torch.sin(torch.sqrt(torch.abs(x / 2 + (y + 47))))
-        term2 = -x * torch.sin(torch.sqrt(torch.abs(x - (y + 47))))
+        term1 = -(x2 + 47) * torch.sin(torch.sqrt(torch.abs(x1 / 2 + (x2 + 47))))
+        term2 = -x1 * torch.sin(torch.sqrt(torch.abs(x1 - (x2 + 47))))
         result = term1 + term2
     else:
         raise ValueError(
