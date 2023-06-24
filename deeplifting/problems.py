@@ -3,7 +3,7 @@ import numpy as np
 import torch
 
 
-def ackley(x, version='numpy'):
+def ackley(x, results, trial, version='numpy'):
     """
     Function that implements the Ackley function in
     numpy or pytorch. We will use this for our deeplifting experiments.
@@ -29,10 +29,14 @@ def ackley(x, version='numpy'):
             "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
         )
 
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+    results[trial, iteration, :] = np.array((x1, x2, result))
+
     return result
 
 
-def bukin_n6(x, version='numpy'):
+def bukin_n6(x, results, trial, version='numpy'):
     """
     Function that implements the Bukin Function N.6 in both
     numpy and pytorch.
@@ -51,10 +55,14 @@ def bukin_n6(x, version='numpy'):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+    results[trial, iteration, :] = np.array((x1, x2, result))
+
     return result
 
 
-def drop_wave(x, version='numpy'):
+def drop_wave(x, results, trial, version='numpy'):
     """
     Implementation of the 2D Drop-Wave function. This
     function has a global minimum at (x, y) = (0, 0).
@@ -91,10 +99,14 @@ def drop_wave(x, version='numpy'):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+    results[trial, iteration, :] = np.array((x1, x2, result))
+
     return result
 
 
-def eggholder(x, version='numpy'):
+def eggholder(x, results, trial, version='numpy'):
     """
     Implementation of the 2D Eggholder function.
     This function has numerous local minima and a global minimum.
@@ -131,4 +143,46 @@ def eggholder(x, version='numpy'):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+    results[trial, iteration, :] = np.array((x1, x2, result))
+
     return result
+
+
+# Problem configurations
+# Ackley
+ackley_config = {
+    'objective': ackley,
+    'bounds': [(-32.768, 32.768), (-32.768, 32.768)],
+    'max_iterations': 1000,
+}
+
+# Bukin N.6
+bukin_n6_config = {
+    'objective': bukin_n6,
+    'bounds': [(-15.0, -5.0), (-3.0, 3.0)],
+    'max_iterations': 1000,
+}
+
+# Drop Wave
+drop_wave_config = {
+    'objective': drop_wave,
+    'bounds': [(-5.12, 5.12), (-5.12, 5.12)],
+    'max_iterations': 1000,
+}
+
+# Eggholder
+eggholder_config = {
+    'objective': eggholder,
+    'bounds': [(-512.0, 512.0), (-512.0, 512.0)],
+    'max_iterations': 1000,
+}
+
+
+PROBLEMS_BY_NAME = {
+    'ackley': ackley_config,
+    'bukin_n6': bukin_n6_config,
+    'drop_wave': drop_wave_config,
+    'eggholder': eggholder_config,
+}
