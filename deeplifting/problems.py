@@ -87,3 +87,42 @@ def drop_wave(x, y, version='numpy'):
         )
 
     return result
+
+
+def eggholder(x, y, version='numpy'):
+    """
+    Implementation of the 2D Eggholder function.
+    This function has numerous local minima and a global minimum.
+
+    Parameters:
+    x : np.ndarray or torch.Tensor
+        The x values (first dimension of the input space).
+    y : np.ndarray or torch.Tensor
+        The y values (second dimension of the input space).
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Eggholder function values
+        corresponding to the inputs (x, y).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    if version == 'numpy':
+        term1 = -(y + 47) * np.sin(np.sqrt(np.abs(x / 2 + (y + 47))))
+        term2 = -x * np.sin(np.sqrt(np.abs(x - (y + 47))))
+        result = term1 + term2
+    elif version == 'pytorch':
+        term1 = -(y + 47) * torch.sin(torch.sqrt(torch.abs(x / 2 + (y + 47))))
+        term2 = -x * torch.sin(torch.sqrt(torch.abs(x - (y + 47))))
+        result = term1 + term2
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    return result
