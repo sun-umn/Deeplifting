@@ -48,3 +48,42 @@ def bukin_n6(x, y, version='numpy'):
         )
 
     return result
+
+
+def drop_wave(x, y, version='numpy'):
+    """
+    Implementation of the 2D Drop-Wave function. This
+    function has a global minimum at (x, y) = (0, 0).
+
+    Parameters:
+    x : np.ndarray or torch.Tensor
+        The x values (first dimension of the input space).
+    y : np.ndarray or torch.Tensor
+        The y values (second dimension of the input space).
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Drop-Wave function values corresponding
+        to the inputs (x, y).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    if version == 'numpy':
+        numerator = 1 + np.cos(12 * np.sqrt(x**2 + y**2))
+        denominator = 0.5 * (x**2 + y**2) + 2
+        result = -numerator / denominator
+    elif version == 'pytorch':
+        numerator = 1 + torch.cos(12 * torch.sqrt(x**2 + y**2))
+        denominator = 0.5 * (x**2 + y**2) + 2
+        result = -numerator / denominator
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    return result
