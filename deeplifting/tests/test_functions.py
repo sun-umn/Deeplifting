@@ -5,7 +5,7 @@ import math
 import torch
 
 # first party
-from deeplifting.problems import ackley, bukin_n6, drop_wave
+from deeplifting.problems import ackley, bukin_n6, drop_wave, eggholder
 
 
 def test_ackley_has_correct_global_minimum():
@@ -63,3 +63,22 @@ def test_drop_wave_has_correct_global_minimum():
     x, y = torch.tensor(0.0), torch.tensor(0.0)
     torch_result = drop_wave(x, y, version='pytorch').numpy()
     math.isclose(torch_result, -1.0, abs_tol=1e-7)
+
+
+def test_eggholder_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Eggholder function has the correct global minimum.
+
+    The global minimum exits as point x*=(512, 404.2319) and
+    f(x*) = -959.6407
+    """
+    # Test the numpy version
+    x, y = 512.0, 404.2319
+    result = eggholder(x, y, version='numpy')
+    math.isclose(result, -959.6407, abs_tol=1e-3)
+
+    # Test the torch version
+    x, y = torch.tensor(512.0), torch.tensor(404.2319)
+    torch_result = eggholder(x, y, version='pytorch').numpy()
+    math.isclose(torch_result, -959.6407, abs_tol=1e-3)
