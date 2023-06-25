@@ -358,6 +358,120 @@ def holder_table(x, results, trial, version='numpy'):
     return result
 
 
+def levy(x, results, trial, version='numpy'):
+    """
+    Implementation of the 2D Levy function.
+    This function has a global minimum at x1 = x2 = 1.
+
+    Parameters:
+    x1 : np.ndarray or torch.Tensor
+        The x1 values (first dimension of the input space).
+    x2 : np.ndarray or torch.Tensor
+        The x2 values (second dimension of the input space).
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Levy function values
+        corresponding to the inputs (x1, x2).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        w1 = 1 + (x1 - 1) / 4
+        w2 = 1 + (x2 - 1) / 4
+        result = (
+            np.sin(np.pi * w1) ** 2
+            + (w2 - 1) ** 2 * (1 + 10 * np.sin(np.pi * w2 + 1) ** 2)
+            + (w1 - 1) ** 2 * (1 + np.sin(2 * np.pi * w1) ** 2)
+        )
+    elif version == 'pytorch':
+        w1 = 1 + (x1 - 1) / 4
+        w2 = 1 + (x2 - 1) / 4
+        result = (
+            torch.sin(torch.tensor(np.pi) * w1) ** 2
+            + (w2 - 1) ** 2 * (1 + 10 * torch.sin(torch.tensor(np.pi) * w2 + 1) ** 2)
+            + (w1 - 1) ** 2 * (1 + torch.sin(2 * torch.tensor(np.pi) * w1) ** 2)
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (x1.detach().numpy(), x2.detach().numpy(), result.detach().numpy())
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+def levy_n13(x, results, trial, version='numpy'):
+    """
+    Implementation of the 2D Levy N.13 function.
+    This function has a global minimum at x1 = x2 = 1.
+
+    Parameters:
+    x1 : np.ndarray or torch.Tensor
+        The x1 values (first dimension of the input space).
+    x2 : np.ndarray or torch.Tensor
+        The x2 values (second dimension of the input space).
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Levy N.13 function values
+        corresponding to the inputs (x1, x2).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = (
+            np.sin(3 * np.pi * x1) ** 2
+            + (x1 - 1) ** 2 * (1 + (np.sin(3 * np.pi * x2)) ** 2)
+            + (x2 - 1) ** 2 * (1 + (np.sin(2 * np.pi * x2)) ** 2)
+        )
+    elif version == 'pytorch':
+        result = (
+            torch.sin(3 * torch.tensor(np.pi) * x1) ** 2
+            + (x1 - 1) ** 2 * (1 + (torch.sin(3 * torch.tensor(np.pi) * x2)) ** 2)
+            + (x2 - 1) ** 2 * (1 + (torch.sin(2 * torch.tensor(np.pi) * x2)) ** 2)
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (x1.detach().numpy(), x2.detach().numpy(), result.detach().numpy())
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
 # Problem configurations
 # Ackley
 ackley_config = {
@@ -370,6 +484,13 @@ ackley_config = {
 bukin_n6_config = {
     'objective': bukin_n6,
     'bounds': [(-15.0, -5.0), (-3.0, 3.0)],
+    'max_iterations': 1000,
+}
+
+# Cross-in-Tray
+cross_in_tray_config = {
+    'objective': cross_in_tray,
+    'bounds': [(-10.0, 10.0), (-10.0, 10.0)],
     'max_iterations': 1000,
 }
 
@@ -401,12 +522,29 @@ holder_table_config = {
     'max_iterations': 1000,
 }
 
+# Levy
+levy_config = {
+    'objective': levy,
+    'bounds': [(-10.0, 10.0), (-10.0, 10.0)],
+    'max_iterations': 1000,
+}
+
+# Levy
+levy_n13_config = {
+    'objective': levy_n13,
+    'bounds': [(-10.0, 10.0), (-10.0, 10.0)],
+    'max_iterations': 1000,
+}
+
 
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
     'bukin_n6': bukin_n6_config,
+    'cross_in_tray': cross_in_tray_config,
     'drop_wave': drop_wave_config,
     'eggholder': eggholder_config,
     'griewank': griewank_config,
     'holder_table': holder_table_config,
+    'levy': levy_config,
+    'levy_n13': levy_n13_config,
 }

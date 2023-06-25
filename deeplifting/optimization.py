@@ -1,5 +1,5 @@
 # stdlib
-import time
+import random
 from typing import Dict, List
 
 # third party
@@ -13,6 +13,19 @@ from scipy.optimize import differential_evolution, dual_annealing
 
 # first party
 from deeplifting.models import DeepliftingMLP
+
+
+def set_seed(seed):
+    """
+    Function to set the seed for the run
+    """
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    np.random.seed(seed)
+    random.seed(seed)
 
 
 def run_dual_annealing(problem: Dict, trials: int):
@@ -110,7 +123,6 @@ def deeplifting_fn(model, objective, bounds):
 
     # Objective function
     x = torch.stack((x1, x2))
-    print(x)
     f = objective(x)
 
     # Inequality constraint
@@ -130,60 +142,66 @@ def run_deeplifting(problem: Dict, trials: int):
     """
     # Get the device (CPU for now)
     device = torch.device('cpu')
+    fn_values = []
 
-    # Define the model
-    model = DeepliftingMLP(
-        input_size=100, layer_sizes=(128, 256, 512, 256, 128), output_size=2
-    )
-    model = model.to(device=device, dtype=torch.double)
-    nvar = getNvarTorch(model.parameters())
-    # Setup a pygransoStruct for the algorithm
-    # options
-    opts = pygransoStruct()
+    for trial in range(trials):
+        # Seed everything
+        set_seed(trial)
 
-    # Inital x0
-    x0 = (
-        torch.nn.utils.parameters_to_vector(model.parameters())
-        .detach()
-        .reshape(nvar, 1)
-        .to(device=device, dtype=torch.double)
-    )
+        # Define the model
+        model = DeepliftingMLP(
+            input_size=100, layer_sizes=(128, 256, 512, 256, 128), output_size=2
+        )
+        model = model.to(device=device, dtype=torch.double)
+        nvar = getNvarTorch(model.parameters())
+        # Setup a pygransoStruct for the algorithm
+        # options
+        opts = pygransoStruct()
 
-    opts.x0 = x0
-    opts.torch_device = device
-    opts.print_frequency = 1
-    opts.limited_mem_size = 25
-    opts.stat_l2_model = False
-    opts.double_precision = True
-    opts.viol_ineq_tol = 1e-8
-    opts.opt_tol = 1e-8
+        # Inital x0
+        x0 = (
+            torch.nn.utils.parameters_to_vector(model.parameters())
+            .detach()
+            .reshape(nvar, 1)
+            .to(device=device, dtype=torch.double)
+        )
 
-    # Objective function
-    objective = problem['objective']
+        opts.x0 = x0
+        opts.torch_device = device
+        opts.print_frequency = 1
+        opts.limited_mem_size = 25
+        opts.stat_l2_model = False
+        opts.double_precision = True
+        opts.viol_ineq_tol = 1e-10
+        opts.opt_tol = 1e-10
 
-    # Get the bounds of the problem
-    bounds = problem['bounds']
+        # Objective function
+        objective = problem['objective']
 
-    # Get the maximum iterations
-    max_iterations = problem['max_iterations']
+        # Get the bounds of the problem
+        bounds = problem['bounds']
 
-    # results
-    results = np.zeros((trials, max_iterations, 3)) * np.nan
+        # Get the maximum iterations
+        max_iterations = problem['max_iterations']
 
-    # Set up the function with the results
-    fn = lambda x: objective(x, results=results, trial=0, version='pytorch')  # noqa
+        # results
+        results = np.zeros((trials, max_iterations, 3)) * np.nan
 
-    # Combined function
-    comb_fn = lambda model: deeplifting_fn(model, fn, bounds)  # noqa
+        # Set up the function with the results
+        fn = lambda x: objective(x, results=results, trial=0, version='pytorch')  # noqa
 
-    # Run the main algorithm
-    start = time.time()
-    soln = pygranso(var_spec=model, combined_fn=comb_fn, user_opts=opts)
-    end = time.time()
+        # Combined function
+        comb_fn = lambda model: deeplifting_fn(model, fn, bounds)  # noqa
 
-    print("Total Wall Time: {}s".format(end - start))
-    print(soln.final.f)
-    print("\n")
+        # Run the main algorithm
+        soln = pygranso(var_spec=model, combined_fn=comb_fn, user_opts=opts)
+
+        # Get final x
+        x1, x2 = model(inputs=None)
+        f = soln.f
+        fn_values.append((x1, x2, f))
+
+    return {'results': results, 'final_results': fn_values}
 
 
 def run_optimization(problem: Dict, algorithms: List) -> pd.DataFrame:
