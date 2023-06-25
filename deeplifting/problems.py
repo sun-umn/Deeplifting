@@ -24,6 +24,7 @@ def ackley(x, results, trial, version='numpy'):
         sum_sq_term = -a * torch.exp(-b * torch.sqrt(0.5 * (x1**2 + x2**2)))
         cos_term = -torch.exp(0.5 * (torch.cos(c * x1) + torch.cos(c * x2)))
         result = sum_sq_term + cos_term + a + torch.exp(torch.tensor(1.0))
+
     else:
         raise ValueError(
             "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
@@ -31,7 +32,14 @@ def ackley(x, results, trial, version='numpy'):
 
     # Fill in the intermediate results
     iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-    results[trial, iteration, :] = np.array((x1, x2, result))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (x1.detach().numpy(), x2.detach().numpy(), result.detach().numpy())
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
 
     return result
 
@@ -57,7 +65,14 @@ def bukin_n6(x, results, trial, version='numpy'):
 
     # Fill in the intermediate results
     iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-    results[trial, iteration, :] = np.array((x1, x2, result))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (x1.detach().numpy(), x2.detach().numpy(), result.detach().numpy())
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
 
     return result
 
@@ -101,7 +116,14 @@ def drop_wave(x, results, trial, version='numpy'):
 
     # Fill in the intermediate results
     iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-    results[trial, iteration, :] = np.array((x1, x2, result))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (x1.detach().numpy(), x2.detach().numpy(), result.detach().numpy())
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
 
     return result
 
@@ -131,12 +153,12 @@ def eggholder(x, results, trial, version='numpy'):
     """
     x1, x2 = x.flatten()
     if version == 'numpy':
-        term1 = -(x2 + 47) * np.sin(np.sqrt(np.abs(x1 / 2 + (x2 + 47))))
-        term2 = -x1 * np.sin(np.sqrt(np.abs(x1 - (x2 + 47))))
+        term1 = -(x2 + 47.0) * np.sin(np.sqrt(np.abs(x1 / 2.0 + (x2 + 47.0))))
+        term2 = -x1 * np.sin(np.sqrt(np.abs(x1 - (x2 + 47.0))))
         result = term1 + term2
     elif version == 'pytorch':
-        term1 = -(x2 + 47) * torch.sin(torch.sqrt(torch.abs(x1 / 2 + (x2 + 47))))
-        term2 = -x1 * torch.sin(torch.sqrt(torch.abs(x1 - (x2 + 47))))
+        term1 = -(x2 + 47.0) * torch.sin(torch.sqrt(torch.abs(x1 / 2.0 + (x2 + 47.0))))
+        term2 = -x1 * torch.sin(torch.sqrt(torch.abs(x1 - (x2 + 47.0))))
         result = term1 + term2
     else:
         raise ValueError(
@@ -145,7 +167,65 @@ def eggholder(x, results, trial, version='numpy'):
 
     # Fill in the intermediate results
     iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-    results[trial, iteration, :] = np.array((x1, x2, result))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (x1.detach().numpy(), x2.detach().numpy(), result.detach().numpy())
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+def griewank(x, results, trial, version='numpy'):
+    """
+    Implementation of the 2D Griewank function.
+    This function has a global minimum at (x, y) = (0, 0).
+
+    Parameters:
+    x : np.ndarray or torch.Tensor
+        The x values (first dimension of the input space).
+    y : np.ndarray or torch.Tensor
+        The y values (second dimension of the input space).
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Griewank function values
+        corresponding to the inputs (x, y).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = 1 + ((x1**2 + x2**2) / 4000) - np.cos(x1) * np.cos(x2 / np.sqrt(2))
+    elif version == 'pytorch':
+        result = (
+            1
+            + ((x1**2 + x2**2) / 4000)
+            - torch.cos(x1) * torch.cos(x2 / torch.sqrt(torch.tensor(2.0)))
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (x1.detach().numpy(), x2.detach().numpy(), result.detach().numpy())
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
 
     return result
 
@@ -179,10 +259,18 @@ eggholder_config = {
     'max_iterations': 1000,
 }
 
+# Griewank
+griewank_config = {
+    'objective': griewank,
+    'bounds': [(-600.0, 600.0), (-600.0, 600.0)],
+    'max_iterations': 1000,
+}
+
 
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
     'bukin_n6': bukin_n6_config,
     'drop_wave': drop_wave_config,
     'eggholder': eggholder_config,
+    'griewank': griewank_config,
 }

@@ -1,10 +1,18 @@
 # stdlib
+import time
 from typing import Dict, List
 
 # third party
 import numpy as np
 import pandas as pd
+import torch
+from pygranso.private.getNvar import getNvarTorch
+from pygranso.pygranso import pygranso
+from pygranso.pygransoStruct import pygransoStruct
 from scipy.optimize import differential_evolution, dual_annealing
+
+# first party
+from deeplifting.models import DeepliftingMLP
 
 
 def run_dual_annealing(problem: Dict, trials: int):
@@ -31,9 +39,9 @@ def run_dual_annealing(problem: Dict, trials: int):
         np.random.seed(trial)
 
         # Set up the function with the results
-        fn = lambda x: objective(
+        fn = lambda x: objective(  # noqa
             x, results=results, trial=trial, version='numpy'
-        )  # noqa
+        )
 
         # Get the result
         result = dual_annealing(fn, bounds, maxiter=max_iterations)
@@ -66,9 +74,9 @@ def run_differential_evolution(problem: Dict, trials: int):
         np.random.seed(trial)
 
         # Set up the function with the results
-        fn = lambda x: objective(
+        fn = lambda x: objective(  # noqa
             x, results=results, trial=trial, version='numpy'
-        )  # noqa
+        )
 
         # Get the result
         result = differential_evolution(fn, bounds, maxiter=max_iterations)
@@ -77,9 +85,108 @@ def run_differential_evolution(problem: Dict, trials: int):
     return {'results': results, 'final_results': fn_values}
 
 
+def deeplifting_fn(model, objective, bounds):
+    """
+    Combined funtion used for PyGranso
+    """
+    outputs = model(inputs=None)
+
+    # Get x1 and x2 so we can add the bounds
+    x1, x2 = outputs
+
+    # Let's try out trick from topology
+    # optimization instead of relying on the
+    # inequality constraint
+    # If we map x and y to [0, 1] and then shift
+    # the interval we can accomplist the same
+    # thing we can use a + (b - a) * x
+    # Get first bounds
+    a1, b1 = bounds[0]
+    x1 = a1 + (b1 - a1) * torch.sigmoid(x1)
+
+    # Get second bounds
+    a2, b2 = bounds[1]
+    x2 = a2 + (b2 - a2) * torch.sigmoid(x2)
+
+    # Objective function
+    x = torch.stack((x1, x2))
+    f = objective(x)
+
+    # Inequality constraint
+    ci = None
+
+    # Equality constraing
+    ce = None
+
+    return f, ci, ce
+
+
+def run_deeplifting(problem: Dict, trials: int):
+    """
+    Function that runs our preimer method of deeplifting.
+    The idea here is to reparmeterize an optimization objective
+    so we can have better optimization and convergence
+    """
+    # Get the device (CPU for now)
+    device = torch.device('cpu')
+
+    # Define the model
+    model = DeepliftingMLP(
+        input_size=100, layer_sizes=(128, 256, 512, 256, 128), output_size=2
+    )
+    model = model.to(device=device, dtype=torch.double)
+    nvar = getNvarTorch(model.parameters())
+    # Setup a pygransoStruct for the algorithm
+    # options
+    opts = pygransoStruct()
+
+    # Inital x0
+    x0 = (
+        torch.nn.utils.parameters_to_vector(model.parameters())
+        .detach()
+        .reshape(nvar, 1)
+        .to(device=device, dtype=torch.double)
+    )
+
+    opts.x0 = x0
+    opts.torch_device = device
+    opts.print_frequency = 1
+    opts.limited_mem_size = 25
+    opts.stat_l2_model = False
+    opts.double_precision = True
+    opts.viol_ineq_tol = 1e-8
+    opts.opt_tol = 1e-8
+
+    # Objective function
+    objective = problem['objective']
+
+    # Get the bounds of the problem
+    bounds = problem['bounds']
+
+    # Get the maximum iterations
+    max_iterations = problem['max_iterations']
+
+    # results
+    results = np.zeros((trials, max_iterations, 3)) * np.nan
+
+    # Set up the function with the results
+    fn = lambda x: objective(x, results=results, trial=0, version='pytorch')  # noqa
+
+    # Combined function
+    comb_fn = lambda model: deeplifting_fn(model, fn, bounds)  # noqa
+
+    # Run the main algorithm
+    start = time.time()
+    soln = pygranso(var_spec=model, combined_fn=comb_fn, user_opts=opts)
+    end = time.time()
+
+    print("Total Wall Time: {}s".format(end - start))
+    print(soln.final.f)
+    print("\n")
+
+
 def run_optimization(problem: Dict, algorithms: List) -> pd.DataFrame:
     """
     Function that runs optimization with different specified
     algorithms for our deeplifitng research.
     """
-    pass

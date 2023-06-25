@@ -31,7 +31,7 @@ class DeepliftingMLP(nn.Module):
         for size in layer_sizes:
             linear_layer = nn.Linear(prev_layer_size, size)
             layers.append(linear_layer)
-            # layers.append(nn.BatchNorm1d(size))  # Add batch normalization
+            layers.append(nn.BatchNorm1d(size))  # Add batch normalization
             layers.append(SinActivation())
             prev_layer_size = size
 
@@ -43,7 +43,7 @@ class DeepliftingMLP(nn.Module):
         # optimization is also let the input be variable. Some
         # of the problems we have looked at so far also are
         # between bounds
-        self.x = nn.Parameter(torch.randn(20, input_size))
+        self.x = nn.Parameter(torch.randn(10, input_size))
 
     def forward(self, inputs=None):  # noqa
         output = self.layers(self.x)
