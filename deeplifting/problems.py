@@ -527,6 +527,61 @@ def rastrigin(x, results, trial, version='numpy'):
     return result
 
 
+def schaffer_n2(x, results, trial, version='numpy'):
+    """
+    Implementation of the 2D Schaffer function N.2.
+    This function has a global minimum at x1 = x2 = 0.
+
+    Parameters:
+    x1 : np.ndarray or torch.Tensor
+        The x1 values (first dimension of the input space).
+    x2 : np.ndarray or torch.Tensor
+        The x2 values (second dimension of the input space).
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Schaffer N.2 function values
+        corresponding to the inputs (x1, x2).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = (
+            0.5
+            + (np.sin(x1**2 - x2**2) ** 2 - 0.5)
+            / (1 + 0.001 * (x1**2 + x2**2)) ** 2
+        )
+    elif version == 'pytorch':
+        result = (
+            0.5
+            + (torch.sin(x1**2 - x2**2) ** 2 - 0.5)
+            / (1 + 0.001 * (x1**2 + x2**2)) ** 2
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (x1.detach().numpy(), x2.detach().numpy(), result.detach().numpy())
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
 # Problem configurations
 # Ackley
 ackley_config = {
@@ -598,6 +653,13 @@ rastrigin_config = {
     'max_iterations': 1000,
 }
 
+# Schaffer N2
+schaffer_n2_config = {
+    'objective': rastrigin,
+    'bounds': [(-100.0, 100.0), (-100.0, 100.0)],
+    'max_iterations': 1000,
+}
+
 
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
@@ -610,4 +672,5 @@ PROBLEMS_BY_NAME = {
     'levy': levy_config,
     'levy_n13': levy_n13_config,
     'rastrigin': rastrigin_config,
+    'schaffer_n2': schaffer_n2_config,
 }
