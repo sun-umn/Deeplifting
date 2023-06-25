@@ -168,7 +168,7 @@ def run_deeplifting(problem: Dict, trials: int):
 
         opts.x0 = x0
         opts.torch_device = device
-        opts.print_level = 0
+        opts.print_level = 1
         opts.limited_mem_size = 25
         opts.stat_l2_model = False
         opts.double_precision = True
