@@ -110,6 +110,7 @@ def deeplifting_fn(model, objective, bounds):
 
     # Objective function
     x = torch.stack((x1, x2))
+    print(x)
     f = objective(x)
 
     # Inequality constraint

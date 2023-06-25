@@ -77,6 +77,79 @@ def bukin_n6(x, results, trial, version='numpy'):
     return result
 
 
+def cross_in_tray(x, results, trial, version='numpy'):
+    """
+    Implementation of the 2D Cross-in-Tray function.
+    This function has four identical global minima.
+
+    Parameters:
+    x1 : np.ndarray or torch.Tensor
+        The x1 values (first dimension of the input space).
+    x2 : np.ndarray or torch.Tensor
+        The x2 values (second dimension of the input space).
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Cross-in-Tray function
+        values corresponding to the inputs (x1, x2).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = (
+            -0.0001
+            * (
+                np.abs(
+                    np.sin(x1)
+                    * np.sin(x2)
+                    * np.exp(np.abs(100 - np.sqrt(x1**2 + x2**2) / np.pi))
+                )
+                + 1
+            )
+            ** 0.1
+        )
+    elif version == 'pytorch':
+        result = (
+            -0.0001
+            * (
+                torch.abs(
+                    torch.sin(x1)
+                    * torch.sin(x2)
+                    * torch.exp(
+                        torch.abs(
+                            100 - torch.sqrt(x1**2 + x2**2) / torch.tensor(np.pi)
+                        )
+                    )
+                    + 1
+                )
+            )
+            ** 0.1
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (x1.detach().numpy(), x2.detach().numpy(), result.detach().numpy())
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
 def drop_wave(x, results, trial, version='numpy'):
     """
     Implementation of the 2D Drop-Wave function. This
@@ -230,6 +303,61 @@ def griewank(x, results, trial, version='numpy'):
     return result
 
 
+def holder_table(x, results, trial, version='numpy'):
+    """
+    Implementation of the 2D Holder Table function.
+    This function has four identical local minima.
+
+    Parameters:
+    x1 : np.ndarray or torch.Tensor
+        The x1 values (first dimension of the input space).
+    x2 : np.ndarray or torch.Tensor
+        The x2 values (second dimension of the input space).
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Holder Table function values
+        corresponding to the inputs (x1, x2).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = -np.abs(
+            np.sin(x1)
+            * np.cos(x2)
+            * np.exp(np.abs(1 - np.sqrt(x1**2 + x2**2) / np.pi))
+        )
+    elif version == 'pytorch':
+        result = -torch.abs(
+            torch.sin(x1)
+            * torch.cos(x2)
+            * torch.exp(torch.abs(1 - torch.sqrt(x1**2 + x2**2) / np.pi))
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (x1.detach().numpy(), x2.detach().numpy(), result.detach().numpy())
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
 # Problem configurations
 # Ackley
 ackley_config = {
@@ -266,6 +394,13 @@ griewank_config = {
     'max_iterations': 1000,
 }
 
+# Holder Table
+holder_table_config = {
+    'objective': holder_table,
+    'bounds': [(-10.0, 10.0), (-10.0, 10.0)],
+    'max_iterations': 1000,
+}
+
 
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
@@ -273,4 +408,5 @@ PROBLEMS_BY_NAME = {
     'drop_wave': drop_wave_config,
     'eggholder': eggholder_config,
     'griewank': griewank_config,
+    'holder_table': holder_table_config,
 }
