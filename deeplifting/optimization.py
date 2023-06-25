@@ -58,7 +58,7 @@ def run_dual_annealing(problem: Dict, trials: int):
 
         # Get the result
         result = dual_annealing(fn, bounds, maxiter=max_iterations)
-        fn_values.append((result.x, result.fun))
+        fn_values.append((result.x[0], result.x[1], result.fun))
 
     return {'results': results, 'final_results': fn_values}
 
@@ -93,7 +93,7 @@ def run_differential_evolution(problem: Dict, trials: int):
 
         # Get the result
         result = differential_evolution(fn, bounds, maxiter=max_iterations)
-        fn_values.append((result.x, result.fun))
+        fn_values.append((result.x[0], result.x[1], result.fun))
 
     return {'results': results, 'final_results': fn_values}
 
