@@ -168,7 +168,7 @@ def run_deeplifting(problem: Dict, trials: int):
 
         opts.x0 = x0
         opts.torch_device = device
-        opts.print_frequency = 1
+        opts.print_level = 0
         opts.limited_mem_size = 25
         opts.stat_l2_model = False
         opts.double_precision = True
@@ -196,9 +196,17 @@ def run_deeplifting(problem: Dict, trials: int):
         # Run the main algorithm
         soln = pygranso(var_spec=model, combined_fn=comb_fn, user_opts=opts)
 
-        # Get final x
+        # Get final x we will also need to map
+        # it to the same bounds
         x1, x2 = model(inputs=None)
-        f = soln.f
+        a1, b1 = bounds[0]
+        x1 = a1 + (b1 - a1) * torch.sigmoid(x1).detach().numpy()
+
+        # Get second bounds
+        a2, b2 = bounds[1]
+        x2 = a2 + (b2 - a2) * torch.sigmoid(x2).detach().numpy()
+
+        f = soln.final.f
         fn_values.append((x1, x2, f))
 
     return {'results': results, 'final_results': fn_values}

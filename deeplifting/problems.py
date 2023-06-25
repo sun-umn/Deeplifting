@@ -472,6 +472,61 @@ def levy_n13(x, results, trial, version='numpy'):
     return result
 
 
+def rastrigin(x, results, trial, version='numpy'):
+    """
+    Implementation of the 2D Rastrigin function.
+    This function has a global minimum at x1 = x2 = 0.
+
+    Parameters:
+    x1 : np.ndarray or torch.Tensor
+        The x1 values (first dimension of the input space).
+    x2 : np.ndarray or torch.Tensor
+        The x2 values (second dimension of the input space).
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Rastrigin function values
+        corresponding to the inputs (x1, x2).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = (
+            10 * 2
+            + (x1**2 - 10 * np.cos(2 * np.pi * x1))
+            + (x2**2 - 10 * np.cos(2 * np.pi * x2))
+        )
+    elif version == 'pytorch':
+        result = (
+            10 * 2
+            + (x1**2 - 10 * torch.cos(2 * torch.tensor(np.pi) * x1))
+            + (x2**2 - 10 * torch.cos(2 * torch.tensor(np.pi) * x2))
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (x1.detach().numpy(), x2.detach().numpy(), result.detach().numpy())
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
 # Problem configurations
 # Ackley
 ackley_config = {
@@ -536,6 +591,13 @@ levy_n13_config = {
     'max_iterations': 1000,
 }
 
+# Rastrigin
+rastrigin_config = {
+    'objective': rastrigin,
+    'bounds': [(-5.12, 5.12), (-5.12, 5.12)],
+    'max_iterations': 1000,
+}
+
 
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
@@ -547,4 +609,5 @@ PROBLEMS_BY_NAME = {
     'holder_table': holder_table_config,
     'levy': levy_config,
     'levy_n13': levy_n13_config,
+    'rastrigin': rastrigin_config,
 }
