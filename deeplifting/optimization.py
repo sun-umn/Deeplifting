@@ -177,8 +177,8 @@ def run_deeplifting(problem: Dict, trials: int):
         opts.limited_mem_size = 50
         opts.stat_l2_model = False
         opts.double_precision = True
-        opts.viol_ineq_tol = 1e-10
-        opts.opt_tol = 1e-10
+        opts.viol_ineq_tol = 1e-5
+        opts.opt_tol = 1e-5
 
         # Objective function
         objective = problem['objective']
@@ -193,9 +193,9 @@ def run_deeplifting(problem: Dict, trials: int):
         results = np.zeros((trials, max_iterations, 3)) * np.nan
 
         # Set up the function with the results
-        fn = lambda x: objective(
+        fn = lambda x: objective(  # noqa
             x, results=results, trial=trial, version='pytorch'
-        )  # noqa
+        )
 
         # Combined function
         comb_fn = lambda model: deeplifting_fn(model, fn, bounds)  # noqa
