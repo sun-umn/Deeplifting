@@ -17,6 +17,8 @@ scipy>=1.7.1
 torch==2.0.1
 jupyterlab==4.0.2
 matplotlib
+jax
+pytest
 
 # PyGranso Solver
 git+https://github.com/sun-umn/PyGRANSO.git

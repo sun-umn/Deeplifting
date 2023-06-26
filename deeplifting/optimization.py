@@ -6,6 +6,7 @@ from typing import Dict, List
 import numpy as np
 import pandas as pd
 import torch
+from cyipopt import minimize_ipopt
 from pygranso.private.getNvar import getNvarTorch
 from pygranso.pygranso import pygranso
 from pygranso.pygransoStruct import pygransoStruct
@@ -26,6 +27,47 @@ def set_seed(seed):
     torch.cuda.manual_seed_all(seed)
     np.random.seed(seed)
     random.seed(seed)
+
+
+def run_ipopt(problem: Dict, trials: int):
+    """
+    Function that runs IPOPT on one of our test
+    functions for deeplifting.
+
+    TODO: In the documentation there are ways to improve
+    IPOPT by using the gradient, jacobian and hessian
+    information we will implement that with jax
+    but may need to rework some of our test functions
+    """
+    # Objective function
+    objective = problem['objective']
+
+    # Get the bounds of the problem
+    bounds = problem['bounds']
+
+    # Get the maximum iterations
+    max_iterations = problem['max_iterations']
+
+    # Save the results
+    # We will store the optimization steps here
+    results = np.zeros((trials, max_iterations, 3)) * np.nan
+    fn_values = []
+
+    for trial in range(trials):
+        # Set the random seed
+        set_seed(trial)
+
+        # Initial guess (starting point for IPOPT)
+        x0 = np.random.rand(2)
+
+        # Get the objective
+        fn = lambda x: objective(x, results=results, trial=trial, version='numpy')
+
+        # Call IPOPT
+        result = minimize_ipopt(fn, x0, bounds=bounds)
+        fn_values.append((result.x[0], result.x[1], result.fun))
+
+    return {'results': results, 'final_results': fn_values}
 
 
 def run_dual_annealing(problem: Dict, trials: int):
@@ -155,7 +197,7 @@ def run_deeplifting(problem: Dict, trials: int):
         # )
 
         model = DeepliftingMLP(
-            input_size=25, layer_sizes=(512, 256, 128, 256, 512), output_size=2
+            input_size=25, layer_sizes=(512, 512, 512, 512), output_size=2
         )
         model = model.to(device=device, dtype=torch.double)
         nvar = getNvarTorch(model.parameters())
