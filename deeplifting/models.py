@@ -43,10 +43,11 @@ class DeepliftingMLP(nn.Module):
         # optimization is also let the input be variable. Some
         # of the problems we have looked at so far also are
         # between bounds
-        self.x = nn.Parameter(torch.randn(100, input_size))
+        self.x = nn.Parameter(torch.randn(50, input_size))
 
     def forward(self, inputs=None):  # noqa
         output = self.layers(self.x)
         output = self.output_layer(output)
-        output = torch.sin(output) + torch.cos(output)
-        return torch.mean(output, axis=0)
+        # output = torch.sin(output) + torch.cos(output)
+        # return torch.mean(output, axis=0)
+        return output

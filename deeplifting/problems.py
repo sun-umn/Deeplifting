@@ -692,12 +692,64 @@ def schwefel(x, results, trial, version='numpy'):
     return result
 
 
+def shubert(x, results, trial, version='numpy'):
+    """
+    Implementation of the 2D Shubert function.
+    This function has several local minima and multiple global minima.
+
+    Parameters:
+    x1 : np.ndarray or torch.Tensor
+        The x1 values (first dimension of the input space).
+    x2 : np.ndarray or torch.Tensor
+        The x2 values (second dimension of the input space).
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Shubert function values
+        corresponding to the inputs (x1, x2).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        term1 = np.sum([i * np.cos((i + 1) * x1 + i) for i in range(1, 6)], axis=0)
+        term2 = np.sum([i * np.cos((i + 1) * x2 + i) for i in range(1, 6)], axis=0)
+        result = term1 * term2
+    elif version == 'pytorch':
+        term1 = sum([i * torch.cos((i + 1) * x1 + i) for i in range(1, 6)])
+        term2 = sum([i * torch.cos((i + 1) * x2 + i) for i in range(1, 6)])
+        result = term1 * term2
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (x1.detach().numpy(), x2.detach().numpy(), result.detach().numpy())
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
 # Problem configurations
 # Ackley
 ackley_config = {
     'objective': ackley,
     'bounds': [(-32.768, 32.768), (-32.768, 32.768)],
     'max_iterations': 1000,
+    'global_minimum': 0.0,
 }
 
 # Bukin N.6
@@ -705,6 +757,7 @@ bukin_n6_config = {
     'objective': bukin_n6,
     'bounds': [(-15.0, -5.0), (-3.0, 3.0)],
     'max_iterations': 1000,
+    'global_minimum': 0.0,
 }
 
 # Cross-in-Tray
@@ -712,6 +765,7 @@ cross_in_tray_config = {
     'objective': cross_in_tray,
     'bounds': [(-10.0, 10.0), (-10.0, 10.0)],
     'max_iterations': 1000,
+    'global_minimum': -2.06261,
 }
 
 # Drop Wave
@@ -719,6 +773,7 @@ drop_wave_config = {
     'objective': drop_wave,
     'bounds': [(-5.12, 5.12), (-5.12, 5.12)],
     'max_iterations': 1000,
+    'global_minimum': -1.0,
 }
 
 # Eggholder
@@ -726,6 +781,7 @@ eggholder_config = {
     'objective': eggholder,
     'bounds': [(-512.0, 512.0), (-512.0, 512.0)],
     'max_iterations': 1000,
+    'global_minimum': -959.6407,
 }
 
 # Griewank
@@ -733,6 +789,7 @@ griewank_config = {
     'objective': griewank,
     'bounds': [(-600.0, 600.0), (-600.0, 600.0)],
     'max_iterations': 1000,
+    'global_minimum': 0.0,
 }
 
 # Holder Table
@@ -740,6 +797,7 @@ holder_table_config = {
     'objective': holder_table,
     'bounds': [(-10.0, 10.0), (-10.0, 10.0)],
     'max_iterations': 1000,
+    'global_minimum': -19.2085,
 }
 
 # Levy
@@ -747,6 +805,7 @@ levy_config = {
     'objective': levy,
     'bounds': [(-10.0, 10.0), (-10.0, 10.0)],
     'max_iterations': 1000,
+    'global_minimum': 0.0,
 }
 
 # Levy
@@ -754,6 +813,7 @@ levy_n13_config = {
     'objective': levy_n13,
     'bounds': [(-10.0, 10.0), (-10.0, 10.0)],
     'max_iterations': 1000,
+    'global_minimum': 0.0,
 }
 
 # Rastrigin
@@ -761,6 +821,7 @@ rastrigin_config = {
     'objective': rastrigin,
     'bounds': [(-5.12, 5.12), (-5.12, 5.12)],
     'max_iterations': 1000,
+    'global_minimum': 0.0,
 }
 
 # Schaffer N2
@@ -768,6 +829,7 @@ schaffer_n2_config = {
     'objective': schaffer_n2,
     'bounds': [(-100.0, 100.0), (-100.0, 100.0)],
     'max_iterations': 1000,
+    'global_minimum': 0.0,
 }
 
 # Schaffer N4
@@ -781,6 +843,13 @@ schaffer_n4_config = {
 schwefel_config = {
     'objective': schwefel,
     'bounds': [(-500.0, 500.0), (-500.0, 500.0)],
+    'max_iterations': 1000,
+}
+
+# Shubert
+shubert_config = {
+    'objective': shubert,
+    'bounds': [(-10.0, 10.0), (-10.0, 10.0)],
     'max_iterations': 1000,
 }
 
@@ -799,4 +868,5 @@ PROBLEMS_BY_NAME = {
     'schaffer_n2': schaffer_n2_config,
     'schaffer_n4': schaffer_n4_config,
     'schwefel': schwefel_config,
+    'shubert': shubert_config,
 }

@@ -105,7 +105,8 @@ def deeplifting_fn(model, objective, bounds):
     outputs = model(inputs=None)
 
     # Get x1 and x2 so we can add the bounds
-    x1, x2 = outputs
+    outputs = torch.sigmoid(outputs)
+    x1, x2 = outputs.mean(axis=0)
 
     # Let's try out trick from topology
     # optimization instead of relying on the
@@ -115,11 +116,11 @@ def deeplifting_fn(model, objective, bounds):
     # thing we can use a + (b - a) * x
     # Get first bounds
     a1, b1 = bounds[0]
-    x1 = a1 + (b1 - a1) * torch.sigmoid(x1)
+    x1 = a1 + (b1 - a1) * x1
 
     # Get second bounds
     a2, b2 = bounds[1]
-    x2 = a2 + (b2 - a2) * torch.sigmoid(x2)
+    x2 = a2 + (b2 - a2) * x2
 
     # Objective function
     x = torch.stack((x1, x2))
@@ -148,9 +149,13 @@ def run_deeplifting(problem: Dict, trials: int):
         # Seed everything
         set_seed(trial)
 
-        # Define the model
+        # # Define the model
+        # model = DeepliftingMLP(
+        #     input_size=25, layer_sizes=(128, 256, 512, 256, 128), output_size=2
+        # )
+
         model = DeepliftingMLP(
-            input_size=100, layer_sizes=(128, 256, 512, 256, 128), output_size=2
+            input_size=25, layer_sizes=(512, 256, 256, 512), output_size=2
         )
         model = model.to(device=device, dtype=torch.double)
         nvar = getNvarTorch(model.parameters())
@@ -169,7 +174,7 @@ def run_deeplifting(problem: Dict, trials: int):
         opts.x0 = x0
         opts.torch_device = device
         opts.print_level = 1
-        opts.limited_mem_size = 25
+        opts.limited_mem_size = 50
         opts.stat_l2_model = False
         opts.double_precision = True
         opts.viol_ineq_tol = 1e-10
@@ -188,7 +193,9 @@ def run_deeplifting(problem: Dict, trials: int):
         results = np.zeros((trials, max_iterations, 3)) * np.nan
 
         # Set up the function with the results
-        fn = lambda x: objective(x, results=results, trial=0, version='pytorch')  # noqa
+        fn = lambda x: objective(
+            x, results=results, trial=trial, version='pytorch'
+        )  # noqa
 
         # Combined function
         comb_fn = lambda model: deeplifting_fn(model, fn, bounds)  # noqa
@@ -198,16 +205,20 @@ def run_deeplifting(problem: Dict, trials: int):
 
         # Get final x we will also need to map
         # it to the same bounds
-        x1, x2 = model(inputs=None)
+        outputs = model(inputs=None)
+        outputs = torch.sigmoid(outputs)
+        x1, x2 = outputs.mean(axis=0)
+
         a1, b1 = bounds[0]
-        x1 = a1 + (b1 - a1) * torch.sigmoid(x1).detach().numpy()
+        x1 = a1 + (b1 - a1) * x1.detach().numpy()
 
         # Get second bounds
         a2, b2 = bounds[1]
-        x2 = a2 + (b2 - a2) * torch.sigmoid(x2).detach().numpy()
+        x2 = a2 + (b2 - a2) * x2.detach().numpy()
 
         f = soln.final.f
-        fn_values.append((x1, x2, f))
+        b = soln.best.f
+        fn_values.append((x1, x2, f, b))
 
     return {'results': results, 'final_results': fn_values}
 
