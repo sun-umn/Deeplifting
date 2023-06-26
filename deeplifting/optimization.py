@@ -61,7 +61,9 @@ def run_ipopt(problem: Dict, trials: int):
         x0 = np.random.rand(2)
 
         # Get the objective
-        fn = lambda x: objective(x, results=results, trial=trial, version='numpy')
+        fn = lambda x: objective(  # noqa
+            x, results=results, trial=trial, version='numpy'
+        )  # noqa
 
         # Call IPOPT
         result = minimize_ipopt(fn, x0, bounds=bounds)
