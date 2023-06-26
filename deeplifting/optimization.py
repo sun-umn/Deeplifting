@@ -142,6 +142,107 @@ def run_differential_evolution(problem: Dict, trials: int):
     return {'results': results, 'final_results': fn_values}
 
 
+def pygranso_fn(X_struct, objective, bounds):
+    """
+    Function to run PyGranso without a neural
+    network approximation to the inputs
+    """
+    x1, x2 = X_struct.x1, X_struct.x2
+    x = torch.cat((x1, x2))
+    f = objective(x)
+
+    # Setup the bounds for the inequality
+    # a <= x <= b
+    # -> a - x <= 0
+    # -> x - b <= 0
+    x1_bounds, x2_bounds = bounds
+    a1, b1 = x1_bounds
+    a2, b2 = x2_bounds
+
+    c1 = a1 - x1
+    c2 = x1 - b1
+    c3 = a2 - x2
+    c4 = x2 - b2
+
+    # Inequality constraints
+    ci = pygransoStruct()
+    ci.c1 = c1
+    ci.c2 = c2
+    ci.c3 = c3
+    ci.c4 = c4
+
+    # Equality constraints
+    ce = None
+
+    return f, ci, ce
+
+
+def run_pygranso(problem: Dict, trials: int):
+    """
+    Function that runs PyGranso for our deeplifting
+    comparisions
+    """
+    # Get the device (CPU for now)
+    device = torch.device('cpu')
+    fn_values = []
+
+    for trial in range(trials):
+        # Seed everything
+        set_seed(trial)
+
+        # var in
+        var_in = {'x1': [1], 'x2': [1]}
+
+        # Setup a pygransoStruct for the algorithm
+        # options
+        opts = pygransoStruct()
+
+        # Inital x0
+        x0 = torch.rand(size=(2, 1), device=device, dtype=torch.double)
+
+        opts.x0 = x0
+        opts.torch_device = device
+        opts.print_level = 1
+        opts.limited_mem_size = 150
+        opts.stat_l2_model = False
+        opts.double_precision = True
+        opts.viol_ineq_tol = 1e-10
+        opts.opt_tol = 1e-10
+
+        # Objective function
+        objective = problem['objective']
+
+        # Get the bounds of the problem
+        bounds = problem['bounds']
+
+        # Get the maximum iterations
+        max_iterations = problem['max_iterations']
+
+        # results
+        results = np.zeros((trials, max_iterations, 3)) * np.nan
+
+        # Set up the function with the results
+        fn = lambda x: objective(  # noqa
+            x, results=results, trial=trial, version='pytorch'
+        )
+
+        # Combined function
+        comb_fn = lambda x: pygranso_fn(x, fn, bounds)  # noqa
+
+        # Run the main algorithm
+        soln = pygranso(var_spec=var_in, combined_fn=comb_fn, user_opts=opts)
+
+        # Get final x we will also need to map
+        # it to the same bounds
+        x1, x2 = soln.final.x.numpy().flatten()
+
+        f = soln.final.f
+        b = soln.best.f
+        fn_values.append((x1, x2, f, b))
+
+    return {'results': results, 'final_results': fn_values}
+
+
 def deeplifting_fn(model, objective, bounds):
     """
     Combined funtion used for PyGranso
@@ -199,7 +300,7 @@ def run_deeplifting(problem: Dict, trials: int):
         # )
 
         model = DeepliftingMLP(
-            input_size=25, layer_sizes=(512, 512, 512, 512), output_size=2
+            input_size=25, layer_sizes=(512, 512, 512, 512, 512), output_size=2
         )
         model = model.to(device=device, dtype=torch.double)
         nvar = getNvarTorch(model.parameters())
@@ -218,11 +319,11 @@ def run_deeplifting(problem: Dict, trials: int):
         opts.x0 = x0
         opts.torch_device = device
         opts.print_level = 1
-        opts.limited_mem_size = 50
+        opts.limited_mem_size = 150
         opts.stat_l2_model = False
         opts.double_precision = True
-        opts.viol_ineq_tol = 1e-5
-        opts.opt_tol = 1e-5
+        opts.viol_ineq_tol = 1e-10
+        opts.opt_tol = 1e-10
 
         # Objective function
         objective = problem['objective']
