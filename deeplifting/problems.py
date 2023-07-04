@@ -44,6 +44,50 @@ def ackley(x, results, trial, version='numpy'):
     return result
 
 
+def ndackley(x, results, trial, version='numpy'):
+    """
+    Compute the Ackley function.
+
+    Args:
+    x: A d-dimensional array or tensor
+    version: A string, either 'numpy' or 'pytorch'
+
+    Returns:
+    result: Value of the Ackley function
+    """
+    a = 20
+    b = 0.2
+    c = 2 * np.pi
+
+    d = len(x)
+
+    if version == 'numpy':
+        arg1 = -b * np.sqrt(1.0 / d * np.sum(np.square(x)))
+        arg2 = 1.0 / d * np.sum(np.cos(c * x))
+        result = -a * np.exp(arg1) - np.exp(arg2) + a + np.e
+
+    elif version == 'pytorch':
+        x = torch.tensor(x, dtype=torch.float32)
+        arg1 = -b * torch.sqrt(1.0 / d * torch.sum(x**2))
+        arg2 = 1.0 / d * torch.sum(torch.cos(c * x))
+        result = -a * torch.exp(arg1) - torch.exp(arg2) + a + np.e
+    else:
+        raise ValueError("Invalid implementation: choose 'numpy' or 'pytorch'")
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (x.detach().numpy(), result.detach().numpy())
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x, result))
+
+    return result
+
+
 def bukin_n6(x, results, trial, version='numpy'):
     """
     Function that implements the Bukin Function N.6 in both
