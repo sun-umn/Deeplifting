@@ -60,6 +60,7 @@ def ndackley(x, results, trial, version='numpy'):
     c = 2 * np.pi
 
     d = len(x)
+    x = x.flatten()
 
     if version == 'numpy':
         arg1 = -b * np.sqrt(1.0 / d * np.sum(np.square(x)))
@@ -67,7 +68,6 @@ def ndackley(x, results, trial, version='numpy'):
         result = -a * np.exp(arg1) - np.exp(arg2) + a + np.e
 
     elif version == 'pytorch':
-        x = torch.tensor(x, dtype=torch.float32)
         arg1 = -b * torch.sqrt(1.0 / d * torch.sum(x**2))
         arg2 = 1.0 / d * torch.sum(torch.cos(c * x))
         result = -a * torch.exp(arg1) - torch.exp(arg2) + a + np.e
@@ -78,12 +78,12 @@ def ndackley(x, results, trial, version='numpy'):
     iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
 
     if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (x.detach().numpy(), result.detach().numpy())
-        )
+        x_tuple = tuple(x.detach().numpy())
+        results[trial, iteration, :] = np.array(x_tuple + (result.detach().numpy(),))
 
     else:
-        results[trial, iteration, :] = np.array((x, result))
+        x_tuple = tuple(x.flatten())
+        results[trial, iteration, :] = np.array(x_tuple + (result,))
 
     return result
 
@@ -794,6 +794,7 @@ ackley_config = {
     'bounds': [(-32.768, 32.768), (-32.768, 32.768)],
     'max_iterations': 1000,
     'global_minimum': 0.0,
+    'dimensions': 2,
 }
 
 # Bukin N.6
@@ -900,9 +901,19 @@ shubert_config = {
     'global_minimum': -186.7309,
 }
 
+# Multi-Dimensional Problems #
+ackley_3d_config = {
+    'objective': ndackley,
+    'bounds': [(-32.768, 32.768)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 3,
+}
+
 
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
+    'ackley_3d': ackley_3d_config,
     'bukin_n6': bukin_n6_config,
     'cross_in_tray': cross_in_tray_config,
     'drop_wave': drop_wave_config,
