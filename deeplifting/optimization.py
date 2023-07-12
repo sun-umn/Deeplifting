@@ -208,6 +208,7 @@ def run_pygranso(problem: Dict, trials: int):
         opts.double_precision = True
         opts.viol_ineq_tol = 1e-10
         opts.opt_tol = 1e-10
+        opts.maxit = 200
 
         # Objective function
         objective = problem['objective']
@@ -324,6 +325,7 @@ def run_deeplifting(problem: Dict, trials: int):
         opts.double_precision = True
         opts.viol_ineq_tol = 1e-10
         opts.opt_tol = 1e-10
+        opts.maxit = 200
 
         # Objective function
         objective = problem['objective']
