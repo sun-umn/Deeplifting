@@ -87,15 +87,21 @@ def run_dual_annealing(problem: Dict, trials: int):
     # Objective function
     objective = problem['objective']
 
+    # Get the number of dimensions
+    dimensions = problem['dimensions']
+
     # Get the bounds of the problem
-    bounds = problem['bounds']
+    if dimensions <= 2:
+        bounds = problem['bounds']
+    else:
+        bounds = problem['bounds'] * dimensions
 
     # Get the maximum iterations
     max_iterations = problem['max_iterations']
 
     # Save the results
     # We will store the optimization steps here
-    results = np.zeros((trials, max_iterations, 3)) * np.nan
+    results = np.zeros((trials, max_iterations, dimensions + 1)) * np.nan
     fn_values = []
 
     for trial in range(trials):
@@ -108,11 +114,12 @@ def run_dual_annealing(problem: Dict, trials: int):
         )
 
         # Random starting point for dual annealing
-        x0 = np.random.rand(2)
+        x0 = np.random.rand(dimensions)
 
         # Get the result
         result = dual_annealing(fn, bounds, x0=x0, maxiter=max_iterations)
-        fn_values.append((result.x[0], result.x[1], result.fun))
+        x_tuple = tuple(x for x in result.x)
+        fn_values.append(x_tuple + (result.fun,))
 
     return {'results': results, 'final_results': fn_values}
 
@@ -125,15 +132,21 @@ def run_differential_evolution(problem: Dict, trials: int):
     # Objective function
     objective = problem['objective']
 
+    # Get the number of dimensions
+    dimensions = problem['dimensions']
+
     # Get the bounds of the problem
-    bounds = problem['bounds']
+    if dimensions <= 2:
+        bounds = problem['bounds']
+    else:
+        bounds = problem['bounds'] * dimensions
 
     # Get the maximum iterations
     max_iterations = problem['max_iterations']
 
     # Save the results
     # We will store the optimization steps here
-    results = np.zeros((trials, max_iterations, 3)) * np.nan
+    results = np.zeros((trials, max_iterations, dimensions + 1)) * np.nan
     fn_values = []
 
     for trial in range(trials):
@@ -146,11 +159,12 @@ def run_differential_evolution(problem: Dict, trials: int):
         )
 
         # Random starting point for dual annealing
-        x0 = np.random.rand(2)
+        x0 = np.random.rand(dimensions)
 
         # Get the result
         result = differential_evolution(fn, bounds, x0=x0, maxiter=max_iterations)
-        fn_values.append((result.x[0], result.x[1], result.fun))
+        x_tuple = tuple(x for x in result.x)
+        fn_values.append(x_tuple + (result.fun,))
 
     return {'results': results, 'final_results': fn_values}
 
@@ -183,6 +197,34 @@ def pygranso_fn(X_struct, objective, bounds):
     ci.c2 = c2
     ci.c3 = c3
     ci.c4 = c4
+
+    # Equality constraints
+    ce = None
+
+    return f, ci, ce
+
+
+def pygranso_nd_fn(X_struct, objective, bounds):
+    """
+    Function to run PyGranso without a neural
+    network approximation to the inputs
+    """
+    x_values = []
+    for key, value in X_struct.__dict__.items():
+        x_values.append(value)
+    x = torch.cat(x_values)
+    f = objective(x)
+
+    # Setup the bounds for the inequality
+    # a <= x <= b
+    # -> a - x <= 0
+    # -> x - b <= 0
+    # Inequality constraints
+    ci = pygransoStruct()
+    for index, cnstr in enumerate(bounds):
+        a, b = cnstr
+        setattr(ci, f'ca{index}', a - x[index])
+        setattr(ci, f'cb{index}', x[index] - b)
 
     # Equality constraints
     ce = None
@@ -249,7 +291,10 @@ def run_pygranso(problem: Dict, trials: int):
         )
 
         # Combined function
-        comb_fn = lambda x: pygranso_fn(x, fn, bounds)  # noqa
+        if dimensions <= 2:
+            comb_fn = lambda x: pygranso_fn(x, fn, bounds)  # noqa
+        else:
+            comb_fn = lambda x: pygranso_nd_fn(x, fn, bounds)  # noqa
 
         # Run the main algorithm
         soln = pygranso(var_spec=var_in, combined_fn=comb_fn, user_opts=opts)

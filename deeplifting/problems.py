@@ -910,10 +910,20 @@ ackley_3d_config = {
     'dimensions': 3,
 }
 
+# Multi-Dimensional Problems #
+ackley_5d_config = {
+    'objective': ndackley,
+    'bounds': [(-32.768, 32.768)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 5,
+}
+
 
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
     'ackley_3d': ackley_3d_config,
+    'ackley_5d': ackley_5d_config,
     'bukin_n6': bukin_n6_config,
     'cross_in_tray': cross_in_tray_config,
     'drop_wave': drop_wave_config,
