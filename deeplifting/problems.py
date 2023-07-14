@@ -1274,7 +1274,7 @@ def ex8_6_2(x, results, trial, version='numpy'):
         )
 
     elif version == 'pytorch':
-        (
+        result = (
             -(
                 torch.sqrt(
                     1
@@ -2002,6 +2002,7 @@ griewank_config = {
     'bounds': [(-600.0, 600.0), (-600.0, 600.0)],
     'max_iterations': 1000,
     'global_minimum': 0.0,
+    'dimensions': 2,
 }
 
 # Holder Table
@@ -2010,6 +2011,7 @@ holder_table_config = {
     'bounds': [(-10.0, 10.0), (-10.0, 10.0)],
     'max_iterations': 1000,
     'global_minimum': -19.2085,
+    'dimensions': 2,
 }
 
 # Levy
@@ -2018,6 +2020,7 @@ levy_config = {
     'bounds': [(-10.0, 10.0), (-10.0, 10.0)],
     'max_iterations': 1000,
     'global_minimum': 0.0,
+    'dimensions': 2,
 }
 
 # Levy
@@ -2026,6 +2029,7 @@ levy_n13_config = {
     'bounds': [(-10.0, 10.0), (-10.0, 10.0)],
     'max_iterations': 1000,
     'global_minimum': 0.0,
+    'dimensions': 2,
 }
 
 # Rastrigin
@@ -2034,6 +2038,7 @@ rastrigin_config = {
     'bounds': [(-5.12, 5.12), (-5.12, 5.12)],
     'max_iterations': 1000,
     'global_minimum': 0.0,
+    'dimensions': 2,
 }
 
 # Schaffer N2
@@ -2042,6 +2047,7 @@ schaffer_n2_config = {
     'bounds': [(-100.0, 100.0), (-100.0, 100.0)],
     'max_iterations': 1000,
     'global_minimum': 0.0,
+    'dimensions': 2,
 }
 
 # Schaffer N4
@@ -2050,6 +2056,7 @@ schaffer_n4_config = {
     'bounds': [(-100.0, 100.0), (-100.0, 100.0)],
     'max_iterations': 1000,
     'global_minimum': 0.29579,
+    'dimensions': 2,
 }
 
 # Schwefel
@@ -2058,6 +2065,7 @@ schwefel_config = {
     'bounds': [(-500.0, 500.0), (-500.0, 500.0)],
     'max_iterations': 1000,
     'global_minimum': 0.0,
+    'dimensions': 2,
 }
 
 # Shubert
@@ -2066,6 +2074,7 @@ shubert_config = {
     'bounds': [(-10.0, 10.0), (-10.0, 10.0)],
     'max_iterations': 1000,
     'global_minimum': -186.7309,
+    'dimensions': 2,
 }
 
 # Multi-Dimensional Problems #

@@ -52,7 +52,13 @@ def run_ipopt(problem: Dict, trials: int):
     if dimensions <= 2:
         bounds = problem['bounds']
     else:
-        bounds = problem['bounds'] * dimensions
+        bounds = problem['bounds']
+
+        if len(bounds) > 1:
+            bounds = bounds
+
+        else:
+            bounds = bounds * dimensions
 
     # Save the results
     # We will store the optimization steps here
@@ -94,7 +100,13 @@ def run_dual_annealing(problem: Dict, trials: int):
     if dimensions <= 2:
         bounds = problem['bounds']
     else:
-        bounds = problem['bounds'] * dimensions
+        bounds = problem['bounds']
+
+        if len(bounds) > 1:
+            bounds = bounds
+
+        else:
+            bounds = bounds * dimensions
 
     # Get the maximum iterations
     max_iterations = problem['max_iterations']
@@ -139,7 +151,13 @@ def run_differential_evolution(problem: Dict, trials: int):
     if dimensions <= 2:
         bounds = problem['bounds']
     else:
-        bounds = problem['bounds'] * dimensions
+        bounds = problem['bounds']
+
+        if len(bounds) > 1:
+            bounds = bounds
+
+        else:
+            bounds = bounds * dimensions
 
     # Get the maximum iterations
     max_iterations = problem['max_iterations']
@@ -277,7 +295,13 @@ def run_pygranso(problem: Dict, trials: int):
         if dimensions <= 2:
             bounds = problem['bounds']
         else:
-            bounds = problem['bounds'] * dimensions
+            bounds = problem['bounds']
+
+            if len(bounds) > 1:
+                bounds = bounds
+
+            else:
+                bounds = bounds * dimensions
 
         # Get the maximum iterations
         max_iterations = problem['max_iterations']
@@ -433,7 +457,13 @@ def run_deeplifting(problem: Dict, trials: int):
         if dimensions <= 2:
             bounds = problem['bounds']
         else:
-            bounds = problem['bounds'] * dimensions
+            bounds = problem['bounds']
+
+            if len(bounds) > 1:
+                bounds = bounds
+
+            else:
+                bounds = bounds * dimensions
 
         # Get the maximum iterations
         max_iterations = problem['max_iterations']
