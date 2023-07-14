@@ -1662,6 +1662,69 @@ def ex8_6_2(x, results, trial, version='numpy'):
     return result
 
 
+def least(x, results, trial, version='numpy'):
+    """
+    Implementation of the Least function from the MINLP library.
+    This function has a global minimum of 0.0.
+
+    Parameters:
+        x: (x1, x2, x3) this is a 3D problem
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Schwefel function values
+        corresponding to the inputs (x1, x2).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2, x3 = x.flatten()
+    if version == 'numpy':
+        result = (
+            (-x2 * np.exp(-5 * x3) + 127 - x1) ** 2
+            + (-x2 * np.exp(-3 * x3) + 151 - x1) ** 2
+            + (-x2 * np.exp(-x3) + 379 - x1) ** 2
+            + (-x2 * np.exp(5 * x3) + 421 - x1) ** 2
+            + (-x2 * np.exp(3 * x3) + 460 - x1) ** 2
+            + (-x2 * np.exp(x3) + 426 - x1) ** 2
+        )
+    elif version == 'pytorch':
+        result = (
+            (-x2 * torch.exp(-5 * x3) + 127 - x1) ** 2
+            + (-x2 * torch.exp(-3 * x3) + 151 - x1) ** 2
+            + (-x2 * torch.exp(-x3) + 379 - x1) ** 2
+            + (-x2 * torch.exp(5 * x3) + 421 - x1) ** 2
+            + (-x2 * torch.exp(3 * x3) + 460 - x1) ** 2
+            + (-x2 * torch.exp(x3) + 426 - x1) ** 2
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().numpy(),
+                x2.detach().numpy(),
+                x3.detach().numpy(),
+                result.detach().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, x3, result))
+
+    return result
+
+
 # Problem configurations
 # Ackley
 ackley_config = {
@@ -1856,6 +1919,19 @@ ex8_6_2_config = {
     'dimensions': 30,
 }
 
+# least from MINLP
+least_config = {
+    'objective': least,
+    'bounds': [
+        (-1e20, 1e20),
+        (-1e20, 1e20),
+        (-5.0, 5.0),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 3,
+}
+
 
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
@@ -1876,4 +1952,5 @@ PROBLEMS_BY_NAME = {
     'schwefel': schwefel_config,
     'shubert': shubert_config,
     'ex8_6_2': ex8_6_2_config,
+    'least': least_config,
 }
