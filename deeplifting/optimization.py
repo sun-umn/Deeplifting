@@ -424,7 +424,9 @@ def run_deeplifting(problem: Dict, trials: int):
         # )
 
         model = DeepliftingMLP(
-            input_size=25, layer_sizes=(512, 512, 512, 512, 512), output_size=dimensions
+            input_size=100,
+            layer_sizes=(512, 512, 512, 512, 512),
+            output_size=dimensions,
         )
         model = model.to(device=device, dtype=torch.double)
         nvar = getNvarTorch(model.parameters())
