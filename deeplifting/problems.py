@@ -803,6 +803,7 @@ bukin_n6_config = {
     'bounds': [(-15.0, -5.0), (-3.0, 3.0)],
     'max_iterations': 1000,
     'global_minimum': 0.0,
+    'dimensions': 2,
 }
 
 # Cross-in-Tray
@@ -811,6 +812,7 @@ cross_in_tray_config = {
     'bounds': [(-10.0, 10.0), (-10.0, 10.0)],
     'max_iterations': 1000,
     'global_minimum': -2.06261,
+    'dimensions': 2,
 }
 
 # Drop Wave
@@ -819,6 +821,7 @@ drop_wave_config = {
     'bounds': [(-5.12, 5.12), (-5.12, 5.12)],
     'max_iterations': 1000,
     'global_minimum': -1.0,
+    'dimensions': 2,
 }
 
 # Eggholder
@@ -827,6 +830,7 @@ eggholder_config = {
     'bounds': [(-512.0, 512.0), (-512.0, 512.0)],
     'max_iterations': 1000,
     'global_minimum': -959.6407,
+    'dimensions': 2,
 }
 
 # Griewank

@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def create_optimization_plot(problem, final_results, colormap='Wistia'):
+def create_optimization_plot(problem_name, problem, final_results, colormap='Wistia'):
     """
     Function that will build out the plots and the solution
     found for the optimization. For our purposes we will mainly
@@ -51,7 +51,8 @@ def create_optimization_plot(problem, final_results, colormap='Wistia'):
     ax1.plot_surface(x, y, z, cmap=colormap, alpha=1.0)
 
     # Add title and labels
-    ax1.set_title('3D Surface Plot of the Ackley Function')
+    problem_name = problem_name.capitalize()
+    ax1.set_title(f'3D Surface Plot of the {problem_name} Function')
     ax1.set_xlabel('X')
     ax1.set_ylabel('Y')
     ax1.set_zlabel('Z (Ackley Value)')
@@ -69,7 +70,7 @@ def create_optimization_plot(problem, final_results, colormap='Wistia'):
         ax2.plot(min_x, min_y, 'ko')  # plot the minimum point as a black dot
 
     # Add title and labels
-    ax2.set_title('Contour Plot of the Ackley Function')
+    ax2.set_title(f'Contour Plot of the {problem_name} Function')
     ax2.set_xlabel('X')
     ax2.set_ylabel('Y')
 
