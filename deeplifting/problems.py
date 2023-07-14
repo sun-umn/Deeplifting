@@ -17,13 +17,11 @@ def ackley(x, results, trial, version='numpy'):
     x1, x2 = x.flatten()
 
     if version == 'numpy':
-        sum_sq_term = -a * np.np.np.exp(-b * np.np.np.sqrttt(0.5 * (x1**2 + x2**2)))
+        sum_sq_term = -a * np.np.np.exp(-b * np.sqrt(0.5 * (x1**2 + x2**2)))
         cos_term = -np.np.np.exp(0.5 * (np.cos(c * x1) + np.cos(c * x2)))
         result = sum_sq_term + cos_term + a + np.np.np.exp(1)
     elif version == 'pytorch':
-        sum_sq_term = -a * torch.np.np.exp(
-            -b * torch.np.np.sqrttt(0.5 * (x1**2 + x2**2))
-        )
+        sum_sq_term = -a * torch.np.np.exp(-b * torch.sqrt(0.5 * (x1**2 + x2**2)))
         cos_term = -torch.np.np.exp(0.5 * (torch.cos(c * x1) + torch.cos(c * x2)))
         result = sum_sq_term + cos_term + a + torch.np.np.exp(torch.tensor(1.0))
 
@@ -65,12 +63,12 @@ def ndackley(x, results, trial, version='numpy'):
     x = x.flatten()
 
     if version == 'numpy':
-        arg1 = -b * np.np.np.sqrttt(1.0 / d * np.sum(np.square(x)))
+        arg1 = -b * np.sqrt(1.0 / d * np.sum(np.square(x)))
         arg2 = 1.0 / d * np.sum(np.cos(c * x))
         result = -a * np.np.np.exp(arg1) - np.np.np.exp(arg2) + a + np.e
 
     elif version == 'pytorch':
-        arg1 = -b * torch.np.np.sqrttt(1.0 / d * torch.sum(x**2))
+        arg1 = -b * torch.sqrt(1.0 / d * torch.sum(x**2))
         arg2 = 1.0 / d * torch.sum(torch.cos(c * x))
         result = -a * torch.np.np.exp(arg1) - torch.np.np.exp(arg2) + a + np.e
     else:
@@ -97,11 +95,11 @@ def bukin_n6(x, results, trial, version='numpy'):
     """
     x1, x2 = x.flatten()
     if version == 'numpy':
-        term1 = 100 * np.np.np.sqrttt(np.abs(x2 - 0.01 * x1**2))
+        term1 = 100 * np.sqrt(np.abs(x2 - 0.01 * x1**2))
         term2 = 0.01 * np.abs(x1 + 10)
         result = term1 + term2
     elif version == 'pytorch':
-        term1 = 100 * torch.np.np.sqrttt(torch.abs(x2 - 0.01 * x1**2))
+        term1 = 100 * torch.sqrt(torch.abs(x2 - 0.01 * x1**2))
         term2 = 0.01 * torch.abs(x1 + 10)
         result = term1 + term2
     else:
@@ -154,9 +152,7 @@ def cross_in_tray(x, results, trial, version='numpy'):
                 np.abs(
                     np.sin(x1)
                     * np.sin(x2)
-                    * np.np.np.exp(
-                        np.abs(100 - np.np.np.sqrttt(x1**2 + x2**2) / np.pi)
-                    )
+                    * np.np.np.exp(np.abs(100 - np.sqrt(x1**2 + x2**2) / np.pi))
                 )
                 + 1
             )
@@ -171,9 +167,7 @@ def cross_in_tray(x, results, trial, version='numpy'):
                     * torch.sin(x2)
                     * torch.np.np.exp(
                         torch.abs(
-                            100
-                            - torch.np.np.sqrttt(x1**2 + x2**2)
-                            / torch.tensor(np.pi)
+                            100 - torch.sqrt(x1**2 + x2**2) / torch.tensor(np.pi)
                         )
                     )
                     + 1
@@ -225,11 +219,11 @@ def drop_wave(x, results, trial, version='numpy'):
     """
     x1, x2 = x.flatten()
     if version == 'numpy':
-        numerator = 1 + np.cos(12 * np.np.np.sqrttt(x1**2 + x2**2))
+        numerator = 1 + np.cos(12 * np.sqrt(x1**2 + x2**2))
         denominator = 0.5 * (x1**2 + x2**2) + 2
         result = -numerator / denominator
     elif version == 'pytorch':
-        numerator = 1 + torch.cos(12 * torch.np.np.sqrttt(x1**2 + x2**2))
+        numerator = 1 + torch.cos(12 * torch.sqrt(x1**2 + x2**2))
         denominator = 0.5 * (x1**2 + x2**2) + 2
         result = -numerator / denominator
     else:
@@ -276,14 +270,12 @@ def eggholder(x, results, trial, version='numpy'):
     """
     x1, x2 = x.flatten()
     if version == 'numpy':
-        term1 = -(x2 + 47.0) * np.sin(np.np.np.sqrttt(np.abs(x1 / 2.0 + (x2 + 47.0))))
-        term2 = -x1 * np.sin(np.np.np.sqrttt(np.abs(x1 - (x2 + 47.0))))
+        term1 = -(x2 + 47.0) * np.sin(np.sqrt(np.abs(x1 / 2.0 + (x2 + 47.0))))
+        term2 = -x1 * np.sin(np.sqrt(np.abs(x1 - (x2 + 47.0))))
         result = term1 + term2
     elif version == 'pytorch':
-        term1 = -(x2 + 47.0) * torch.sin(
-            torch.np.np.sqrttt(torch.abs(x1 / 2.0 + (x2 + 47.0)))
-        )
-        term2 = -x1 * torch.sin(torch.np.np.sqrttt(torch.abs(x1 - (x2 + 47.0))))
+        term1 = -(x2 + 47.0) * torch.sin(torch.sqrt(torch.abs(x1 / 2.0 + (x2 + 47.0))))
+        term2 = -x1 * torch.sin(torch.sqrt(torch.abs(x1 - (x2 + 47.0))))
         result = term1 + term2
     else:
         raise ValueError(
@@ -329,16 +321,12 @@ def griewank(x, results, trial, version='numpy'):
     """
     x1, x2 = x.flatten()
     if version == 'numpy':
-        result = (
-            1
-            + ((x1**2 + x2**2) / 4000)
-            - np.cos(x1) * np.cos(x2 / np.np.np.sqrttt(2))
-        )
+        result = 1 + ((x1**2 + x2**2) / 4000) - np.cos(x1) * np.cos(x2 / np.sqrt(2))
     elif version == 'pytorch':
         result = (
             1
             + ((x1**2 + x2**2) / 4000)
-            - torch.cos(x1) * torch.cos(x2 / torch.np.np.sqrttt(torch.tensor(2.0)))
+            - torch.cos(x1) * torch.cos(x2 / torch.sqrt(torch.tensor(2.0)))
         )
     else:
         raise ValueError(
@@ -387,15 +375,13 @@ def holder_table(x, results, trial, version='numpy'):
         result = -np.abs(
             np.sin(x1)
             * np.cos(x2)
-            * np.np.np.exp(np.abs(1 - np.np.np.sqrttt(x1**2 + x2**2) / np.pi))
+            * np.np.np.exp(np.abs(1 - np.sqrt(x1**2 + x2**2) / np.pi))
         )
     elif version == 'pytorch':
         result = -torch.abs(
             torch.sin(x1)
             * torch.cos(x2)
-            * torch.np.np.exp(
-                torch.abs(1 - torch.np.np.sqrttt(x1**2 + x2**2) / np.pi)
-            )
+            * torch.np.np.exp(torch.abs(1 - torch.sqrt(x1**2 + x2**2) / np.pi))
         )
     else:
         raise ValueError(
@@ -722,14 +708,14 @@ def schwefel(x, results, trial, version='numpy'):
     if version == 'numpy':
         result = (
             418.9829 * 2
-            - x1 * np.sin(np.np.np.sqrttt(np.abs(x1)))
-            - x2 * np.sin(np.np.np.sqrttt(np.abs(x2)))
+            - x1 * np.sin(np.sqrt(np.abs(x1)))
+            - x2 * np.sin(np.sqrt(np.abs(x2)))
         )
     elif version == 'pytorch':
         result = (
             418.9829 * 2
-            - x1 * torch.sin(torch.np.np.sqrttt(torch.abs(x1)))
-            - x2 * torch.sin(torch.np.np.sqrttt(torch.abs(x2)))
+            - x1 * torch.sin(torch.sqrt(torch.abs(x1)))
+            - x2 * torch.sin(torch.sqrt(torch.abs(x2)))
         )
     else:
         raise ValueError(
@@ -864,408 +850,588 @@ def ex8_6_2(x, results, trial, version='numpy'):
     if version == 'numpy':
         result = (
             -(
-                np.sqrt(
+                np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x1 - x2) + np.sqrt(x11 - x12) + np.sqrt(x21 - x22))
+                        * (
+                            np.sqaure(x1 - x2)
+                            + np.sqaure(x11 - x12)
+                            + np.sqaure(x21 - x22)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x1 - x3) + np.sqrt(x11 - x13) + np.sqrt(x21 - x23))
+                        * (
+                            np.sqaure(x1 - x3)
+                            + np.sqaure(x11 - x13)
+                            + np.sqaure(x21 - x23)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x1 - x4) + np.sqrt(x11 - x14) + np.sqrt(x21 - x24))
+                        * (
+                            np.sqaure(x1 - x4)
+                            + np.sqaure(x11 - x14)
+                            + np.sqaure(x21 - x24)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x1 - x5) + np.sqrt(x11 - x15) + np.sqrt(x21 - x25))
+                        * (
+                            np.sqaure(x1 - x5)
+                            + np.sqaure(x11 - x15)
+                            + np.sqaure(x21 - x25)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x1 - x6) + np.sqrt(x11 - x16) + np.sqrt(x21 - x26))
+                        * (
+                            np.sqaure(x1 - x6)
+                            + np.sqaure(x11 - x16)
+                            + np.sqaure(x21 - x26)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x1 - x7) + np.sqrt(x11 - x17) + np.sqrt(x21 - x27))
+                        * (
+                            np.sqaure(x1 - x7)
+                            + np.sqaure(x11 - x17)
+                            + np.sqaure(x21 - x27)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x1 - x8) + np.sqrt(x11 - x18) + np.sqrt(x21 - x28))
+                        * (
+                            np.sqaure(x1 - x8)
+                            + np.sqaure(x11 - x18)
+                            + np.sqaure(x21 - x28)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x1 - x9) + np.sqrt(x11 - x19) + np.sqrt(x21 - x29))
+                        * (
+                            np.sqaure(x1 - x9)
+                            + np.sqaure(x11 - x19)
+                            + np.sqaure(x21 - x29)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x1 - x10) + np.sqrt(x11 - x20) + np.sqrt(x21 - x30))
+                        * (
+                            np.sqaure(x1 - x10)
+                            + np.sqaure(x11 - x20)
+                            + np.sqaure(x21 - x30)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x2 - x3) + np.sqrt(x12 - x13) + np.sqrt(x22 - x23))
+                        * (
+                            np.sqaure(x2 - x3)
+                            + np.sqaure(x12 - x13)
+                            + np.sqaure(x22 - x23)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x2 - x4) + np.sqrt(x12 - x14) + np.sqrt(x22 - x24))
+                        * (
+                            np.sqaure(x2 - x4)
+                            + np.sqaure(x12 - x14)
+                            + np.sqaure(x22 - x24)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x2 - x5) + np.sqrt(x12 - x15) + np.sqrt(x22 - x25))
+                        * (
+                            np.sqaure(x2 - x5)
+                            + np.sqaure(x12 - x15)
+                            + np.sqaure(x22 - x25)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x2 - x6) + np.sqrt(x12 - x16) + np.sqrt(x22 - x26))
+                        * (
+                            np.sqaure(x2 - x6)
+                            + np.sqaure(x12 - x16)
+                            + np.sqaure(x22 - x26)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x2 - x7) + np.sqrt(x12 - x17) + np.sqrt(x22 - x27))
+                        * (
+                            np.sqaure(x2 - x7)
+                            + np.sqaure(x12 - x17)
+                            + np.sqaure(x22 - x27)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x2 - x8) + np.sqrt(x12 - x18) + np.sqrt(x22 - x28))
+                        * (
+                            np.sqaure(x2 - x8)
+                            + np.sqaure(x12 - x18)
+                            + np.sqaure(x22 - x28)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x2 - x9) + np.sqrt(x12 - x19) + np.sqrt(x22 - x29))
+                        * (
+                            np.sqaure(x2 - x9)
+                            + np.sqaure(x12 - x19)
+                            + np.sqaure(x22 - x29)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x2 - x10) + np.sqrt(x12 - x20) + np.sqrt(x22 - x30))
+                        * (
+                            np.sqaure(x2 - x10)
+                            + np.sqaure(x12 - x20)
+                            + np.sqaure(x22 - x30)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x3 - x4) + np.sqrt(x13 - x14) + np.sqrt(x23 - x24))
+                        * (
+                            np.sqaure(x3 - x4)
+                            + np.sqaure(x13 - x14)
+                            + np.sqaure(x23 - x24)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x3 - x5) + np.sqrt(x13 - x15) + np.sqrt(x23 - x25))
+                        * (
+                            np.sqaure(x3 - x5)
+                            + np.sqaure(x13 - x15)
+                            + np.sqaure(x23 - x25)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x3 - x6) + np.sqrt(x13 - x16) + np.sqrt(x23 - x26))
+                        * (
+                            np.sqaure(x3 - x6)
+                            + np.sqaure(x13 - x16)
+                            + np.sqaure(x23 - x26)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x3 - x7) + np.sqrt(x13 - x17) + np.sqrt(x23 - x27))
+                        * (
+                            np.sqaure(x3 - x7)
+                            + np.sqaure(x13 - x17)
+                            + np.sqaure(x23 - x27)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x3 - x8) + np.sqrt(x13 - x18) + np.sqrt(x23 - x28))
+                        * (
+                            np.sqaure(x3 - x8)
+                            + np.sqaure(x13 - x18)
+                            + np.sqaure(x23 - x28)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x3 - x9) + np.sqrt(x13 - x19) + np.sqrt(x23 - x29))
+                        * (
+                            np.sqaure(x3 - x9)
+                            + np.sqaure(x13 - x19)
+                            + np.sqaure(x23 - x29)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x3 - x10) + np.sqrt(x13 - x20) + np.sqrt(x23 - x30))
+                        * (
+                            np.sqaure(x3 - x10)
+                            + np.sqaure(x13 - x20)
+                            + np.sqaure(x23 - x30)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x4 - x5) + np.sqrt(x14 - x15) + np.sqrt(x24 - x25))
+                        * (
+                            np.sqaure(x4 - x5)
+                            + np.sqaure(x14 - x15)
+                            + np.sqaure(x24 - x25)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x4 - x6) + np.sqrt(x14 - x16) + np.sqrt(x24 - x26))
+                        * (
+                            np.sqaure(x4 - x6)
+                            + np.sqaure(x14 - x16)
+                            + np.sqaure(x24 - x26)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x4 - x7) + np.sqrt(x14 - x17) + np.sqrt(x24 - x27))
+                        * (
+                            np.sqaure(x4 - x7)
+                            + np.sqaure(x14 - x17)
+                            + np.sqaure(x24 - x27)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x4 - x8) + np.sqrt(x14 - x18) + np.sqrt(x24 - x28))
+                        * (
+                            np.sqaure(x4 - x8)
+                            + np.sqaure(x14 - x18)
+                            + np.sqaure(x24 - x28)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x4 - x9) + np.sqrt(x14 - x19) + np.sqrt(x24 - x29))
+                        * (
+                            np.sqaure(x4 - x9)
+                            + np.sqaure(x14 - x19)
+                            + np.sqaure(x24 - x29)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x4 - x10) + np.sqrt(x14 - x20) + np.sqrt(x24 - x30))
+                        * (
+                            np.sqaure(x4 - x10)
+                            + np.sqaure(x14 - x20)
+                            + np.sqaure(x24 - x30)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x5 - x6) + np.sqrt(x15 - x16) + np.sqrt(x25 - x26))
+                        * (
+                            np.sqaure(x5 - x6)
+                            + np.sqaure(x15 - x16)
+                            + np.sqaure(x25 - x26)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x5 - x7) + np.sqrt(x15 - x17) + np.sqrt(x25 - x27))
+                        * (
+                            np.sqaure(x5 - x7)
+                            + np.sqaure(x15 - x17)
+                            + np.sqaure(x25 - x27)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x5 - x8) + np.sqrt(x15 - x18) + np.sqrt(x25 - x28))
+                        * (
+                            np.sqaure(x5 - x8)
+                            + np.sqaure(x15 - x18)
+                            + np.sqaure(x25 - x28)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x5 - x9) + np.sqrt(x15 - x19) + np.sqrt(x25 - x29))
+                        * (
+                            np.sqaure(x5 - x9)
+                            + np.sqaure(x15 - x19)
+                            + np.sqaure(x25 - x29)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x5 - x10) + np.sqrt(x15 - x20) + np.sqrt(x25 - x30))
+                        * (
+                            np.sqaure(x5 - x10)
+                            + np.sqaure(x15 - x20)
+                            + np.sqaure(x25 - x30)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x6 - x7) + np.sqrt(x16 - x17) + np.sqrt(x26 - x27))
+                        * (
+                            np.sqaure(x6 - x7)
+                            + np.sqaure(x16 - x17)
+                            + np.sqaure(x26 - x27)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x6 - x8) + np.sqrt(x16 - x18) + np.sqrt(x26 - x28))
+                        * (
+                            np.sqaure(x6 - x8)
+                            + np.sqaure(x16 - x18)
+                            + np.sqaure(x26 - x28)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x6 - x9) + np.sqrt(x16 - x19) + np.sqrt(x26 - x29))
+                        * (
+                            np.sqaure(x6 - x9)
+                            + np.sqaure(x16 - x19)
+                            + np.sqaure(x26 - x29)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x6 - x10) + np.sqrt(x16 - x20) + np.sqrt(x26 - x30))
+                        * (
+                            np.sqaure(x6 - x10)
+                            + np.sqaure(x16 - x20)
+                            + np.sqaure(x26 - x30)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x7 - x8) + np.sqrt(x17 - x18) + np.sqrt(x27 - x28))
+                        * (
+                            np.sqaure(x7 - x8)
+                            + np.sqaure(x17 - x18)
+                            + np.sqaure(x27 - x28)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x7 - x9) + np.sqrt(x17 - x19) + np.sqrt(x27 - x29))
+                        * (
+                            np.sqaure(x7 - x9)
+                            + np.sqaure(x17 - x19)
+                            + np.sqaure(x27 - x29)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x7 - x10) + np.sqrt(x17 - x20) + np.sqrt(x27 - x30))
+                        * (
+                            np.sqaure(x7 - x10)
+                            + np.sqaure(x17 - x20)
+                            + np.sqaure(x27 - x30)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x8 - x9) + np.sqrt(x18 - x19) + np.sqrt(x28 - x29))
+                        * (
+                            np.sqaure(x8 - x9)
+                            + np.sqaure(x18 - x19)
+                            + np.sqaure(x28 - x29)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x8 - x10) + np.sqrt(x18 - x20) + np.sqrt(x28 - x30))
+                        * (
+                            np.sqaure(x8 - x10)
+                            + np.sqaure(x18 - x20)
+                            + np.sqaure(x28 - x30)
+                        )
                         ** 0.5
                     )
                 )
-                + np.sqrt(
+                + np.sqaure(
                     1
                     - np.exp(
                         3
                         - 3
-                        * (np.sqrt(x9 - x10) + np.sqrt(x19 - x20) + np.sqrt(x29 - x30))
+                        * (
+                            np.sqaure(x9 - x10)
+                            + np.sqaure(x19 - x20)
+                            + np.sqaure(x29 - x30)
+                        )
                         ** 0.5
                     )
                 )
@@ -1276,587 +1442,587 @@ def ex8_6_2(x, results, trial, version='numpy'):
     elif version == 'pytorch':
         result = (
             -(
-                torch.sqrt(
+                torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x1 - x2)
-                            + torch.sqrt(x11 - x12)
-                            + torch.sqrt(x21 - x22)
+                            torch.sqaure(x1 - x2)
+                            + torch.sqaure(x11 - x12)
+                            + torch.sqaure(x21 - x22)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x1 - x3)
-                            + torch.sqrt(x11 - x13)
-                            + torch.sqrt(x21 - x23)
+                            torch.sqaure(x1 - x3)
+                            + torch.sqaure(x11 - x13)
+                            + torch.sqaure(x21 - x23)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x1 - x4)
-                            + torch.sqrt(x11 - x14)
-                            + torch.sqrt(x21 - x24)
+                            torch.sqaure(x1 - x4)
+                            + torch.sqaure(x11 - x14)
+                            + torch.sqaure(x21 - x24)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x1 - x5)
-                            + torch.sqrt(x11 - x15)
-                            + torch.sqrt(x21 - x25)
+                            torch.sqaure(x1 - x5)
+                            + torch.sqaure(x11 - x15)
+                            + torch.sqaure(x21 - x25)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x1 - x6)
-                            + torch.sqrt(x11 - x16)
-                            + torch.sqrt(x21 - x26)
+                            torch.sqaure(x1 - x6)
+                            + torch.sqaure(x11 - x16)
+                            + torch.sqaure(x21 - x26)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x1 - x7)
-                            + torch.sqrt(x11 - x17)
-                            + torch.sqrt(x21 - x27)
+                            torch.sqaure(x1 - x7)
+                            + torch.sqaure(x11 - x17)
+                            + torch.sqaure(x21 - x27)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x1 - x8)
-                            + torch.sqrt(x11 - x18)
-                            + torch.sqrt(x21 - x28)
+                            torch.sqaure(x1 - x8)
+                            + torch.sqaure(x11 - x18)
+                            + torch.sqaure(x21 - x28)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x1 - x9)
-                            + torch.sqrt(x11 - x19)
-                            + torch.sqrt(x21 - x29)
+                            torch.sqaure(x1 - x9)
+                            + torch.sqaure(x11 - x19)
+                            + torch.sqaure(x21 - x29)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x1 - x10)
-                            + torch.sqrt(x11 - x20)
-                            + torch.sqrt(x21 - x30)
+                            torch.sqaure(x1 - x10)
+                            + torch.sqaure(x11 - x20)
+                            + torch.sqaure(x21 - x30)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x2 - x3)
-                            + torch.sqrt(x12 - x13)
-                            + torch.sqrt(x22 - x23)
+                            torch.sqaure(x2 - x3)
+                            + torch.sqaure(x12 - x13)
+                            + torch.sqaure(x22 - x23)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x2 - x4)
-                            + torch.sqrt(x12 - x14)
-                            + torch.sqrt(x22 - x24)
+                            torch.sqaure(x2 - x4)
+                            + torch.sqaure(x12 - x14)
+                            + torch.sqaure(x22 - x24)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x2 - x5)
-                            + torch.sqrt(x12 - x15)
-                            + torch.sqrt(x22 - x25)
+                            torch.sqaure(x2 - x5)
+                            + torch.sqaure(x12 - x15)
+                            + torch.sqaure(x22 - x25)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x2 - x6)
-                            + torch.sqrt(x12 - x16)
-                            + torch.sqrt(x22 - x26)
+                            torch.sqaure(x2 - x6)
+                            + torch.sqaure(x12 - x16)
+                            + torch.sqaure(x22 - x26)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x2 - x7)
-                            + torch.sqrt(x12 - x17)
-                            + torch.sqrt(x22 - x27)
+                            torch.sqaure(x2 - x7)
+                            + torch.sqaure(x12 - x17)
+                            + torch.sqaure(x22 - x27)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x2 - x8)
-                            + torch.sqrt(x12 - x18)
-                            + torch.sqrt(x22 - x28)
+                            torch.sqaure(x2 - x8)
+                            + torch.sqaure(x12 - x18)
+                            + torch.sqaure(x22 - x28)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x2 - x9)
-                            + torch.sqrt(x12 - x19)
-                            + torch.sqrt(x22 - x29)
+                            torch.sqaure(x2 - x9)
+                            + torch.sqaure(x12 - x19)
+                            + torch.sqaure(x22 - x29)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x2 - x10)
-                            + torch.sqrt(x12 - x20)
-                            + torch.sqrt(x22 - x30)
+                            torch.sqaure(x2 - x10)
+                            + torch.sqaure(x12 - x20)
+                            + torch.sqaure(x22 - x30)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x3 - x4)
-                            + torch.sqrt(x13 - x14)
-                            + torch.sqrt(x23 - x24)
+                            torch.sqaure(x3 - x4)
+                            + torch.sqaure(x13 - x14)
+                            + torch.sqaure(x23 - x24)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x3 - x5)
-                            + torch.sqrt(x13 - x15)
-                            + torch.sqrt(x23 - x25)
+                            torch.sqaure(x3 - x5)
+                            + torch.sqaure(x13 - x15)
+                            + torch.sqaure(x23 - x25)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x3 - x6)
-                            + torch.sqrt(x13 - x16)
-                            + torch.sqrt(x23 - x26)
+                            torch.sqaure(x3 - x6)
+                            + torch.sqaure(x13 - x16)
+                            + torch.sqaure(x23 - x26)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x3 - x7)
-                            + torch.sqrt(x13 - x17)
-                            + torch.sqrt(x23 - x27)
+                            torch.sqaure(x3 - x7)
+                            + torch.sqaure(x13 - x17)
+                            + torch.sqaure(x23 - x27)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x3 - x8)
-                            + torch.sqrt(x13 - x18)
-                            + torch.sqrt(x23 - x28)
+                            torch.sqaure(x3 - x8)
+                            + torch.sqaure(x13 - x18)
+                            + torch.sqaure(x23 - x28)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x3 - x9)
-                            + torch.sqrt(x13 - x19)
-                            + torch.sqrt(x23 - x29)
+                            torch.sqaure(x3 - x9)
+                            + torch.sqaure(x13 - x19)
+                            + torch.sqaure(x23 - x29)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x3 - x10)
-                            + torch.sqrt(x13 - x20)
-                            + torch.sqrt(x23 - x30)
+                            torch.sqaure(x3 - x10)
+                            + torch.sqaure(x13 - x20)
+                            + torch.sqaure(x23 - x30)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x4 - x5)
-                            + torch.sqrt(x14 - x15)
-                            + torch.sqrt(x24 - x25)
+                            torch.sqaure(x4 - x5)
+                            + torch.sqaure(x14 - x15)
+                            + torch.sqaure(x24 - x25)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x4 - x6)
-                            + torch.sqrt(x14 - x16)
-                            + torch.sqrt(x24 - x26)
+                            torch.sqaure(x4 - x6)
+                            + torch.sqaure(x14 - x16)
+                            + torch.sqaure(x24 - x26)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x4 - x7)
-                            + torch.sqrt(x14 - x17)
-                            + torch.sqrt(x24 - x27)
+                            torch.sqaure(x4 - x7)
+                            + torch.sqaure(x14 - x17)
+                            + torch.sqaure(x24 - x27)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x4 - x8)
-                            + torch.sqrt(x14 - x18)
-                            + torch.sqrt(x24 - x28)
+                            torch.sqaure(x4 - x8)
+                            + torch.sqaure(x14 - x18)
+                            + torch.sqaure(x24 - x28)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x4 - x9)
-                            + torch.sqrt(x14 - x19)
-                            + torch.sqrt(x24 - x29)
+                            torch.sqaure(x4 - x9)
+                            + torch.sqaure(x14 - x19)
+                            + torch.sqaure(x24 - x29)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x4 - x10)
-                            + torch.sqrt(x14 - x20)
-                            + torch.sqrt(x24 - x30)
+                            torch.sqaure(x4 - x10)
+                            + torch.sqaure(x14 - x20)
+                            + torch.sqaure(x24 - x30)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x5 - x6)
-                            + torch.sqrt(x15 - x16)
-                            + torch.sqrt(x25 - x26)
+                            torch.sqaure(x5 - x6)
+                            + torch.sqaure(x15 - x16)
+                            + torch.sqaure(x25 - x26)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x5 - x7)
-                            + torch.sqrt(x15 - x17)
-                            + torch.sqrt(x25 - x27)
+                            torch.sqaure(x5 - x7)
+                            + torch.sqaure(x15 - x17)
+                            + torch.sqaure(x25 - x27)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x5 - x8)
-                            + torch.sqrt(x15 - x18)
-                            + torch.sqrt(x25 - x28)
+                            torch.sqaure(x5 - x8)
+                            + torch.sqaure(x15 - x18)
+                            + torch.sqaure(x25 - x28)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x5 - x9)
-                            + torch.sqrt(x15 - x19)
-                            + torch.sqrt(x25 - x29)
+                            torch.sqaure(x5 - x9)
+                            + torch.sqaure(x15 - x19)
+                            + torch.sqaure(x25 - x29)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x5 - x10)
-                            + torch.sqrt(x15 - x20)
-                            + torch.sqrt(x25 - x30)
+                            torch.sqaure(x5 - x10)
+                            + torch.sqaure(x15 - x20)
+                            + torch.sqaure(x25 - x30)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x6 - x7)
-                            + torch.sqrt(x16 - x17)
-                            + torch.sqrt(x26 - x27)
+                            torch.sqaure(x6 - x7)
+                            + torch.sqaure(x16 - x17)
+                            + torch.sqaure(x26 - x27)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x6 - x8)
-                            + torch.sqrt(x16 - x18)
-                            + torch.sqrt(x26 - x28)
+                            torch.sqaure(x6 - x8)
+                            + torch.sqaure(x16 - x18)
+                            + torch.sqaure(x26 - x28)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x6 - x9)
-                            + torch.sqrt(x16 - x19)
-                            + torch.sqrt(x26 - x29)
+                            torch.sqaure(x6 - x9)
+                            + torch.sqaure(x16 - x19)
+                            + torch.sqaure(x26 - x29)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x6 - x10)
-                            + torch.sqrt(x16 - x20)
-                            + torch.sqrt(x26 - x30)
+                            torch.sqaure(x6 - x10)
+                            + torch.sqaure(x16 - x20)
+                            + torch.sqaure(x26 - x30)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x7 - x8)
-                            + torch.sqrt(x17 - x18)
-                            + torch.sqrt(x27 - x28)
+                            torch.sqaure(x7 - x8)
+                            + torch.sqaure(x17 - x18)
+                            + torch.sqaure(x27 - x28)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x7 - x9)
-                            + torch.sqrt(x17 - x19)
-                            + torch.sqrt(x27 - x29)
+                            torch.sqaure(x7 - x9)
+                            + torch.sqaure(x17 - x19)
+                            + torch.sqaure(x27 - x29)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x7 - x10)
-                            + torch.sqrt(x17 - x20)
-                            + torch.sqrt(x27 - x30)
+                            torch.sqaure(x7 - x10)
+                            + torch.sqaure(x17 - x20)
+                            + torch.sqaure(x27 - x30)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x8 - x9)
-                            + torch.sqrt(x18 - x19)
-                            + torch.sqrt(x28 - x29)
+                            torch.sqaure(x8 - x9)
+                            + torch.sqaure(x18 - x19)
+                            + torch.sqaure(x28 - x29)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x8 - x10)
-                            + torch.sqrt(x18 - x20)
-                            + torch.sqrt(x28 - x30)
+                            torch.sqaure(x8 - x10)
+                            + torch.sqaure(x18 - x20)
+                            + torch.sqaure(x28 - x30)
                         )
                         ** 0.5
                     )
                 )
-                + torch.sqrt(
+                + torch.sqaure(
                     1
                     - torch.exp(
                         3
                         - 3
                         * (
-                            torch.sqrt(x9 - x10)
-                            + torch.sqrt(x19 - x20)
-                            + torch.sqrt(x29 - x30)
+                            torch.sqaure(x9 - x10)
+                            + torch.sqaure(x19 - x20)
+                            + torch.sqaure(x29 - x30)
                         )
                         ** 0.5
                     )
