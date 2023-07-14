@@ -1996,8 +1996,8 @@ least_config = {
 ex4_1_5_config = {
     'objective': ex4_1_5,
     'bounds': [
-        (-5, 1e2),
-        (-1e2, 5),
+        (-5, 1e6),
+        (-1e6, 5),
     ],
     'max_iterations': 1000,
     'global_minimum': 0.0,
