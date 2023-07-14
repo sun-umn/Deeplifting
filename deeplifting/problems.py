@@ -248,7 +248,7 @@ def drop_wave(x, results, trial, version='numpy'):
 def eggholder(x, results, trial, version='numpy'):
     """
     Implementation of the 2D Eggholder function.
-    This function has numerous local minima and a global minimum.
+    This function has numerous local minima and a global minimu
 
     Parameters:
     x : np.ndarray or torch.Tensor
@@ -1725,6 +1725,66 @@ def least(x, results, trial, version='numpy'):
     return result
 
 
+def ex4_1_5(x, results, trial, version='numpy'):
+    """
+    Implementation of the example 4-1-5 function from the MINLP library.
+    This function has a global minimum of 0.0.
+
+    Parameters:
+        x: (x1, x2) this is a 3D problem
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Schwefel function values
+        corresponding to the inputs (x1, x2).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = (
+            2 * x1**2
+            - 1.05 * x1**4
+            + 0.166666666666667 * x1**6
+            - x1 * x2
+            + x2**2
+        )
+    elif version == 'pytorch':
+        result = (
+            2 * x1**2
+            - 1.05 * x1**4
+            + 0.166666666666667 * x1**6
+            - x1 * x2
+            + x2**2
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().numpy(),
+                x2.detach().numpy(),
+                result.detach().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
 # Problem configurations
 # Ackley
 ackley_config = {
@@ -1932,6 +1992,18 @@ least_config = {
     'dimensions': 3,
 }
 
+# ex4_1_5 from MINLP
+ex4_1_5_config = {
+    'objective': ex4_1_5,
+    'bounds': [
+        (-5, 1e2),
+        (-1e2, 5),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 2,
+}
+
 
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
@@ -1953,4 +2025,5 @@ PROBLEMS_BY_NAME = {
     'shubert': shubert_config,
     'ex8_6_2': ex8_6_2_config,
     'least': least_config,
+    'ex4_1_5': ex4_1_5_config,
 }
