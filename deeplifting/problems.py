@@ -6,7 +6,7 @@ import torch
 def ackley(x, results, trial, version='numpy'):
     """
     Function that implements the Ackley function in
-    numpy or pytorch. We will use this for our deeplifting np.np.experiments.
+    numpy or pytorch. We will use this for our deeplifting experiments.
     Note, that this version is the 2-D version only.
     """
     a = 20
@@ -17,13 +17,13 @@ def ackley(x, results, trial, version='numpy'):
     x1, x2 = x.flatten()
 
     if version == 'numpy':
-        sum_sq_term = -a * np.np.np.exp(-b * np.sqrt(0.5 * (x1**2 + x2**2)))
-        cos_term = -np.np.np.exp(0.5 * (np.cos(c * x1) + np.cos(c * x2)))
-        result = sum_sq_term + cos_term + a + np.np.np.exp(1)
+        sum_sq_term = -a * np.exp(-b * np.sqrt(0.5 * (x1**2 + x2**2)))
+        cos_term = -np.exp(0.5 * (np.cos(c * x1) + np.cos(c * x2)))
+        result = sum_sq_term + cos_term + a + np.exp(1)
     elif version == 'pytorch':
-        sum_sq_term = -a * torch.np.np.exp(-b * torch.sqrt(0.5 * (x1**2 + x2**2)))
-        cos_term = -torch.np.np.exp(0.5 * (torch.cos(c * x1) + torch.cos(c * x2)))
-        result = sum_sq_term + cos_term + a + torch.np.np.exp(torch.tensor(1.0))
+        sum_sq_term = -a * torch.exp(-b * torch.sqrt(0.5 * (x1**2 + x2**2)))
+        cos_term = -torch.exp(0.5 * (torch.cos(c * x1) + torch.cos(c * x2)))
+        result = sum_sq_term + cos_term + a + torch.exp(torch.tensor(1.0))
 
     else:
         raise ValueError(
@@ -65,12 +65,12 @@ def ndackley(x, results, trial, version='numpy'):
     if version == 'numpy':
         arg1 = -b * np.sqrt(1.0 / d * np.sum(np.square(x)))
         arg2 = 1.0 / d * np.sum(np.cos(c * x))
-        result = -a * np.np.np.exp(arg1) - np.np.np.exp(arg2) + a + np.e
+        result = -a * np.exp(arg1) - np.exp(arg2) + a + np.e
 
     elif version == 'pytorch':
         arg1 = -b * torch.sqrt(1.0 / d * torch.sum(x**2))
         arg2 = 1.0 / d * torch.sum(torch.cos(c * x))
-        result = -a * torch.np.np.exp(arg1) - torch.np.np.exp(arg2) + a + np.e
+        result = -a * torch.exp(arg1) - torch.exp(arg2) + a + np.e
     else:
         raise ValueError("Invalid implementation: choose 'numpy' or 'pytorch'")
 
@@ -152,7 +152,7 @@ def cross_in_tray(x, results, trial, version='numpy'):
                 np.abs(
                     np.sin(x1)
                     * np.sin(x2)
-                    * np.np.np.exp(np.abs(100 - np.sqrt(x1**2 + x2**2) / np.pi))
+                    * np.exp(np.abs(100 - np.sqrt(x1**2 + x2**2) / np.pi))
                 )
                 + 1
             )
@@ -165,7 +165,7 @@ def cross_in_tray(x, results, trial, version='numpy'):
                 torch.abs(
                     torch.sin(x1)
                     * torch.sin(x2)
-                    * torch.np.np.exp(
+                    * torch.exp(
                         torch.abs(
                             100 - torch.sqrt(x1**2 + x2**2) / torch.tensor(np.pi)
                         )
@@ -375,13 +375,13 @@ def holder_table(x, results, trial, version='numpy'):
         result = -np.abs(
             np.sin(x1)
             * np.cos(x2)
-            * np.np.np.exp(np.abs(1 - np.sqrt(x1**2 + x2**2) / np.pi))
+            * np.exp(np.abs(1 - np.sqrt(x1**2 + x2**2) / np.pi))
         )
     elif version == 'pytorch':
         result = -torch.abs(
             torch.sin(x1)
             * torch.cos(x2)
-            * torch.np.np.exp(torch.abs(1 - torch.sqrt(x1**2 + x2**2) / np.pi))
+            * torch.exp(torch.abs(1 - torch.sqrt(x1**2 + x2**2) / np.pi))
         )
     else:
         raise ValueError(
@@ -849,1186 +849,732 @@ def ex8_6_2(x, results, trial, version='numpy'):
     ) = x.flatten()
     if version == 'numpy':
         result = (
-            -(
-                np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x1 - x2)
-                            + np.square(x11 - x12)
-                            + np.square(x21 - x22)
-                        )
-                        ** 0.5
-                    )
+            (
+                -np.exp(
+                    -3 * ((x1 - x2) ** 2 + (x11 - x12) ** 2 + (x21 - x22) ** 2) ** 0.5
+                    + 3
                 )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x1 - x3)
-                            + np.square(x11 - x13)
-                            + np.square(x21 - x23)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x1 - x4)
-                            + np.square(x11 - x14)
-                            + np.square(x21 - x24)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x1 - x5)
-                            + np.square(x11 - x15)
-                            + np.square(x21 - x25)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x1 - x6)
-                            + np.square(x11 - x16)
-                            + np.square(x21 - x26)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x1 - x7)
-                            + np.square(x11 - x17)
-                            + np.square(x21 - x27)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x1 - x8)
-                            + np.square(x11 - x18)
-                            + np.square(x21 - x28)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x1 - x9)
-                            + np.square(x11 - x19)
-                            + np.square(x21 - x29)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x1 - x10)
-                            + np.square(x11 - x20)
-                            + np.square(x21 - x30)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x2 - x3)
-                            + np.square(x12 - x13)
-                            + np.square(x22 - x23)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x2 - x4)
-                            + np.square(x12 - x14)
-                            + np.square(x22 - x24)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x2 - x5)
-                            + np.square(x12 - x15)
-                            + np.square(x22 - x25)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x2 - x6)
-                            + np.square(x12 - x16)
-                            + np.square(x22 - x26)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x2 - x7)
-                            + np.square(x12 - x17)
-                            + np.square(x22 - x27)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x2 - x8)
-                            + np.square(x12 - x18)
-                            + np.square(x22 - x28)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x2 - x9)
-                            + np.square(x12 - x19)
-                            + np.square(x22 - x29)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x2 - x10)
-                            + np.square(x12 - x20)
-                            + np.square(x22 - x30)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x3 - x4)
-                            + np.square(x13 - x14)
-                            + np.square(x23 - x24)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x3 - x5)
-                            + np.square(x13 - x15)
-                            + np.square(x23 - x25)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x3 - x6)
-                            + np.square(x13 - x16)
-                            + np.square(x23 - x26)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x3 - x7)
-                            + np.square(x13 - x17)
-                            + np.square(x23 - x27)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x3 - x8)
-                            + np.square(x13 - x18)
-                            + np.square(x23 - x28)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x3 - x9)
-                            + np.square(x13 - x19)
-                            + np.square(x23 - x29)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x3 - x10)
-                            + np.square(x13 - x20)
-                            + np.square(x23 - x30)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x4 - x5)
-                            + np.square(x14 - x15)
-                            + np.square(x24 - x25)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x4 - x6)
-                            + np.square(x14 - x16)
-                            + np.square(x24 - x26)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x4 - x7)
-                            + np.square(x14 - x17)
-                            + np.square(x24 - x27)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x4 - x8)
-                            + np.square(x14 - x18)
-                            + np.square(x24 - x28)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x4 - x9)
-                            + np.square(x14 - x19)
-                            + np.square(x24 - x29)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x4 - x10)
-                            + np.square(x14 - x20)
-                            + np.square(x24 - x30)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x5 - x6)
-                            + np.square(x15 - x16)
-                            + np.square(x25 - x26)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x5 - x7)
-                            + np.square(x15 - x17)
-                            + np.square(x25 - x27)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x5 - x8)
-                            + np.square(x15 - x18)
-                            + np.square(x25 - x28)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x5 - x9)
-                            + np.square(x15 - x19)
-                            + np.square(x25 - x29)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x5 - x10)
-                            + np.square(x15 - x20)
-                            + np.square(x25 - x30)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x6 - x7)
-                            + np.square(x16 - x17)
-                            + np.square(x26 - x27)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x6 - x8)
-                            + np.square(x16 - x18)
-                            + np.square(x26 - x28)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x6 - x9)
-                            + np.square(x16 - x19)
-                            + np.square(x26 - x29)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x6 - x10)
-                            + np.square(x16 - x20)
-                            + np.square(x26 - x30)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x7 - x8)
-                            + np.square(x17 - x18)
-                            + np.square(x27 - x28)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x7 - x9)
-                            + np.square(x17 - x19)
-                            + np.square(x27 - x29)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x7 - x10)
-                            + np.square(x17 - x20)
-                            + np.square(x27 - x30)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x8 - x9)
-                            + np.square(x18 - x19)
-                            + np.square(x28 - x29)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x8 - x10)
-                            + np.square(x18 - x20)
-                            + np.square(x28 - x30)
-                        )
-                        ** 0.5
-                    )
-                )
-                + np.square(
-                    1
-                    - np.exp(
-                        3
-                        - 3
-                        * (
-                            np.square(x9 - x10)
-                            + np.square(x19 - x20)
-                            + np.square(x29 - x30)
-                        )
-                        ** 0.5
-                    )
-                )
+                + 1
             )
-            + 45
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x1 - x3) ** 2 + (x11 - x13) ** 2 + (x21 - x23) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x1 - x4) ** 2 + (x11 - x14) ** 2 + (x21 - x24) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x1 - x5) ** 2 + (x11 - x15) ** 2 + (x21 - x25) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x1 - x6) ** 2 + (x11 - x16) ** 2 + (x21 - x26) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x1 - x7) ** 2 + (x11 - x17) ** 2 + (x21 - x27) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x1 - x8) ** 2 + (x11 - x18) ** 2 + (x21 - x28) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x1 - x9) ** 2 + (x11 - x19) ** 2 + (x21 - x29) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x1 - x10) ** 2 + (x11 - x20) ** 2 + (x21 - x30) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x2 - x3) ** 2 + (x12 - x13) ** 2 + (x22 - x23) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x2 - x4) ** 2 + (x12 - x14) ** 2 + (x22 - x24) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x2 - x5) ** 2 + (x12 - x15) ** 2 + (x22 - x25) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x2 - x6) ** 2 + (x12 - x16) ** 2 + (x22 - x26) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x2 - x7) ** 2 + (x12 - x17) ** 2 + (x22 - x27) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x2 - x8) ** 2 + (x12 - x18) ** 2 + (x22 - x28) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x2 - x9) ** 2 + (x12 - x19) ** 2 + (x22 - x29) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x2 - x10) ** 2 + (x12 - x20) ** 2 + (x22 - x30) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x3 - x4) ** 2 + (x13 - x14) ** 2 + (x23 - x24) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x3 - x5) ** 2 + (x13 - x15) ** 2 + (x23 - x25) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x3 - x6) ** 2 + (x13 - x16) ** 2 + (x23 - x26) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x3 - x7) ** 2 + (x13 - x17) ** 2 + (x23 - x27) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x3 - x8) ** 2 + (x13 - x18) ** 2 + (x23 - x28) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x3 - x9) ** 2 + (x13 - x19) ** 2 + (x23 - x29) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x3 - x10) ** 2 + (x13 - x20) ** 2 + (x23 - x30) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x4 - x5) ** 2 + (x14 - x15) ** 2 + (x24 - x25) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x4 - x6) ** 2 + (x14 - x16) ** 2 + (x24 - x26) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x4 - x7) ** 2 + (x14 - x17) ** 2 + (x24 - x27) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x4 - x8) ** 2 + (x14 - x18) ** 2 + (x24 - x28) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x4 - x9) ** 2 + (x14 - x19) ** 2 + (x24 - x29) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x4 - x10) ** 2 + (x14 - x20) ** 2 + (x24 - x30) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x5 - x6) ** 2 + (x15 - x16) ** 2 + (x25 - x26) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x5 - x7) ** 2 + (x15 - x17) ** 2 + (x25 - x27) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x5 - x8) ** 2 + (x15 - x18) ** 2 + (x25 - x28) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x5 - x9) ** 2 + (x15 - x19) ** 2 + (x25 - x29) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x5 - x10) ** 2 + (x15 - x20) ** 2 + (x25 - x30) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x6 - x7) ** 2 + (x16 - x17) ** 2 + (x26 - x27) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x6 - x8) ** 2 + (x16 - x18) ** 2 + (x26 - x28) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x6 - x9) ** 2 + (x16 - x19) ** 2 + (x26 - x29) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x6 - x10) ** 2 + (x16 - x20) ** 2 + (x26 - x30) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x7 - x8) ** 2 + (x17 - x18) ** 2 + (x27 - x28) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x7 - x9) ** 2 + (x17 - x19) ** 2 + (x27 - x29) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x7 - x10) ** 2 + (x17 - x20) ** 2 + (x27 - x30) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x8 - x9) ** 2 + (x18 - x19) ** 2 + (x28 - x29) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x8 - x10) ** 2 + (x18 - x20) ** 2 + (x28 - x30) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -np.exp(
+                    -3 * ((x9 - x10) ** 2 + (x19 - x20) ** 2 + (x29 - x30) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            - 45
         )
 
     elif version == 'pytorch':
         result = (
-            -(
-                torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x1 - x2)
-                            + torch.square(x11 - x12)
-                            + torch.square(x21 - x22)
-                        )
-                        ** 0.5
-                    )
+            (
+                -torch.exp(
+                    -3 * ((x1 - x2) ** 2 + (x11 - x12) ** 2 + (x21 - x22) ** 2) ** 0.5
+                    + 3
                 )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x1 - x3)
-                            + torch.square(x11 - x13)
-                            + torch.square(x21 - x23)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x1 - x4)
-                            + torch.square(x11 - x14)
-                            + torch.square(x21 - x24)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x1 - x5)
-                            + torch.square(x11 - x15)
-                            + torch.square(x21 - x25)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x1 - x6)
-                            + torch.square(x11 - x16)
-                            + torch.square(x21 - x26)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x1 - x7)
-                            + torch.square(x11 - x17)
-                            + torch.square(x21 - x27)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x1 - x8)
-                            + torch.square(x11 - x18)
-                            + torch.square(x21 - x28)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x1 - x9)
-                            + torch.square(x11 - x19)
-                            + torch.square(x21 - x29)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x1 - x10)
-                            + torch.square(x11 - x20)
-                            + torch.square(x21 - x30)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x2 - x3)
-                            + torch.square(x12 - x13)
-                            + torch.square(x22 - x23)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x2 - x4)
-                            + torch.square(x12 - x14)
-                            + torch.square(x22 - x24)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x2 - x5)
-                            + torch.square(x12 - x15)
-                            + torch.square(x22 - x25)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x2 - x6)
-                            + torch.square(x12 - x16)
-                            + torch.square(x22 - x26)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x2 - x7)
-                            + torch.square(x12 - x17)
-                            + torch.square(x22 - x27)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x2 - x8)
-                            + torch.square(x12 - x18)
-                            + torch.square(x22 - x28)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x2 - x9)
-                            + torch.square(x12 - x19)
-                            + torch.square(x22 - x29)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x2 - x10)
-                            + torch.square(x12 - x20)
-                            + torch.square(x22 - x30)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x3 - x4)
-                            + torch.square(x13 - x14)
-                            + torch.square(x23 - x24)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x3 - x5)
-                            + torch.square(x13 - x15)
-                            + torch.square(x23 - x25)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x3 - x6)
-                            + torch.square(x13 - x16)
-                            + torch.square(x23 - x26)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x3 - x7)
-                            + torch.square(x13 - x17)
-                            + torch.square(x23 - x27)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x3 - x8)
-                            + torch.square(x13 - x18)
-                            + torch.square(x23 - x28)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x3 - x9)
-                            + torch.square(x13 - x19)
-                            + torch.square(x23 - x29)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x3 - x10)
-                            + torch.square(x13 - x20)
-                            + torch.square(x23 - x30)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x4 - x5)
-                            + torch.square(x14 - x15)
-                            + torch.square(x24 - x25)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x4 - x6)
-                            + torch.square(x14 - x16)
-                            + torch.square(x24 - x26)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x4 - x7)
-                            + torch.square(x14 - x17)
-                            + torch.square(x24 - x27)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x4 - x8)
-                            + torch.square(x14 - x18)
-                            + torch.square(x24 - x28)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x4 - x9)
-                            + torch.square(x14 - x19)
-                            + torch.square(x24 - x29)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x4 - x10)
-                            + torch.square(x14 - x20)
-                            + torch.square(x24 - x30)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x5 - x6)
-                            + torch.square(x15 - x16)
-                            + torch.square(x25 - x26)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x5 - x7)
-                            + torch.square(x15 - x17)
-                            + torch.square(x25 - x27)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x5 - x8)
-                            + torch.square(x15 - x18)
-                            + torch.square(x25 - x28)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x5 - x9)
-                            + torch.square(x15 - x19)
-                            + torch.square(x25 - x29)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x5 - x10)
-                            + torch.square(x15 - x20)
-                            + torch.square(x25 - x30)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x6 - x7)
-                            + torch.square(x16 - x17)
-                            + torch.square(x26 - x27)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x6 - x8)
-                            + torch.square(x16 - x18)
-                            + torch.square(x26 - x28)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x6 - x9)
-                            + torch.square(x16 - x19)
-                            + torch.square(x26 - x29)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x6 - x10)
-                            + torch.square(x16 - x20)
-                            + torch.square(x26 - x30)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x7 - x8)
-                            + torch.square(x17 - x18)
-                            + torch.square(x27 - x28)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x7 - x9)
-                            + torch.square(x17 - x19)
-                            + torch.square(x27 - x29)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x7 - x10)
-                            + torch.square(x17 - x20)
-                            + torch.square(x27 - x30)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x8 - x9)
-                            + torch.square(x18 - x19)
-                            + torch.square(x28 - x29)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x8 - x10)
-                            + torch.square(x18 - x20)
-                            + torch.square(x28 - x30)
-                        )
-                        ** 0.5
-                    )
-                )
-                + torch.square(
-                    1
-                    - torch.exp(
-                        3
-                        - 3
-                        * (
-                            torch.square(x9 - x10)
-                            + torch.square(x19 - x20)
-                            + torch.square(x29 - x30)
-                        )
-                        ** 0.5
-                    )
-                )
+                + 1
             )
-            + 45
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x1 - x3) ** 2 + (x11 - x13) ** 2 + (x21 - x23) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x1 - x4) ** 2 + (x11 - x14) ** 2 + (x21 - x24) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x1 - x5) ** 2 + (x11 - x15) ** 2 + (x21 - x25) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x1 - x6) ** 2 + (x11 - x16) ** 2 + (x21 - x26) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x1 - x7) ** 2 + (x11 - x17) ** 2 + (x21 - x27) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x1 - x8) ** 2 + (x11 - x18) ** 2 + (x21 - x28) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x1 - x9) ** 2 + (x11 - x19) ** 2 + (x21 - x29) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x1 - x10) ** 2 + (x11 - x20) ** 2 + (x21 - x30) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x2 - x3) ** 2 + (x12 - x13) ** 2 + (x22 - x23) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x2 - x4) ** 2 + (x12 - x14) ** 2 + (x22 - x24) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x2 - x5) ** 2 + (x12 - x15) ** 2 + (x22 - x25) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x2 - x6) ** 2 + (x12 - x16) ** 2 + (x22 - x26) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x2 - x7) ** 2 + (x12 - x17) ** 2 + (x22 - x27) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x2 - x8) ** 2 + (x12 - x18) ** 2 + (x22 - x28) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x2 - x9) ** 2 + (x12 - x19) ** 2 + (x22 - x29) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x2 - x10) ** 2 + (x12 - x20) ** 2 + (x22 - x30) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x3 - x4) ** 2 + (x13 - x14) ** 2 + (x23 - x24) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x3 - x5) ** 2 + (x13 - x15) ** 2 + (x23 - x25) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x3 - x6) ** 2 + (x13 - x16) ** 2 + (x23 - x26) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x3 - x7) ** 2 + (x13 - x17) ** 2 + (x23 - x27) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x3 - x8) ** 2 + (x13 - x18) ** 2 + (x23 - x28) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x3 - x9) ** 2 + (x13 - x19) ** 2 + (x23 - x29) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x3 - x10) ** 2 + (x13 - x20) ** 2 + (x23 - x30) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x4 - x5) ** 2 + (x14 - x15) ** 2 + (x24 - x25) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x4 - x6) ** 2 + (x14 - x16) ** 2 + (x24 - x26) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x4 - x7) ** 2 + (x14 - x17) ** 2 + (x24 - x27) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x4 - x8) ** 2 + (x14 - x18) ** 2 + (x24 - x28) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x4 - x9) ** 2 + (x14 - x19) ** 2 + (x24 - x29) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x4 - x10) ** 2 + (x14 - x20) ** 2 + (x24 - x30) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x5 - x6) ** 2 + (x15 - x16) ** 2 + (x25 - x26) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x5 - x7) ** 2 + (x15 - x17) ** 2 + (x25 - x27) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x5 - x8) ** 2 + (x15 - x18) ** 2 + (x25 - x28) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x5 - x9) ** 2 + (x15 - x19) ** 2 + (x25 - x29) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x5 - x10) ** 2 + (x15 - x20) ** 2 + (x25 - x30) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x6 - x7) ** 2 + (x16 - x17) ** 2 + (x26 - x27) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x6 - x8) ** 2 + (x16 - x18) ** 2 + (x26 - x28) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x6 - x9) ** 2 + (x16 - x19) ** 2 + (x26 - x29) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x6 - x10) ** 2 + (x16 - x20) ** 2 + (x26 - x30) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x7 - x8) ** 2 + (x17 - x18) ** 2 + (x27 - x28) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x7 - x9) ** 2 + (x17 - x19) ** 2 + (x27 - x29) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x7 - x10) ** 2 + (x17 - x20) ** 2 + (x27 - x30) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x8 - x9) ** 2 + (x18 - x19) ** 2 + (x28 - x29) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x8 - x10) ** 2 + (x18 - x20) ** 2 + (x28 - x30) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            + (
+                -torch.exp(
+                    -3 * ((x9 - x10) ** 2 + (x19 - x20) ** 2 + (x29 - x30) ** 2) ** 0.5
+                    + 3
+                )
+                + 1
+            )
+            ** 2
+            - 45
         )
 
     else:
@@ -2246,9 +1792,7 @@ shubert_config = {
 # Multi-Dimensional Problems #
 ackley_3d_config = {
     'objective': ndackley,
-    'bounds': [
-        (-32.768, 32.768)
-    ],  # Will use a single level bound and then np.np.expand
+    'bounds': [(-32.768, 32.768)],  # Will use a single level bound and then expand
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 3,
@@ -2263,11 +1807,20 @@ ackley_5d_config = {
     'dimensions': 5,
 }
 
+# Multi-Dimensional Problems #
+ackley_30d_config = {
+    'objective': ndackley,
+    'bounds': [(-32.768, 32.768)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 30,
+}
+
 # ex8_6_2 from MINLP
 ex8_6_2_config = {
     'objective': ex8_6_2,
     'bounds': [
-        (0, 0),
+        (-0.001, 0.001),
         (-5, 5),
         (-5, 5),
         (-5, 5),
@@ -2277,8 +1830,8 @@ ex8_6_2_config = {
         (-5, 5),
         (-5, 5),
         (-5, 5),
-        (0, 0),
-        (0, 0),
+        (-0.001, 0.001),
+        (-0.001, 0.001),
         (-5, 5),
         (-5, 5),
         (-5, 5),
@@ -2287,9 +1840,9 @@ ex8_6_2_config = {
         (-5, 5),
         (-5, 5),
         (-5, 5),
-        (0, 0),
-        (0, 0),
-        (0, 0),
+        (-0.001, 0.001),
+        (-0.001, 0.001),
+        (-0.001, 0.001),
         (-5, 5),
         (-5, 5),
         (-5, 5),
@@ -2308,6 +1861,7 @@ PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
     'ackley_3d': ackley_3d_config,
     'ackley_5d': ackley_5d_config,
+    'ackley_30d': ackley_30d_config,
     'bukin_n6': bukin_n6_config,
     'cross_in_tray': cross_in_tray_config,
     'drop_wave': drop_wave_config,
