@@ -360,7 +360,11 @@ def griewank(x, results, trial, version='numpy'):
 
     if isinstance(result, torch.Tensor):
         results[trial, iteration, :] = np.array(
-            (x1.detach().numpy(), x2.detach().numpy(), result.detach().numpy())
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
         )
 
     else:
@@ -415,7 +419,11 @@ def holder_table(x, results, trial, version='numpy'):
 
     if isinstance(result, torch.Tensor):
         results[trial, iteration, :] = np.array(
-            (x1.detach().numpy(), x2.detach().numpy(), result.detach().numpy())
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
         )
 
     else:
@@ -474,7 +482,11 @@ def levy(x, results, trial, version='numpy'):
 
     if isinstance(result, torch.Tensor):
         results[trial, iteration, :] = np.array(
-            (x1.detach().numpy(), x2.detach().numpy(), result.detach().numpy())
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
         )
 
     else:
@@ -529,7 +541,11 @@ def levy_n13(x, results, trial, version='numpy'):
 
     if isinstance(result, torch.Tensor):
         results[trial, iteration, :] = np.array(
-            (x1.detach().numpy(), x2.detach().numpy(), result.detach().numpy())
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
         )
 
     else:
@@ -584,7 +600,11 @@ def rastrigin(x, results, trial, version='numpy'):
 
     if isinstance(result, torch.Tensor):
         results[trial, iteration, :] = np.array(
-            (x1.detach().numpy(), x2.detach().numpy(), result.detach().numpy())
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
         )
 
     else:
@@ -639,7 +659,11 @@ def schaffer_n2(x, results, trial, version='numpy'):
 
     if isinstance(result, torch.Tensor):
         results[trial, iteration, :] = np.array(
-            (x1.detach().numpy(), x2.detach().numpy(), result.detach().numpy())
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
         )
 
     else:
@@ -694,7 +718,11 @@ def schaffer_n4(x, results, trial, version='numpy'):
 
     if isinstance(result, torch.Tensor):
         results[trial, iteration, :] = np.array(
-            (x1.detach().numpy(), x2.detach().numpy(), result.detach().numpy())
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
         )
 
     else:
@@ -749,7 +777,11 @@ def schwefel(x, results, trial, version='numpy'):
 
     if isinstance(result, torch.Tensor):
         results[trial, iteration, :] = np.array(
-            (x1.detach().numpy(), x2.detach().numpy(), result.detach().numpy())
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
         )
 
     else:
@@ -800,7 +832,11 @@ def shubert(x, results, trial, version='numpy'):
 
     if isinstance(result, torch.Tensor):
         results[trial, iteration, :] = np.array(
-            (x1.detach().numpy(), x2.detach().numpy(), result.detach().numpy())
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
         )
 
     else:
