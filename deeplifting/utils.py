@@ -23,6 +23,17 @@ def create_optimization_plot(problem_name, problem, final_results, colormap='Wis
     x_min, x_max = x_bounds
     y_min, y_max = y_bounds
 
+    # Some of the problems that we are exploring do not
+    # have bounds but we will want to plot them
+    if x_max is None:
+        x_max = 1e6
+    if x_min is None:
+        x_min = -1e6
+    if y_max is None:
+        y_max = 1e6
+    if y_min is None:
+        y_min = -1e6
+
     # Create a grid of points
     x = np.linspace(x_min, x_max, 100)
     y = np.linspace(y_min, y_max, 100)
@@ -56,7 +67,7 @@ def create_optimization_plot(problem_name, problem, final_results, colormap='Wis
     ax1.set_title(f'3D Surface Plot of the {problem_name} Function')
     ax1.set_xlabel('X')
     ax1.set_ylabel('Y')
-    ax1.set_zlabel('Z (Ackley Value)')
+    ax1.set_zlabel(f'Z ({problem_name} Value)')
 
     # Specify the contour plot
     ax2 = fig.add_subplot(122)
