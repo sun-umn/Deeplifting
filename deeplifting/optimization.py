@@ -14,6 +14,7 @@ from scipy.optimize import differential_evolution, dual_annealing
 
 # first party
 from deeplifting.models import DeepliftingMLP
+from deeplifting.utils import get_devices
 
 
 def set_seed(seed):
@@ -256,7 +257,7 @@ def run_pygranso(problem: Dict, trials: int):
     comparisions
     """
     # Get the device (CPU for now)
-    device = torch.device('cpu')
+    device = get_devices()
     fn_values = []
 
     for trial in range(trials):

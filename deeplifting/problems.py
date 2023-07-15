@@ -35,7 +35,11 @@ def ackley(x, results, trial, version='numpy'):
 
     if isinstance(result, torch.Tensor):
         results[trial, iteration, :] = np.array(
-            (x1.detach().numpy(), x2.detach().numpy(), result.detach().numpy())
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
         )
 
     else:
@@ -78,8 +82,10 @@ def ndackley(x, results, trial, version='numpy'):
     iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
 
     if isinstance(result, torch.Tensor):
-        x_tuple = tuple(x.detach().numpy())
-        results[trial, iteration, :] = np.array(x_tuple + (result.detach().numpy(),))
+        x_tuple = tuple(x.detach().cpu().numpy())
+        results[trial, iteration, :] = np.array(
+            x_tuple + (result.detach().cpu().numpy(),)
+        )
 
     else:
         x_tuple = tuple(x.flatten())
@@ -1588,37 +1594,37 @@ def ex8_6_2(x, results, trial, version='numpy'):
     if isinstance(result, torch.Tensor):
         results[trial, iteration, :] = np.array(
             (
-                x1.detach().numpy(),
-                x2.detach().numpy(),
-                x3.detach().numpy(),
-                x4.detach().numpy(),
-                x5.detach().numpy(),
-                x6.detach().numpy(),
-                x7.detach().numpy(),
-                x8.detach().numpy(),
-                x9.detach().numpy(),
-                x10.detach().numpy(),
-                x11.detach().numpy(),
-                x12.detach().numpy(),
-                x13.detach().numpy(),
-                x14.detach().numpy(),
-                x15.detach().numpy(),
-                x16.detach().numpy(),
-                x17.detach().numpy(),
-                x18.detach().numpy(),
-                x19.detach().numpy(),
-                x20.detach().numpy(),
-                x21.detach().numpy(),
-                x22.detach().numpy(),
-                x23.detach().numpy(),
-                x24.detach().numpy(),
-                x25.detach().numpy(),
-                x26.detach().numpy(),
-                x27.detach().numpy(),
-                x28.detach().numpy(),
-                x29.detach().numpy(),
-                x30.detach().numpy(),
-                result.detach().numpy(),
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                x3.detach().cpu().numpy(),
+                x4.detach().cpu().numpy(),
+                x5.detach().cpu().numpy(),
+                x6.detach().cpu().numpy(),
+                x7.detach().cpu().numpy(),
+                x8.detach().cpu().numpy(),
+                x9.detach().cpu().numpy(),
+                x10.detach().cpu().numpy(),
+                x11.detach().cpu().numpy(),
+                x12.detach().cpu().numpy(),
+                x13.detach().cpu().numpy(),
+                x14.detach().cpu().numpy(),
+                x15.detach().cpu().numpy(),
+                x16.detach().cpu().numpy(),
+                x17.detach().cpu().numpy(),
+                x18.detach().cpu().numpy(),
+                x19.detach().cpu().numpy(),
+                x20.detach().cpu().numpy(),
+                x21.detach().cpu().numpy(),
+                x22.detach().cpu().numpy(),
+                x23.detach().cpu().numpy(),
+                x24.detach().cpu().numpy(),
+                x25.detach().cpu().numpy(),
+                x26.detach().cpu().numpy(),
+                x27.detach().cpu().numpy(),
+                x28.detach().cpu().numpy(),
+                x29.detach().cpu().numpy(),
+                x30.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
             )
         )
 
@@ -1712,10 +1718,10 @@ def least(x, results, trial, version='numpy'):
     if isinstance(result, torch.Tensor):
         results[trial, iteration, :] = np.array(
             (
-                x1.detach().numpy(),
-                x2.detach().numpy(),
-                x3.detach().numpy(),
-                result.detach().numpy(),
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                x3.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
             )
         )
 
@@ -1773,9 +1779,9 @@ def ex4_1_5(x, results, trial, version='numpy'):
     if isinstance(result, torch.Tensor):
         results[trial, iteration, :] = np.array(
             (
-                x1.detach().numpy(),
-                x2.detach().numpy(),
-                result.detach().numpy(),
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
             )
         )
 
