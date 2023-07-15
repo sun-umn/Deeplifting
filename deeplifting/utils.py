@@ -4,6 +4,7 @@ from functools import partial
 # third party
 import matplotlib.pyplot as plt
 import numpy as np
+import torch
 
 
 def create_optimization_plot(problem_name, problem, final_results, colormap='Wistia'):
@@ -79,3 +80,22 @@ def create_optimization_plot(problem_name, problem, final_results, colormap='Wis
     plt.show()
 
     return fig
+
+
+def get_devices():
+    """
+    Function to get GPU devices if available. If there are
+    no GPU devices available then we will use CPU
+    """
+    # Default device
+    device = torch.device("cpu")
+
+    # Get available GPUs
+    n_gpus = torch.cuda.device_count()
+    if n_gpus > 0:
+        gpu_name_list = [f'cuda:{device}' for device in range(n_gpus)]
+
+        # NOTE: For now we will only use the first GPU that is available
+        device = torch.device(gpu_name_list[0])
+
+    return device
