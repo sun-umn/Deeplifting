@@ -179,9 +179,9 @@ def run_differential_evolution(problem: Dict, trials: int):
     for constr in bounds:
         a, b = constr
         if a is None:
-            a = -1e6
+            a = float(-1e20)
         if b is None:
-            b = 1e6
+            b = float(1e20)
         updated_bounds.append((a, b))
 
     # Need to modify x0 for problems like ex8_6_2
@@ -214,7 +214,9 @@ def run_differential_evolution(problem: Dict, trials: int):
             x0[near_zero_bounds] = 0.0
 
         # Get the result
-        result = differential_evolution(fn, bounds, x0=x0, maxiter=max_iterations)
+        result = differential_evolution(
+            fn, updated_bounds, x0=x0, maxiter=max_iterations
+        )
         x_tuple = tuple(x for x in result.x)
         fn_values.append(x_tuple + (result.fun,))
 
@@ -321,7 +323,7 @@ def run_pygranso(problem: Dict, trials: int):
 
         opts.x0 = x0
         opts.torch_device = device
-        opts.print_level = 1
+        opts.print_frequency = 100
         opts.limited_mem_size = 150
         opts.stat_l2_model = False
         opts.double_precision = True
@@ -497,7 +499,7 @@ def run_deeplifting(problem: Dict, trials: int):
 
         opts.x0 = x0
         opts.torch_device = device
-        opts.print_level = 1
+        opts.print_frequency = 10
         opts.limited_mem_size = 150
         opts.stat_l2_model = False
         opts.double_precision = True
