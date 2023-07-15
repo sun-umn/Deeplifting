@@ -110,6 +110,17 @@ def run_dual_annealing(problem: Dict, trials: int):
         else:
             bounds = bounds * dimensions
 
+    # Some of the problems may be unbounded but dual annealing
+    # and differential evolution need to have bounds provided
+    updated_bounds = []
+    for constr in bounds:
+        a, b = constr
+        if a is None:
+            a = -1e6
+        if b is None:
+            b = 1e6
+        updated_bounds.append((a, b))
+
     # Get the maximum iterations
     max_iterations = problem['max_iterations']
 
@@ -131,7 +142,7 @@ def run_dual_annealing(problem: Dict, trials: int):
         x0 = np.random.rand(dimensions)
 
         # Get the result
-        result = dual_annealing(fn, bounds, x0=x0, maxiter=max_iterations)
+        result = dual_annealing(fn, updated_bounds, x0=x0, maxiter=max_iterations)
         x_tuple = tuple(x for x in result.x)
         fn_values.append(x_tuple + (result.fun,))
 
@@ -161,6 +172,24 @@ def run_differential_evolution(problem: Dict, trials: int):
         else:
             bounds = bounds * dimensions
 
+    # Some of the problems may be unbounded but dual annealing
+    # and differential evolution need to have bounds provided
+    updated_bounds = []
+    near_zero_bounds = []
+    for constr in bounds:
+        a, b = constr
+        if a is None:
+            a = -1e6
+        if b is None:
+            b = 1e6
+        updated_bounds.append((a, b))
+
+    # Need to modify x0 for problems like ex8_6_2
+    for index, constr in enumerate(updated_bounds):
+        a, b = constr
+        if (a == -1e-6) or (b == 1e-6):
+            near_zero_bounds.append(index)
+
     # Get the maximum iterations
     max_iterations = problem['max_iterations']
 
@@ -180,6 +209,9 @@ def run_differential_evolution(problem: Dict, trials: int):
 
         # Random starting point for dual annealing
         x0 = np.random.rand(dimensions)
+
+        if len(near_zero_bounds) > 0:
+            x0[near_zero_bounds] = 0.0
 
         # Get the result
         result = differential_evolution(fn, bounds, x0=x0, maxiter=max_iterations)
