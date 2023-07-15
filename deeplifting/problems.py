@@ -118,7 +118,11 @@ def bukin_n6(x, results, trial, version='numpy'):
 
     if isinstance(result, torch.Tensor):
         results[trial, iteration, :] = np.array(
-            (x1.detach().numpy(), x2.detach().numpy(), result.detach().numpy())
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
         )
 
     else:
@@ -191,7 +195,11 @@ def cross_in_tray(x, results, trial, version='numpy'):
 
     if isinstance(result, torch.Tensor):
         results[trial, iteration, :] = np.array(
-            (x1.detach().numpy(), x2.detach().numpy(), result.detach().numpy())
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
         )
 
     else:
@@ -242,7 +250,11 @@ def drop_wave(x, results, trial, version='numpy'):
 
     if isinstance(result, torch.Tensor):
         results[trial, iteration, :] = np.array(
-            (x1.detach().numpy(), x2.detach().numpy(), result.detach().numpy())
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
         )
 
     else:
@@ -293,7 +305,11 @@ def eggholder(x, results, trial, version='numpy'):
 
     if isinstance(result, torch.Tensor):
         results[trial, iteration, :] = np.array(
-            (x1.detach().numpy(), x2.detach().numpy(), result.detach().numpy())
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
         )
 
     else:
