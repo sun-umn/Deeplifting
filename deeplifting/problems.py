@@ -1945,7 +1945,7 @@ def ex4_1_5(x, results, trial, version='numpy'):
 
 def ex8_1_5(x, results, trial, version='numpy'):
     """
-    Implementation of the example 8-1-1 function from the MINLP library.
+    Implementation of the example 8-1-5 function from the MINLP library.
     This function has a global minimum of -2.0218.
 
     Parameters:
@@ -1982,6 +1982,54 @@ def ex8_1_5(x, results, trial, version='numpy'):
             - 4 * x2**2
             + 4 * x2**4
         )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+def ex8_1_4(x, results, trial, version='numpy'):
+    """
+    Implementation of the example 8-1-4 function from the MINLP library.
+    This function has a global minimum of 0.0.
+
+    Parameters:
+        x: (x1, x2) this is a 3D problem
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Schwefel function values
+        corresponding to the inputs (x1, x2).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = 12 * x1**2 - 6.3 * x1**4 + x1**6 - 6 * x1 * x2 + 6 * x2**2
+    elif version == 'pytorch':
+        result = 12 * x1**2 - 6.3 * x1**4 + x1**6 - 6 * x1 * x2 + 6 * x2**2
     else:
         raise ValueError(
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
@@ -2243,6 +2291,17 @@ ex8_1_3_config = {
     ],
     'max_iterations': 1000,
     'global_minimum': 3.0,
+    'dimensions': 2,
+}
+
+ex8_1_4_config = {
+    'objective': ex8_1_4,
+    'bounds': [
+        (None, None),
+        (None, None),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
     'dimensions': 2,
 }
 
