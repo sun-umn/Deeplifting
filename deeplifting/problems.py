@@ -2503,6 +2503,17 @@ ex8_1_4_config = {
     'dimensions': 2,
 }
 
+ex8_1_5_config = {
+    'objective': ex8_1_5,
+    'bounds': [
+        (None, None),
+        (None, None),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': -1.0316,
+    'dimensions': 2,
+}
+
 ex8_1_6_config = {
     'objective': ex8_1_6,
     'bounds': [
@@ -2636,7 +2647,7 @@ PROBLEMS_BY_NAME = {
     'ex4_1_5': ex4_1_5_config,
     'ex8_1_1': ex8_1_1_config,
     'ex8_1_3': ex8_1_3_config,
-    'ex8_1_5': ex4_1_5_config,
+    'ex8_1_5': ex8_1_5_config,
     'ex8_1_4': ex8_1_4_config,
     'ex8_1_6': ex8_1_6_config,
     'kriging_peaks_red010': kriging_peaks_red010_config,
