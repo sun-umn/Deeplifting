@@ -2246,18 +2246,6 @@ ex8_1_3_config = {
     'dimensions': 2,
 }
 
-ex8_1_5_config = {
-    'objective': ex8_1_5,
-    'bounds': [
-        (None, None),
-        (None, None),
-    ],
-    'max_iterations': 1000,
-    'global_minimum': -1.0316,
-    'dimensions': 2,
-}
-
-
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
     'ackley_3d': ackley_3d_config,
