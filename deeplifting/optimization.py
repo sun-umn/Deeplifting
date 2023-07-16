@@ -274,18 +274,24 @@ def pygranso_nd_fn(X_struct, objective, bounds):
     # -> a - x <= 0
     # -> x - b <= 0
     # Inequality constraints
-    ci = pygransoStruct()
-    for index, cnstr in enumerate(bounds):
-        a, b = cnstr
-        if a is None and b is None:
-            pass
-        elif a is None:
-            setattr(ci, f'ca{index}', a - x[index])
-        elif b is None:
-            setattr(ci, f'cb{index}', x[index] - b)
-        else:
-            setattr(ci, f'ca{index}', a - x[index])
-            setattr(ci, f'cb{index}', x[index] - b)
+    # In some cases all of the bounds will be
+    # None so we will need to set the ci struct
+    # to None
+    ci = None
+
+    if np.any(np.array(bounds).flatten() != None):  # noqa
+        ci = pygransoStruct()
+        for index, cnstr in enumerate(bounds):
+            a, b = cnstr
+            if a is None and b is None:
+                pass
+            elif a is None:
+                setattr(ci, f'ca{index}', a - x[index])
+            elif b is None:
+                setattr(ci, f'cb{index}', x[index] - b)
+            else:
+                setattr(ci, f'ca{index}', a - x[index])
+                setattr(ci, f'cb{index}', x[index] - b)
 
     # Equality constraints
     ce = None
