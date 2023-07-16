@@ -1783,6 +1783,118 @@ def least(x, results, trial, version='numpy'):
     return result
 
 
+def ex8_1_3(x, results, trial, version='numpy'):
+    """
+    Implementation of the example 8-1-3 function from the MINLP library.
+    This function has a global minimum of 3.0.
+
+    Parameters:
+        x: (x1, x2) this is a 3D problem
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Schwefel function values
+        corresponding to the inputs (x1, x2).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = (
+            (1 + x1 + x2) ** 2
+            * (3 * x1**2 - 14 * x1 + 6 * x1 * x2 - 14 * x2 + 3 * x2**2 + 19)
+            + 1
+        ) * (
+            (2 * x1 - 3 * x2) ** 2
+            * (12 * x1**2 - 32 * x1 - 36 * x1 * x2 + 48 * x2 + 27 * x2**2 + 18)
+            + 30
+        )
+    elif version == 'pytorch':
+        result = (
+            (1 + x1 + x2) ** 2
+            * (3 * x1**2 - 14 * x1 + 6 * x1 * x2 - 14 * x2 + 3 * x2**2 + 19)
+            + 1
+        ) * (
+            (2 * x1 - 3 * x2) ** 2
+            * (12 * x1**2 - 32 * x1 - 36 * x1 * x2 + 48 * x2 + 27 * x2**2 + 18)
+            + 30
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+def ex8_1_1(x, results, trial, version='numpy'):
+    """
+    Implementation of the example 8-1-1 function from the MINLP library.
+    This function has a global minimum of -2.0218.
+
+    Parameters:
+        x: (x1, x2) this is a 3D problem
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Schwefel function values
+        corresponding to the inputs (x1, x2).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = np.cos(x1) * np.sin(x2) - x1 / (x2**2 + 1)
+    elif version == 'pytorch':
+        result = torch.cos(x1) * torch.sin(x2) - x1 / (x2**2 + 1)
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
 def ex4_1_5(x, results, trial, version='numpy'):
     """
     Implementation of the example 4-1-5 function from the MINLP library.
@@ -1805,21 +1917,9 @@ def ex4_1_5(x, results, trial, version='numpy'):
     """
     x1, x2 = x.flatten()
     if version == 'numpy':
-        result = (
-            2 * x1**2
-            - 1.05 * x1**4
-            + 0.166666666666667 * x1**6
-            - x1 * x2
-            + x2**2
-        )
+        result = np.cos(x1) * np.sin(x2) - x1 / (x2**2 + 1)
     elif version == 'pytorch':
-        result = (
-            2 * x1**2
-            - 1.05 * x1**4
-            + 0.166666666666667 * x1**6
-            - x1 * x2
-            + x2**2
-        )
+        result = torch.cos(x1) * torch.sin(x2) - x1 / (x2**2 + 1)
     else:
         raise ValueError(
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
@@ -2062,6 +2162,28 @@ ex4_1_5_config = {
     'dimensions': 2,
 }
 
+ex8_1_1_config = {
+    'objective': ex8_1_1,
+    'bounds': [
+        (-1, 2),
+        (-1, 1),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': -2.02180678,
+    'dimensions': 2,
+}
+
+ex8_1_3_config = {
+    'objective': ex8_1_3,
+    'bounds': [
+        (None, None),
+        (None, None),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 3.0,
+    'dimensions': 2,
+}
+
 
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
@@ -2084,4 +2206,6 @@ PROBLEMS_BY_NAME = {
     'ex8_6_2': ex8_6_2_config,
     'least': least_config,
     'ex4_1_5': ex4_1_5_config,
+    'ex8_1_1': ex8_1_1_config,
+    'ex8_1_3': ex8_1_3_config,
 }
