@@ -1,3 +1,5 @@
+# Adding noqa to this file because flake8 is throwing
+# an error about maximum recurrsion
 # flake8: noqa
 
 # third party
