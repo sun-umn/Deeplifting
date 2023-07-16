@@ -1,6 +1,7 @@
 # third party
 import numpy as np
 import torch
+from scipy.special import gamma
 
 # first party
 from deeplifting.kriging_peaks.kriging_peaks_red import (
@@ -2121,6 +2122,135 @@ def ex8_1_6(x, results, trial, version='numpy'):
     return result
 
 
+def mathopt6(x, results, trial, version='numpy'):
+    """
+    Implementation of the mathopt6 function from the MINLP library.
+    This function has a global minimum of -3.306868. This
+    was found by COUENNE
+
+    Parameters:
+        x: (x1, x2) this is a 3D problem
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Schwefel function values
+        corresponding to the inputs (x1, x2).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = (
+            np.exp(np.sin(50 * x1))
+            + np.sin(60 * np.exp(x2))
+            + np.sin(70 * np.sin(x1))
+            + np.sin(np.sin(80 * x2))
+            - np.sin(10 * x1 + 10 * x2)
+            + 0.25 * (x1**2 + x2**2)
+        )
+    elif version == 'pytorch':
+        result = (
+            torch.exp(torch.sin(50 * x1))
+            + torch.sin(60 * torch.exp(x2))
+            + torch.sin(70 * torch.sin(x1))
+            + torch.sin(torch.sin(80 * x2))
+            - torch.sin(10 * x1 + 10 * x2)
+            + 0.25 * (x1**2 + x2**2)
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+def quantum(x, results, trial, version='numpy'):
+    """
+    Implementation of the quantum function from the MINLP library.
+    This function has a global minimum of 0.8049. This
+    was found by CONOPT
+
+    Parameters:
+        x: (x1, x2) this is a 3D problem
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Schwefel function values
+        corresponding to the inputs (x1, x2).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = -(
+            0.5 * np.square(x2) * gamma(2 - 0.5 / x2) / gamma(0.5 / x2) * x1 ** (1 / x2)
+            + 0.5 * gamma(1.5 / x2) / gamma(0.5 / x2) * x1 ** (-1 / x2)
+            + gamma(2.5 / x2) / gamma(0.5 / x2) * x1 ** (-2 / x2)
+        )
+    elif version == 'pytorch':
+        result = -(
+            0.5
+            * np.square(x2)
+            * torch.exp(torch.lgamma(2 - 0.5 / x2))
+            / torch.exp(torch.lgamma(0.5 / x2))
+            * x1 ** (1 / x2)
+            + 0.5
+            * torch.exp(torch.lgamma(1.5 / x2))
+            / torch.exp(torch.lgamma(0.5 / x2))
+            * x1 ** (-1 / x2)
+            + torch.exp(torch.lgamma(2.5 / x2))
+            / torch.exp(torch.lgamma(0.5 / x2))
+            * x1 ** (-2 / x2)
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
 # Problem configurations
 # Ackley
 ackley_config = {
@@ -2461,6 +2591,17 @@ kriging_peaks_red500_config = {
     'dimensions': 2,
 }
 
+mathopt6_config = {
+    'objective': mathopt6,
+    'bounds': [
+        (-3, 3),
+        (-3, 3),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': -3.3069,
+    'dimensions': 2,
+}
+
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
     'ackley_3d': ackley_3d_config,
@@ -2494,4 +2635,5 @@ PROBLEMS_BY_NAME = {
     'kriging_peaks_red100': kriging_peaks_red100_config,
     'kriging_peaks_red200': kriging_peaks_red200_config,
     'kriging_peaks_red500': kriging_peaks_red500_config,
+    'mathopt6': mathopt6_config,
 }
