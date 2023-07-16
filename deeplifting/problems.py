@@ -2602,6 +2602,17 @@ mathopt6_config = {
     'dimensions': 2,
 }
 
+quantum_config = {
+    'objective': mathopt6,
+    'bounds': [
+        (1e-4, 10),
+        (1e-3, 10),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0.8049,
+    'dimensions': 2,
+}
+
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
     'ackley_3d': ackley_3d_config,
@@ -2636,4 +2647,5 @@ PROBLEMS_BY_NAME = {
     'kriging_peaks_red200': kriging_peaks_red200_config,
     'kriging_peaks_red500': kriging_peaks_red500_config,
     'mathopt6': mathopt6_config,
+    'quantum': quantum_config,
 }
