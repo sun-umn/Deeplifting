@@ -2208,13 +2208,13 @@ def quantum(x, results, trial, version='numpy'):
     """
     x1, x2 = x.flatten()
     if version == 'numpy':
-        result = -(
+        result = (
             0.5 * np.square(x2) * gamma(2 - 0.5 / x2) / gamma(0.5 / x2) * x1 ** (1 / x2)
             + 0.5 * gamma(1.5 / x2) / gamma(0.5 / x2) * x1 ** (-1 / x2)
             + gamma(2.5 / x2) / gamma(0.5 / x2) * x1 ** (-2 / x2)
         )
     elif version == 'pytorch':
-        result = -(
+        result = (
             0.5
             * np.square(x2)
             * torch.exp(torch.lgamma(2 - 0.5 / x2))
