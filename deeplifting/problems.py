@@ -3,7 +3,10 @@ import numpy as np
 import torch
 
 # first party
-from deeplifting.kriging_peaks.kriging_peaks_red import kriging_peaks_red100
+from deeplifting.kriging_peaks.kriging_peaks_red import (
+    kriging_peaks_red100,
+    kriging_peaks_red200,
+)
 
 
 def ackley(x, results, trial, version='numpy'):
@@ -9047,6 +9050,17 @@ kriging_peaks_red100_config = {
     'dimensions': 2,
 }
 
+kriging_peaks_red200_config = {
+    'objective': kriging_peaks_red200,
+    'bounds': [
+        (-3, 3),
+        (-3, 3),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': -3.8902,
+    'dimensions': 2,
+}
+
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
     'ackley_3d': ackley_3d_config,
@@ -9078,4 +9092,5 @@ PROBLEMS_BY_NAME = {
     'kriging_peaks_red030': kriging_peaks_red030_config,
     'kriging_peaks_red050': kriging_peaks_red050_config,
     'kriging_peaks_red100': kriging_peaks_red100_config,
+    'kriging_peaks_red200': kriging_peaks_red200_config,
 }
