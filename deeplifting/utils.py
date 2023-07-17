@@ -35,8 +35,8 @@ def create_optimization_plot(problem_name, problem, final_results, colormap='Wis
         y_min = -1e6
 
     # Create a grid of points
-    x = np.linspace(x_min, x_max, 100)
-    y = np.linspace(y_min, y_max, 100)
+    x = np.linspace(x_min, x_max, 1000)
+    y = np.linspace(y_min, y_max, 1000)
     x, y = np.meshgrid(x, y)
 
     # For the function inputs we need results and a trial
