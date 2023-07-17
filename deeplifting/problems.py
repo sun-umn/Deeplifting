@@ -2251,6 +2251,55 @@ def quantum(x, results, trial, version='numpy'):
     return result
 
 
+def rosenbrock(x, results, trial, version='numpy'):
+    """
+    Implementation of the rosenbrock function from the MINLP library.
+    This function has a global minimum of 0.0. This
+    was found by CONOPT
+
+    Parameters:
+        x: (x1, x2) this is a 3D problem
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Schwefel function values
+        corresponding to the inputs (x1, x2).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = 100 * (-(x1**2) + x2) ** 2 + (1 - x1) ** 2
+    elif version == 'pytorch':
+        result = 100 * (-(x1**2) + x2) ** 2 + (1 - x1) ** 2
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
 # Problem configurations
 # Ackley
 ackley_config = {
@@ -2624,6 +2673,17 @@ quantum_config = {
     'dimensions': 2,
 }
 
+rosenbrock_config = {
+    'objective': rosenbrock,
+    'bounds': [
+        (-10, 5),
+        (-10, 10),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0.8049,
+    'dimensions': 2,
+}
+
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
     'ackley_3d': ackley_3d_config,
@@ -2659,4 +2719,5 @@ PROBLEMS_BY_NAME = {
     'kriging_peaks_red500': kriging_peaks_red500_config,
     'mathopt6': mathopt6_config,
     'quantum': quantum_config,
+    'rosenbrock': rosenbrock_config,
 }
