@@ -2216,7 +2216,7 @@ def quantum(x, results, trial, version='numpy'):
     elif version == 'pytorch':
         result = (
             0.5
-            * np.square(x2)
+            * torch.square(x2)
             * torch.exp(torch.lgamma(2 - 0.5 / x2))
             / torch.exp(torch.lgamma(0.5 / x2))
             * x1 ** (1 / x2)
@@ -2614,10 +2614,10 @@ mathopt6_config = {
 }
 
 quantum_config = {
-    'objective': mathopt6,
+    'objective': quantum,
     'bounds': [
-        (1e-4, 10),
-        (1e-3, 10),
+        (1, 10),
+        (1, 10),
     ],
     'max_iterations': 1000,
     'global_minimum': 0.8049,
