@@ -160,7 +160,9 @@ def run_dual_annealing(
     return {'results': results, 'final_results': fn_values}
 
 
-def run_differential_evolution(problem: Dict, trials: int):
+def run_differential_evolution(
+    problem: Dict, trials: int, strat='best1bin', mut=0.5, recomb=0.7
+):
     """
     Function that runs differential evolution for a
     specified optimization problem
@@ -226,7 +228,13 @@ def run_differential_evolution(problem: Dict, trials: int):
 
         # Get the result
         result = differential_evolution(
-            fn, updated_bounds, x0=x0, maxiter=max_iterations
+            fn,
+            updated_bounds,
+            x0=x0,
+            maxiter=max_iterations,
+            strategy=strat,
+            mutation=mut,
+            recombination=recomb,
         )
         x_tuple = tuple(x for x in result.x)
         fn_values.append(x_tuple + (result.fun,))
