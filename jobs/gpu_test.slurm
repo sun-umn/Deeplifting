@@ -9,4 +9,4 @@
 #SBATCH --gres=gpu:1
 /home/jusun/dever120/Deeplifting
 export PATH=/home/jusun/dever120/miniconda3/envs/deeplifting/bin:$PATH
-nvidia-smi && python -c "import torch; torch.cuda.device_count()"
+nvidia-smi && python -c "import torch; print(torch.cuda.device_count())"
