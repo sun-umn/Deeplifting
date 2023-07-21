@@ -4,11 +4,9 @@ import os
 # third party
 import click
 import neptune
-
-# first party
-from deeplifting.optimization import run_deeplifting
-from deeplifting.problems import PROBLEMS_BY_NAME
-from deeplifting.utils import create_optimization_plot
+from optimization import run_deeplifting
+from problems import PROBLEMS_BY_NAME
+from utils import create_optimization_plot
 
 
 @click.command('run-deeplifting')
