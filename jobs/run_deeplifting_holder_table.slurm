@@ -9,4 +9,4 @@
 #SBATCH --gres=gpu:a100:1
 /home/jusun/dever120/Deeplifting
 export PATH=/home/jusun/dever120/miniconda3/envs/deeplifting/bin:$PATH
-python -m deeplifting.tasks run-deeplifting --problem_name "holder_table"
+python -m tasks --problem_name "holder_table"
