@@ -103,6 +103,7 @@ def get_devices():
 
     # Get available GPUs
     n_gpus = torch.cuda.device_count()
+    print(f'n_gpus: {n_gpus}')
     if n_gpus > 0:
         gpu_name_list = [f'cuda:{device}' for device in range(n_gpus)]
 

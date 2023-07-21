@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # third party
 import click
+import matplotlib.pyplot as plt
 import neptune
 
 # first party
@@ -42,7 +43,7 @@ def run_deeplifting_task(problem_name):
     # Log the image and results
     fig = create_optimization_plot(problem_name, problem, results, colormap='autumn_r')
     run[f"deeplifting-{problem_name}-final-results-surface-and-contour"].upload(fig)
-    fig.close()
+    plt.close()
 
 
 if __name__ == "__main__":

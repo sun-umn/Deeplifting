@@ -495,6 +495,7 @@ def run_deeplifting(problem: Dict, trials: int):
     # Get the device (CPU for now)
     dimensions = problem['dimensions']
     device = get_devices()
+    print(device)
     fn_values = []
 
     for trial in range(trials):
