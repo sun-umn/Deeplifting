@@ -32,8 +32,8 @@ class DeepliftingMLP(nn.Module):
             linear_layer = nn.Linear(prev_layer_size, size)
             layers.append(linear_layer)
             layers.append(nn.BatchNorm1d(size))  # Add batch normalization
-            layers.append(SinActivation())
-            # layers.append(nn.ReLU())
+            # layers.append(SinActivation())
+            layers.append(nn.ReLU())
             prev_layer_size = size
 
         # Output layer

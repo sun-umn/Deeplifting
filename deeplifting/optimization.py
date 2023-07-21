@@ -503,7 +503,7 @@ def run_deeplifting(problem: Dict, trials: int):
         set_seed(trial)
 
         model = DeepliftingMLP(
-            input_size=100,
+            input_size=25,
             # layer_sizes=(256, 256, 256, 256, 256),
             # layer_sizes=(512, 512, 512, 512, 512),
             layer_sizes=(1024, 1024, 1024, 1024, 1024),
