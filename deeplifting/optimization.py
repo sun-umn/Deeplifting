@@ -87,7 +87,9 @@ def run_ipopt(problem: Dict, trials: int):
     return {'results': results, 'final_results': fn_values}
 
 
-def run_dual_annealing(problem: Dict, trials: int):
+def run_dual_annealing(
+    problem: Dict, trials: int, init_temp=5230, res_temp=2e-5, vis=2.62, acpt=-5.0
+):
     """
     Function that runs dual annealing for a
     specified optimization problem
@@ -142,14 +144,25 @@ def run_dual_annealing(problem: Dict, trials: int):
         x0 = np.random.rand(dimensions)
 
         # Get the result
-        result = dual_annealing(fn, updated_bounds, x0=x0, maxiter=max_iterations)
+        result = dual_annealing(
+            fn,
+            updated_bounds,
+            x0=x0,
+            maxiter=max_iterations,
+            initial_temp=init_temp,
+            restart_temp_ratio=res_temp,
+            visit=vis,
+            accept=acpt,
+        )
         x_tuple = tuple(x for x in result.x)
         fn_values.append(x_tuple + (result.fun,))
 
     return {'results': results, 'final_results': fn_values}
 
 
-def run_differential_evolution(problem: Dict, trials: int):
+def run_differential_evolution(
+    problem: Dict, trials: int, strat='best1bin', mut=0.5, recomb=0.7
+):
     """
     Function that runs differential evolution for a
     specified optimization problem
@@ -215,7 +228,13 @@ def run_differential_evolution(problem: Dict, trials: int):
 
         # Get the result
         result = differential_evolution(
-            fn, updated_bounds, x0=x0, maxiter=max_iterations
+            fn,
+            updated_bounds,
+            x0=x0,
+            maxiter=max_iterations,
+            strategy=strat,
+            mutation=mut,
+            recombination=recomb,
         )
         x_tuple = tuple(x for x in result.x)
         fn_values.append(x_tuple + (result.fun,))
