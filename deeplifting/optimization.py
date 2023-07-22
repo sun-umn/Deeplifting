@@ -526,12 +526,12 @@ def run_deeplifting(problem: Dict, trials: int):
         opts.x0 = x0
         opts.torch_device = device
         opts.print_frequency = 10
-        opts.limited_mem_size = 25
+        opts.limited_mem_size = 10
         opts.stat_l2_model = False
         opts.double_precision = True
         opts.viol_ineq_tol = 1e-10
         opts.opt_tol = 1e-10
-        opts.maxit = 2000
+        opts.maxit = 1000
 
         # Objective function
         objective = problem['objective']
