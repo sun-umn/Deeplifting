@@ -426,20 +426,20 @@ def holder_table(x, results, trial, version='numpy'):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+    # # Fill in the intermediate results
+    # iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
 
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
+    # if isinstance(result, torch.Tensor):
+    #     results[trial, iteration, :] = np.array(
+    #         (
+    #             x1.detach().cpu().numpy(),
+    #             x2.detach().cpu().numpy(),
+    #             result.detach().cpu().numpy(),
+    #         )
+    #     )
 
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    # else:
+    #     results[trial, iteration, :] = np.array((x1, x2, result))
 
     return result
 
