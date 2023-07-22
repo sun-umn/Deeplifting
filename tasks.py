@@ -35,7 +35,7 @@ def run_deeplifting_task(problem_name):
     # TODO: Will make the arguments of the model configurable
     # So we can use hyperopt to test different configurations
     # of the model
-    outputs = run_deeplifting(problem, trials=10)
+    outputs = run_deeplifting(problem, trials=2)
 
     # Get final results
     results = outputs['final_results']
