@@ -2680,7 +2680,7 @@ rosenbrock_config = {
         (-10, 10),
     ],
     'max_iterations': 1000,
-    'global_minimum': 0.8049,
+    'global_minimum': 0,
     'dimensions': 2,
 }
 
