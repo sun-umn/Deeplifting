@@ -2405,7 +2405,7 @@ schaffer_n4_config = {
     'objective': schaffer_n4,
     'bounds': [(-100.0, 100.0), (-100.0, 100.0)],
     'max_iterations': 1000,
-    'global_minimum': 0.29579,
+    'global_minimum': 0.292579,
     'dimensions': 2,
 }
 
@@ -2421,7 +2421,7 @@ schwefel_config = {
 # Shubert
 shubert_config = {
     'objective': shubert,
-    'bounds': [(-10.0, 10.0), (-10.0, 10.0)],
+    'bounds': [(-10, 10), (-10, 10)],
     'max_iterations': 1000,
     'global_minimum': -186.7309,
     'dimensions': 2,
@@ -2498,8 +2498,8 @@ ex8_6_2_config = {
 least_config = {
     'objective': least,
     'bounds': [
-        (None, None),
-        (None, None),
+        (-1e20, 1e20),
+        (-1e20, 1e20),
         (-5.0, 5.0),
     ],
     'max_iterations': 1000,

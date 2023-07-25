@@ -33,7 +33,6 @@ class DeepliftingMLP(nn.Module):
             layers.append(linear_layer)
             layers.append(nn.BatchNorm1d(size))  # Add batch normalization
             layers.append(SinActivation())
-            # layers.append(nn.ReLU())
             prev_layer_size = size
 
         # Output layer
@@ -49,6 +48,69 @@ class DeepliftingMLP(nn.Module):
     def forward(self, inputs=None):  # noqa
         output = self.layers(self.x)
         output = self.output_layer(output)
-        # output = torch.sin(output) + torch.cos(output)
-        # return torch.mean(output, axis=0)
+        return output
+
+
+class DeepliftingSkipMLP(nn.Module):
+    """
+    Class that implements a standard MLP from
+    pytorch. We will utilize this as one of many
+    NN architectures for our deep lifting project.
+    Utiilizes skip connections.
+    """
+
+    def __init__(self, input_size, output_size, n):  # noqa
+        super(DeepliftingSkipMLP, self).__init__()
+
+        # Input layer 1 + BN
+        self.linear_layer1 = nn.Linear(input_size, n)
+        self.bn1 = nn.BatchNorm1d(n)
+
+        # Input layer 2 + BN
+        self.linear_layer2 = nn.Linear(n, n)
+        self.bn2 = nn.BatchNorm1d(n)
+
+        # Input layer 3 + BN
+        self.linear_layer3 = nn.Linear(n, n)
+        self.bn3 = nn.BatchNorm1d(n)
+
+        # Input layer 4 + BN
+        self.linear_layer4 = nn.Linear(n * 3, n)
+        self.bn4 = nn.BatchNorm1d(n)
+
+        # Output layer
+        self.output_layer = nn.Linear(n, output_size)
+
+        # Activation
+        self.activation = SinActivation()
+
+        # One of the things that we did with the topology
+        # optimization is also let the input be variable. Some
+        # of the problems we have looked at so far also are
+        # between bounds
+        self.x = nn.Parameter(torch.randn(input_size, input_size))
+
+    def forward(self, inputs=None):  # noqa
+        # First layer
+        output1 = self.linear_layer1(self.x)
+        # output1 = self.bn1(output1)
+        output1 = self.activation(output1)
+
+        # Second layer
+        output2 = self.linear_layer2(output1)
+        # output2 = self.bn2(output2)
+        output2 = self.activation(output2)
+
+        # Thrid layer
+        output3 = self.linear_layer3(output2)
+        # output3 = self.bn3(output3)
+        output3 = self.activation(output3)
+
+        # Final layer
+        output = torch.cat((output1, output2, output3), axis=1)
+        output = self.linear_layer4(output)
+        # output = self.bn4(output)
+        output = self.activation(output)
+
+        output = self.output_layer(output)
         return output
