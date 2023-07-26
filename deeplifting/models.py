@@ -82,7 +82,11 @@ class DeepliftingSkipMLP(nn.Module):
         self.output_layer = nn.Linear(n, output_size)
 
         # Activation
-        self.activation = SinActivation()
+        # self.activation = SinActivation()
+        self.activation = nn.ReLU()
+
+        # Dropout
+        self.dropout = nn.Dropout(p=0.01)
 
         # One of the things that we did with the topology
         # optimization is also let the input be variable. Some
@@ -93,23 +97,30 @@ class DeepliftingSkipMLP(nn.Module):
     def forward(self, inputs=None):  # noqa
         # First layer
         output1 = self.linear_layer1(self.x)
-        # output1 = self.bn1(output1)
+        output1 = self.bn1(output1)
         output1 = self.activation(output1)
 
         # Second layer
         output2 = self.linear_layer2(output1)
-        # output2 = self.bn2(output2)
+        output2 = self.bn2(output2)
         output2 = self.activation(output2)
 
         # Thrid layer
         output3 = self.linear_layer3(output2)
-        # output3 = self.bn3(output3)
+        output3 = self.bn3(output3)
         output3 = self.activation(output3)
 
         # Final layer
-        output = torch.cat((output1, output2, output3), axis=1)
+        output = torch.cat(
+            (
+                output1,
+                output2,
+                output3,
+            ),
+            axis=1,
+        )
         output = self.linear_layer4(output)
-        # output = self.bn4(output)
+        output = self.bn4(output)
         output = self.activation(output)
 
         output = self.output_layer(output)

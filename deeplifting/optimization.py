@@ -140,14 +140,10 @@ def run_dual_annealing(
             x, results=results, trial=trial, version='numpy'
         )
 
-        # Random starting point for dual annealing
-        x0 = np.random.rand(dimensions)
-
         # Get the result
         result = dual_annealing(
             fn,
             updated_bounds,
-            x0=x0,
             maxiter=max_iterations,
             initial_temp=init_temp,
             restart_temp_ratio=res_temp,
@@ -220,17 +216,10 @@ def run_differential_evolution(
             x, results=results, trial=trial, version='numpy'
         )
 
-        # Random starting point for dual annealing
-        x0 = np.random.rand(dimensions)
-
-        if len(near_zero_bounds) > 0:
-            x0[near_zero_bounds] = 0.0
-
         # Get the result
         result = differential_evolution(
             fn,
             updated_bounds,
-            x0=x0,
             maxiter=max_iterations,
             strategy=strat,
             mutation=mut,
@@ -286,6 +275,7 @@ def pygranso_nd_fn(X_struct, objective, bounds):
     for key, value in X_struct.__dict__.items():
         x_values.append(value)
     x = torch.cat(x_values)
+    print(x)
     f = objective(x)
 
     # Setup the bounds for the inequality
@@ -452,6 +442,7 @@ def deeplifting_predictions(outputs, objective, bounds):
     idx_min = torch.argmin(objective_values)
     x = x[idx_min, :]
     x = x.detach().cpu().numpy().flatten()
+    print(x)
 
     return x, f
 
@@ -494,13 +485,20 @@ def run_deeplifting(problem: Dict, trials: int):
         set_seed(trial)
 
         model = DeepliftingSkipMLP(
-            input_size=256,
+            input_size=1024,
             output_size=dimensions,
-            n=128,
+            n=256,
         )
+
+        # model = DeepliftingMLP(
+        #     input_size=512,
+        #     layer_sizes=(256, 256, 256),
+        #     output_size=dimensions,
+        # )
 
         model = model.to(device=device, dtype=torch.double)
         nvar = getNvarTorch(model.parameters())
+
         # Setup a pygransoStruct for the algorithm
         # options
         opts = pygransoStruct()
@@ -515,7 +513,7 @@ def run_deeplifting(problem: Dict, trials: int):
 
         opts.x0 = x0
         opts.torch_device = device
-        opts.print_frequency = 10
+        opts.print_frequency = 1
         opts.limited_mem_size = 10
         opts.stat_l2_model = False
         opts.double_precision = True

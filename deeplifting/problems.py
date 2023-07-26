@@ -2395,7 +2395,7 @@ rastrigin_config = {
 schaffer_n2_config = {
     'objective': schaffer_n2,
     'bounds': [(-100.0, 100.0), (-100.0, 100.0)],
-    'max_iterations': 1000,
+    'max_iterations': 100,
     'global_minimum': 0.0,
     'dimensions': 2,
 }
