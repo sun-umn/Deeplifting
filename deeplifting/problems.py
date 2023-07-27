@@ -2490,7 +2490,7 @@ ex8_6_2_config = {
         (-5, 5),
     ],
     'max_iterations': 1000,
-    'global_minimum': -45,
+    'global_minimum': -31.888630,
     'dimensions': 30,
 }
 

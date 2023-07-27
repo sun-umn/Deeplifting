@@ -144,7 +144,7 @@ def run_dual_annealing(
         result = dual_annealing(
             fn,
             updated_bounds,
-            maxiter=max_iterations,
+            maxiter=100,
             initial_temp=init_temp,
             restart_temp_ratio=res_temp,
             visit=vis,
@@ -220,7 +220,7 @@ def run_differential_evolution(
         result = differential_evolution(
             fn,
             updated_bounds,
-            maxiter=max_iterations,
+            maxiter=100,
             strategy=strat,
             mutation=mut,
             recombination=recomb,
@@ -275,7 +275,6 @@ def pygranso_nd_fn(X_struct, objective, bounds):
     for key, value in X_struct.__dict__.items():
         x_values.append(value)
     x = torch.cat(x_values)
-    print(x)
     f = objective(x)
 
     # Setup the bounds for the inequality
@@ -333,22 +332,6 @@ def run_pygranso(problem: Dict, trials: int):
         # options
         opts = pygransoStruct()
 
-        # Inital x0
-        x0 = torch.rand(size=(dimensions, 1), device=device, dtype=torch.double)
-
-        opts.x0 = x0
-        opts.torch_device = device
-        opts.print_frequency = 100
-        opts.limited_mem_size = 150
-        opts.stat_l2_model = False
-        opts.double_precision = True
-        opts.viol_ineq_tol = 1e-10
-        opts.opt_tol = 1e-10
-        opts.maxit = 2000
-
-        # Objective function
-        objective = problem['objective']
-
         # Get the bounds of the problem
         if dimensions <= 2:
             bounds = problem['bounds']
@@ -360,6 +343,43 @@ def run_pygranso(problem: Dict, trials: int):
 
             else:
                 bounds = bounds * dimensions
+
+        # Create x0 based on the bounds
+        x0_values = []
+        for bound in bounds:
+            a, b = bound
+            if a is None and b is None:
+                x_value = torch.randn(1) * 1e3
+
+            elif a is None and b is not None:
+                x_value = torch.randn(1) * 1e3
+                x_value = torch.clamp(x_value, min=None, max=b)
+
+            elif a is not None and b is None:
+                x_value = torch.randn(1) * 1e3
+                x_value = torch.clamp(x_value, min=a, max=None)
+
+            else:
+                x_value = a + (b - a) / 2.0 * (torch.sin(torch.randn(1)) + 1.0)
+
+            x0_values.append(x_value)
+
+        x0 = torch.tensor(x0_values).reshape(dimensions, 1)
+        x0 = x0.to(device=device, dtype=torch.double)
+
+        # Pygranso options
+        opts.x0 = x0
+        opts.torch_device = device
+        opts.print_frequency = 10
+        opts.limited_mem_size = 50
+        opts.stat_l2_model = False
+        opts.double_precision = True
+        opts.viol_ineq_tol = 1e-10
+        opts.opt_tol = 1e-10
+        opts.maxit = 2000
+
+        # Objective function
+        objective = problem['objective']
 
         # Get the maximum iterations
         max_iterations = problem['max_iterations']
@@ -395,7 +415,7 @@ def run_pygranso(problem: Dict, trials: int):
     return {'results': results, 'final_results': fn_values}
 
 
-def deeplifting_predictions(outputs, objective, bounds):
+def deeplifting_predictions(outputs1, outputs2, objective, bounds):
     """
     Function to create the outputs for the
     deeplifting framework
@@ -412,22 +432,41 @@ def deeplifting_predictions(outputs, objective, bounds):
     # c + (d - c) / (2) * (x + 1)
 
     # Try updating the way we define the bounds
-    x_values = []
+    x_values_float = []
     for index, cnstr in enumerate(bounds):
         a, b = cnstr
         if (a is None) and (b is None):
-            x_constr = outputs[index]
+            x_constr = outputs1[index]
         elif (a is None) or (b is None):
-            x_constr = torch.clamp(outputs[index], min=a, max=b)
+            x_constr = torch.clamp(outputs1[index], min=a, max=b)
 
         # Being very explicit about this condition just in case
         # to avoid weird behavior
         elif (a is not None) and (b is not None):
-            # x_constr = a + (b - a) * torch.sigmoid(x[index])
-            x_constr = a + (b - a) / 2.0 * (torch.sin(outputs[:, index]) + 1)
-        x_values.append(x_constr)
+            x_constr = a + (b - a) / 2.0 * (torch.sin(outputs1[:, index]) + 1)
+        x_values_float.append(x_constr)
 
-    x = torch.stack(x_values, axis=1)
+    x_float = torch.stack(x_values_float, axis=1)
+
+    # Integer outputs
+    x_values_trunc = []
+    for index, cnstr in enumerate(bounds):
+        a, b = cnstr
+        if (a is None) and (b is None):
+            x_constr = outputs2[index]
+        elif (a is None) or (b is None):
+            x_constr = torch.clamp(outputs2[index], min=a, max=b)
+
+        # Being very explicit about this condition just in case
+        # to avoid weird behavior
+        elif (a is not None) and (b is not None):
+            x_constr = a + (b - a) / 2.0 * (torch.sin(outputs2[:, index]) + 1)
+            # x_constr = a + (b - a) * torch.sigmoid(outputs2[:, index])
+        x_values_trunc.append(x_constr)
+
+    x_trunc = torch.trunc(torch.stack(x_values_trunc, axis=1))
+
+    x = torch.vstack((x_float, x_trunc))
 
     # Iterate over the objective values
     objective_values = []
@@ -442,7 +481,6 @@ def deeplifting_predictions(outputs, objective, bounds):
     idx_min = torch.argmin(objective_values)
     x = x[idx_min, :]
     x = x.detach().cpu().numpy().flatten()
-    print(x)
 
     return x, f
 
@@ -451,13 +489,13 @@ def deeplifting_nd_fn(model, objective, bounds):
     """
     Combined funtion used for PyGranso
     """
-    outputs = model(inputs=None)
+    outputs1, outputs2 = model(inputs=None)
 
     # Get x1 and x2 so we can add the bounds
     # outputs = torch.sigmoid(outputs)
     # x = outputs.mean(axis=0)
     # print(f'Output x {x}')
-    x, f = deeplifting_predictions(outputs, objective, bounds)
+    x, f = deeplifting_predictions(outputs1, outputs2, objective, bounds)
 
     # Inequality constraint
     ci = None
@@ -487,14 +525,8 @@ def run_deeplifting(problem: Dict, trials: int):
         model = DeepliftingSkipMLP(
             input_size=1024,
             output_size=dimensions,
-            n=256,
+            n=512,
         )
-
-        # model = DeepliftingMLP(
-        #     input_size=512,
-        #     layer_sizes=(256, 256, 256),
-        #     output_size=dimensions,
-        # )
 
         model = model.to(device=device, dtype=torch.double)
         nvar = getNvarTorch(model.parameters())
@@ -555,17 +587,17 @@ def run_deeplifting(problem: Dict, trials: int):
 
         # Get final x we will also need to map
         # it to the same bounds
-        outputs = model(inputs=None)
+        outputs1, outputs2 = model(inputs=None)
         final_results = np.zeros((1, 1, 3))
         final_fn = lambda x: objective(
             x, results=final_results, trial=0, version='pytorch'
         )
-        xf, f = deeplifting_predictions(outputs, final_fn, bounds)
+        xf, f = deeplifting_predictions(outputs1, outputs2, final_fn, bounds)
         data_point = tuple(xf) + (float(f.detach().cpu().numpy()),)
         fn_values.append(data_point)
 
         # Collect garbage and empty cache
-        del (model, nvar, x0, opts, soln, outputs, xf, f)
+        del (model, nvar, x0, opts, soln, outputs1, outputs2, xf, f)
         gc.collect()
         torch.cuda.empty_cache()
 

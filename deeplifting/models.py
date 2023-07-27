@@ -79,11 +79,12 @@ class DeepliftingSkipMLP(nn.Module):
         self.bn4 = nn.BatchNorm1d(n)
 
         # Output layer
-        self.output_layer = nn.Linear(n, output_size)
+        self.output_float_layer = nn.Linear(n, output_size)
+        self.output_trunc_layer = nn.Linear(n, output_size)
 
         # Activation
         # self.activation = SinActivation()
-        self.activation = nn.ReLU()
+        self.activation = nn.LeakyReLU()
 
         # Dropout
         self.dropout = nn.Dropout(p=0.01)
@@ -98,16 +99,19 @@ class DeepliftingSkipMLP(nn.Module):
         # First layer
         output1 = self.linear_layer1(self.x)
         output1 = self.bn1(output1)
+        # output1 = self.dropout(output1)
         output1 = self.activation(output1)
 
         # Second layer
         output2 = self.linear_layer2(output1)
         output2 = self.bn2(output2)
+        # output2 = self.dropout(output2)
         output2 = self.activation(output2)
 
         # Thrid layer
         output3 = self.linear_layer3(output2)
         output3 = self.bn3(output3)
+        # output3 = self.dropout(output3)
         output3 = self.activation(output3)
 
         # Final layer
@@ -119,9 +123,17 @@ class DeepliftingSkipMLP(nn.Module):
             ),
             axis=1,
         )
+
+        # Get an output that allows float values
         output = self.linear_layer4(output)
         output = self.bn4(output)
         output = self.activation(output)
 
-        output = self.output_layer(output)
-        return output
+        # Final output
+        output_float = self.output_float_layer(output)
+
+        # Set up a region that focuses on integer values
+        output_trunc = self.output_trunc_layer(output)
+        output_trunc = nn.LeakyReLU()(output_trunc)
+
+        return output_float, output_trunc
