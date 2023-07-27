@@ -78,7 +78,7 @@ def create_optimization_plot(problem_name, problem, final_results, colormap='Wis
 
     # Add the minimum point
     for result in final_results:
-        min_x, min_y, _, _ = result
+        min_x, min_y, _ = result
         ax2.plot(min_x, min_y, 'ko')  # plot the minimum point as a black dot
 
     # Add title and labels
