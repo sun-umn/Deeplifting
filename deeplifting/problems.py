@@ -2300,6 +2300,197 @@ def rosenbrock(x, results, trial, version='numpy'):
     return result
 
 
+def damavandi(x, results, trial, version='numpy'):
+    """
+    Implementation of the Damavandi problem from the infinity77 list.
+    This is a 3-dimensional function with a global minimum of 0.0 at (2,2)
+
+    Parameters:
+        x: (x1, x2) this is a 3D problem
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Damavandi function values
+        corresponding to the inputs (x1, x2).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = (
+            1
+            - np.abs(
+                (np.sin(np.pi * (x1 - 2)) * np.sin(np.pi * (x2 - 2)))
+                / ((np.pi**2) * (x1 - 2) * (x2 - 2))
+            )
+            ** 5
+        ) * (2 + (x1 - 7) ** 2 + 2 * (x2 - 7) ** 2)
+    elif version == 'pytorch':
+        result = (
+            1
+            - torch.abs(
+                (torch.sin(np.pi * (x1 - 2)) * torch.sin(np.pi * (x2 - 2)))
+                / ((np.pi**2) * (x1 - 2) * (x2 - 2))
+            )
+            ** 5
+        ) * (2 + (x1 - 7) ** 2 + 2 * (x2 - 7) ** 2)
+    else:
+        raise ValueError(
+            "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
+        )
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+def cross_leg_table(x, results, trial, version='numpy'):
+    """
+    Implementation of the CrossLegTable problem from the infinity77 list.
+    This is a 3-dimensional function with a global minimum of -1.0 at (0,0)
+
+    Parameters:
+        x: (x1, x2) this is a 3D problem
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Damavandi function values
+        corresponding to the inputs (x1, x2).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = -(
+            1
+            / (
+                (
+                    np.abs(
+                        np.exp(np.abs(100 - (((x1**2 + x2**2) ** 0.5) / (np.pi))))
+                        * np.sin(x1)
+                        * np.sin(x2)
+                    )
+                    + 1
+                )
+                ** 0.1
+            )
+        )
+    elif version == 'pytorch':
+        result = -(
+            1
+            / (
+                (
+                    torch.abs(
+                        torch.exp(
+                            torch.abs(100 - (((x1**2 + x2**2) ** 0.5) / (np.pi)))
+                        )
+                        * torch.sin(x1)
+                        * torch.sin(x2)
+                    )
+                    + 1
+                )
+                ** 0.1
+            )
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
+        )
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+def sine_envelope(x, results, trial, version='numpy'):
+    """
+    Implementation of the SineEnvelope problem from the infinity77 list.
+    This is a 3-dimensional function with a global minimum of -0.72984 at (0,0)
+
+    Parameters:
+        x: (x1, x2) this is a 3D problem
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Damavandi function values
+        corresponding to the inputs (x1, x2).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = -(
+            ((np.sin(((x2**2 + x1**2) ** 0.5) - 0.5)) ** 2)
+            / ((0.001 * (x2**2 + x1**2) + 1) ** 2)
+            + 0.5
+        )
+    elif version == 'pytorch':
+        result = -(
+            ((torch.sin(((x2**2 + x1**2) ** 0.5) - 0.5)) ** 2)
+            / ((0.001 * (x2**2 + x1**2) + 1) ** 2)
+            + 0.5
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
+        )
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
 # Problem configurations
 # Ackley
 ackley_config = {
@@ -2684,6 +2875,39 @@ rosenbrock_config = {
     'dimensions': 2,
 }
 
+damavandi_config = {
+    'objective': damavandi,
+    'bounds': [
+        (0, 14),
+        (0, 14),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+}
+
+cross_leg_table_config = {
+    'objective': cross_leg_table,
+    'bounds': [
+        (-10, 10),
+        (-10, 10),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': -1,
+    'dimensions': 2,
+}
+
+sine_envelope_config = {
+    'objective': sine_envelope,
+    'bounds': [
+        (-100, 100),
+        (-100, 100),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': -0.72984,
+    'dimensions': 2,
+}
+
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
     'ackley_3d': ackley_3d_config,
@@ -2720,4 +2944,7 @@ PROBLEMS_BY_NAME = {
     'mathopt6': mathopt6_config,
     'quantum': quantum_config,
     'rosenbrock': rosenbrock_config,
+    'damavandi': damavandi_config,
+    'cross_leg_table': cross_leg_table_config,
+    'sine_envelope': sine_envelope_config,
 }
