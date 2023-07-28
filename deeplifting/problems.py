@@ -2330,7 +2330,7 @@ def damavandi(x, results, trial, version='numpy'):
             )
             ** 5
         ) * (2 + (x1 - 7) ** 2 + 2 * (x2 - 7) ** 2)
-    elif version == 'torch':
+    elif version == 'pytorch':
         result = (
             1
             - torch.abs(
@@ -2397,7 +2397,7 @@ def cross_leg_table(x, results, trial, version='numpy'):
                 ** 0.1
             )
         )
-    elif version == 'torch':
+    elif version == 'pytorch':
         result = -(
             1
             / (
@@ -2463,7 +2463,7 @@ def sine_envelope(x, results, trial, version='numpy'):
             / ((0.001 * (x2**2 + x1**2) + 1) ** 2)
             + 0.5
         )
-    elif version == 'torch':
+    elif version == 'pytorch':
         result = -(
             ((torch.sin(((x2**2 + x1**2) ** 0.5) - 0.5)) ** 2)
             / ((0.001 * (x2**2 + x1**2) + 1) ** 2)
@@ -2882,12 +2882,12 @@ damavandi_config = {
         (0, 14),
     ],
     'max_iterations': 1000,
-    'global_minumum': 0,
+    'global_minimum': 0,
     'dimensions': 2,
 }
 
 cross_leg_table_config = {
-    'obective': cross_leg_table,
+    'objective': cross_leg_table,
     'bounds': [
         (-10, 10),
         (-10, 10),
