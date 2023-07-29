@@ -385,6 +385,49 @@ def griewank(x, results, trial, version='numpy'):
     return result
 
 
+def ndgriewank(x, results, trial, version='numpy'):
+    """
+    Implementation of the n-dimensional Griewank function
+
+    Args:
+    x: A d-dimensional array or tensor
+    version: A string, either 'numpy' or 'pytorch'
+
+    Returns:
+    result: Value of the griewank function
+    """
+    d = len(x)
+    x = x.flatten()
+
+    if version == 'numpy':
+        sqrt_i = np.sqrt(np.arange(1, d + 1)).flatten()
+        result = np.sum(np.square(x) / 4000) - np.prod(np.cos(x / sqrt_i)) + 1
+    elif version == 'pytorch':
+        sqrt_i = torch.sqrt(torch.arange(1, d + 1)).flatten()
+        result = (
+            torch.sum(torch.square(x) / 4000) - torch.prod(torch.cos(x / sqrt_i)) + 1
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        x_tuple = tuple(x.detach().cpu().numpy())
+        results[trial, iteration, :] = np.array(
+            x_tuple + (result.detach().cpu().numpy(),)
+        )
+
+    else:
+        x_tuple = tuple(x.flatten())
+        results[trial, iteration, :] = np.array(x_tuple + (result,))
+
+    return result
+
+
 def holder_table(x, results, trial, version='numpy'):
     """
     Implementation of the 2D Holder Table function.
@@ -442,6 +485,35 @@ def holder_table(x, results, trial, version='numpy'):
         results[trial, iteration, :] = np.array((x1, x2, result))
 
     return result
+
+
+# def langermann(x, results, trial, version='numpy'):
+#     """
+#     Implementation of the 2D Langermann function.
+
+#     Parameters:
+#     x1 : np.ndarray or torch.Tensor
+#         The x1 values (first dimension of the input space).
+#     x2 : np.ndarray or torch.Tensor
+#         The x2 values (second dimension of the input space).
+#     version : str
+#         The version to use for the function's computation.
+#         Options are 'numpy' and 'pytorch'.
+
+#     Returns:
+#     result : np.ndarray or torch.Tensor
+#         The computed Levy function values
+#         corresponding to the inputs (x1, x2).
+
+#     Raises:
+#     ValueError
+#         If the version is not 'numpy' or 'pytorch'.
+#     """
+#     x1, x2 = x.flatten()
+#     A = np.array([[3, 5], [5, 2], [2, 1], [1, 4], [7, 9]])
+#     c = np.array([1, 2, 5, 2, 3])
+#     if version == 'numpy':
+#         result = np.sum()
 
 
 def levy(x, results, trial, version='numpy'):
@@ -503,6 +575,57 @@ def levy(x, results, trial, version='numpy'):
 
     else:
         results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+def ndlevy(x, results, trial, version='numpy'):
+    """
+    Implemention of the n-dimensional levy function
+
+    Args:
+    x: A d-dimensional array or tensor
+    version: A string, either 'numpy' or 'pytorch'
+
+    Returns:
+    result: Value of the Levy function
+    """
+    x = x.flatten()
+    w = ((x - 1) / 2) + 1
+    w1 = w[0]
+    wd = w[-1]
+    w = w[1:-1]
+    if version == 'numpy':
+        result = (
+            np.square(np.sin(np.pi * w1))
+            + np.sum(np.square(w - 1) * (1 + 10 * np.square(np.sin(np.pi * w + 1))))
+            + np.square(wd - 1) * (1 + np.square(np.sin(2 * np.pi * wd)))
+        )
+    elif version == 'pytorch':
+        result = (
+            torch.square(torch.sin(np.pi * w1))
+            + torch.sum(
+                torch.square(w - 1) * (1 + 10 * torch.square(torch.sin(np.pi * w + 1)))
+            )
+            + torch.square(wd - 1) * (1 + torch.square(torch.sin(2 * np.pi * wd)))
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        x_tuple = tuple(x.detach().cpu().numpy())
+        results[trial, iteration, :] = np.array(
+            x_tuple + (result.detach().cpu().numpy(),)
+        )
+
+    else:
+        x_tuple = tuple(x.flatten())
+        results[trial, iteration, :] = np.array(x_tuple + (result,))
 
     return result
 
@@ -621,6 +744,44 @@ def rastrigin(x, results, trial, version='numpy'):
 
     else:
         results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+def ndrastrigin(x, results, trial, version='numpy'):
+    """
+    Implemention of the n-dimensional levy function
+
+    Args:
+    x: A d-dimensional array or tensor
+    version: A string, either 'numpy' or 'pytorch'
+
+    Returns:
+    result: Value of the Rastrigin function
+    """
+    x = x.flatten()
+    d = len(x)
+    if version == 'numpy':
+        result = 10 * d + np.sum(np.square(x) - 10 * np.cos(2 * np.pi * x))
+    elif version == 'pytorch':
+        result = 10 * d + torch.sum(torch.square(x) - 10 * torch.cos(2 * np.pi * x))
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        x_tuple = tuple(x.detach().cpu().numpy())
+        results[trial, iteration, :] = np.array(
+            x_tuple + (result.detach().cpu().numpy(),)
+        )
+
+    else:
+        x_tuple = tuple(x.flatten())
+        results[trial, iteration, :] = np.array(x_tuple + (result,))
 
     return result
 
@@ -798,6 +959,44 @@ def schwefel(x, results, trial, version='numpy'):
 
     else:
         results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+def ndschwefel(x, results, trial, version='numpy'):
+    """
+    Implemention of the n-dimensional levy function
+
+    Args:
+    x: A d-dimensional array or tensor
+    version: A string, either 'numpy' or 'pytorch'
+
+    Returns:
+    result: Value of the Rastrigin function
+    """
+    x = x.flatten()
+    d = len(x)
+    if version == 'numpy':
+        result = 418.9829 * d - np.sum(x * np.sin(np.sqrt(np.abs(x))))
+    elif version == 'pytorch':
+        result == 418.9829 * d - torch.sum(x * torch.sin(torch.sqrt(torch.abs(x))))
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        x_tuple = tuple(x.detach().cpu().numpy())
+        results[trial, iteration, :] = np.array(
+            x_tuple + (result.detach().cpu().numpy(),)
+        )
+
+    else:
+        x_tuple = tuple(x.flatten())
+        results[trial, iteration, :] = np.array(x_tuple + (result,))
 
     return result
 
@@ -2645,6 +2844,110 @@ ackley_30d_config = {
     'dimensions': 30,
 }
 
+# Multi-Dimensional Problems #
+griewank_3d_config = {
+    'objective': ndgriewank,
+    'bounds': [(-600, 600)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 3,
+}
+
+# Multi-Dimensional Problems #
+griewank_5d_config = {
+    'objective': ndgriewank,
+    'bounds': [(-600, 600)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 5,
+}
+
+# Multi-Dimensional Problems #
+griewank_30d_config = {
+    'objective': ndgriewank,
+    'bounds': [(-600, 600)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 30,
+}
+
+# Multi-Dimensional Problems #
+levy_3d_config = {
+    'objective': ndlevy,
+    'bounds': [(-10, 10)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 3,
+}
+
+# Multi-Dimensional Problems #
+levy_5d_config = {
+    'objective': ndlevy,
+    'bounds': [(-10, 10)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 5,
+}
+
+# Multi-Dimensional Problems #
+levy_30d_config = {
+    'objective': ndlevy,
+    'bounds': [(-10, 10)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 30,
+}
+
+# Multi-Dimensional Problems #
+rastrigin_3d_config = {
+    'objective': ndrastrigin,
+    'bounds': [(-5.12, 5.12)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 3,
+}
+
+rastrigin_5d_config = {
+    'objective': ndrastrigin,
+    'bounds': [(-5.12, 5.12)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 5,
+}
+
+rastrigin_30d_config = {
+    'objective': ndrastrigin,
+    'bounds': [(-5.12, 5.12)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 30,
+}
+
+
+schwefel_3d_config = {
+    'objective': ndschwefel,
+    'bounds': [(-500, 500)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 3,
+}
+
+schwefel_5d_config = {
+    'objective': ndschwefel,
+    'bounds': [(-500, 500)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 5,
+}
+
+schwefel_30d_config = {
+    'objective': ndschwefel,
+    'bounds': [(-500, 500)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 30,
+}
+
 # ex8_6_2 from MINLP
 ex8_6_2_config = {
     'objective': ex8_6_2,
@@ -2918,13 +3221,25 @@ PROBLEMS_BY_NAME = {
     'drop_wave': drop_wave_config,
     'eggholder': eggholder_config,
     'griewank': griewank_config,
+    'griewank_3d': griewank_3d_config,
+    'griewank_5d': griewank_5d_config,
+    'griewank_30d': griewank_30d_config,
     'holder_table': holder_table_config,
     'levy': levy_config,
+    'levy_3d': levy_3d_config,
+    'levy_5d': levy_5d_config,
+    'levy_30d': levy_30d_config,
     'levy_n13': levy_n13_config,
     'rastrigin': rastrigin_config,
+    'rastrigin_3d': rastrigin_3d_config,
+    'rastrigin_5d': rastrigin_3d_config,
+    'rastrigin_30d': rastrigin_30d_config,
     'schaffer_n2': schaffer_n2_config,
     'schaffer_n4': schaffer_n4_config,
     'schwefel': schwefel_config,
+    'schwefel_3d': schwefel_3d_config,
+    'schwefel_5d': schwefel_5d_config,
+    'schwefel_30d': schwefel_30d_config,
     'shubert': shubert_config,
     'ex8_6_2': ex8_6_2_config,
     'least': least_config,
