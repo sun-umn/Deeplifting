@@ -7,7 +7,9 @@ import numpy as np
 import torch
 
 
-def create_optimization_plot(problem_name, problem, final_results, colormap='Wistia'):
+def create_optimization_plot(
+    problem_name, problem, final_results, add_contour_plot=True, colormap='Wistia'
+):
     """
     Function that will build out the plots and the solution
     found for the optimization. For our purposes we will mainly
@@ -57,7 +59,10 @@ def create_optimization_plot(problem_name, problem, final_results, colormap='Wis
     fig = plt.figure(figsize=(10, 4.5))
 
     # Specify 3D plot
-    ax1 = fig.add_subplot(121, projection='3d')
+    if add_contour_plot:
+        ax1 = fig.add_subplot(121, projection='3d')
+    else:
+        ax1 = fig.add_subplot(111, projection='3d')
 
     # Plot the surface
     ax1.plot_surface(x, y, z, cmap=colormap, alpha=1.0)
@@ -69,22 +74,23 @@ def create_optimization_plot(problem_name, problem, final_results, colormap='Wis
     ax1.set_ylabel('Y')
     ax1.set_zlabel(f'Z ({problem_name} Value)')
 
-    # Specify the contour plot
-    ax2 = fig.add_subplot(122)
+    if add_contour_plot:
+        # Specify the contour plot
+        ax2 = fig.add_subplot(122)
 
-    # Plot the contour
-    contour = ax2.contourf(x, y, z, cmap=colormap)
-    fig.colorbar(contour, ax=ax2)
+        # Plot the contour
+        contour = ax2.contourf(x, y, z, cmap=colormap)
+        fig.colorbar(contour, ax=ax2)
 
-    # Add the minimum point
-    for result in final_results:
-        min_x, min_y, _ = result
-        ax2.plot(min_x, min_y, 'ko')  # plot the minimum point as a black dot
+        # Add the minimum point
+        for result in final_results:
+            min_x, min_y, _ = result
+            ax2.plot(min_x, min_y, 'ko')  # plot the minimum point as a black dot
 
-    # Add title and labels
-    ax2.set_title(f'Contour Plot of the {problem_name} Function')
-    ax2.set_xlabel('X')
-    ax2.set_ylabel('Y')
+        # Add title and labels
+        ax2.set_title(f'Contour Plot of the {problem_name} Function')
+        ax2.set_xlabel('X')
+        ax2.set_ylabel('Y')
 
     # Show the plots
     plt.tight_layout()
