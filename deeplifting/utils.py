@@ -84,7 +84,7 @@ def create_optimization_plot(
 
         # Add the minimum point
         for result in final_results:
-            min_x, min_y, _ = result
+            min_x, min_y, _, _, _ = result
             ax2.plot(min_x, min_y, 'ko')  # plot the minimum point as a black dot
 
         # Add title and labels

@@ -11,9 +11,30 @@ class SinActivation(nn.Module):
 
     def __init__(self):  # noqa
         super(SinActivation, self).__init__()
+        self.scale = nn.Parameter(torch.ones(1), requires_grad=True)
 
     def forward(self, x):  # noqa
-        return torch.sin(x)
+        return torch.sin(x * self.scale)
+
+
+class AddOffset(nn.Module):
+    """
+    Class that adds the weights / bias offsets & is
+    trainable for the structural optimization code
+    """
+
+    def __init__(self, scale=10):  # noqa
+        super().__init__()
+        self.scale = nn.Parameter(
+            torch.tensor(scale, dtype=torch.double), requires_grad=True
+        )
+        self.bias = nn.Parameter(
+            torch.zeros(1),
+            requires_grad=True,
+        )
+
+    def forward(self, x):  # noqa
+        return x + (self.scale * self.bias)
 
 
 class DeepliftingMLP(nn.Module):
@@ -101,18 +122,21 @@ class DeepliftingSkipMLP(nn.Module):
         output1 = self.bn1(output1)
         # output1 = self.dropout(output1)
         output1 = self.activation(output1)
+        output1 = AddOffset()(output1)
 
         # Second layer
         output2 = self.linear_layer2(output1)
         output2 = self.bn2(output2)
         # output2 = self.dropout(output2)
         output2 = self.activation(output2)
+        output2 = AddOffset()(output2)
 
         # Thrid layer
         output3 = self.linear_layer3(output2)
         output3 = self.bn3(output3)
         # output3 = self.dropout(output3)
         output3 = self.activation(output3)
+        output3 = AddOffset()(output3)
 
         # Final layer
         output = torch.cat(
@@ -131,9 +155,10 @@ class DeepliftingSkipMLP(nn.Module):
 
         # Final output
         output_float = self.output_float_layer(output)
+        output_float = AddOffset()(output_float)
 
         # Set up a region that focuses on integer values
-        output_trunc = self.output_trunc_layer(output)
-        output_trunc = nn.LeakyReLU()(output_trunc)
+        # output_trunc = self.output_trunc_layer(output)
+        # output_trunc = nn.ReLU()(output_trunc)
 
-        return output_float, output_trunc
+        return output_float, None  # , output_trunc

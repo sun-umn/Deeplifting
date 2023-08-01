@@ -1,6 +1,7 @@
 # stdlib
 import gc
 import random
+import time
 from typing import Dict, List
 
 # third party
@@ -80,9 +81,13 @@ def run_ipopt(problem: Dict, trials: int):
         )  # noqa
 
         # Call IPOPT
+        start_time = time.time()
         result = minimize_ipopt(fn, x0, bounds=bounds)
+        end_time = time.time()
+        total_time = end_time - start_time
+
         x_tuple = tuple(x for x in result.x)
-        fn_values.append(x_tuple + (result.fun,))
+        fn_values.append(x_tuple + (result.fun, 'IPOPT', total_time))
 
     return {'results': results, 'final_results': fn_values}
 
@@ -141,6 +146,7 @@ def run_dual_annealing(
         )
 
         # Get the result
+        start_time = time.time()
         result = dual_annealing(
             fn,
             updated_bounds,
@@ -150,8 +156,10 @@ def run_dual_annealing(
             visit=vis,
             accept=acpt,
         )
+        end_time = time.time()
+        total_time = end_time - start_time
         x_tuple = tuple(x for x in result.x)
-        fn_values.append(x_tuple + (result.fun,))
+        fn_values.append(x_tuple + (result.fun, 'Dual Annealing', total_time))
 
     return {'results': results, 'final_results': fn_values}
 
@@ -217,6 +225,7 @@ def run_differential_evolution(
         )
 
         # Get the result
+        start_time = time.time()
         result = differential_evolution(
             fn,
             updated_bounds,
@@ -225,8 +234,10 @@ def run_differential_evolution(
             mutation=mut,
             recombination=recomb,
         )
+        end_time = time.time()
+        total_time = end_time - start_time
         x_tuple = tuple(x for x in result.x)
-        fn_values.append(x_tuple + (result.fun,))
+        fn_values.append(x_tuple + (result.fun, 'Differential Evolution', total_time))
 
     return {'results': results, 'final_results': fn_values}
 
@@ -370,7 +381,8 @@ def run_pygranso(problem: Dict, trials: int):
         # Pygranso options
         opts.x0 = x0
         opts.torch_device = device
-        opts.print_frequency = 10
+        # opts.print_frequency = 0
+        opts.print_level = 0
         opts.limited_mem_size = 50
         opts.stat_l2_model = False
         opts.double_precision = True
@@ -396,7 +408,10 @@ def run_pygranso(problem: Dict, trials: int):
         comb_fn = lambda x: pygranso_nd_fn(x, fn, bounds)  # noqa
 
         # Run the main algorithm
+        start_time = time.time()
         soln = pygranso(var_spec=var_in, combined_fn=comb_fn, user_opts=opts)
+        end_time = time.time()
+        total_time = end_time - start_time
 
         # Get final x we will also need to map
         # it to the same bounds
@@ -406,7 +421,7 @@ def run_pygranso(problem: Dict, trials: int):
         b = soln.best.f
 
         x_tuple = tuple(x)
-        fn_values.append(x_tuple + (f,) + (b,))
+        fn_values.append(x_tuple + (f, 'PyGRANSO', total_time))
 
         del (var_in, x0, opts, soln, x, f, b)
         gc.collect()
@@ -444,29 +459,32 @@ def deeplifting_predictions(outputs1, outputs2, objective, bounds):
         # to avoid weird behavior
         elif (a is not None) and (b is not None):
             x_constr = a + (b - a) / 2.0 * (torch.sin(outputs1[:, index]) + 1)
+            # x_constr = a + (b - a) * torch.sigmoid(outputs2[:, index] * 6)
         x_values_float.append(x_constr)
 
     x_float = torch.stack(x_values_float, axis=1)
 
-    # Integer outputs
-    x_values_trunc = []
-    for index, cnstr in enumerate(bounds):
-        a, b = cnstr
-        if (a is None) and (b is None):
-            x_constr = outputs2[index]
-        elif (a is None) or (b is None):
-            x_constr = torch.clamp(outputs2[index], min=a, max=b)
+    # # Integer outputs
+    # x_values_trunc = []
+    # for index, cnstr in enumerate(bounds):
+    #     a, b = cnstr
+    #     if (a is None) and (b is None):
+    #         x_constr = outputs2[index]
+    #     elif (a is None) or (b is None):
+    #         x_constr = torch.clamp(outputs2[index], min=a, max=b)
 
-        # Being very explicit about this condition just in case
-        # to avoid weird behavior
-        elif (a is not None) and (b is not None):
-            x_constr = a + (b - a) / 2.0 * (torch.sin(outputs2[:, index]) + 1)
-            # x_constr = a + (b - a) * torch.sigmoid(outputs2[:, index])
-        x_values_trunc.append(x_constr)
+    #     # Being very explicit about this condition just in case
+    #     # to avoid weird behavior
+    #     elif (a is not None) and (b is not None):
+    #         # x_constr = a + (b - a) / 2.0 * (torch.sin(outputs2[:, index]) + 1)
+    #         x_constr = a + (b - a) * torch.sigmoid(outputs2[:, index] * 6)
+    #     x_values_trunc.append(x_constr)
 
-    x_trunc = torch.trunc(torch.stack(x_values_trunc, axis=1))
+    # x_trunc = torch.stack(x_values_trunc, axis=1)
+    # # x_trunc = torch.trunc(x_trunc)
 
-    x = torch.vstack((x_float, x_trunc))
+    # x = torch.vstack((x_float, x_trunc))
+    x = x_float
 
     # Iterate over the objective values
     objective_values = []
@@ -525,7 +543,7 @@ def run_deeplifting(problem: Dict, trials: int):
         model = DeepliftingSkipMLP(
             input_size=1024,
             output_size=dimensions,
-            n=512,
+            n=(2**11),
         )
 
         model = model.to(device=device, dtype=torch.double)
@@ -546,11 +564,12 @@ def run_deeplifting(problem: Dict, trials: int):
         opts.x0 = x0
         opts.torch_device = device
         opts.print_frequency = 1
-        opts.limited_mem_size = 10
+        # opts.print_level = 0
+        opts.limited_mem_size = 5
         opts.stat_l2_model = False
         opts.double_precision = True
-        opts.viol_ineq_tol = 1e-10
-        opts.opt_tol = 1e-10
+        # opts.viol_ineq_tol = 1e-15
+        opts.opt_tol = 1e-20
         opts.maxit = 1000
 
         # Objective function
@@ -583,7 +602,10 @@ def run_deeplifting(problem: Dict, trials: int):
         comb_fn = lambda model: deeplifting_nd_fn(model, fn, bounds)  # noqa
 
         # Run the main algorithm
+        start_time = time.time()
         soln = pygranso(var_spec=model, combined_fn=comb_fn, user_opts=opts)
+        end_time = time.time()
+        total_time = end_time - start_time
 
         # Get final x we will also need to map
         # it to the same bounds
@@ -593,7 +615,11 @@ def run_deeplifting(problem: Dict, trials: int):
             x, results=final_results, trial=0, version='pytorch'
         )
         xf, f = deeplifting_predictions(outputs1, outputs2, final_fn, bounds)
-        data_point = tuple(xf) + (float(f.detach().cpu().numpy()),)
+        data_point = tuple(xf) + (
+            float(f.detach().cpu().numpy()),
+            'Deeplifting',
+            total_time,
+        )
         fn_values.append(data_point)
 
         # Collect garbage and empty cache
