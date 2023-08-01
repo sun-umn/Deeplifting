@@ -594,7 +594,7 @@ def ndlevy(x, results, trial, version='numpy'):
     w = ((x - 1) / 2) + 1
     w1 = w[0]
     wd = w[-1]
-    w = w[1:-1]
+    w = w[0:-1]
     if version == 'numpy':
         result = (
             np.square(np.sin(np.pi * w1))
