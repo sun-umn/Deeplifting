@@ -524,7 +524,14 @@ def deeplifting_nd_fn(model, objective, bounds):
     return f, ci, ce
 
 
-def run_deeplifting(problem: Dict, trials: int):
+def run_deeplifting(
+    problem: Dict,
+    trials: int,
+    input_size=512,
+    hidden_sizes=(512, 512, 512),
+    activation='sine',
+    agg_function='sum',
+):
     """
     Function that runs our preimer method of deeplifting.
     The idea here is to reparmeterize an optimization objective
@@ -540,10 +547,14 @@ def run_deeplifting(problem: Dict, trials: int):
         # Seed everything
         set_seed(trial)
 
+        # Deeplifting model with skip connections
         model = DeepliftingSkipMLP(
-            input_size=1024,
+            input_size=input_size,
+            hidden_sizes=hidden_sizes,
             output_size=dimensions,
-            n=(2**11),
+            skip_every_n=1,
+            activation=activation,
+            agg_function=agg_function,
         )
 
         model = model.to(device=device, dtype=torch.double)
