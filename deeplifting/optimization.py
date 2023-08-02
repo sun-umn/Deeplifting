@@ -544,9 +544,6 @@ def run_deeplifting(
     fn_values = []
 
     for trial in range(trials):
-        # Seed everything
-        set_seed(trial)
-
         # Deeplifting model with skip connections
         model = DeepliftingSkipMLP(
             input_size=input_size,
@@ -555,6 +552,7 @@ def run_deeplifting(
             skip_every_n=1,
             activation=activation,
             agg_function=agg_function,
+            seed=trial,
         )
 
         model = model.to(device=device, dtype=torch.double)

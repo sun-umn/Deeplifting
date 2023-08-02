@@ -2,6 +2,9 @@
 import torch
 import torch.nn as nn
 
+# first party
+from deeplifting.optimization import set_seed
+
 
 class SinActivation(nn.Module):
     """
@@ -12,9 +15,10 @@ class SinActivation(nn.Module):
     def __init__(self):  # noqa
         super(SinActivation, self).__init__()
         self.scale = nn.Parameter(torch.ones(1), requires_grad=True)
+        self.shift = nn.Parameter(torch.zeros(1), requires_grad=True)
 
     def forward(self, x):  # noqa
-        return torch.sin(x * self.scale)
+        return torch.sin((x - self.shift) * self.scale)
 
 
 class AddOffset(nn.Module):
@@ -72,98 +76,6 @@ class DeepliftingMLP(nn.Module):
         return output
 
 
-# class DeepliftingSkipMLP(nn.Module):
-#     """
-#     Class that implements a standard MLP from
-#     pytorch. We will utilize this as one of many
-#     NN architectures for our deep lifting project.
-#     Utiilizes skip connections.
-#     """
-
-#     def __init__(self, input_size, output_size, n):  # noqa
-#         super(DeepliftingSkipMLP, self).__init__()
-
-#         # Input layer 1 + BN
-#         self.linear_layer1 = nn.Linear(input_size, n)
-#         self.bn1 = nn.BatchNorm1d(n)
-
-#         # Input layer 2 + BN
-#         self.linear_layer2 = nn.Linear(n, n)
-#         self.bn2 = nn.BatchNorm1d(n)
-
-#         # Input layer 3 + BN
-#         self.linear_layer3 = nn.Linear(n, n)
-#         self.bn3 = nn.BatchNorm1d(n)
-
-#         # Input layer 4 + BN
-#         self.linear_layer4 = nn.Linear(n * 3, n)
-#         self.bn4 = nn.BatchNorm1d(n)
-
-#         # Output layer
-#         self.output_float_layer = nn.Linear(n, output_size)
-#         self.output_trunc_layer = nn.Linear(n, output_size)
-
-#         # Activation
-#         # self.activation = SinActivation()
-#         self.activation = nn.LeakyReLU()
-
-#         # Dropout
-#         self.dropout = nn.Dropout(p=0.01)
-
-#         # One of the things that we did with the topology
-#         # optimization is also let the input be variable. Some
-#         # of the problems we have looked at so far also are
-#         # between bounds
-#         self.x = nn.Parameter(torch.randn(input_size, input_size))
-
-#     def forward(self, inputs=None):  # noqa
-#         # First layer
-#         output1 = self.linear_layer1(self.x)
-#         output1 = self.bn1(output1)
-#         # output1 = self.dropout(output1)
-#         output1 = self.activation(output1)
-#         output1 = AddOffset()(output1)
-
-#         # Second layer
-#         output2 = self.linear_layer2(output1)
-#         output2 = self.bn2(output2)
-#         # output2 = self.dropout(output2)
-#         output2 = self.activation(output2)
-#         output2 = AddOffset()(output2)
-
-#         # Thrid layer
-#         output3 = self.linear_layer3(output2)
-#         output3 = self.bn3(output3)
-#         # output3 = self.dropout(output3)
-#         output3 = self.activation(output3)
-#         output3 = AddOffset()(output3)
-
-#         # Final layer
-#         output = torch.cat(
-#             (
-#                 output1,
-#                 output2,
-#                 output3,
-#             ),
-#             axis=1,
-#         )
-
-#         # Get an output that allows float values
-#         output = self.linear_layer4(output)
-#         output = self.bn4(output)
-#         output = self.activation(output)
-
-#         # Final output
-#         output_float = self.output_float_layer(output)
-#         output_float = AddOffset()(output_float)
-
-#         # Set up a region that focuses on integer values
-#         # output_trunc = self.output_trunc_layer(output)
-#         # output_trunc = nn.ReLU()(output_trunc)
-
-#         return output_float, None  # , output_trunc
-
-
 class DeepliftingBlock(nn.Module):
     def __init__(self, input_size, output_size, activation='sine'):
         super(DeepliftingBlock, self).__init__()
@@ -180,15 +92,15 @@ class DeepliftingBlock(nn.Module):
         # Linear layer
         x = self.linear(x)
 
-        # Batch Normalization
-        x = self.batch_norm(x)
+        # # Batch Normalization
+        # x = self.batch_norm(x)
 
         # Sine activation function
         if self.activation == 'sine':
-            x = torch.sin(x)
+            x = SinActivation()(x)
         elif self.activation == 'relu':
             x = nn.ReLU()(x)
-        elif self.activation == 'LeakyReLU':
+        elif self.activation == 'leaky_relu':
             x = nn.LeakyReLU()(x)
 
         return x
@@ -204,8 +116,11 @@ class DeepliftingSkipMLP(nn.Module):
         skip_every_n=1,
         activation='sine',
         agg_function='sum',
+        seed=0,
     ):
         super(DeepliftingSkipMLP, self).__init__()
+        # Set the seed
+        set_seed(seed)
 
         self.layers = nn.ModuleList()
         self.skip_every_n = skip_every_n
