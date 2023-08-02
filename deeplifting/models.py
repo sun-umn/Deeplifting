@@ -81,6 +81,12 @@ class DeepliftingBlock(nn.Module):
         super(DeepliftingBlock, self).__init__()
         # Define the activation
         self.activation = activation
+        if self.activation == 'sine':
+            self.activation_layer = SinActivation()
+        elif self.activation == 'relu':
+            self.activation_layer = nn.ReLU()
+        elif self.activation == 'leaky_relu':
+            self.activation_layer = nn.LeakyReLU()
 
         # Define the Linear layer
         self.linear = nn.Linear(input_size, output_size)
@@ -95,13 +101,8 @@ class DeepliftingBlock(nn.Module):
         # # Batch Normalization
         # x = self.batch_norm(x)
 
-        # Sine activation function
-        if self.activation == 'sine':
-            x = SinActivation()(x)
-        elif self.activation == 'relu':
-            x = nn.ReLU()(x)
-        elif self.activation == 'leaky_relu':
-            x = nn.LeakyReLU(negative_slope=0.1)(x)
+        # Activation function
+        x = self.activation_layer(x)
 
         return x
 
