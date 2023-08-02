@@ -1,6 +1,5 @@
 # stdlib
 import gc
-import random
 import time
 from typing import Dict, List
 
@@ -16,20 +15,7 @@ from scipy.optimize import differential_evolution, dual_annealing
 
 # first party
 from deeplifting.models import DeepliftingSkipMLP
-from deeplifting.utils import get_devices
-
-
-def set_seed(seed):
-    """
-    Function to set the seed for the run
-    """
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-    np.random.seed(seed)
-    random.seed(seed)
+from deeplifting.utils import get_devices, set_seed
 
 
 def run_ipopt(problem: Dict, trials: int):

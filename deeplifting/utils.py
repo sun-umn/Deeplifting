@@ -1,10 +1,24 @@
 # stdlib
+import random
 from functools import partial
 
 # third party
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
+
+
+def set_seed(seed):
+    """
+    Function to set the seed for the run
+    """
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    np.random.seed(seed)
+    random.seed(seed)
 
 
 def create_optimization_plot(

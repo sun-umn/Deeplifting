@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 
 # first party
-from deeplifting.optimization import set_seed
+from deeplifting.utils import set_seed
 
 
 class SinActivation(nn.Module):
