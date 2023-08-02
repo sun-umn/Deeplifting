@@ -416,61 +416,62 @@ def run_pygranso(problem: Dict, trials: int):
     return {'results': results, 'final_results': fn_values}
 
 
-def deeplifting_predictions(outputs1, outputs2, objective, bounds):
+# def deeplifting_predictions(outputs1, outputs2, objective, bounds):
+#     """
+#     Function to create the outputs for the
+#     deeplifting framework
+#     """
+#     # Let's try out trick from topology
+#     # optimization instead of relying on the
+#     # inequality constraint
+#     # If we map x and y to [0, 1] and then shift
+#     # the interval we can accomplist the same
+#     # thing we can use a + (b - a) * x
+
+#     # For sin [-1, 1]
+#     # c + (d - c) / (b - a) * (x - a)
+#     # c + (d - c) / (2) * (x + 1)
+
+#     # Try updating the way we define the bounds
+#     x_values_float = []
+#     for index, cnstr in enumerate(bounds):
+#         a, b = cnstr
+#         if (a is None) and (b is None):
+#             x_constr = outputs1[index]
+#         elif (a is None) or (b is None):
+#             x_constr = torch.clamp(outputs1[index], min=a, max=b)
+
+#         # Being very explicit about this condition just in case
+#         # to avoid weird behavior
+#         elif (a is not None) and (b is not None):
+#             x_constr = a + (b - a) / 2.0 * (torch.sin(outputs1[:, index]) + 1)
+#             # x_constr = a + (b - a) / 2.0 * (outputs1[:, index] + 1)
+#             # x_constr = a + (b - a) * torch.sigmoid(outputs2[:, index] * 6)
+#         x_values_float.append(x_constr)
+
+#     x = torch.stack(x_values_float, axis=1)
+
+#     # Iterate over the objective values
+#     objective_values = []
+#     for i in range(len(x)):
+#         f = objective(x[i, :])
+#         objective_values.append(f)
+
+#     objective_values = torch.stack(objective_values)
+#     f = torch.min(objective_values)
+
+#     # Need to get the minimum of f
+#     idx_min = torch.argmin(objective_values)
+#     x = x[idx_min, :]
+#     x = x.detach().cpu().numpy().flatten()
+
+#     return x, f
+
+
+def deeplifting_predictions(x, objective):
     """
-    Function to create the outputs for the
-    deeplifting framework
+    Convert scaled values to the objective function
     """
-    # Let's try out trick from topology
-    # optimization instead of relying on the
-    # inequality constraint
-    # If we map x and y to [0, 1] and then shift
-    # the interval we can accomplist the same
-    # thing we can use a + (b - a) * x
-
-    # For sin [-1, 1]
-    # c + (d - c) / (b - a) * (x - a)
-    # c + (d - c) / (2) * (x + 1)
-
-    # Try updating the way we define the bounds
-    x_values_float = []
-    for index, cnstr in enumerate(bounds):
-        a, b = cnstr
-        if (a is None) and (b is None):
-            x_constr = outputs1[index]
-        elif (a is None) or (b is None):
-            x_constr = torch.clamp(outputs1[index], min=a, max=b)
-
-        # Being very explicit about this condition just in case
-        # to avoid weird behavior
-        elif (a is not None) and (b is not None):
-            x_constr = a + (b - a) / 2.0 * (torch.sin(outputs1[:, index]) + 1)
-            # x_constr = a + (b - a) * torch.sigmoid(outputs2[:, index] * 6)
-        x_values_float.append(x_constr)
-
-    x_float = torch.stack(x_values_float, axis=1)
-
-    # # Integer outputs
-    # x_values_trunc = []
-    # for index, cnstr in enumerate(bounds):
-    #     a, b = cnstr
-    #     if (a is None) and (b is None):
-    #         x_constr = outputs2[index]
-    #     elif (a is None) or (b is None):
-    #         x_constr = torch.clamp(outputs2[index], min=a, max=b)
-
-    #     # Being very explicit about this condition just in case
-    #     # to avoid weird behavior
-    #     elif (a is not None) and (b is not None):
-    #         # x_constr = a + (b - a) / 2.0 * (torch.sin(outputs2[:, index]) + 1)
-    #         x_constr = a + (b - a) * torch.sigmoid(outputs2[:, index] * 6)
-    #     x_values_trunc.append(x_constr)
-
-    # x_trunc = torch.stack(x_values_trunc, axis=1)
-    # # x_trunc = torch.trunc(x_trunc)
-
-    # x = torch.vstack((x_float, x_trunc))
-    x = x_float
 
     # Iterate over the objective values
     objective_values = []
@@ -489,17 +490,17 @@ def deeplifting_predictions(outputs1, outputs2, objective, bounds):
     return x, f
 
 
-def deeplifting_nd_fn(model, objective, bounds):
+def deeplifting_nd_fn(model, objective):
     """
     Combined funtion used for PyGranso
     """
-    outputs1, outputs2 = model(inputs=None)
+    outputs = model(inputs=None)
 
     # Get x1 and x2 so we can add the bounds
     # outputs = torch.sigmoid(outputs)
     # x = outputs.mean(axis=0)
     # print(f'Output x {x}')
-    x, f = deeplifting_predictions(outputs1, outputs2, objective, bounds)
+    x, f = deeplifting_predictions(outputs, objective)
 
     # Inequality constraint
     ci = None
@@ -516,6 +517,7 @@ def run_deeplifting(
     input_size=512,
     hidden_sizes=(512, 512, 512),
     activation='sine',
+    output_activation='sine',
     agg_function='sum',
 ):
     """
@@ -530,13 +532,30 @@ def run_deeplifting(
     fn_values = []
 
     for trial in range(trials):
+        # Objective function
+        objective = problem['objective']
+
+        # Get the bounds of the problem
+        if dimensions <= 2:
+            bounds = problem['bounds']
+        else:
+            bounds = problem['bounds']
+
+            if len(bounds) > 1:
+                bounds = bounds
+
+            else:
+                bounds = bounds * dimensions
+
         # Deeplifting model with skip connections
         model = DeepliftingSkipMLP(
             input_size=input_size,
             hidden_sizes=hidden_sizes,
             output_size=dimensions,
+            bounds=bounds,
             skip_every_n=1,
             activation=activation,
+            output_activation=output_activation,
             agg_function=agg_function,
             seed=trial,
         )
@@ -563,24 +582,8 @@ def run_deeplifting(
         opts.limited_mem_size = 5
         opts.stat_l2_model = False
         opts.double_precision = True
-        # opts.viol_ineq_tol = 1e-15
         opts.opt_tol = 1e-20
         opts.maxit = 1000
-
-        # Objective function
-        objective = problem['objective']
-
-        # Get the bounds of the problem
-        if dimensions <= 2:
-            bounds = problem['bounds']
-        else:
-            bounds = problem['bounds']
-
-            if len(bounds) > 1:
-                bounds = bounds
-
-            else:
-                bounds = bounds * dimensions
 
         # Get the maximum iterations
         max_iterations = problem['max_iterations']
@@ -594,7 +597,7 @@ def run_deeplifting(
         )
 
         # # Combined function
-        comb_fn = lambda model: deeplifting_nd_fn(model, fn, bounds)  # noqa
+        comb_fn = lambda model: deeplifting_nd_fn(model, fn)  # noqa
 
         # Run the main algorithm
         start_time = time.time()
@@ -604,12 +607,12 @@ def run_deeplifting(
 
         # Get final x we will also need to map
         # it to the same bounds
-        outputs1, outputs2 = model(inputs=None)
-        final_results = np.zeros((1, 1, 3))
+        outputs = model(inputs=None)
+        final_results = np.zeros((1, 1, dimensions + 1))
         final_fn = lambda x: objective(
             x, results=final_results, trial=0, version='pytorch'
         )
-        xf, f = deeplifting_predictions(outputs1, outputs2, final_fn, bounds)
+        xf, f = deeplifting_predictions(outputs, final_fn)
         data_point = tuple(xf) + (
             float(f.detach().cpu().numpy()),
             'Deeplifting',
@@ -618,7 +621,7 @@ def run_deeplifting(
         fn_values.append(data_point)
 
         # Collect garbage and empty cache
-        del (model, nvar, x0, opts, soln, outputs1, outputs2, xf, f)
+        del (model, nvar, x0, opts, soln, outputs, xf, f)
         gc.collect()
         torch.cuda.empty_cache()
 

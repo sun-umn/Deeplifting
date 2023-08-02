@@ -121,13 +121,13 @@ def get_devices():
     # Default device
     device = torch.device("cpu")
 
-    # Get available GPUs
-    n_gpus = torch.cuda.device_count()
-    print(f'n_gpus: {n_gpus}')
-    if n_gpus > 0:
-        gpu_name_list = [f'cuda:{device}' for device in range(n_gpus)]
+    # # Get available GPUs
+    # n_gpus = torch.cuda.device_count()
+    # print(f'n_gpus: {n_gpus}')
+    # if n_gpus > 0:
+    #     gpu_name_list = [f'cuda:{device}' for device in range(n_gpus)]
 
-        # NOTE: For now we will only use the first GPU that is available
-        device = torch.device(gpu_name_list[0])
+    #     # NOTE: For now we will only use the first GPU that is available
+    #     device = torch.device(gpu_name_list[0])
 
     return device

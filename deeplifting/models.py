@@ -101,8 +101,52 @@ class DeepliftingBlock(nn.Module):
         elif self.activation == 'relu':
             x = nn.ReLU()(x)
         elif self.activation == 'leaky_relu':
-            x = nn.LeakyReLU()(x)
+            x = nn.LeakyReLU(negative_slope=0.1)(x)
 
+        return x
+
+
+class DeepliftingScalingBlock(nn.Module):
+    def __init__(self, bounds, output_activation):
+        super(DeepliftingScalingBlock, self).__init__()
+        # Define the bounds for the class
+        self.bounds = bounds
+
+        # Define the scaler based on the final activation layer
+        # of the output
+        self.output_activation = output_activation
+
+    def forward(self, outputs):
+        # Let's try out trick from topology
+        # optimization instead of relying on the
+        # inequality constraint
+        # If we map x and y to [0, 1] and then shift
+        # the interval we can accomplist the same
+        # thing we can use a + (b - a) * x
+
+        # For sin [-1, 1]
+        # c + (d - c) / (b - a) * (x - a)
+        # c + (d - c) / (2) * (x + 1)
+
+        # Try updating the way we define the bounds
+        x_values_float = []
+        for index, cnstr in enumerate(self.bounds):
+            a, b = cnstr
+            if (a is None) and (b is None):
+                x_constr = outputs[index]
+            elif (a is None) or (b is None):
+                x_constr = torch.clamp(outputs[index], min=a, max=b)
+
+            # Being very explicit about this condition just in case
+            # to avoid weird behavior
+            elif (a is not None) and (b is not None):
+                if self.output_activation != 'sine':
+                    x_constr = a + (b - a) / 2.0 * (torch.sin(outputs[:, index]) + 1)
+                else:
+                    x_constr = a + (b - a) / 2.0 * (outputs[:, index] + 1)
+            x_values_float.append(x_constr)
+
+        x = torch.stack(x_values_float, axis=1)
         return x
 
 
@@ -113,8 +157,11 @@ class DeepliftingSkipMLP(nn.Module):
         input_size,
         hidden_sizes,
         output_size,
+        bounds,
+        *,
         skip_every_n=1,
         activation='sine',
+        output_activation='sine',
         agg_function='sum',
         seed=0,
     ):
@@ -149,7 +196,12 @@ class DeepliftingSkipMLP(nn.Module):
 
         # Output layer
         self.output_layer = DeepliftingBlock(
-            hidden_sizes[-1], output_size, activation=activation
+            hidden_sizes[-1], output_size, activation=output_activation
+        )
+
+        # Final scaling layer
+        self.scaling_layer = DeepliftingScalingBlock(
+            bounds=bounds, output_activation=output_activation
         )
 
         # One of the things that we did with the topology
@@ -179,5 +231,9 @@ class DeepliftingSkipMLP(nn.Module):
         elif self.agg_function == 'max':
             x = torch.amax(x, axis=0)
 
+        # Final output layer
         out = self.output_layer(x)
-        return out, None
+
+        # Run through the scaling layer
+        out = self.scaling_layer(out)
+        return out
