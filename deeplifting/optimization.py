@@ -59,6 +59,7 @@ def run_ipopt(problem: Dict, trials: int):
         set_seed(trial)
 
         # Initial guess (starting point for IPOPT)
+        # TODO: Need to provide a better starting point here
         x0 = np.random.rand(dimensions)
 
         # Get the objective
@@ -136,7 +137,7 @@ def run_dual_annealing(
         result = dual_annealing(
             fn,
             updated_bounds,
-            maxiter=100,
+            maxiter=1000,
             initial_temp=init_temp,
             restart_temp_ratio=res_temp,
             visit=vis,
@@ -215,7 +216,7 @@ def run_differential_evolution(
         result = differential_evolution(
             fn,
             updated_bounds,
-            maxiter=100,
+            maxiter=1000,
             strategy=strat,
             mutation=mut,
             recombination=recomb,
@@ -416,58 +417,6 @@ def run_pygranso(problem: Dict, trials: int):
     return {'results': results, 'final_results': fn_values}
 
 
-# def deeplifting_predictions(outputs1, outputs2, objective, bounds):
-#     """
-#     Function to create the outputs for the
-#     deeplifting framework
-#     """
-#     # Let's try out trick from topology
-#     # optimization instead of relying on the
-#     # inequality constraint
-#     # If we map x and y to [0, 1] and then shift
-#     # the interval we can accomplist the same
-#     # thing we can use a + (b - a) * x
-
-#     # For sin [-1, 1]
-#     # c + (d - c) / (b - a) * (x - a)
-#     # c + (d - c) / (2) * (x + 1)
-
-#     # Try updating the way we define the bounds
-#     x_values_float = []
-#     for index, cnstr in enumerate(bounds):
-#         a, b = cnstr
-#         if (a is None) and (b is None):
-#             x_constr = outputs1[index]
-#         elif (a is None) or (b is None):
-#             x_constr = torch.clamp(outputs1[index], min=a, max=b)
-
-#         # Being very explicit about this condition just in case
-#         # to avoid weird behavior
-#         elif (a is not None) and (b is not None):
-#             x_constr = a + (b - a) / 2.0 * (torch.sin(outputs1[:, index]) + 1)
-#             # x_constr = a + (b - a) / 2.0 * (outputs1[:, index] + 1)
-#             # x_constr = a + (b - a) * torch.sigmoid(outputs2[:, index] * 6)
-#         x_values_float.append(x_constr)
-
-#     x = torch.stack(x_values_float, axis=1)
-
-#     # Iterate over the objective values
-#     objective_values = []
-#     for i in range(len(x)):
-#         f = objective(x[i, :])
-#         objective_values.append(f)
-
-#     objective_values = torch.stack(objective_values)
-#     f = torch.min(objective_values)
-
-#     # Need to get the minimum of f
-#     idx_min = torch.argmin(objective_values)
-#     x = x[idx_min, :]
-#     x = x.detach().cpu().numpy().flatten()
-
-#     return x, f
-
-
 def deeplifting_predictions(x, objective):
     """
     Convert scaled values to the objective function
@@ -582,6 +531,8 @@ def run_deeplifting(
         opts.limited_mem_size = 5
         opts.stat_l2_model = False
         opts.double_precision = True
+        # opts.disable_terminationcode_6 = True
+        # opts.halt_on_linesearch_bracket = False
         opts.opt_tol = 1e-20
         opts.maxit = 1000
 

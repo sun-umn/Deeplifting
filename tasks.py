@@ -12,20 +12,20 @@ from deeplifting.problems import PROBLEMS_BY_NAME
 
 # Identify problems to run
 problem_names = [
-    # 'ackley',
+    'ackley',
     'bukin_n6',
-    # 'cross_in_tray',
-    # 'drop_wave',
-    # 'eggholder',
-    # 'griewank',
-    # 'holder_table',
-    # 'levy',
-    # 'levy_n13',
-    # 'rastrigin',
-    # 'schaffer_n2',
-    # 'schaffer_n4',
-    # 'schwefel',
-    # 'shubert',
+    'cross_in_tray',
+    'drop_wave',
+    'eggholder',
+    'griewank',
+    'holder_table',
+    'levy',
+    'levy_n13',
+    'rastrigin',
+    'schaffer_n2',
+    'schaffer_n4',
+    'schwefel',
+    'shubert',
     # 'ex8_1_1',
     # 'kriging_peaks_red010',
     # 'kriging_peaks_red020',
@@ -49,9 +49,9 @@ hidden_size_2048 = (2048,)
 hidden_sizes = [
     # Hidden sizes of 128
     hidden_size_128 * 2,
-    hidden_size_128 * 3,
-    hidden_size_128 * 4,
-    hidden_size_128 * 5,
+    # hidden_size_128 * 3,
+    # hidden_size_128 * 4,
+    # hidden_size_128 * 5,
     # # Hidden sizes of 256
     # hidden_size_256 * 2,
     # hidden_size_256 * 3,
@@ -78,16 +78,16 @@ hidden_sizes = [
 ]
 
 # Input sizes
-input_sizes = [32, 64, 128, 256, 512, 1024, 2046]
+input_sizes = [512]
 
 # Hidden activations
-hidden_activations = ['sine', 'relu', 'leaky_relu']
+hidden_activations = ['sine']
 
 # Ouput activations
-output_activations = ['sine', 'leaky_relu']
+output_activations = ['leaky_relu']
 
 # Aggregate functions - for skip connections
-agg_functions = ['max', 'sum', 'average']
+agg_functions = ['sum']
 
 # @click.command('run-deeplifting')
 # @click.option("--problem_name", default="ackley", type=click.STRING)
@@ -150,19 +150,19 @@ def run_deeplifting_task():
     configurations = list(product(*combinations))
 
     # Number of trials
-    trials = 2
+    trials = 10
 
     # List to store performance data
     performance_df_list = []
 
     # Run over the experiments
-    for (
+    for index, (
         input_size,
         hidden_size,
         hidden_activation,
         output_activation,
         agg_function,
-    ) in configurations:
+    ) in enumerate(configurations):
         for problem_name in problem_names:
             # Load the problems
             problem = PROBLEMS_BY_NAME[problem_name]
@@ -190,13 +190,16 @@ def run_deeplifting_task():
             results['hidden_activation'] = hidden_activation
             results['output_activation'] = output_activation
             results['agg_function'] = agg_function
+            results['problem_name'] = problem_name
+            results['global_minimum'] = problem['global_minimum']
+
+            # Save to parquet
+            results.to_parquet(
+                f'./results/results-2023-08-03-2-{problem_name}-{index}.parquet'
+            )
 
             # Append performance
             performance_df_list.append(results)
-
-    # Concat all data
-    performance_df = pd.concat(results)
-    performance_df.to_parquet('./results.parquet')
 
 
 if __name__ == "__main__":
