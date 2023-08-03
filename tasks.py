@@ -1,49 +1,202 @@
 #!/usr/bin/python
+# stdlib
+from itertools import product
+
 # third party
-import click
-import matplotlib.pyplot as plt
 import neptune
+import pandas as pd
 
 # first party
 from deeplifting.optimization import run_deeplifting
 from deeplifting.problems import PROBLEMS_BY_NAME
-from deeplifting.utils import create_optimization_plot
+
+# Identify problems to run
+problem_names = [
+    # 'ackley',
+    'bukin_n6',
+    # 'cross_in_tray',
+    # 'drop_wave',
+    # 'eggholder',
+    # 'griewank',
+    # 'holder_table',
+    # 'levy',
+    # 'levy_n13',
+    # 'rastrigin',
+    # 'schaffer_n2',
+    # 'schaffer_n4',
+    # 'schwefel',
+    # 'shubert',
+    # 'ex8_1_1',
+    # 'kriging_peaks_red010',
+    # 'kriging_peaks_red020',
+    # 'mathopt6',
+    # 'quantum',
+    # 'rosenbrock',
+    # 'cross_leg_table',
+    # 'sine_envelope',
+]
+
+# Identify available hidden sizes
+hidden_size_64 = (64,)
+hidden_size_128 = (128,)
+hidden_size_256 = (256,)
+hidden_size_512 = (512,)
+hidden_size_768 = (768,)
+hidden_size_1024 = (1024,)
+hidden_size_2048 = (2048,)
+
+# Hidden size combinations
+hidden_sizes = [
+    # Hidden sizes of 128
+    hidden_size_128 * 2,
+    hidden_size_128 * 3,
+    hidden_size_128 * 4,
+    hidden_size_128 * 5,
+    # # Hidden sizes of 256
+    # hidden_size_256 * 2,
+    # hidden_size_256 * 3,
+    # hidden_size_256 * 4,
+    # hidden_size_256 * 5,
+    # # Hidden sizes of 512
+    # hidden_size_512 * 2,
+    # hidden_size_512 * 3,
+    # hidden_size_512 * 4,
+    # hidden_size_512 * 5,
+    # # Hidden sizes of 768
+    # hidden_size_768 * 2,
+    # hidden_size_768 * 3,
+    # hidden_size_768 * 4,
+    # hidden_size_768 * 5,
+    # # Hidden sizes of 1024
+    # hidden_size_1024 * 2,
+    # hidden_size_1024 * 3,
+    # hidden_size_1024 * 4,
+    # # Hidden sizes of 2048
+    # hidden_size_2048 * 2,
+    # hidden_size_2048 * 3,
+    # hidden_size_2048 * 4,
+]
+
+# Input sizes
+input_sizes = [32, 64, 128, 256, 512, 1024, 2046]
+
+# Hidden activations
+hidden_activations = ['sine', 'relu', 'leaky_relu']
+
+# Ouput activations
+output_activations = ['sine', 'leaky_relu']
+
+# Aggregate functions - for skip connections
+agg_functions = ['max', 'sum', 'average']
+
+# @click.command('run-deeplifting')
+# @click.option("--problem_name", default="ackley", type=click.STRING)
+# def run_deeplifting_task(problem_name):
+#     """
+#     Function to run the deeplifting task.
+#     """
+#     # Get the problem details
+#     problem = PROBLEMS_BY_NAME[problem_name]
+
+#     # Print the problem name to stdout
+#     click.echo(problem_name)
+
+#     # Enable the neptune run
+#     # Get api token
+#     # TODO: If api token is not present log a warning
+#     # and default to saving files locally
+#     run = neptune.init_run(
+#         project="dever120/Deeplifting",
+#         api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzYmIwMTUyNC05YmZmLTQ1NzctOTEyNS1kZTIxYjU5NjY5YjAifQ==",  # noqa
+#     )  # your credentials
+
+#     # Get the deeplifting outputs
+#     # TODO: Will make the arguments of the model configurable
+#     # So we can use hyperopt to test different configurations
+#     # of the model
+#     outputs = run_deeplifting(problem, trials=10)
+
+#     # Get final results
+#     results = outputs['final_results']
+
+#     # Log the image and results
+#     fig = create_optimization_plot(problem_name, problem, results, colormap='autumn_r')  # noqa
+#     run[f"deeplifting-{problem_name}-final-results-surface-and-contour"].upload(fig)
+#     plt.close()
 
 
-@click.command('run-deeplifting')
-@click.option("--problem_name", default="ackley", type=click.STRING)
-def run_deeplifting_task(problem_name):
+def run_deeplifting_task():
     """
-    Function to run the deeplifting task.
+    Run deep lifting over specified available problems and over a search space
+    to find the best performance
     """
-    # Get the problem details
-    problem = PROBLEMS_BY_NAME[problem_name]
-
-    # Print the problem name to stdout
-    click.echo(problem_name)
-
     # Enable the neptune run
     # Get api token
     # TODO: If api token is not present log a warning
     # and default to saving files locally
-    run = neptune.init_run(
+    run = neptune.init_run(  # noqa
         project="dever120/Deeplifting",
         api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzYmIwMTUyNC05YmZmLTQ1NzctOTEyNS1kZTIxYjU5NjY5YjAifQ==",  # noqa
     )  # your credentials
 
-    # Get the deeplifting outputs
-    # TODO: Will make the arguments of the model configurable
-    # So we can use hyperopt to test different configurations
-    # of the model
-    outputs = run_deeplifting(problem, trials=10)
+    # Get the available configurations
+    combinations = (
+        input_sizes,
+        hidden_sizes,
+        hidden_activations,
+        output_activations,
+        agg_functions,
+    )
+    configurations = list(product(*combinations))
 
-    # Get final results
-    results = outputs['final_results']
+    # Number of trials
+    trials = 2
 
-    # Log the image and results
-    fig = create_optimization_plot(problem_name, problem, results, colormap='autumn_r')
-    run[f"deeplifting-{problem_name}-final-results-surface-and-contour"].upload(fig)
-    plt.close()
+    # List to store performance data
+    performance_df_list = []
+
+    # Run over the experiments
+    for (
+        input_size,
+        hidden_size,
+        hidden_activation,
+        output_activation,
+        agg_function,
+    ) in configurations:
+        for problem_name in problem_names:
+            # Load the problems
+            problem = PROBLEMS_BY_NAME[problem_name]
+
+            # Get the outputs
+            outputs = run_deeplifting(
+                problem,
+                trials=trials,
+                input_size=input_size,
+                hidden_sizes=hidden_size,
+                activation=hidden_activation,
+                output_activation=output_activation,
+                agg_function=agg_function,
+            )
+
+            # Get the results of the outputs
+            results = pd.DataFrame(
+                outputs['final_results'],
+                columns=['x1', 'x2', 'f', 'algorithm', 'total_time'],
+            )
+
+            # Add meta data to the results
+            results['input_size'] = input_size
+            results['hidden_size'] = '-'.join(map(str, hidden_sizes))
+            results['hidden_activation'] = hidden_activation
+            results['output_activation'] = output_activation
+            results['agg_function'] = agg_function
+
+            # Append performance
+            performance_df_list.append(results)
+
+    # Concat all data
+    performance_df = pd.concat(results)
+    performance_df.to_parquet('./results.parquet')
 
 
 if __name__ == "__main__":

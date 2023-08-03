@@ -628,7 +628,7 @@ def run_deeplifting(
     return {'results': results, 'final_results': fn_values}
 
 
-def run_optimization(problem: Dict, algorithms: List) -> pd.DataFrame:
+def run_deeplifting_optimization(problem: Dict, algorithms: List) -> pd.DataFrame:
     """
     Function that runs optimization with different specified
     algorithms for our deeplifitng research.
