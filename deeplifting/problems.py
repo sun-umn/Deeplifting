@@ -487,33 +487,80 @@ def holder_table(x, results, trial, version='numpy'):
     return result
 
 
-# def langermann(x, results, trial, version='numpy'):
-#     """
-#     Implementation of the 2D Langermann function.
+def langermann(x, results, trial, version='numpy'):
+    """
+    Implementation of the 2D Langermann function.
 
-#     Parameters:
-#     x1 : np.ndarray or torch.Tensor
-#         The x1 values (first dimension of the input space).
-#     x2 : np.ndarray or torch.Tensor
-#         The x2 values (second dimension of the input space).
-#     version : str
-#         The version to use for the function's computation.
-#         Options are 'numpy' and 'pytorch'.
+    Parameters:
+    x1 : np.ndarray or torch.Tensor
+        The x1 values (first dimension of the input space).
+    x2 : np.ndarray or torch.Tensor
+        The x2 values (second dimension of the input space).
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
 
-#     Returns:
-#     result : np.ndarray or torch.Tensor
-#         The computed Levy function values
-#         corresponding to the inputs (x1, x2).
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Levy function values
+        corresponding to the inputs (x1, x2).
 
-#     Raises:
-#     ValueError
-#         If the version is not 'numpy' or 'pytorch'.
-#     """
-#     x1, x2 = x.flatten()
-#     A = np.array([[3, 5], [5, 2], [2, 1], [1, 4], [7, 9]])
-#     c = np.array([1, 2, 5, 2, 3])
-#     if version == 'numpy':
-#         result = np.sum()
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = (
+            np.exp((-1 / np.pi) * (np.square(x1 - 3) + np.square(x2 - 5)))
+            * np.cos(np.pi * (np.square(x1 - 3) + np.square(x2 - 5)))
+            + 2
+            * np.exp((-1 / np.pi) * (np.square(x1 - 5) + np.square(x2 - 2)))
+            * np.cos(np.pi * (np.square(x1 - 5) + np.square(x2 - 2)))
+            + 5
+            * np.exp((-1 / np.pi) * (np.square(x1 - 2) + np.square(x2 - 1)))
+            * np.cos(np.pi * (np.square(x1 - 2) + np.square(x2 - 1)))
+            + 2
+            * np.exp((-1 / np.pi) * (np.square(x1 - 1) + np.square(x2 - 4)))
+            * np.cos(np.pi * (np.square(x1 - 1) + np.square(x2 - 4)))
+            + 3
+            * np.exp((-1 / np.pi) * (np.square(x1 - 7) + np.square(x2 - 9)))
+            * np.cos(np.pi * (np.square(x1 - 7) + np.square(x2 - 9)))
+        )
+    elif version == 'pytorch':
+        result = (
+            torch.exp((-1 / np.pi) * (torch.square(x1 - 3) + torch.square(x2 - 5)))
+            * torch.cos(np.pi * (torch.square(x1 - 3) + torch.square(x2 - 5)))
+            + 2
+            * torch.exp((-1 / np.pi) * (torch.square(x1 - 5) + torch.square(x2 - 2)))
+            * torch.cos(np.pi * (torch.square(x1 - 5) + torch.square(x2 - 2)))
+            + 5
+            * torch.exp((-1 / np.pi) * (torch.square(x1 - 2) + torch.square(x2 - 1)))
+            * torch.cos(np.pi * (torch.square(x1 - 2) + torch.square(x2 - 1)))
+            + 2
+            * torch.exp((-1 / np.pi) * (torch.square(x1 - 1) + torch.square(x2 - 4)))
+            * torch.cos(np.pi * (torch.square(x1 - 1) + torch.square(x2 - 4)))
+            + 3
+            * torch.exp((-1 / np.pi) * (torch.square(x1 - 7) + torch.square(x2 - 9)))
+            * torch.cos(np.pi * (torch.square(x1 - 7) + torch.square(x2 - 9)))
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
 
 
 def levy(x, results, trial, version='numpy'):
@@ -2690,6 +2737,266 @@ def sine_envelope(x, results, trial, version='numpy'):
     return result
 
 
+# Problems from the literature survey by Jamil et al.
+# Ackley2
+def ackley2(x, results, trial, version='numpy'):
+    """
+    Implementation of the Ackley2 function.
+    This is a 3-dimensional function with a global minimum of -200 at (0,0)
+
+    Parameters:
+        x: (x1, x2) this is a 3D problem
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Damavandi function values
+        corresponding to the inputs (x1, x2).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = -200 * np.exp(-0.02 * np.sqrt(x1**2 + x2**2))
+    elif version == 'pytorch':
+        result = -200 * torch.exp(-0.02 * torch.sqrt(x1**2 + x2**2))
+    else:
+        raise ValueError(
+            "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# Ackley3
+def ackley3(x, results, trial, version='numpy'):
+    """
+    Implementation of the Ackley3 function.
+    This is a 3-dimensional function with a global minimum of -219.1418 at (0,~-0.4)
+
+    Parameters:
+        x: (x1, x2) this is a 3D problem
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Damavandi function values
+        corresponding to the inputs (x1, x2).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = 200 * np.exp(-0.02 * np.sqrt(x1**2 + x2**2)) + 5 * np.exp(
+            np.cos(3 * x1) + np.sin(3 * x2)
+        )
+    elif version == 'pytorch':
+        result = 200 * torch.exp(-0.02 * torch.sqrt(x1**2 + x2**2)) + 5 * torch.exp(
+            torch.cos(3 * x1) + torch.sin(3 * x2)
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# Ackley4 in 2d
+
+# nd Ackley4
+
+
+# Adjiman
+def adjiman(x, results, trial, version='numpy'):
+    """
+    Implementation of the Adjiman function.
+    This is a 3-dimensional function with a global minimum of -2.02181 at (2,0.10578)
+
+    Parameters:
+        x: (x1, x2) this is a 3D problem
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Damavandi function values
+        corresponding to the inputs (x1, x2).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = np.cos(x1) * np.sin(x2) - (x1 / (x2**2 + 1))
+    elif version == 'pytorch':
+        result = torch.cos(x1) * torch.sin(x2) - (x1 / (x2**2 + 1))
+    else:
+        raise ValueError(
+            "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# Alpine1 in 2d
+def alpine1(x, results, trial, version='numpy'):
+    """
+    Implementation of the Alpine1 function.
+    This is a 3-dimensional function with a global minimum of 0 at (0,0)
+
+    Parameters:
+        x: (x1, x2) this is a 3D problem
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Damavandi function values
+        corresponding to the inputs (x1, x2).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = np.abs(x1 * np.sin(x1) + 0.1 * x1) + np.abs(x2 * np.sin(x2) + 0.1 * x1)
+    elif version == 'pytorch':
+        result = torch.abs(x1 * torch.sin(x1) + 0.1 * x1) + torch.abs(
+            x2 * torch.sin(x2) + 0.1 * x2
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# nd Alpine1
+
+
+# Alpine2 in 2d
+def alpine2(x, results, trial, version='numpy'):
+    """
+    Implementation of the Alpine2 function.
+    This is a 3-dimensional function with a global minimum of 2.8^2 at (7.917,7.917)
+
+    Parameters:
+        x: (x1, x2) this is a 3D problem
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Damavandi function values
+        corresponding to the inputs (x1, x2).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = (np.sqrt(x1) * np.sin(x1)) * (np.sqrt(x2) * np.sin(x2))
+    elif version == 'pytorch':
+        result = (torch.sqrt(x1) * torch.sin(x1)) * (torch.sqrt(x2) * torch.sin(x2))
+    else:
+        raise ValueError(
+            "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
 # Problem configurations
 # Ackley
 ackley_config = {
@@ -2751,6 +3058,15 @@ holder_table_config = {
     'bounds': [(-10.0, 10.0), (-10.0, 10.0)],
     'max_iterations': 1000,
     'global_minimum': -19.2085,
+    'dimensions': 2,
+}
+
+# Langermann
+langermann_config = {
+    'objective': langermann,
+    'bounds': [(0, 10), (0, 10)],
+    'max_iterations': 1000,
+    'global_minimum': None,
     'dimensions': 2,
 }
 
@@ -3211,6 +3527,61 @@ sine_envelope_config = {
     'dimensions': 2,
 }
 
+ackley2_config = {
+    'objective': ackley2,
+    'bounds': [
+        (-32, 32),
+        (-32, 32),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': -200,
+    'dimensions': 2,
+}
+
+ackley3_config = {
+    'objective': ackley3,
+    'bounds': [
+        (-32, 32),
+        (-32, 32),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': -219.1418,
+    'dimensions': 2,
+}
+
+adjiman_config = {
+    'objective': adjiman,
+    'bounds': [
+        (-1, 2),
+        (-1, 1),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': -2.02181,
+    'dimensions': 2,
+}
+
+alpine1_config = {
+    'objective': alpine1,
+    'bounds': [
+        (-10, 10),
+        (-10, 10),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+}
+
+alpine2_config = {
+    'objective': alpine2,
+    'bounds': [
+        (-7.917, 7.917),
+        (-7.917, 7.917),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 7.884864,
+    'dimensions': 2,
+}
+
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
     'ackley_3d': ackley_3d_config,
@@ -3225,6 +3596,7 @@ PROBLEMS_BY_NAME = {
     'griewank_5d': griewank_5d_config,
     'griewank_30d': griewank_30d_config,
     'holder_table': holder_table_config,
+    'langermann': langermann_config,
     'levy': levy_config,
     'levy_3d': levy_3d_config,
     'levy_5d': levy_5d_config,
@@ -3262,4 +3634,8 @@ PROBLEMS_BY_NAME = {
     'damavandi': damavandi_config,
     'cross_leg_table': cross_leg_table_config,
     'sine_envelope': sine_envelope_config,
+    'ackley3': ackley3_config,
+    'adjiman': adjiman_config,
+    'alpine1': alpine1_config,
+    'alpine2': alpine2_config,
 }
