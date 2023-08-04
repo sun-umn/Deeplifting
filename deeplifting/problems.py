@@ -2840,9 +2840,50 @@ def ackley3(x, results, trial, version='numpy'):
     return result
 
 
-# Ackley4 in 2d
-
 # nd Ackley4
+def ndackley4(x, results, trial, version='numpy'):
+    """
+    Compute the Ackley4 function.
+
+    Args:
+    x: A d-dimensional array or tensor
+    version: A string, either 'numpy' or 'pytorch'
+
+    Returns:
+    result: Value of the Ackley function
+    """
+    x = x.flatten()
+    shifted_x = x.flatten()[1:]
+    x = x.flatten()[:-1]
+    if version == 'numpy':
+        result = np.sum(
+            np.exp(-0.2) * np.sqrt(np.square(x) + np.square(shifted_x))
+            + 3 * (np.cos(2 * x) + np.sin(2 * shifted_x))
+        )
+    elif version == 'pytorch':
+        result = np.sum(
+            torch.exp(-0.2) * torch.sqrt(torch.square(x) + torch.square(shifted_x))
+            + 3 * (torch.cos(2 * x) + torch.sin(2 * shifted_x))
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        x_tuple = tuple(x.detach().cpu().numpy())
+        results[trial, iteration, :] = np.array(
+            x_tuple + (result.detach().cpu().numpy(),)
+        )
+
+    else:
+        x_tuple = tuple(x.flatten())
+        results[trial, iteration, :] = np.array(x_tuple + (result,))
+
+    return result
 
 
 # Adjiman
@@ -2946,6 +2987,41 @@ def alpine1(x, results, trial, version='numpy'):
 
 
 # nd Alpine1
+def ndalpine1(x, results, trial, version='numpy'):
+    """
+    Compute the Alpine1 function.
+
+    Args:
+    x: A d-dimensional array or tensor
+    version: A string, either 'numpy' or 'pytorch'
+
+    Returns:
+    result: Value of the Ackley function
+    """
+    x = x.flatten()
+    if version == 'numpy':
+        result = np.sum(np.abs(x * np.sin(x) + 0.1 * x))
+    elif version == 'pytorch':
+        result = torch.sum(torch.abs(x * torch.sin(x) + 0.1 * x))
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        x_tuple = tuple(x.detach().cpu().numpy())
+        results[trial, iteration, :] = np.array(
+            x_tuple + (result.detach().cpu().numpy(),)
+        )
+
+    else:
+        x_tuple = tuple(x.flatten())
+        results[trial, iteration, :] = np.array(x_tuple + (result,))
+
+    return result
 
 
 # Alpine2 in 2d
@@ -2993,6 +3069,536 @@ def alpine2(x, results, trial, version='numpy'):
 
     else:
         results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# nd Alpine2
+def ndalpine2(x, results, trial, version='numpy'):
+    """
+    Compute the Alpine2 function.
+
+    Args:
+    x: A d-dimensional array or tensor
+    version: A string, either 'numpy' or 'pytorch'
+
+    Returns:
+    result: Value of the Ackley function
+    """
+    x = x.flatten()
+    if version == 'numpy':
+        result = np.prod(np.sqrt(x) * np.sin(x))
+    elif version == 'pytorch':
+        result = torch.prod(torch.sqrt(x) * torch.sin(x))
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        x_tuple = tuple(x.detach().cpu().numpy())
+        results[trial, iteration, :] = np.array(
+            x_tuple + (result.detach().cpu().numpy(),)
+        )
+
+    else:
+        x_tuple = tuple(x.flatten())
+        results[trial, iteration, :] = np.array(x_tuple + (result,))
+
+    return result
+
+
+# Brad in 3d
+def brad(x, results, trial, version='numpy'):
+    x1, x2, x3 = x.flatten()
+    if version == 'numpy':
+        u = np.arange(1, 16)
+        v = 16 - u
+        w = np.minimum(u, v)
+        y = np.array(
+            [
+                0.14,
+                0.18,
+                0.22,
+                0.25,
+                0.29,
+                0.32,
+                0.35,
+                0.39,
+                0.37,
+                0.58,
+                0.73,
+                0.96,
+                1.34,
+                2.10,
+                4.39,
+            ]
+        )
+        result = np.sum(np.square((y - x1 - u) / (v * x2 + w * x3)))
+    elif version == 'pytorch':
+        u = torch.arange(1, 16)
+        v = 16 - u
+        w = torch.minimum(u, v)
+        y = torch.array(
+            [
+                0.14,
+                0.18,
+                0.22,
+                0.25,
+                0.29,
+                0.32,
+                0.35,
+                0.39,
+                0.37,
+                0.58,
+                0.73,
+                0.96,
+                1.34,
+                2.10,
+                4.39,
+            ]
+        )
+        result = torch.sum(torch.square((y - x1 - u) / (v * x2 + w * x3)))
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                x3.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, x3, result))
+
+    return result
+
+
+# Bartels Conn in 2d
+def bartels_conn(x, results, trial, version='numpy'):
+    """
+    Implementation of the Bartels Conn function.
+    This is a 3-dimensional function with a global minimum of 1 at (0,0)
+
+    Parameters:
+        x: (x1, x2) this is a 3D problem
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Damavandi function values
+        corresponding to the inputs (x1, x2).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = (
+            np.abs(np.square(x1) + np.square(x2) + x1 * x2)
+            + np.abs(np.sin(x1))
+            + np.abs(np.cos(x2))
+        )
+    elif version == 'pytorch':
+        result = (
+            torch.abs(torch.square(x1) + torch.square(x2) + x1 * x2)
+            + torch.abs(torch.sin(x1))
+            + torch.abs(torch.cos(x2))
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# Beale in 2d
+def beale(x, results, trial, version='numpy'):
+    """
+    Implementation of the Beale function.
+    This is a 3-dimensional function with a global minimum of 0 at (3,0.5)
+
+    Parameters:
+        x: (x1, x2) this is a 3D problem
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Damavandi function values
+        corresponding to the inputs (x1, x2).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = (
+            np.square(1.5 - x1 + x1 * x2)
+            + np.square((2.25 - x1 + x1 * np.square(x2)))
+            + np.square(2.625 - x1 + x1 * np.power(x2, 3))
+        )
+    elif version == 'pytorch':
+        result = (
+            torch.square(1.5 - x1 + x1 * x2)
+            + torch.square((2.25 - x1 + x1 * torch.square(x2)))
+            + torch.square(2.625 - x1 + x1 * torch.power(x2, 3))
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# Biggs EXP2 in 2d
+def biggs_exp2(x, results, trial, version='numpy'):
+    """
+    Implementation of the Biggs EXP2 function.
+    This is a 3-dimensional function with a global minimum of 0 at (1,10)
+
+    Parameters:
+        x: (x1, x2) this is a 3D problem
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Damavandi function values
+        corresponding to the inputs (x1, x2).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        t = np.arange(1, 11) * 0.1
+        y = np.exp(-t) - 5 * np.exp(10 * t)
+        result = np.sum(np.square(np.exp(-t * x1) - 5 * np.exp(-t * x2) - y))
+    elif version == 'pytorch':
+        t = torch.arange(1, 11) * 0.1
+        y = torch.exp(-t) - 5 * torch.exp(10 * t)
+        result = torch.sum(
+            torch.square(torch.exp(-t * x1) - 5 * torch.exp(-t * x2) - y)
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# Biggs EXP3 in 3d
+def biggs_exp3(x, results, trial, version='numpy'):
+    """
+    Implementation of the Biggs EXP3 function.
+    This is a 4-dimensional function with a global minimum of 0 at (1,10,5)
+
+    Parameters:
+        x: (x1, x2, x3) this is a 4D problem
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Damavandi function values
+        corresponding to the inputs (x1, x2, x3).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2, x3 = x.flatten()
+    if version == 'numpy':
+        t = np.arange(1, 11) * 0.1
+        y = np.exp(-t) - 5 * np.exp(10 * t)
+        result = np.sum(np.square(np.exp(-t * x1) - x3 * np.exp(-t * x2) - y))
+    elif version == 'pytorch':
+        t = torch.arange(1, 11) * 0.1
+        y = torch.exp(-t) - 5 * torch.exp(10 * t)
+        result = torch.sum(
+            torch.square(torch.exp(-t * x1) - x3 * torch.exp(-t * x2) - y)
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                x3.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, x3, result))
+
+    return result
+
+
+# Biggs EXP4 in 4d
+def biggs_exp4(x, results, trial, version='numpy'):
+    """
+    Implementation of the Biggs EXP4 function.
+    This is a 5-dimensional function with a global minimum of 0 at (1,10,1,5)
+
+    Parameters:
+        x: (x1, x2, x3, x4) this is a 5D problem
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Damavandi function values
+        corresponding to the inputs (x1, x2, x3, x4).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2, x3, x4 = x.flatten()
+    if version == 'numpy':
+        t = np.arange(1, 11) * 0.1
+        y = np.exp(-t) - 5 * np.exp(10 * t)
+        result = np.sum(np.square(x3 * np.exp(-t * x1) - x4 * np.exp(-t * x2) - y))
+    elif version == 'pytorch':
+        t = torch.arange(1, 11) * 0.1
+        y = torch.exp(-t) - 5 * torch.exp(10 * t)
+        result = torch.sum(
+            torch.square(x3 * torch.exp(-t * x1) - x4 * torch.exp(-t * x2) - y)
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                x3.detach().cpu().numpy(),
+                x4.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, x3, x4, result))
+
+    return result
+
+
+# Biggs EXP5
+def biggs_exp5(x, results, trial, version='numpy'):
+    """
+    Implementation of the Biggs EXP5 function.
+    This is a 6-dimensional function with a global minimum of 0 at (1,10,1,5,4)
+
+    Parameters:
+        x: (x1, x2, x3, x4, x5) this is a 6D problem
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Damavandi function values
+        corresponding to the inputs (x1, x2, x3, x4, x5).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2, x3, x4, x5 = x.flatten()
+    if version == 'numpy':
+        t = np.arange(1, 11) * 0.1
+        y = np.exp(-t) - 5 * np.exp(10 * t) + 3 * np.exp(-4 * t)
+        result = np.sum(
+            np.square(
+                x3 * np.exp(-t * x1) - x4 * np.exp(-t * x2) + 3 * np.exp(-t * x5) - y
+            )
+        )
+    elif version == 'pytorch':
+        t = torch.arange(1, 11) * 0.1
+        y = torch.exp(-t) - 5 * torch.exp(10 * t) + 3 * torch.exp(-4 * t)
+        result = torch.sum(
+            torch.square(
+                x3 * torch.exp(-t * x1)
+                - x4 * torch.exp(-t * x2)
+                + 3 * torch.exp(-t * x5)
+                - y
+            )
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                x3.detach().cpu().numpy(),
+                x4.detach().cpu().numpy(),
+                x5.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, x3, x4, x5, result))
+
+    return result
+
+
+# Biggs EXP6
+def biggs_exp6(x, results, trial, version='numpy'):
+    """
+    Implementation of the Biggs EXP5 function.
+    This is a 7-dimensional function with a global minimum of 0 at (1,10,1,5,4,3)
+
+    Parameters:
+        x: (x1, x2, x3, x4, x5, x6) this is a 7D problem
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Damavandi function values
+        corresponding to the inputs (x1, x2, x3, x4, x5, x6).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2, x3, x4, x5, x6 = x.flatten()
+    if version == 'numpy':
+        t = np.arange(1, 11) * 0.1
+        y = np.exp(-t) - 5 * np.exp(10 * t) + 3 * np.exp(-4 * t)
+        result = np.sum(
+            np.square(
+                x3 * np.exp(-t * x1) - x4 * np.exp(-t * x2) + x6 * np.exp(-t * x5) - y
+            )
+        )
+    elif version == 'pytorch':
+        t = torch.arange(1, 11) * 0.1
+        y = torch.exp(-t) - 5 * torch.exp(10 * t) + 3 * torch.exp(-4 * t)
+        result = torch.sum(
+            torch.square(
+                x3 * torch.exp(-t * x1)
+                - x4 * torch.exp(-t * x2)
+                + x6 * torch.exp(-t * x5)
+                - y
+            )
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                x3.detach().cpu().numpy(),
+                x4.detach().cpu().numpy(),
+                x5.detach().cpu().numpy(),
+                x6.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, x3, x4, x5, x6, result))
 
     return result
 
@@ -3549,6 +4155,62 @@ ackley3_config = {
     'dimensions': 2,
 }
 
+ackley4_config = {
+    'objective': ndackley4,
+    'bounds': [(-35, 35)],
+    'max_iterations': 1000,
+    'global_minimum': -3.917275,
+    'dimensions': 2,
+}
+
+ackley4_10d_config = {
+    'objective': ndackley4,
+    'bounds': [(-35, 35)],
+    'max_iterations': 1000,
+    'global_minimum': -3.917275,
+    'dimensions': 10,
+}
+
+ackley4_50d_config = {
+    'objective': ndackley4,
+    'bounds': [(-35, 35)],
+    'max_iterations': 1000,
+    'global_minimum': -3.917275,
+    'dimensions': 50,
+}
+
+ackley4_100d_config = {
+    'objective': ndackley4,
+    'bounds': [(-35, 35)],
+    'max_iterations': 1000,
+    'global_minimum': -3.917275,
+    'dimensions': 100,
+}
+
+ackley4_500d_config = {
+    'objective': ndackley4,
+    'bounds': [(-35, 35)],
+    'max_iterations': 1000,
+    'global_minimum': -3.917275,
+    'dimensions': 500,
+}
+
+ackley4_1000d_config = {
+    'objective': ndackley4,
+    'bounds': [(-35, 35)],
+    'max_iterations': 1000,
+    'global_minimum': -3.917275,
+    'dimensions': 1000,
+}
+
+ackley4_5000d_config = {
+    'objective': ndackley4,
+    'bounds': [(-35, 35)],
+    'max_iterations': 1000,
+    'global_minimum': -3.917275,
+    'dimensions': 5000,
+}
+
 adjiman_config = {
     'objective': adjiman,
     'bounds': [
@@ -3571,6 +4233,54 @@ alpine1_config = {
     'dimensions': 2,
 }
 
+alpine1_10d_config = {
+    'objective': alpine1,
+    'bounds': [(-10, 10)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 10,
+}
+
+alpine1_50d_config = {
+    'objective': alpine1,
+    'bounds': [(-10, 10)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 50,
+}
+
+alpine1_100d_config = {
+    'objective': alpine1,
+    'bounds': [(-10, 10)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 100,
+}
+
+alpine1_500d_config = {
+    'objective': alpine1,
+    'bounds': [(-10, 10)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 500,
+}
+
+alpine1_1000d_config = {
+    'objective': alpine1,
+    'bounds': [(-10, 10)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 1000,
+}
+
+alpine1_5000d_config = {
+    'objective': alpine1,
+    'bounds': [(-10, 10)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 5000,
+}
+
 alpine2_config = {
     'objective': alpine2,
     'bounds': [
@@ -3578,8 +4288,146 @@ alpine2_config = {
         (-7.917, 7.917),
     ],
     'max_iterations': 1000,
-    'global_minimum': 7.884864,
+    'global_minimum': 2.8**2,
     'dimensions': 2,
+}
+
+alpine2_10d_config = {
+    'objective': alpine2,
+    'bounds': [(-7.917, 7.917)],
+    'max_iterations': 1000,
+    'global_minimum': 2.8**10,
+    'dimensions': 10,
+}
+
+alpine2_100d_config = {
+    'objective': alpine2,
+    'bounds': [(-7.917, 7.917)],
+    'max_iterations': 1000,
+    'global_minimum': 2.8**100,
+    'dimensions': 100,
+}
+
+alpine2_500d_config = {
+    'objective': alpine2,
+    'bounds': [(-7.917, 7.917)],
+    'max_iterations': 1000,
+    'global_minimum': 2.8**500,
+    'dimensions': 500,
+}
+
+alpine2_1000d_config = {
+    'objective': alpine2,
+    'bounds': [(-7.917, 7.917)],
+    'max_iterations': 1000,
+    'global_minimum': 2.8**1000,
+    'dimensions': 1000,
+}
+
+alpine2_5000d_config = {
+    'objective': alpine2,
+    'bounds': [(-7.917, 7.917)],
+    'max_iterations': 1000,
+    'global_minimum': 2.8**5000,
+    'dimensions': 5000,
+}
+
+brad_config = {
+    'objective': brad,
+    'bounds': [
+        (-0.25, 0.25),
+        (0.01, 1e10),
+        (-1e10, 2.5),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0.00821487,
+    'dimensions': 3,
+}
+
+bartels_conn_config = {
+    'objective': bartels_conn,
+    'bounds': [
+        (-500, 500),
+        (-500, 500),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 1,
+    'dimensions': 2,
+}
+
+beale_config = {
+    'objective': beale,
+    'bounds': [
+        (-4.5, 4.5),
+        (-4.5, 4.5),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+}
+
+biggs_exp2_config = {
+    'objective': biggs_exp2,
+    'bounds': [
+        (0, 20),
+        (0, 20),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+}
+
+biggs_exp3_config = {
+    'objective': biggs_exp3,
+    'bounds': [
+        (0, 20),
+        (0, 20),
+        (0, 20),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 3,
+}
+
+biggs_exp4_config = {
+    'objective': biggs_exp4,
+    'bounds': [
+        (0, 20),
+        (0, 20),
+        (0, 20),
+        (0, 20),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 4,
+}
+
+biggs_exp5_config = {
+    'objective': biggs_exp5,
+    'bounds': [
+        (0, 20),
+        (0, 20),
+        (0, 20),
+        (0, 20),
+        (0, 20),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 5,
+}
+
+biggs_exp6_config = {
+    'objective': biggs_exp6,
+    'bounds': [
+        (0, 20),
+        (0, 20),
+        (0, 20),
+        (0, 20),
+        (0, 20),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 6,
 }
 
 PROBLEMS_BY_NAME = {
@@ -3635,7 +4483,31 @@ PROBLEMS_BY_NAME = {
     'cross_leg_table': cross_leg_table_config,
     'sine_envelope': sine_envelope_config,
     'ackley3': ackley3_config,
+    'ackley4': ackley4_config,
+    'ackley4_10d': ackley4_10d_config,
+    'ackley4_100d': ackley4_100d_config,
+    'ackley4_500d': ackley4_500d_config,
+    'ackley4_1000d': ackley4_1000d_config,
+    'ackley4_5000d': ackley4_5000d_config,
     'adjiman': adjiman_config,
     'alpine1': alpine1_config,
+    'alpine1_10d': alpine1_10d_config,
+    'alpine1_100d': alpine1_100d_config,
+    'alpine1_500d': alpine1_500d_config,
+    'alpine1_1000d': alpine1_1000d_config,
+    'alpine1_5000d': alpine1_5000d_config,
     'alpine2': alpine2_config,
+    'alpine2_10d': alpine2_10d_config,
+    'alpine2_100d': alpine2_100d_config,
+    'alpine2_500d': alpine2_500d_config,
+    'alpine2_1000d': alpine2_1000d_config,
+    'alpine2_5000d': alpine2_5000d_config,
+    'brad': brad_config,
+    'bartels_con': bartels_conn_config,
+    'beale': beale_config,
+    'biggs_exp2': biggs_exp2_config,
+    'biggs_exp3': biggs_exp3_config,
+    'biggs_exp4': biggs_exp4_config,
+    'biggs_exp5': biggs_exp5_config,
+    'biggs_exp6': biggs_exp6_config,
 }
