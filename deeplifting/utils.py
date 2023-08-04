@@ -21,6 +21,100 @@ def set_seed(seed):
     random.seed(seed)
 
 
+def create_contour_plot(problem_name, problem, trajectories, colormap='OrRd_r'):
+    """
+    Function that will build out the plots and the solution
+    found for the optimization. For our purposes we will mainly
+    be interested in the deep learning results.
+    """
+    # Get the objective function
+    objective = problem['objective']
+
+    # Get the bounds for the problem
+    x_bounds, y_bounds = problem['bounds']
+
+    # Separate into the minimum and maximum bounds
+    x_min, x_max = x_bounds
+    y_min, y_max = y_bounds
+
+    # Some of the problems that we are exploring do not
+    # have bounds but we will want to plot them
+    if x_max is None:
+        x_max = 1e6
+    if x_min is None:
+        x_min = -1e6
+    if y_max is None:
+        y_max = 1e6
+    if y_min is None:
+        y_min = -1e6
+
+    # Create a grid of points
+    x = np.linspace(x_min, x_max, 1000)
+    y = np.linspace(y_min, y_max, 1000)
+    x, y = np.meshgrid(x, y)
+
+    # For the function inputs we need results and a trial
+    # Create dummy data
+    results = np.zeros((1, 1, 3))
+    trial = 0
+
+    # Put objective function in a wrapper
+    objective_f = partial(objective, results=results, trial=trial, version='numpy')
+
+    # Create a grid of vectors
+    grid = np.stack((x, y), axis=-1)
+
+    # Apply the function on each point of the grid
+    z = np.apply_along_axis(objective_f, 2, grid)
+
+    # Create a figure
+    fig = plt.figure(figsize=(10, 4.5))
+    ax1 = fig.add_subplot(111)
+
+    ax1.contour(x, y, z, levels=50, cmap=colormap)
+    ax1.colorbar()
+
+    # Define colors and markers for the models
+    colors = ['red', 'black']
+    markers = ['o', 's']
+
+    # Plot each set of points
+    for idx, points in enumerate(trajectories):
+        x_values, y_values = zip(*points)
+        plt.scatter(
+            x_values,
+            y_values,
+            color=colors[idx],
+            marker=markers[idx],
+            label=f'Model {idx + 1}',
+        )
+
+        # Plot arrows for the trajectory
+        for i in range(len(points) - 1):
+            plt.arrow(
+                points[i][0],
+                points[i][1],
+                points[i + 1][0] - points[i][0],
+                points[i + 1][1] - points[i][1],
+                head_width=0.1,
+                head_length=0.1,
+                fc=colors[idx],
+                ec=colors[idx],
+            )
+
+    plt.xlabel('X')
+    plt.ylabel('Y')
+    plt.title('Contour Plot with Points and Trajectory')
+    plt.legend()
+    plt.show()
+
+    # Show the plots
+    plt.tight_layout()
+    plt.show()
+
+    return fig
+
+
 def create_optimization_plot(
     problem_name, problem, final_results, add_contour_plot=True, colormap='Wistia'
 ):

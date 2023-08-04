@@ -4316,21 +4316,21 @@ alpine2_500d_config = {
     'dimensions': 500,
 }
 
-alpine2_1000d_config = {
-    'objective': alpine2,
-    'bounds': [(-7.917, 7.917)],
-    'max_iterations': 1000,
-    'global_minimum': 2.8**1000,
-    'dimensions': 1000,
-}
+# alpine2_1000d_config = {
+#     'objective': alpine2,
+#     'bounds': [(-7.917, 7.917)],
+#     'max_iterations': 1000,
+#     'global_minimum': 2.8**1000,
+#     'dimensions': 1000,
+# }
 
-alpine2_5000d_config = {
-    'objective': alpine2,
-    'bounds': [(-7.917, 7.917)],
-    'max_iterations': 1000,
-    'global_minimum': 2.8**5000,
-    'dimensions': 5000,
-}
+# alpine2_5000d_config = {
+#     'objective': alpine2,
+#     'bounds': [(-7.917, 7.917)],
+#     'max_iterations': 1000,
+#     'global_minimum': 2.8**5000,
+#     'dimensions': 5000,
+# }
 
 brad_config = {
     'objective': brad,
@@ -4500,8 +4500,8 @@ PROBLEMS_BY_NAME = {
     'alpine2_10d': alpine2_10d_config,
     'alpine2_100d': alpine2_100d_config,
     'alpine2_500d': alpine2_500d_config,
-    'alpine2_1000d': alpine2_1000d_config,
-    'alpine2_5000d': alpine2_5000d_config,
+    # 'alpine2_1000d': alpine2_1000d_config,
+    # 'alpine2_5000d': alpine2_5000d_config,
     'brad': brad_config,
     'bartels_con': bartels_conn_config,
     'beale': beale_config,
