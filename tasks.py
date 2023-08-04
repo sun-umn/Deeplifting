@@ -26,14 +26,14 @@ problem_names = [
     'schaffer_n4',
     'schwefel',
     'shubert',
-    # 'ex8_1_1',
-    # 'kriging_peaks_red010',
-    # 'kriging_peaks_red020',
-    # 'mathopt6',
-    # 'quantum',
-    # 'rosenbrock',
-    # 'cross_leg_table',
-    # 'sine_envelope',
+    'ex8_1_1',
+    'kriging_peaks_red010',
+    'kriging_peaks_red020',
+    'mathopt6',
+    'quantum',
+    'rosenbrock',
+    'cross_leg_table',
+    'sine_envelope',
 ]
 
 # Identify available hidden sizes
@@ -150,7 +150,7 @@ def run_deeplifting_task():
     configurations = list(product(*combinations))
 
     # Number of trials
-    trials = 10
+    trials = 20
 
     # List to store performance data
     performance_df_list = []
