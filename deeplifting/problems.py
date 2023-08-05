@@ -3603,6 +3603,203 @@ def biggs_exp6(x, results, trial, version='numpy'):
     return result
 
 
+# Bird in 2d
+def bird(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = (
+            np.sin(x1) * np.exp(np.square(1 - np.cos(x2)))
+            + np.cos(x2) * np.exp(np.square(1 - np.sin(x1)))
+            + np.square(x1 - x2)
+        )
+    elif version == 'pytorch':
+        result == torch.sin(x1) * torch.exp(
+            torch.square(1 - torch.cos(x2))
+        ) + torch.cos(x2) * torch.exp(torch.square(1 - torch.sin(x1))) + torch.square(
+            x1 - x2
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# Bohachevsky1 in 2d
+def bohachevsky1(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = (
+            np.square(x1)
+            + 2 * np.square(x2)
+            - 0.3 * np.cos(3 * np.pi * x1)
+            - 0.4 * np.cos(4 * np.pi * x2)
+            + 0.7
+        )
+    elif version == 'pytorch':
+        result = (
+            torch.square(x1)
+            + 2 * torch.square(x2)
+            - 0.3 * torch.cos(3 * np.pi * x1)
+            - 0.4 * torch.cos(4 * np.pi * x2)
+            + 0.7
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# Bohachevsky2 in 2d
+def bohachevsky2(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = (
+            np.square(x1)
+            + 2 * np.square(x2)
+            - 0.3 * np.cos(3 * np.pi * x1) * 0.4 * np.cos(4 * np.pi * x2)
+            + 0.3
+        )
+    elif version == 'pytorch':
+        result = (
+            torch.square(x1)
+            + 2 * torch.square(x2)
+            - 0.3 * torch.cos(3 * np.pi * x1) * 0.4 * torch.cos(4 * np.pi * x2)
+            + 0.3
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# Bohachevsky3 in 2d
+def bohachevsky3(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = (
+            np.square(x1)
+            + 2 * np.square(x2)
+            - 0.3 * np.cos(3 * np.pi * x1 + 4 * np.pi * x2)
+            + 0.3
+        )
+    elif version == 'pytorch':
+        result = (
+            torch.square(x1)
+            + 2 * torch.square(x2)
+            - 0.3 * torch.cos(3 * np.pi * x1 + 4 * np.pi * x2)
+            + 0.3
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# Booth in 2d
+def booth(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = np.square(x1 + 2 * x2 - 7) + np.square(2 * x1 + x2 - 5)
+    elif version == 'pytorch':
+        result = torch.square(x1 + 2 * x2 - 7) + torch.square(2 * x1 + x2 - 5)
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# # Box-Betts Quadratic Sum in 3d
+# def box_betts(x, results, trial, version='numpy'):
+#     x1, x2, x3 = x.flatten()
+#     if version == 'numpy':
+#         g = np.exp(-0.1)
+
+
 # Problem configurations
 # Ackley
 ackley_config = {
@@ -4430,6 +4627,61 @@ biggs_exp6_config = {
     'dimensions': 6,
 }
 
+bird_config = {
+    'objective': bird,
+    'bounds': [
+        (-2 * np.pi, 2 * np.pi),
+        (-2 * np.pi, 2 * np.pi),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': -106.764537,
+    'dimensions': 2,
+}
+
+bohachevsky1_config = {
+    'objective': bohachevsky1,
+    'bounds': [
+        (-100, 100),
+        (-100, 100),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+}
+
+bohachevsky2_config = {
+    'objective': bohachevsky2,
+    'bounds': [
+        (-100, 100),
+        (-100, 100),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+}
+
+bohachevsky3_config = {
+    'objective': bohachevsky3,
+    'bounds': [
+        (-100, 100),
+        (-100, 100),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+}
+
+booth_config = {
+    'objective': booth,
+    'bounds': [
+        (-10, 10),
+        (-10, 10),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+}
+
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
     'ackley_3d': ackley_3d_config,
@@ -4510,4 +4762,9 @@ PROBLEMS_BY_NAME = {
     'biggs_exp4': biggs_exp4_config,
     'biggs_exp5': biggs_exp5_config,
     'biggs_exp6': biggs_exp6_config,
+    'bird': bird_config,
+    'bohachevsky1': bohachevsky1_config,
+    'bohachevsky2': bohachevsky2_config,
+    'bohachevsky3': bohachevsky3_config,
+    'booth': booth_config,
 }
