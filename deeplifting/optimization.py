@@ -18,6 +18,7 @@ from deeplifting.models import DeepliftingSkipMLP
 from deeplifting.utils import (
     DifferentialEvolutionCallback,
     DualAnnealingCallback,
+    HaltLog,
     get_devices,
     initialize_vector,
     set_seed,
@@ -76,6 +77,7 @@ def run_ipopt(problem: Dict, trials: int):
         # Call IPOPT
         start_time = time.time()
         result = minimize_ipopt(fn, x0, bounds=bounds)
+
         end_time = time.time()
         total_time = end_time - start_time
 
@@ -352,6 +354,7 @@ def run_pygranso(problem: Dict, trials: int):
     # Get the device (CPU for now)
     device = get_devices()
     fn_values = []
+    interim_results = []
 
     # Get the maximum iterations
     max_iterations = problem['max_iterations']
@@ -416,11 +419,29 @@ def run_pygranso(problem: Dict, trials: int):
         # Combined function
         comb_fn = lambda x: pygranso_nd_fn(x, fn, bounds)  # noqa
 
+        # Initiate halt log
+        mHLF_obj = HaltLog()
+        halt_log_fn, get_log_fn = mHLF_obj.makeHaltLogFunctions(opts.maxit)
+
+        #  Set PyGRANSO's logging function in opts
+        opts.halt_log_fn = halt_log_fn
+
         # Run the main algorithm
         start_time = time.time()
         soln = pygranso(var_spec=var_in, combined_fn=comb_fn, user_opts=opts)
         end_time = time.time()
         total_time = end_time - start_time
+
+        # GET THE HISTORY OF ITERATES
+        # Even if an error is thrown, the log generated until the error can be
+        # obtained by calling get_log_fn()
+        log = get_log_fn()
+
+        # Final structure
+        indexes = (pd.Series(log.fn_evals).cumsum() - 1).values.tolist()
+
+        # Index results
+        interim_results.append(results[trial, indexes, :])
 
         # Get final x we will also need to map
         # it to the same bounds
@@ -436,7 +457,7 @@ def run_pygranso(problem: Dict, trials: int):
         gc.collect()
         torch.cuda.empty_cache()
 
-    return {'results': results, 'final_results': fn_values}
+    return {'results': interim_results, 'final_results': fn_values}
 
 
 def deeplifting_predictions(x, objective):
@@ -490,6 +511,7 @@ def run_deeplifting(
     activation='sine',
     output_activation='sine',
     agg_function='sum',
+    save_model_path=None,
 ):
     """
     Function that runs our preimer method of deeplifting.
@@ -499,8 +521,8 @@ def run_deeplifting(
     # Get the device (CPU for now)
     dimensions = problem['dimensions']
     device = get_devices()
-    print(device)
     fn_values = []
+    iterim_results = []
 
     for trial in range(trials):
         # Objective function
@@ -572,11 +594,29 @@ def run_deeplifting(
         # # Combined function
         comb_fn = lambda model: deeplifting_nd_fn(model, fn)  # noqa
 
+        # Initiate halt log
+        mHLF_obj = HaltLog()
+        halt_log_fn, get_log_fn = mHLF_obj.makeHaltLogFunctions(opts.maxit)
+
+        #  Set PyGRANSO's logging function in opts
+        opts.halt_log_fn = halt_log_fn
+
         # Run the main algorithm
         start_time = time.time()
         soln = pygranso(var_spec=model, combined_fn=comb_fn, user_opts=opts)
         end_time = time.time()
         total_time = end_time - start_time
+
+        # GET THE HISTORY OF ITERATES
+        # Even if an error is thrown, the log generated until the error can be
+        # obtained by calling get_log_fn()
+        log = get_log_fn()
+
+        # Final structure
+        indexes = (pd.Series(log.fn_evals).cumsum() - 1).values.tolist()
+
+        # Append intermediate results
+        iterim_results.append(results[trial, indexes, :])
 
         # Get final x we will also need to map
         # it to the same bounds
@@ -593,12 +633,29 @@ def run_deeplifting(
         )
         fn_values.append(data_point)
 
+        # If save model then we need to save the configuration of the
+        # model and the model weights
+        if save_model_path is not None:
+            # Get the configuration
+            config = {}
+            config['input_size'] = input_size
+            config['hidden_sizes'] = hidden_sizes
+            config['dimensions'] = dimensions
+            config['bounds'] = bounds
+            config['activation'] = activation
+            config['output_activation'] = output_activation
+            config['agg_function'] = agg_function
+            config['seed'] = trial
+
+            # Save the model
+            torch.save(model.state_dict(), save_model_path)
+
         # Collect garbage and empty cache
         del (model, nvar, x0, opts, soln, outputs, xf, f)
         gc.collect()
         torch.cuda.empty_cache()
 
-    return {'results': results, 'final_results': fn_values}
+    return {'results': iterim_results, 'final_results': fn_values}
 
 
 def run_deeplifting_optimization(problem: Dict, algorithms: List) -> pd.DataFrame:
