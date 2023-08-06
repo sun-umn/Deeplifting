@@ -353,12 +353,18 @@ def run_pygranso(problem: Dict, trials: int):
     device = get_devices()
     fn_values = []
 
+    # Get the maximum iterations
+    max_iterations = problem['max_iterations']
+
+    # Get the number of dimensions for the problem
+    dimensions = problem['dimensions']
+
+    # results
+    results = np.zeros((trials, max_iterations, dimensions + 1)) * np.nan
+
     for trial in range(trials):
         # Seed everything
         set_seed(trial)
-
-        # Get the number of dimensions for the problem
-        dimensions = problem['dimensions']
 
         # var in
         var_in = {}
@@ -382,33 +388,16 @@ def run_pygranso(problem: Dict, trials: int):
                 bounds = bounds * dimensions
 
         # Create x0 based on the bounds
-        x0_values = []
-        for bound in bounds:
-            a, b = bound
-            if a is None and b is None:
-                x_value = torch.randn(1) * 1e3
-
-            elif a is None and b is not None:
-                x_value = torch.randn(1) * 1e3
-                x_value = torch.clamp(x_value, min=None, max=b)
-
-            elif a is not None and b is None:
-                x_value = torch.randn(1) * 1e3
-                x_value = torch.clamp(x_value, min=a, max=None)
-
-            else:
-                x_value = a + (b - a) / 2.0 * (torch.sin(torch.randn(1)) + 1.0)
-
-            x0_values.append(x_value)
-
-        x0 = torch.tensor(x0_values).reshape(dimensions, 1)
+        # Initial point
+        x0 = initialize_vector(size=dimensions, bounds=bounds)
+        x0 = torch.tensor(x0).reshape(dimensions, 1)
         x0 = x0.to(device=device, dtype=torch.double)
 
         # Pygranso options
         opts.x0 = x0
         opts.torch_device = device
-        # opts.print_frequency = 0
-        opts.print_level = 0
+        opts.print_frequency = 1
+        # opts.print_level = 0
         opts.limited_mem_size = 50
         opts.stat_l2_model = False
         opts.double_precision = True
@@ -418,12 +407,6 @@ def run_pygranso(problem: Dict, trials: int):
 
         # Objective function
         objective = problem['objective']
-
-        # Get the maximum iterations
-        max_iterations = problem['max_iterations']
-
-        # results
-        results = np.zeros((trials, max_iterations, dimensions + 1)) * np.nan
 
         # Set up the function with the results
         fn = lambda x: objective(  # noqa
