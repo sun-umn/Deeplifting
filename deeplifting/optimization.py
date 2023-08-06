@@ -16,6 +16,7 @@ from scipy.optimize import differential_evolution, dual_annealing
 # first party
 from deeplifting.models import DeepliftingSkipMLP
 from deeplifting.utils import (
+    DifferentialEvolutionCallback,
     DualAnnealingCallback,
     get_devices,
     initialize_vector,
@@ -231,6 +232,9 @@ def run_differential_evolution(
         # Initial point
         x0 = initialize_vector(size=dimensions, bounds=bounds)
 
+        # Callback
+        callback = DifferentialEvolutionCallback()
+
         # Set up the function with the results
         fn = lambda x: objective(  # noqa
             x, results=results, trial=trial, version='numpy'
@@ -246,13 +250,14 @@ def run_differential_evolution(
             strategy=strat,
             mutation=mut,
             recombination=recomb,
+            callback=callback.record_intermediate_data,
         )
         end_time = time.time()
         total_time = end_time - start_time
         x_tuple = tuple(x for x in result.x)
         fn_values.append(x_tuple + (result.fun, 'Differential Evolution', total_time))
 
-    return {'results': results, 'final_results': fn_values}
+    return {'results': results, 'final_results': fn_values, 'callbacks': callback}
 
 
 def pygranso_fn(X_struct, objective, bounds):

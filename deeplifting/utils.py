@@ -8,6 +8,16 @@ import numpy as np
 import torch
 
 
+class DifferentialEvolutionCallback(object):
+    def __init__(self):
+        self.x_history = []
+        self.convergence_history = []
+
+    def record_intermediate_data(self, xk, convergence):
+        self.x_history.append(xk)
+        self.convergence_history.append(convergence)
+
+
 class DualAnnealingCallback(object):
     def __init__(self):
         self.x_history = []
