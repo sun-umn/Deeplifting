@@ -15,7 +15,12 @@ from scipy.optimize import differential_evolution, dual_annealing
 
 # first party
 from deeplifting.models import DeepliftingSkipMLP
-from deeplifting.utils import get_devices, set_seed
+from deeplifting.utils import (
+    DualAnnealingCallback,
+    get_devices,
+    initialize_vector,
+    set_seed,
+)
 
 
 def run_ipopt(problem: Dict, trials: int):
@@ -60,7 +65,7 @@ def run_ipopt(problem: Dict, trials: int):
 
         # Initial guess (starting point for IPOPT)
         # TODO: Need to provide a better starting point here
-        x0 = np.random.rand(dimensions)
+        x0 = initialize_vector(size=dimensions, bounds=bounds)
 
         # Get the objective
         fn = lambda x: objective(  # noqa
@@ -120,35 +125,52 @@ def run_dual_annealing(
 
     # Save the results
     # We will store the optimization steps here
-    results = np.zeros((trials, max_iterations, dimensions + 1)) * np.nan
+    results = np.zeros((trials, max_iterations * 10, dimensions + 1)) * np.nan
     fn_values = []
+    callbacks = []
 
     for trial in range(trials):
         # Set a random seed
         np.random.seed(trial)
+
+        # Initial point
+        x0 = initialize_vector(size=dimensions, bounds=bounds)
 
         # Set up the function with the results
         fn = lambda x: objective(  # noqa
             x, results=results, trial=trial, version='numpy'
         )
 
+        # Callback
+        callback = DualAnnealingCallback()
+
+        # Let's record the initial result
+        # We will use the context -1 to indicate the initial search
+        callback.record_intermediate_data(x0, fn(x0), -1)
+
         # Get the result
         start_time = time.time()
         result = dual_annealing(
             fn,
             updated_bounds,
+            x0=x0,
             maxiter=1000,
             initial_temp=init_temp,
             restart_temp_ratio=res_temp,
             visit=vis,
             accept=acpt,
+            callback=callback.record_intermediate_data,
         )
+
         end_time = time.time()
         total_time = end_time - start_time
         x_tuple = tuple(x for x in result.x)
         fn_values.append(x_tuple + (result.fun, 'Dual Annealing', total_time))
 
-    return {'results': results, 'final_results': fn_values}
+        # Append callback results
+        callbacks.append(callback)
+
+    return {'results': results, 'final_results': fn_values, 'callback': callbacks}
 
 
 def run_differential_evolution(
@@ -199,12 +221,15 @@ def run_differential_evolution(
 
     # Save the results
     # We will store the optimization steps here
-    results = np.zeros((trials, max_iterations, dimensions + 1)) * np.nan
+    results = np.zeros((trials, max_iterations * 10, dimensions + 1)) * np.nan
     fn_values = []
 
     for trial in range(trials):
         # Set a random seed
         np.random.seed(trial)
+
+        # Initial point
+        x0 = initialize_vector(size=dimensions, bounds=bounds)
 
         # Set up the function with the results
         fn = lambda x: objective(  # noqa
@@ -216,6 +241,7 @@ def run_differential_evolution(
         result = differential_evolution(
             fn,
             updated_bounds,
+            x0=x0,
             maxiter=1000,
             strategy=strat,
             mutation=mut,

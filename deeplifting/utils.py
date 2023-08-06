@@ -8,6 +8,18 @@ import numpy as np
 import torch
 
 
+class DualAnnealingCallback(object):
+    def __init__(self):
+        self.x_history = []
+        self.f_history = []
+        self.context_history = []
+
+    def record_intermediate_data(self, x, f, algorithm_context):
+        self.x_history.append(x)
+        self.f_history.append(f)
+        self.context_history.append(algorithm_context)
+
+
 def set_seed(seed):
     """
     Function to set the seed for the run
@@ -21,7 +33,20 @@ def set_seed(seed):
     random.seed(seed)
 
 
-def create_contour_plot(problem_name, problem, trajectories, colormap='OrRd_r'):
+def initialize_vector(size, bounds):
+    if len(bounds) != size:
+        raise ValueError("The number of bounds must match the size of the vector")
+
+    vector = [np.random.uniform(low, high) for low, high in bounds]
+    return np.array(vector)
+
+
+def add_jitter(points, jitter_amount=0.05):
+    jitter = np.random.uniform(-jitter_amount, jitter_amount, points.shape)
+    return points + jitter
+
+
+def create_contour_plot(problem_name, problem, models, trajectories, colormap='OrRd_r'):
     """
     Function that will build out the plots and the solution
     found for the optimization. For our purposes we will mainly
@@ -68,38 +93,36 @@ def create_contour_plot(problem_name, problem, trajectories, colormap='OrRd_r'):
     z = np.apply_along_axis(objective_f, 2, grid)
 
     # Create a figure
-    fig = plt.figure(figsize=(10, 4.5))
+    fig = plt.figure(figsize=(8, 8))
     ax1 = fig.add_subplot(111)
 
-    ax1.contour(x, y, z, levels=50, cmap=colormap)
-    ax1.colorbar()
+    contour = ax1.contourf(x, y, z, levels=10, cmap=colormap)
+    fig.colorbar(contour, ax=ax1)
 
     # Define colors and markers for the models
-    colors = ['red', 'black']
-    markers = ['o', 's']
+    colors = ['grey', 'maroon', 'black']
 
     # Plot each set of points
     for idx, points in enumerate(trajectories):
-        x_values, y_values = zip(*points)
+        points_with_jitter = add_jitter(np.array(points))
+        x_values, y_values = zip(*points_with_jitter)
         plt.scatter(
             x_values,
             y_values,
             color=colors[idx],
-            marker=markers[idx],
-            label=f'Model {idx + 1}',
+            label=models[idx],
         )
 
-        # Plot arrows for the trajectory
-        for i in range(len(points) - 1):
-            plt.arrow(
-                points[i][0],
-                points[i][1],
-                points[i + 1][0] - points[i][0],
-                points[i + 1][1] - points[i][1],
-                head_width=0.1,
-                head_length=0.1,
-                fc=colors[idx],
-                ec=colors[idx],
+        # Connect the points with lines
+        plt.plot(x_values, y_values, color=colors[idx])
+
+        for i, point in enumerate(points):
+            plt.annotate(
+                str(i),
+                xy=point,
+                xytext=(-10, 5),
+                textcoords='offset points',
+                color=colors[idx],
             )
 
     plt.xlabel('X')
