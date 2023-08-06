@@ -114,8 +114,8 @@ def create_contour_plot(problem_name, problem, models, trajectories, colormap='O
 
     # Plot each set of points
     for idx, points in enumerate(trajectories):
-        points_with_jitter = add_jitter(np.array(points))
-        x_values, y_values = zip(*points_with_jitter)
+        # points_with_jitter = add_jitter(np.array(points))
+        x_values, y_values = zip(*points)
         plt.scatter(
             x_values,
             y_values,
