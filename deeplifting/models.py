@@ -1,9 +1,23 @@
+# stdlib
+import random
+
 # third party
+import numpy as np
 import torch
 import torch.nn as nn
 
-# first party
-from deeplifting.utils import set_seed
+
+def set_seed(seed):
+    """
+    Function to set the seed for the run
+    """
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    np.random.seed(seed)
+    random.seed(seed)
 
 
 class SinActivation(nn.Module):

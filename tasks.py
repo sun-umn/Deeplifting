@@ -3,6 +3,7 @@
 from itertools import product
 
 # third party
+import click
 import neptune
 import pandas as pd
 
@@ -90,6 +91,12 @@ output_activations = ['leaky_relu']
 agg_functions = ['sum']
 
 
+@click.group()
+def cli():
+    pass
+
+
+@cli.command('run-deeplifting-task')
 def run_deeplifting_task():
     """
     Run deep lifting over specified available problems and over a search space
@@ -167,5 +174,12 @@ def run_deeplifting_task():
             performance_df_list.append(results)
 
 
+@cli.command('run-test')
+def run_test():
+    "Testing"
+    print('Test!')
+
+
 if __name__ == "__main__":
-    run_deeplifting_task()
+    # Be able to run different commands
+    cli()
