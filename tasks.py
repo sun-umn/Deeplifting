@@ -174,10 +174,26 @@ def run_deeplifting_task():
             performance_df_list.append(results)
 
 
-@cli.command('run-test')
-def run_test():
-    "Testing"
-    print('Test!')
+@cli.command('run-algorithm-comparisons')
+def run_algorithm_comparison_task():
+    """
+    Function that will run the competing algorithms to Deeplifting.
+    The current competitor models are:
+    1. IPOPT
+    2. Dual Annealing
+    3. Differential Evolution
+    4. PyGRANSO
+    """
+    print('Run Algorithms!')
+
+
+@cli.command('create-trajectory-plot')
+def run_create_trajectory_plot():
+    """
+    Function that will run each of the models and create a
+    "trajectory plot" for the paper
+    """
+    print('Create trajectory plot!')
 
 
 if __name__ == "__main__":
