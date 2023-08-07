@@ -3793,11 +3793,509 @@ def booth(x, results, trial, version='numpy'):
     return result
 
 
-# # Box-Betts Quadratic Sum in 3d
-# def box_betts(x, results, trial, version='numpy'):
-#     x1, x2, x3 = x.flatten()
-#     if version == 'numpy':
-#         g = np.exp(-0.1)
+# Branin RCOS in 2d
+def branin_rcos(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = (
+            np.square(x2 - ((5 * np.square(x1)) / (4 * np.square(np.pi))) - 6)
+            + 10
+            * (1 - (1 / (8 * np.pi)))
+            * np.cos(x1)
+            * np.cos(x2)
+            * np.log(np.square(x1) + np.square(x2) + 1)
+            + 10
+        )
+    elif version == 'pytorch':
+        result = (
+            torch.square(x2 - ((5 * torch.square(x1)) / (4 * torch.square(np.pi))) - 6)
+            + 10
+            * (1 - (1 / (8 * np.pi)))
+            * torch.cos(x1)
+            * torch.cos(x2)
+            * torch.log(torch.square(x1) + torch.square(x2) + 1)
+            + 10
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# Brent function in 2d
+def brent(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = (
+            np.square(x1 + 10)
+            + np.square(x2 + 10)
+            + np.exp(-np.square(x1) - np.square(x2))
+        )
+    elif version == 'pytorch':
+        result = (
+            torch.square(x1 + 10)
+            + torch.square(x2 + 10)
+            + torch.exp(-torch.square(x1) - torch.square(x2))
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# nd Brown function
+def brown(x, results, trial, version='numpy'):
+    x = x.flatten()
+    shifted_x = x[1:]
+    x = x[:-1]
+    if version == 'numpy':
+        result = np.sum(
+            np.power(np.square(x), np.square(shifted_x) + 1)
+            + np.power(np.square(shifted_x), np.square(shifted_x) + 1)
+        )
+    elif version == 'pytorch':
+        result = torch.sum(
+            torch.power(torch.square(x), torch.square(shifted_x) + 1)
+            + torch.power(torch.square(shifted_x), torch.square(shifted_x) + 1)
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        x_tuple = tuple(x.detach().cpu().numpy())
+        results[trial, iteration, :] = np.array(
+            x_tuple + (result.detach().cpu().numpy(),)
+        )
+
+    else:
+        x_tuple = tuple(x.flatten())
+        results[trial, iteration, :] = np.array(x_tuple + (result,))
+
+    return result
+
+
+# Bukin n2 in 2d
+def bukin_n2(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = 100 * (x2 - 0.01 * np.square(x1) + 1) + 0.01 * np.square(x1 + 10)
+    elif version == 'pytorch':
+        result = 100 * (x2 - 0.01 * torch.square(x1) + 1) + 0.01 * torch.square(x1 + 10)
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# Bukin n4 in 2d
+def bukin_n4(x, results, trial, version):
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = 100 * np.square(x2) + 0.01 * np.abs(x1 + 10)
+    elif version == 'pytorch':
+        result = 100 * torch.square(x2) + 0.01 * torch.abs(x1 + 10)
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# Camel 3 hump in 2d
+def camel_3hump(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy' or version == 'pytorch':
+        result = 2 * x1**2 - 1.05 * x1**4 + (1 / 6) * x1**6 + x1 * x2 + x2**2
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# Camel 6 hump in 2d
+def camel_6hump(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy' or version == 'pytorch':
+        result = (
+            (4 - 2.1 * x1**2 + (1 / 3) * x1**4) * x1**2
+            + x1 * x2
+            + (4 * x**2 - 4) * x2**2
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# Chen Bird in 2d
+def chen_bird(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = -(0.001 / np.floor(0.001**2 + (x1 - 0.4 * x2 - 0.1) ** 2)) - (
+            0.001 / np.floor(0.001**2 + (2 * x1 + x2 - 1.5) ** 2)
+        )
+    elif version == 'pytorch':
+        result = -(0.001 / torch.floor(0.001**2 + (x1 - 0.4 * x2 - 0.1) ** 2)) - (
+            0.001 / torch.floor(0.001**2 + (2 * x1 + x2 - 1.5) ** 2)
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# Chen V in 2d
+def chen_v(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = (
+            -(0.001 / np.floor(0.001**2 + (x1**2 + x2**2 - 1) ** 2))
+            - (0.001 / np.floor(0.001**2 + x1**2 + x2**2 - 0.5) ** 2)
+            - (0.001 / np.floor(0.001**2 + (x1**2 - x2**2) ** 2))
+        )
+    elif version == 'pytorch':
+        result = (
+            -(0.001 / torch.floor(0.001**2 + (x1**2 + x2**2 - 1) ** 2))
+            - (0.001 / torch.floor(0.001**2 + x1**2 + x2**2 - 0.5) ** 2)
+            - (0.001 / torch.floor(0.001**2 + (x1**2 - x2**2) ** 2))
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# Chichinadze in 2d
+def chichinadze(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = (
+            x1**2
+            - 12 * x1
+            + 11
+            + 10 * np.cos((np.pi * x1) / 2)
+            + 8 * np.sin((5 * np.pi * x1) / 2)
+            - (1 / 5) ** 0.5 * np.exp(-0.5 * (x2 - 0.5) ** 2)
+        )
+    elif version == 'pytorch':
+        result = (
+            x1**2
+            - 12 * x1
+            + 11
+            + 10 * torch.cos((np.pi * x1) / 2)
+            + 8 * torch.sin((5 * np.pi * x1) / 2)
+            - (1 / 5) ** 0.5 * torch.exp(-0.5 * (x2 - 0.5) ** 2)
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# nd Chung Reynolds
+def chung_reynolds(x, results, trial, version='numpy'):
+    x = x.flatten()
+    if version == 'numpy':
+        result = np.square(np.sum(np.square(x)))
+    elif version == 'pytorch':
+        result = torch.square(torch.sum(torch.square(x)))
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        x_tuple = tuple(x.detach().cpu().numpy())
+        results[trial, iteration, :] = np.array(
+            x_tuple + (result.detach().cpu().numpy(),)
+        )
+
+    else:
+        x_tuple = tuple(x.flatten())
+        results[trial, iteration, :] = np.array(x_tuple + (result,))
+
+    return result
+
+
+# Colville in 4d
+def colville(x, results, trial, version='numpy'):
+    x1, x2, x3, x4 = x.flatten()
+    if version == 'numpy' or version == 'pytorch':
+        result = (
+            100 * (x1 - x2**2) ** 2
+            + (1 - x1) ** 2
+            + 90 * (x4 - x3**2) ** 2
+            + (1 - x3) ** 2
+            + 10.1 * ((x2 - 1) ** 2 + (x4 - 1) ** 2)
+            + 19.8 * (x2 - 1) * (x4 - 1)
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                x3.detach().cpu().numpy(),
+                x4.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, x3, x4, result))
+
+    return result
+
+
+# Cosine Mixture in 4d
+def cosine_mixture(x, results, trial, version='numpy'):
+    x = x.flatten()
+    if version == 'numpy':
+        result = -0.1 * np.sum(np.cos(5 * np.pi * x)) - np.sum(np.square(x))
+    elif version == 'pytorch':
+        result = -0.1 * torch.sum(torch.cos(5 * np.pi * x)) - torch.sum(torch.square(x))
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        x_tuple = tuple(x.detach().cpu().numpy())
+        results[trial, iteration, :] = np.array(
+            x_tuple + (result.detach().cpu().numpy(),)
+        )
+
+    else:
+        x_tuple = tuple(x.flatten())
+        results[trial, iteration, :] = np.array(x_tuple + (result,))
+
+    return result
+
+
+# nd Csendes fn
+def csendes(x, results, trial, version='numpy'):
+    x = x.flatten()
+    if version == 'numpy':
+        result = np.sum(np.power(x, 6) * (2 + np.sin(1 / x)))
+    elif version == 'pytorch':
+        result = torch.sum(torch.power(x, 6) * (2 + torch.sin(1 / x)))
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        x_tuple = tuple(x.detach().cpu().numpy())
+        results[trial, iteration, :] = np.array(
+            x_tuple + (result.detach().cpu().numpy(),)
+        )
+
+    else:
+        x_tuple = tuple(x.flatten())
+        results[trial, iteration, :] = np.array(x_tuple + (result,))
+
+    return result
+
+
+# Cube in 2d
+def cube(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy' or version == 'pytorch':
+        result = 100 * (x2 - x1**3) ** 2 + (1 - x1) ** 2
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
 
 
 # Problem configurations
@@ -4421,10 +4919,7 @@ adjiman_config = {
 
 alpine1_config = {
     'objective': alpine1,
-    'bounds': [
-        (-10, 10),
-        (-10, 10),
-    ],
+    'bounds': [(-10, 10)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2,
@@ -4480,10 +4975,7 @@ alpine1_5000d_config = {
 
 alpine2_config = {
     'objective': alpine2,
-    'bounds': [
-        (-7.917, 7.917),
-        (-7.917, 7.917),
-    ],
+    'bounds': [(-7.917, 7.917)],
     'max_iterations': 1000,
     'global_minimum': 2.8**2,
     'dimensions': 2,
@@ -4682,6 +5174,292 @@ booth_config = {
     'dimensions': 2,
 }
 
+branin_rcos_config = {
+    'objective': branin_rcos,
+    'bounds': [
+        (-5, 15),
+        (-5, 15),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 5.559037,
+    'dimensions': 2,
+}
+
+brent_config = {
+    'objective': brent,
+    'bounds': [
+        (-10, 10),
+        (-10, 10),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+}
+
+brown_config = {
+    'objective': brown,
+    'bounds': [(-1, 4)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+}
+
+brown_10d_config = {
+    'objective': brown,
+    'bounds': [(-1, 4)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 10,
+}
+
+brown_50d_config = {
+    'objective': brown,
+    'bounds': [(-1, 4)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 50,
+}
+
+brown_100d_config = {
+    'objective': brown,
+    'bounds': [(-1, 4)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 100,
+}
+
+brown_500d_config = {
+    'objective': brown,
+    'bounds': [(-1, 4)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 500,
+}
+
+brown_1000d_config = {
+    'objective': brown,
+    'bounds': [(-1, 4)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 1000,
+}
+
+brown_5000d_config = {
+    'objective': brown,
+    'bounds': [(-1, 4)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 5000,
+}
+
+bukin_n2_config = {
+    'objective': bukin_n2,
+    'bounds': [
+        (-15, -5),
+        (-3, -3),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+}
+
+bukin_n4_config = {
+    'objective': bukin_n4,
+    'bounds': [
+        (-15, -5),
+        (-3, -3),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+}
+
+camel_3hump_config = {
+    'objective': camel_3hump,
+    'bounds': [
+        (-5, 5),
+        (-5, 5),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+}
+
+camel_6hump_config = {
+    'objective': camel_6hump,
+    'bounds': [
+        (-5, 5),
+        (-5, 5),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': -1.0316,
+    'dimensions': 2,
+}
+
+chen_bird_config = {
+    'objective': chen_bird,
+    'bounds': [
+        (-500, 500),
+        (-500, 500),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': -2000,
+    'dimensions': 2,
+}
+
+chen_v_config = {
+    'objective': chen_v,
+    'bounds': [
+        (-500, 500),
+        (-500, 500),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': -2000,
+    'dimensions': 2,
+}
+
+chichinadze_config = {
+    'objective': chichinadze,
+    'bounds': [
+        (-30, 30),
+        (-30, 30),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': -43.3159,
+    'dimensions': 2,
+}
+
+chung_reynolds_config = {
+    'objective': chung_reynolds,
+    'bounds': [(-100, 100)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+}
+
+chung_reynolds_10d_config = {
+    'objective': chung_reynolds,
+    'bounds': [(-100, 100)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 10,
+}
+
+chung_reynolds_50d_config = {
+    'objective': chung_reynolds,
+    'bounds': [(-100, 100)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 50,
+}
+
+chung_reynolds_100d_config = {
+    'objective': chung_reynolds,
+    'bounds': [(-100, 100)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 100,
+}
+
+chung_reynolds_500d_config = {
+    'objective': chung_reynolds,
+    'bounds': [(-100, 100)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 500,
+}
+
+chung_reynolds_1000d_config = {
+    'objective': chung_reynolds,
+    'bounds': [(-100, 100)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 1000,
+}
+
+chung_reynolds_5000d_config = {
+    'objective': chung_reynolds,
+    'bounds': [(-100, 100)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 5000,
+}
+
+cosine_mixture_config = {
+    'objective': cosine_mixture,
+    'bounds': [(-1, 1)],
+    'max_iterations': 1000,
+    'global_minimum': 0.4,
+    'dimensions': 4,
+}
+
+csendes_config = {
+    'objective': csendes,
+    'bounds': [(-1, 1)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+}
+
+csendes_10d_config = {
+    'objective': csendes,
+    'bounds': [(-1, 1)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 10,
+}
+
+csendes_50d_config = {
+    'objective': csendes,
+    'bounds': [(-1, 1)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 50,
+}
+
+csendes_100d_config = {
+    'objective': csendes,
+    'bounds': [(-1, 1)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 100,
+}
+
+csendes_500d_config = {
+    'objective': csendes,
+    'bounds': [(-1, 1)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 500,
+}
+
+csendes_1000d_config = {
+    'objective': csendes,
+    'bounds': [(-1, 1)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 1000,
+}
+
+csendes_5000d_config = {
+    'objective': csendes,
+    'bounds': [(-1, 1)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 5000,
+}
+
+cube_config = {
+    'objective': cube,
+    'bounds': [
+        (-10, 10),
+        (-10, 10),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+}
+
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
     'ackley_3d': ackley_3d_config,
@@ -4767,4 +5545,36 @@ PROBLEMS_BY_NAME = {
     'bohachevsky2': bohachevsky2_config,
     'bohachevsky3': bohachevsky3_config,
     'booth': booth_config,
+    'branin_rcos': branin_rcos_config,
+    'brent': brent_config,
+    'brown': brown_config,
+    'brown_10d': brown_10d_config,
+    'brown_50d': brown_50d_config,
+    'brown_100d': brown_100d_config,
+    'brown_500d': brown_500d_config,
+    'brown_1000d': brown_1000d_config,
+    'brown_5000d': brown_5000d_config,
+    'bukin_n2': bukin_n2_config,
+    'bukin_n4': bukin_n4_config,
+    'camel_3hump': camel_3hump_config,
+    'camel_6hump': camel_6hump_config,
+    'chen_bird': chen_bird_config,
+    'chen_v': chen_v_config,
+    'chichinadze': chichinadze_config,
+    'chung_reynolds': chung_reynolds_config,
+    'chung_reyonlds_10d': chung_reynolds_10d_config,
+    'chung_reynolds_50d': chung_reynolds_50d_config,
+    'chung_reynolds_100d': chung_reynolds_100d_config,
+    'chung_reynolds_500d': chung_reynolds_500d_config,
+    'chung_reynolds_1000d': chung_reynolds_1000d_config,
+    'chung_reynolds_5000d': chung_reynolds_5000d_config,
+    'cosine_mixture': cosine_mixture_config,
+    'csendes': csendes_config,
+    'csendes_10d': csendes_10d_config,
+    'csendes_50d': csendes_50d_config,
+    'csendes_100d': csendes_100d_config,
+    'csendes_500d': csendes_500d_config,
+    'csendes_1000d': csendes_1000d_config,
+    'csendes_5000d': csendes_5000d_config,
+    'cube': cube_config,
 }
