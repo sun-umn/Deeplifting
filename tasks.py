@@ -5,36 +5,43 @@ from itertools import product
 # third party
 import click
 import neptune
+import numpy as np
 import pandas as pd
 
 # first party
-from deeplifting.optimization import run_deeplifting
+from deeplifting.optimization import (
+    run_deeplifting,
+    run_differential_evolution,
+    run_dual_annealing,
+    run_ipopt,
+    run_pygranso,
+)
 from deeplifting.problems import PROBLEMS_BY_NAME
 
 # Identify problems to run
 problem_names = [
     'ackley',
-    'bukin_n6',
-    'cross_in_tray',
-    'drop_wave',
-    'eggholder',
-    'griewank',
-    'holder_table',
-    'levy',
-    'levy_n13',
-    'rastrigin',
-    'schaffer_n2',
-    'schaffer_n4',
-    'schwefel',
-    'shubert',
-    'ex8_1_1',
-    'kriging_peaks_red010',
-    'kriging_peaks_red020',
-    'mathopt6',
-    'quantum',
-    'rosenbrock',
-    'cross_leg_table',
-    'sine_envelope',
+    # 'bukin_n6',
+    # 'cross_in_tray',
+    # 'drop_wave',
+    # 'eggholder',
+    # 'griewank',
+    # 'holder_table',
+    # 'levy',
+    # 'levy_n13',
+    # 'rastrigin',
+    # 'schaffer_n2',
+    # 'schaffer_n4',
+    # 'schwefel',
+    # 'shubert',
+    # 'ex8_1_1',
+    # 'kriging_peaks_red010',
+    # 'kriging_peaks_red020',
+    # 'mathopt6',
+    # 'quantum',
+    # 'rosenbrock',
+    # 'cross_leg_table',
+    # 'sine_envelope',
 ]
 
 # Identify available hidden sizes
@@ -185,6 +192,88 @@ def run_algorithm_comparison_task():
     4. PyGRANSO
     """
     print('Run Algorithms!')
+    problem_performance_list = []
+    trials = 1
+
+    for problem_name in problem_names:
+        # Setup the problem
+        problem = PROBLEMS_BY_NAME[problem_name]
+
+        # Get the known minimum
+        minimum_value = problem['global_minimum']
+
+        # First run IPOPT
+        outputs_ipopt = run_ipopt(problem, trials=trials)
+
+        # Get the final results for all IPOPT runs
+        ipopt_results = pd.DataFrame(
+            outputs_ipopt['final_results'],
+            columns=['x1', 'x2', 'f', 'algorithm', 'time'],
+        )
+        ipopt_results['problem_name'] = problem_name
+        ipopt_results['hits'] = np.where(
+            np.abs(ipopt_results['f'] - minimum_value) <= 1e-4, 1, 0
+        )
+
+        # Add IPOPT to the problem_performance_list
+        problem_performance_list.append(ipopt_results)
+
+        # Next add dual annealing
+        outputs_dual_annealing = run_dual_annealing(problem, trials=trials)
+
+        # Get the final results for all dual annealing runs
+        dual_annleaing_results = pd.DataFrame(
+            outputs_dual_annealing['final_results'],
+            columns=['x1', 'x2', 'f', 'algorithm', 'time'],
+        )
+        dual_annleaing_results['problem_name'] = problem_name
+        dual_annleaing_results['hits'] = np.where(
+            np.abs(dual_annleaing_results['f'] - minimum_value) <= 1e-4, 1, 0
+        )
+
+        # Add dual annealing to the problem_performance_list
+        problem_performance_list.append(dual_annleaing_results)
+
+        # Next add differential evolution
+        outputs_differential_evolution = run_differential_evolution(
+            problem, trials=trials
+        )
+
+        # Get the final results for all differential evolution runs
+        differential_evolution_results = pd.DataFrame(
+            outputs_differential_evolution['final_results'],
+            columns=['x1', 'x2', 'f', 'algorithm', 'time'],
+        )
+        differential_evolution_results['problem_name'] = problem_name
+        differential_evolution_results['hits'] = np.where(
+            np.abs(differential_evolution_results['f'] - minimum_value) <= 1e-4, 1, 0
+        )
+
+        # Add differential evolution to the problem_performance_list
+        problem_performance_list.append(differential_evolution_results)
+
+        # Next add pygranso
+        outputs_pygranso = run_pygranso(problem, trials=trials)
+
+        # Get the final results for all differential evolution runs
+        pygranso_results = pd.DataFrame(
+            outputs_pygranso['final_results'],
+            columns=['x1', 'x2', 'f', 'algorithm', 'time'],
+        )
+        pygranso_results['problem_name'] = problem_name
+        pygranso_results['hits'] = np.where(
+            np.abs(pygranso_results['f'] - minimum_value) <= 1e-4, 1, 0
+        )
+
+        # Add differential evolution to the problem_performance_list
+        problem_performance_list.append(pygranso_results)
+
+        # Concatenate all of the data at the end of each problem because
+        # we can save intermediate results
+        problem_performance_df = pd.concat(problem_performance_list, ignore_index=True)
+        problem_performance_df.to_parquet(
+            './results/algorithm-comparisons-{problem_name}.parquet'
+        )
 
 
 @cli.command('create-trajectory-plot')
