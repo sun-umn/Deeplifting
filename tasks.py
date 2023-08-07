@@ -21,27 +21,27 @@ from deeplifting.problems import PROBLEMS_BY_NAME
 # Identify problems to run
 problem_names = [
     'ackley',
-    # 'bukin_n6',
-    # 'cross_in_tray',
-    # 'drop_wave',
-    # 'eggholder',
-    # 'griewank',
-    # 'holder_table',
-    # 'levy',
-    # 'levy_n13',
-    # 'rastrigin',
-    # 'schaffer_n2',
-    # 'schaffer_n4',
-    # 'schwefel',
-    # 'shubert',
-    # 'ex8_1_1',
-    # 'kriging_peaks_red010',
-    # 'kriging_peaks_red020',
-    # 'mathopt6',
-    # 'quantum',
-    # 'rosenbrock',
-    # 'cross_leg_table',
-    # 'sine_envelope',
+    'bukin_n6',
+    'cross_in_tray',
+    'drop_wave',
+    'eggholder',
+    'griewank',
+    'holder_table',
+    'levy',
+    'levy_n13',
+    'rastrigin',
+    'schaffer_n2',
+    'schaffer_n4',
+    'schwefel',
+    'shubert',
+    'ex8_1_1',
+    'kriging_peaks_red010',
+    'kriging_peaks_red020',
+    'mathopt6',
+    'quantum',
+    'rosenbrock',
+    'cross_leg_table',
+    'sine_envelope',
 ]
 
 # Identify available hidden sizes
@@ -193,7 +193,7 @@ def run_algorithm_comparison_task():
     """
     print('Run Algorithms!')
     problem_performance_list = []
-    trials = 1
+    trials = 20
 
     for problem_name in problem_names:
         # Setup the problem
