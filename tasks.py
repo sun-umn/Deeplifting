@@ -272,7 +272,7 @@ def run_algorithm_comparison_task():
         # we can save intermediate results
         problem_performance_df = pd.concat(problem_performance_list, ignore_index=True)
         problem_performance_df.to_parquet(
-            './results/algorithm-comparisons-{problem_name}.parquet'
+            f'./results/algorithm-comparisons-{problem_name}.parquet'
         )
 
 

@@ -134,7 +134,7 @@ def run_dual_annealing(
 
     for trial in range(trials):
         # Set a random seed
-        np.random.seed(trial)
+        np.random.seed(trial + 1)
 
         # Initial point
         x0 = initialize_vector(size=dimensions, bounds=bounds)
@@ -230,7 +230,7 @@ def run_differential_evolution(
 
     for trial in range(trials):
         # Set a random seed
-        np.random.seed(trial)
+        np.random.seed(trial + 2)
 
         # Initial point
         x0 = initialize_vector(size=dimensions, bounds=bounds)
@@ -367,7 +367,7 @@ def run_pygranso(problem: Dict, trials: int):
 
     for trial in range(trials):
         # Seed everything
-        set_seed(trial)
+        set_seed(trial + 3)
 
         # var in
         var_in = {}
