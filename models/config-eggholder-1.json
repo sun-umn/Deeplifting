@@ -1,0 +1,23 @@
+{
+    "input_size": 512,
+    "hidden_sizes": [
+        128,
+        128
+    ],
+    "dimensions": 2,
+    "bounds": [
+        [
+            -512.0,
+            512.0
+        ],
+        [
+            -512.0,
+            512.0
+        ]
+    ],
+    "activation": "sine",
+    "output_activation": "leaky_relu",
+    "agg_function": "sum",
+    "seed": 1,
+    "global_minimum": -959.6407
+}
