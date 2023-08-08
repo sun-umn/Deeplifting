@@ -441,7 +441,7 @@ def run_pygranso(problem: Dict, trials: int):
         indexes = (pd.Series(log.fn_evals).cumsum() - 1).values.tolist()
 
         # Index results
-        interim_results.append(results[trial, indexes, :])
+        interim_results.append(results[trial, indexes, :dimensions])
 
         # Get final x we will also need to map
         # it to the same bounds
@@ -457,7 +457,7 @@ def run_pygranso(problem: Dict, trials: int):
         gc.collect()
         torch.cuda.empty_cache()
 
-    return {'results': interim_results, 'final_results': fn_values}
+    return {'results': None, 'final_results': fn_values, 'callbacks': interim_results}
 
 
 def deeplifting_predictions(x, objective):
@@ -482,7 +482,7 @@ def deeplifting_predictions(x, objective):
     return x, f
 
 
-def deeplifting_nd_fn(model, objective):
+def deeplifting_nd_fn(model, objective, trial, dimensions, deeplifting_results):
     """
     Combined funtion used for PyGranso
     """
@@ -493,6 +493,12 @@ def deeplifting_nd_fn(model, objective):
     # x = outputs.mean(axis=0)
     # print(f'Output x {x}')
     x, f = deeplifting_predictions(outputs, objective)
+    f_copy = f.detach().cpu().numpy()
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(deeplifting_results[trial]), axis=1))
+    deeplifting_results[trial, iteration, :dimensions] = x
+    deeplifting_results[trial, iteration, -1] = f_copy
 
     # Inequality constraint
     ci = None
@@ -585,6 +591,9 @@ def run_deeplifting(
 
         # results
         results = np.zeros((trials, max_iterations, dimensions + 1)) * np.nan
+        deeplifting_results = (
+            np.zeros((trials, max_iterations, dimensions + 1)) * np.nan
+        )
 
         # Set up the function with the results
         fn = lambda x: objective(  # noqa
@@ -592,7 +601,9 @@ def run_deeplifting(
         )
 
         # # Combined function
-        comb_fn = lambda model: deeplifting_nd_fn(model, fn)  # noqa
+        comb_fn = lambda model: deeplifting_nd_fn(
+            model, fn, trial, dimensions, deeplifting_results
+        )  # noqa
 
         # Initiate halt log
         mHLF_obj = HaltLog()
@@ -616,7 +627,7 @@ def run_deeplifting(
         indexes = (pd.Series(log.fn_evals).cumsum() - 1).values.tolist()
 
         # Append intermediate results
-        iterim_results.append(results[trial, indexes, :])
+        iterim_results.append(deeplifting_results[trial, indexes, :dimensions])
 
         # Get final x we will also need to map
         # it to the same bounds
@@ -655,7 +666,7 @@ def run_deeplifting(
         gc.collect()
         torch.cuda.empty_cache()
 
-    return {'results': iterim_results, 'final_results': fn_values}
+    return {'results': None, 'final_results': fn_values, 'callbacks': iterim_results}
 
 
 def run_deeplifting_optimization(problem: Dict, algorithms: List) -> pd.DataFrame:

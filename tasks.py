@@ -17,6 +17,7 @@ from deeplifting.optimization import (
     run_pygranso,
 )
 from deeplifting.problems import PROBLEMS_BY_NAME
+from deeplifting.utils import create_contour_plot
 
 # Identify problems to run
 problem_names = [
@@ -280,9 +281,76 @@ def run_algorithm_comparison_task():
 def run_create_trajectory_plot():
     """
     Function that will run each of the models and create a
-    "trajectory plot" for the paper
+    "trajectory plot" for the paper. Every function now has the ability
+    to observe the intermediate trajectory of the optimization with the
+    exception of IPOPT (we need to use a completely different API).
+    With this information we can plot the trajectory of the optimization
     """
     print('Create trajectory plot!')
+    # Problem set up
+    problem_name = 'eggholder'
+    trials = 1
+    index = 0
+    problem = PROBLEMS_BY_NAME[problem_name]
+
+    # First run IPOPT
+    outputs_ipopt = run_ipopt(problem, trials=trials)
+    ipopt_trajectory_data = outputs_ipopt['results'][index, :, :]
+
+    # For IPOPT we need to manually get the data
+    mask = ~np.isnan(ipopt_trajectory_data).any(axis=1)
+    ipopt_trajectory_data = ipopt_trajectory_data[mask]
+    midpoint = len(ipopt_trajectory_data) // 2
+    ipopt_trajectory_data = ipopt_trajectory_data[[0, midpoint, -1], :2]
+    ipopt_trajectory_data = ipopt_trajectory_data.tolist()
+
+    # Next add dual annealing
+    outputs_dual_annealing = run_dual_annealing(problem, trials=trials)
+    dual_annealing_trajectory_data = outputs_dual_annealing['callbacks'][
+        index
+    ].x_history
+
+    # Next add differential evolution
+    outputs_differential_evolution = run_differential_evolution(problem, trials=trials)
+    differential_evolution_trajectory_data = outputs_differential_evolution[
+        'callbacks'
+    ][index].x_history
+
+    # Next add pygranso
+    outputs_pygranso = run_pygranso(problem, trials=trials)
+    pygranso_trajectory_data = outputs_pygranso['callbacks'][index]
+
+    # Run deeplifting
+    outputs_deeplifting = run_deeplifting(problem, trials=trials)
+    deeplifting_trajectory_data = outputs_deeplifting['callbacks'][index]
+
+    # Create models and trajectories
+    trajectories = [
+        deeplifting_trajectory_data,
+        ipopt_trajectory_data,
+        dual_annealing_trajectory_data,
+        differential_evolution_trajectory_data,
+        pygranso_trajectory_data,
+    ]
+
+    models = [
+        'Deeplifting',
+        'IPOPT',
+        'Dual Annealing',
+        'Differential Evolution',
+        'PyGranso',
+    ]
+
+    # plot the data
+    fig = create_contour_plot(
+        problem_name=problem_name,
+        problem=problem,
+        models=models,
+        trajectories=trajectories,
+        colormap='OrRd_r',
+    )
+
+    return fig
 
 
 if __name__ == "__main__":

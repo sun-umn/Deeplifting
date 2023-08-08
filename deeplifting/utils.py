@@ -117,24 +117,25 @@ def create_contour_plot(problem_name, problem, models, trajectories, colormap='O
     z = np.apply_along_axis(objective_f, 2, grid)
 
     # Create a figure
-    fig = plt.figure(figsize=(7, 6))
+    fig = plt.figure(figsize=(8, 6))
     ax1 = fig.add_subplot(111)
 
-    contour = ax1.contourf(x, y, z, levels=10, cmap=colormap)
+    contour = ax1.contour(x, y, z, levels=10, cmap=colormap, alpha=0.5)
     fig.colorbar(contour, ax=ax1)
 
     # Define colors and markers for the models
-    colors = ['grey', 'maroon', 'black']
+    colors = ['black', 'black', 'black', 'black', 'black']
+    markers = ['o', 's', '^', 'd', 'p']
 
     # Plot each set of points
     for idx, points in enumerate(trajectories):
-        # points_with_jitter = add_jitter(np.array(points))
         x_values, y_values = zip(*points)
         plt.scatter(
             x_values,
             y_values,
             color=colors[idx],
             label=models[idx],
+            marker=markers[idx],
         )
 
         # Connect the points with lines
@@ -234,7 +235,7 @@ def create_optimization_plot(
         ax2 = fig.add_subplot(122)
 
         # Plot the contour
-        contour = ax2.contourf(x, y, z, cmap=colormap)
+        contour = ax2.contour(x, y, z, cmap=colormap)
         fig.colorbar(contour, ax=ax2)
 
         # Add the minimum point
