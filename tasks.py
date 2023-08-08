@@ -150,6 +150,7 @@ def run_deeplifting_task():
             # Get the outputs
             outputs = run_deeplifting(
                 problem,
+                problem_name=problem_name,
                 trials=trials,
                 input_size=input_size,
                 hidden_sizes=hidden_size,
@@ -321,7 +322,9 @@ def run_create_trajectory_plot():
     pygranso_trajectory_data = outputs_pygranso['callbacks'][index]
 
     # Run deeplifting
-    outputs_deeplifting = run_deeplifting(problem, trials=trials)
+    outputs_deeplifting = run_deeplifting(
+        problem, problem_name=problem_name, trials=trials
+    )
     deeplifting_trajectory_data = outputs_deeplifting['callbacks'][index]
 
     # Create models and trajectories
@@ -387,6 +390,7 @@ def run_saved_model_task():
         # Get the outputs
         _ = run_deeplifting(
             problem,
+            problem_name=problem_name,
             trials=trials,
             input_size=input_size,
             hidden_sizes=hidden_size,

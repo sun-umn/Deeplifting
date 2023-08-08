@@ -513,6 +513,7 @@ def deeplifting_nd_fn(model, objective, trial, dimensions, deeplifting_results):
 
 def run_deeplifting(
     problem: Dict,
+    problem_name: str,
     trials: int,
     input_size=512,
     hidden_sizes=(512, 512, 512),
@@ -592,9 +593,9 @@ def run_deeplifting(
         max_iterations = problem['max_iterations']
 
         # results
-        results = np.zeros((trials, max_iterations, dimensions + 1)) * np.nan
+        results = np.zeros((trials, max_iterations * 10, dimensions + 1)) * np.nan
         deeplifting_results = (
-            np.zeros((trials, max_iterations, dimensions + 1)) * np.nan
+            np.zeros((trials, max_iterations * 10, dimensions + 1)) * np.nan
         )
 
         # Set up the function with the results
@@ -639,8 +640,9 @@ def run_deeplifting(
             x, results=final_results, trial=0, version='pytorch'
         )
         xf, f = deeplifting_predictions(outputs, final_fn)
+        f = f.detach().cpu().numpy()
         data_point = tuple(xf) + (
-            float(f.detach().cpu().numpy()),
+            float(f),
             'Deeplifting',
             total_time,
         )
@@ -649,6 +651,9 @@ def run_deeplifting(
         # If save model then we need to save the configuration of the
         # model and the model weights
         if save_model_path is not None:
+            # Add success criteria to the file name
+            status = np.abs(f - problem['global_minimum']) <= 1e-4
+
             # Get the configuration
             config = {}
             config['input_size'] = input_size
@@ -663,12 +668,14 @@ def run_deeplifting(
 
             # Save the model
             model_file_name = os.path.join(
-                save_model_path, 'f{problem_name}-{trial}.pt'
+                save_model_path, f'{problem_name}-{trial}-{status}.pt'
             )
             torch.save(model.state_dict(), model_file_name)
 
             # Save model config json
-            json_file_name = os.path.join(save_model_path, 'config.json')
+            json_file_name = os.path.join(
+                save_model_path, f'config-{problem_name}-{trial}-{status}.json'
+            )
             with open(json_file_name, 'w') as json_file:
                 json.dump(config, json_file, indent=4)
 
