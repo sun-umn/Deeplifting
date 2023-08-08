@@ -1,5 +1,7 @@
 # stdlib
 import gc
+import json
+import os
 import time
 from typing import Dict, List
 
@@ -657,9 +659,18 @@ def run_deeplifting(
             config['output_activation'] = output_activation
             config['agg_function'] = agg_function
             config['seed'] = trial
+            config['global_minimum'] = problem['global_minimum']
 
             # Save the model
-            torch.save(model.state_dict(), save_model_path)
+            model_file_name = os.path.join(
+                save_model_path, 'f{problem_name}-{trial}.pt'
+            )
+            torch.save(model.state_dict(), model_file_name)
+
+            # Save model config json
+            json_file_name = os.path.join(save_model_path, 'config.json')
+            with open(json_file_name, 'w') as json_file:
+                json.dump(config, json_file, indent=4)
 
         # Collect garbage and empty cache
         del (model, nvar, x0, opts, soln, outputs, xf, f)

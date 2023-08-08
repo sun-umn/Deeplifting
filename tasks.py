@@ -353,6 +353,50 @@ def run_create_trajectory_plot():
     return fig
 
 
+@cli.command('run-deeplifting-and-save')
+def run_saved_model_task():
+    """
+    Run deep lifting over specified available problems and over a search space
+    to find the best performance
+    """
+    # Get the available configurations
+    problem_name = 'eggholder'
+    combinations = (
+        input_sizes,
+        hidden_sizes,
+        hidden_activations,
+        output_activations,
+        agg_functions,
+    )
+    configurations = list(product(*combinations))
+
+    # Number of trials
+    trials = 5
+
+    # Run over the experiments
+    for index, (
+        input_size,
+        hidden_size,
+        hidden_activation,
+        output_activation,
+        agg_function,
+    ) in enumerate(configurations):
+        # Get problem_information
+        problem = PROBLEMS_BY_NAME[problem_name]
+
+        # Get the outputs
+        _ = run_deeplifting(
+            problem,
+            trials=trials,
+            input_size=input_size,
+            hidden_sizes=hidden_size,
+            activation=hidden_activation,
+            output_activation=output_activation,
+            agg_function=agg_function,
+            save_model_path='./models/',
+        )
+
+
 if __name__ == "__main__":
     # Be able to run different commands
     cli()
