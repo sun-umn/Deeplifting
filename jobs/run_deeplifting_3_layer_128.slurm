@@ -9,4 +9,4 @@
 #SBATCH --gres=gpu:1
 cd /home/jusun/dever120/Deeplifting
 export PATH=/home/jusun/dever120/miniconda3/envs/deeplifting/bin:$PATH
-python -m tasks --problem_name "bukin_n6"
+python -m tasks --dimensionality='low-dimensional' --layers=3

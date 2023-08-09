@@ -140,7 +140,8 @@ def cli():
 
 @cli.command('run-deeplifting-task')
 @click.option('--dimensionality', default='low-dimensional')
-def run_deeplifting_task(dimensionality):
+@click.option('--layers', default=2)
+def run_deeplifting_task(dimensionality, layers):
     """
     Run deep lifting over specified available problems and over a search space
     to find the best performance
@@ -161,10 +162,19 @@ def run_deeplifting_task(dimensionality):
     else:
         raise ValueError('Option for dimensionality does not exist!')
 
+    if layers == 2:
+        dl_hidden_sizes = [hidden_size_128 * 2]
+    elif layers == 3:
+        dl_hidden_sizes = [hidden_size_128 * 3]
+    elif layers == 4:
+        dl_hidden_sizes = [hidden_size_128 * 4]
+    else:
+        raise ValueError('This many layers is not yet configured!')
+
     # Get the available configurations
     combinations = (
         input_sizes,
-        hidden_sizes,
+        dl_hidden_sizes,
         hidden_activations,
         output_activations,
         agg_functions,
