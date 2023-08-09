@@ -235,7 +235,7 @@ def run_deeplifting_task(dimensionality, layers, method, output_activation):
 
             # Add meta data to the results
             results['input_size'] = input_size
-            results['hidden_size'] = '-'.join(map(str, hidden_sizes))
+            results['hidden_size'] = '-'.join(map(str, hidden_size))
             results['hidden_activation'] = hidden_activation
             results['output_activation'] = output_activation
             results['agg_function'] = agg_function

@@ -1,15 +1,41 @@
 # stdlib
+import glob
+import os
 import random
 from functools import partial
 
 # third party
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import torch
 from pygranso.pygransoStruct import pygransoStruct
 
 # first party
 from deeplifting.models import DeepliftingSkipMLP
+
+
+def build_deeplifting_results(file_structure, epsilon=5.5e-4):
+    """
+    Function that can help us easily create results.
+    file_structure is the naming convention of the file.
+    We can use a wild-card and load in multiple files at
+    once.
+    """
+    directory = os.getcwd()
+    results_path = os.path.join(directory, file_structure)
+
+    # Get all files
+    files = glob.glob(results_path)
+
+    # Load in the parquet files
+    df = pd.read_parquet(files)
+
+    # Create the hit variable
+    df['hits'] = np.abs(df['global_minimum'] - df['f'])
+
+    # Return the aggregated results
+    return df.groupby('problem_name').agg({'hits': 'mean'})
 
 
 def load_deeplifting_model(model_path, config):
