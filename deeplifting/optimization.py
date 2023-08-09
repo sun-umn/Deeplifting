@@ -471,29 +471,41 @@ def run_pygranso(problem: Dict, trials: int):
     return {'results': None, 'final_results': fn_values, 'callbacks': interim_results}
 
 
-def deeplifting_predictions(x, objective):
+def deeplifting_predictions(x, objective, method='particle'):
     """
     Convert scaled values to the objective function
     """
+    if method == 'particle':
+        # Iterate over the objective values
+        objective_values = []
+        for i in range(len(x)):
+            f = objective(x[i, :])
+            objective_values.append(f)
 
-    # Iterate over the objective values
-    objective_values = []
-    for i in range(len(x)):
-        f = objective(x[i, :])
-        objective_values.append(f)
+        objective_values = torch.stack(objective_values)
+        f = torch.min(objective_values)
 
-    objective_values = torch.stack(objective_values)
-    f = torch.min(objective_values)
+        # Need to get the minimum of f
+        idx_min = torch.argmin(objective_values)
+        x = x[idx_min, :]
+        x = x.detach().cpu().numpy().flatten()
 
-    # Need to get the minimum of f
-    idx_min = torch.argmin(objective_values)
-    x = x[idx_min, :]
-    x = x.detach().cpu().numpy().flatten()
+    elif method == 'single-value':
+        x = x.mean(axis=0)
+        f = objective(x)
+
+        # Detach and return x
+        x = x.detach().cpu().numpy().flatten()
+
+    else:
+        raise ValueError(f'{method} does not exist!')
 
     return x, f
 
 
-def deeplifting_nd_fn(model, objective, trial, dimensions, deeplifting_results):
+def deeplifting_nd_fn(
+    model, objective, trial, dimensions, deeplifting_results, method='particle'
+):
     """
     Combined funtion used for PyGranso
     """
@@ -503,7 +515,7 @@ def deeplifting_nd_fn(model, objective, trial, dimensions, deeplifting_results):
     # outputs = torch.sigmoid(outputs)
     # x = outputs.mean(axis=0)
     # print(f'Output x {x}')
-    x, f = deeplifting_predictions(outputs, objective)
+    x, f = deeplifting_predictions(outputs, objective, method=method)
     f_copy = f.detach().cpu().numpy()
 
     # Fill in the intermediate results
@@ -529,6 +541,7 @@ def run_deeplifting(
     activation='sine',
     output_activation='sine',
     agg_function='sum',
+    method='particle',
     save_model_path=None,
 ):
     """
@@ -614,7 +627,12 @@ def run_deeplifting(
 
         # # Combined function
         comb_fn = lambda model: deeplifting_nd_fn(
-            model, fn, trial, dimensions, deeplifting_results
+            model,
+            fn,
+            trial,
+            dimensions,
+            deeplifting_results,
+            method=method,
         )  # noqa
 
         # Initiate halt log

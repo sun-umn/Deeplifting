@@ -141,7 +141,8 @@ def cli():
 @cli.command('run-deeplifting-task')
 @click.option('--dimensionality', default='low-dimensional')
 @click.option('--layers', default=2)
-def run_deeplifting_task(dimensionality, layers):
+@click.option('--method', default='particle')
+def run_deeplifting_task(dimensionality, layers, method):
     """
     Run deep lifting over specified available problems and over a search space
     to find the best performance
@@ -182,7 +183,7 @@ def run_deeplifting_task(dimensionality, layers):
     configurations = list(product(*combinations))
 
     # Number of trials
-    trials = 20
+    trials = 1
 
     # List to store performance data
     performance_df_list = []
@@ -209,6 +210,7 @@ def run_deeplifting_task(dimensionality, layers):
                 activation=hidden_activation,
                 output_activation=output_activation,
                 agg_function=agg_function,
+                method=method,
             )
 
             # Get the results of the outputs
