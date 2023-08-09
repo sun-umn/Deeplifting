@@ -183,7 +183,7 @@ def run_deeplifting_task(dimensionality, layers, method):
     configurations = list(product(*combinations))
 
     # Number of trials
-    trials = 1
+    trials = 20
 
     # List to store performance data
     performance_df_list = []
