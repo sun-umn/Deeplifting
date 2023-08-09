@@ -3273,7 +3273,7 @@ def beale(x, results, trial, version='numpy'):
         result = (
             torch.square(1.5 - x1 + x1 * x2)
             + torch.square((2.25 - x1 + x1 * torch.square(x2)))
-            + torch.square(2.625 - x1 + x1 * torch.power(x2, 3))
+            + torch.square(2.625 - x1 + x1 * torch.pow(x2, 3))
         )
     else:
         raise ValueError(
@@ -3611,10 +3611,10 @@ def bird(x, results, trial, version='numpy'):
             + np.square(x1 - x2)
         )
     elif version == 'pytorch':
-        result == torch.sin(x1) * torch.exp(
-            torch.square(1 - torch.cos(x2))
-        ) + torch.cos(x2) * torch.exp(torch.square(1 - torch.sin(x1))) + torch.square(
-            x1 - x2
+        result = (
+            torch.sin(x1) * torch.exp(torch.square(1 - torch.cos(x2)))
+            + torch.cos(x2) * torch.exp(torch.square(1 - torch.sin(x1)))
+            + torch.square(x1 - x2)
         )
     else:
         raise ValueError(
@@ -3806,9 +3806,7 @@ def branin_rcos(x, results, trial, version='numpy'):
         )
     elif version == 'pytorch':
         result = (
-            torch.square(
-                x2 - ((5.1 * torch.square(x1)) / (4 * torch.square(np.pi))) - 6
-            )
+            torch.square(x2 - ((5.1 * torch.square(x1)) / (4 * torch.pi**2)) - 6)
             + 10
             * (1 - (1 / (8 * np.pi)))
             * torch.cos(x1)
@@ -3889,8 +3887,8 @@ def brown(x, results, trial, version='numpy'):
         )
     elif version == 'pytorch':
         result = torch.sum(
-            torch.power(torch.square(x), torch.square(shifted_x) + 1)
-            + torch.power(torch.square(shifted_x), torch.square(shifted_x) + 1)
+            torch.pow(torch.square(x), torch.square(shifted_x) + 1)
+            + torch.pow(torch.square(shifted_x), torch.square(shifted_x) + 1)
         )
     else:
         raise ValueError(
@@ -4008,7 +4006,7 @@ def camel_6hump(x, results, trial, version='numpy'):
         result = (
             (4 - 2.1 * x1**2 + (1 / 3) * x1**4) * x1**2
             + x1 * x2
-            + (4 * x**2 - 4) * x2**2
+            + (4 * x2**2 - 4) * x2**2
         )
     else:
         raise ValueError(
@@ -4079,7 +4077,7 @@ def chen_v(x, results, trial, version='numpy'):
     elif version == 'pytorch':
         result = (
             -(0.001 / torch.floor(0.001**2 + (x1**2 + x2**2 - 1) ** 2))
-            - (0.001 / torch.floor(0.001**2 + x1**2 + x2**2 - 0.5) ** 2)
+            - (0.001 / torch.floor(0.001**2 + (x1**2 + x2**2 - 0.5) ** 2))
             - (0.001 / torch.floor(0.001**2 + (x1**2 - x2**2) ** 2))
         )
     else:
@@ -4122,8 +4120,8 @@ def chichinadze(x, results, trial, version='numpy'):
             x1**2
             - 12 * x1
             + 11
-            + 10 * torch.cos((np.pi * x1) / 2)
-            + 8 * torch.sin((5 * np.pi * x1) / 2)
+            + 10 * torch.cos((torch.pi * x1) / 2)
+            + 8 * torch.sin((5 * torch.pi * x1) / 2)
             - (1 / 5) ** 0.5 * torch.exp(-0.5 * (x2 - 0.5) ** 2)
         )
     else:
@@ -5534,7 +5532,7 @@ PROBLEMS_BY_NAME = {
     'alpine2': alpine2_config,
     'alpine2_10d': alpine2_10d_config,
     'brad': brad_config,
-    'bartels_con': bartels_conn_config,
+    'bartels_conn': bartels_conn_config,
     'beale': beale_config,
     'biggs_exp2': biggs_exp2_config,
     'biggs_exp3': biggs_exp3_config,
