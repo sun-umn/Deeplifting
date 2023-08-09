@@ -2704,17 +2704,15 @@ def sine_envelope(x, results, trial, version='numpy'):
     """
     x1, x2 = x.flatten()
     if version == 'numpy':
-        result = -(
-            ((np.sin(((x2**2 + x1**2) ** 0.5) - 0.5)) ** 2)
-            / ((0.001 * (x2**2 + x1**2) + 1) ** 2)
-            + 0.5
-        )
+        r = np.sqrt(x2**2 + x1**2)
+        numerator = np.sin(r) ** 2 - 0.5
+        denominator = (0.001 * r**2 + 1.0) ** 2
+        result = -(numerator / denominator + 0.5)
     elif version == 'pytorch':
-        result = -(
-            ((torch.sin(((x2**2 + x1**2) ** 0.5) - 0.5)) ** 2)
-            / ((0.001 * (x2**2 + x1**2) + 1) ** 2)
-            + 0.5
-        )
+        r = torch.sqrt(x2**2 + x1**2)
+        numerator = torch.sin(r) ** 2 - 0.5
+        denominator = (0.001 * r**2 + 1.0) ** 2
+        result = -(numerator / denominator + 0.5)
     else:
         raise ValueError(
             "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
@@ -4461,6 +4459,22 @@ ackley_30d_config = {
     'dimensions': 30,
 }
 
+ackley_100d_config = {
+    'objective': ndackley,
+    'bounds': [(-32.768, 32.768)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 100,
+}
+
+ackley_1000d_config = {
+    'objective': ndackley,
+    'bounds': [(-32.768, 32.768)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 1000,
+}
+
 # Multi-Dimensional Problems #
 griewank_3d_config = {
     'objective': ndgriewank,
@@ -4486,6 +4500,22 @@ griewank_30d_config = {
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 30,
+}
+
+griewank_100d_config = {
+    'objective': ndgriewank,
+    'bounds': [(-600, 600)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 100,
+}
+
+griewank_1000d_config = {
+    'objective': ndgriewank,
+    'bounds': [(-600, 600)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 1000,
 }
 
 # Multi-Dimensional Problems #
@@ -4852,7 +4882,7 @@ ackley3_config = {
 
 ackley4_config = {
     'objective': ndackley4,
-    'bounds': [(-35, 35)],
+    'bounds': [(-35, 35), (-35, 35)],
     'max_iterations': 1000,
     'global_minimum': -3.917275,
     'dimensions': 2,
@@ -4919,7 +4949,7 @@ adjiman_config = {
 
 alpine1_config = {
     'objective': alpine1,
-    'bounds': [(-10, 10)],
+    'bounds': [(-10, 10), (-10, 10)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2,
@@ -4975,7 +5005,7 @@ alpine1_5000d_config = {
 
 alpine2_config = {
     'objective': alpine2,
-    'bounds': [(-7.917, 7.917)],
+    'bounds': [(-7.917, 7.917), (-7.917, 7.917)],
     'max_iterations': 1000,
     'global_minimum': 2.8**2,
     'dimensions': 2,
@@ -4988,38 +5018,6 @@ alpine2_10d_config = {
     'global_minimum': 2.8**10,
     'dimensions': 10,
 }
-
-alpine2_100d_config = {
-    'objective': alpine2,
-    'bounds': [(-7.917, 7.917)],
-    'max_iterations': 1000,
-    'global_minimum': 2.8**100,
-    'dimensions': 100,
-}
-
-alpine2_500d_config = {
-    'objective': alpine2,
-    'bounds': [(-7.917, 7.917)],
-    'max_iterations': 1000,
-    'global_minimum': 2.8**500,
-    'dimensions': 500,
-}
-
-# alpine2_1000d_config = {
-#     'objective': alpine2,
-#     'bounds': [(-7.917, 7.917)],
-#     'max_iterations': 1000,
-#     'global_minimum': 2.8**1000,
-#     'dimensions': 1000,
-# }
-
-# alpine2_5000d_config = {
-#     'objective': alpine2,
-#     'bounds': [(-7.917, 7.917)],
-#     'max_iterations': 1000,
-#     'global_minimum': 2.8**5000,
-#     'dimensions': 5000,
-# }
 
 brad_config = {
     'objective': brad,
@@ -5198,7 +5196,7 @@ brent_config = {
 
 brown_config = {
     'objective': brown,
-    'bounds': [(-1, 4)],
+    'bounds': [(-1, 4), (-1, 4)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2,
@@ -5331,7 +5329,7 @@ chichinadze_config = {
 
 chung_reynolds_config = {
     'objective': chung_reynolds,
-    'bounds': [(-100, 100)],
+    'bounds': [(-100, 100), (-100, 100)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2,
@@ -5395,7 +5393,7 @@ cosine_mixture_config = {
 
 csendes_config = {
     'objective': csendes,
-    'bounds': [(-1, 1)],
+    'bounds': [(-1, 1), (-1, 1)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2,
@@ -5465,6 +5463,8 @@ PROBLEMS_BY_NAME = {
     'ackley_3d': ackley_3d_config,
     'ackley_5d': ackley_5d_config,
     'ackley_30d': ackley_30d_config,
+    'ackley_100d': ackley_100d_config,
+    'ackley_1000d': ackley4_1000d_config,
     'bukin_n6': bukin_n6_config,
     'cross_in_tray': cross_in_tray_config,
     'drop_wave': drop_wave_config,
@@ -5473,6 +5473,8 @@ PROBLEMS_BY_NAME = {
     'griewank_3d': griewank_3d_config,
     'griewank_5d': griewank_5d_config,
     'griewank_30d': griewank_30d_config,
+    'griewank_100d': griewank_1000d_config,
+    'griewank_1000d': griewank_1000d_config,
     'holder_table': holder_table_config,
     'langermann': langermann_config,
     'levy': levy_config,
@@ -5512,6 +5514,7 @@ PROBLEMS_BY_NAME = {
     'damavandi': damavandi_config,
     'cross_leg_table': cross_leg_table_config,
     'sine_envelope': sine_envelope_config,
+    'ackley2': ackley2_config,
     'ackley3': ackley3_config,
     'ackley4': ackley4_config,
     'ackley4_10d': ackley4_10d_config,
@@ -5528,10 +5531,6 @@ PROBLEMS_BY_NAME = {
     'alpine1_5000d': alpine1_5000d_config,
     'alpine2': alpine2_config,
     'alpine2_10d': alpine2_10d_config,
-    'alpine2_100d': alpine2_100d_config,
-    'alpine2_500d': alpine2_500d_config,
-    # 'alpine2_1000d': alpine2_1000d_config,
-    # 'alpine2_5000d': alpine2_5000d_config,
     'brad': brad_config,
     'bartels_con': bartels_conn_config,
     'beale': beale_config,

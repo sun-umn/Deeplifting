@@ -20,29 +20,63 @@ from deeplifting.problems import PROBLEMS_BY_NAME
 from deeplifting.utils import create_contour_plot
 
 # Identify problems to run
-problem_names = [
-    'ackley',
-    'bukin_n6',
-    'cross_in_tray',
-    'drop_wave',
-    'eggholder',
-    'griewank',
-    'holder_table',
-    'levy',
-    'levy_n13',
-    'rastrigin',
-    'schaffer_n2',
-    'schaffer_n4',
-    'schwefel',
-    'shubert',
-    'ex8_1_1',
-    'kriging_peaks_red010',
-    'kriging_peaks_red020',
-    'mathopt6',
-    'quantum',
-    'rosenbrock',
-    'cross_leg_table',
+low_dimensional_problem_names = [
+    # 'ackley',
+    # 'bukin_n6',
+    # 'cross_in_tray',
+    # 'drop_wave',
+    # 'eggholder',
+    # 'griewank',
+    # 'holder_table',
+    # 'levy',
+    # 'levy_n13',
+    # 'rastrigin',
+    # 'schaffer_n2',
+    # 'schaffer_n4',
+    # 'schwefel',
+    # 'shubert',
+    # 'ex8_1_1',
+    # 'kriging_peaks_red010',
+    # 'kriging_peaks_red020',
+    # 'kriging_peaks_red030',
+    # 'mathopt6',
+    # 'quantum',
+    # 'rosenbrock',
+    # 'cross_leg_table',
     'sine_envelope',
+    'ackley2',
+    'ackley3',
+    # 'ackley4',  # Was having issues
+    'adjiman',
+    'alpine1',
+    'alpine2',
+    'bartels_conn',
+    'beale',
+    'biggs_exp2',
+    'bird',
+    'bohachevsky1',
+    'bohachevsky2',
+    'bohachevsky3',
+    'booth',
+    'branin_rcos',
+    'brent',
+    'brown',
+    'bukin_n2',
+    'bukin_n4',
+    'camel_3hump',
+    'camel_6hump',
+    'chen_bird',
+    'chen_v',
+    'chichinadze',
+    'chung_reynolds',
+    'cube',
+]
+
+high_dimensional_problem_names = [
+    'ackley_30d',
+    'ackley_100d',
+    'ackley_1000d',
+    'ex8_6_2',
 ]
 
 # Identify available hidden sizes
@@ -105,7 +139,8 @@ def cli():
 
 
 @cli.command('run-deeplifting-task')
-def run_deeplifting_task():
+@click.option('--dimensionality', default='low-dimensional')
+def run_deeplifting_task(dimensionality):
     """
     Run deep lifting over specified available problems and over a search space
     to find the best performance
@@ -118,6 +153,13 @@ def run_deeplifting_task():
         project="dever120/Deeplifting",
         api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzYmIwMTUyNC05YmZmLTQ1NzctOTEyNS1kZTIxYjU5NjY5YjAifQ==",  # noqa
     )  # your credentials
+
+    if dimensionality == 'low-dimensional':
+        problem_names = low_dimensional_problem_names
+    elif dimensionality == 'high-dimensional':
+        problem_names = high_dimensional_problem_names
+    else:
+        raise ValueError('Option for dimensionality does not exist!')
 
     # Get the available configurations
     combinations = (
@@ -160,9 +202,13 @@ def run_deeplifting_task():
             )
 
             # Get the results of the outputs
+            output_size = problem['dimensions']
+            x_columns = [f'x{i + 1}' for i in range(output_size)]
+            columns = x_columns + ['f', 'algorithm', 'total_time']
+
             results = pd.DataFrame(
                 outputs['final_results'],
-                columns=['x1', 'x2', 'f', 'algorithm', 'total_time'],
+                columns=columns,
             )
 
             # Add meta data to the results
@@ -184,7 +230,8 @@ def run_deeplifting_task():
 
 
 @cli.command('run-algorithm-comparisons')
-def run_algorithm_comparison_task():
+@click.option('--dimensionality', default='low-dimensional')
+def run_algorithm_comparison_task(dimensionality):
     """
     Function that will run the competing algorithms to Deeplifting.
     The current competitor models are:
@@ -194,10 +241,18 @@ def run_algorithm_comparison_task():
     4. PyGRANSO
     """
     print('Run Algorithms!')
-    problem_performance_list = []
     trials = 20
 
+    if dimensionality == 'low-dimensional':
+        problem_names = low_dimensional_problem_names
+    elif dimensionality == 'high-dimensional':
+        problem_names = high_dimensional_problem_names
+    else:
+        raise ValueError('Option for dimensionality does not exist!')
+
     for problem_name in problem_names:
+        problem_performance_list = []
+
         # Setup the problem
         problem = PROBLEMS_BY_NAME[problem_name]
 

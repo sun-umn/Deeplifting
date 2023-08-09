@@ -21,7 +21,6 @@ from deeplifting.utils import (
     DifferentialEvolutionCallback,
     DualAnnealingCallback,
     HaltLog,
-    get_devices,
     initialize_vector,
     set_seed,
 )
@@ -315,32 +314,42 @@ def pygranso_nd_fn(X_struct, objective, bounds):
     x_values = []
     for key, value in X_struct.__dict__.items():
         x_values.append(value)
-    x = torch.cat(x_values)
+    x = torch.stack(x_values)
+
+    # Box constraints
+    unscaled_x_values = []
+    for index, constr in enumerate(bounds):
+        a, b = constr
+        x_constr = a + (b - a) / 2.0 * (torch.sin(x[index]) + 1)
+        unscaled_x_values.append(x_constr)
+    x = torch.stack(unscaled_x_values)
     f = objective(x)
 
-    # Setup the bounds for the inequality
-    # a <= x <= b
-    # -> a - x <= 0
-    # -> x - b <= 0
-    # Inequality constraints
-    # In some cases all of the bounds will be
-    # None so we will need to set the ci struct
-    # to None
+    # # Setup the bounds for the inequality
+    # # a <= x <= b
+    # # -> a - x <= 0
+    # # -> x - b <= 0
+    # # Inequality constraints
+    # # In some cases all of the bounds will be
+    # # None so we will need to set the ci struct
+    # # to None
     ci = None
 
-    if np.any(np.array(bounds).flatten() != None):  # noqa
-        ci = pygransoStruct()
-        for index, cnstr in enumerate(bounds):
-            a, b = cnstr
-            if a is None and b is None:
-                pass
-            elif a is None:
-                setattr(ci, f'ca{index}', a - x[index])
-            elif b is None:
-                setattr(ci, f'cb{index}', x[index] - b)
-            else:
-                setattr(ci, f'ca{index}', a - x[index])
-                setattr(ci, f'cb{index}', x[index] - b)
+    # # TODO: I will leave this for now but it was not working - is there
+    # # an implementation issue?
+    # if np.any(np.array(bounds).flatten() != None):  # noqa
+    #     ci = pygransoStruct()
+    #     for index, cnstr in enumerate(bounds):
+    #         a, b = cnstr
+    #         if a is None and b is None:
+    #             pass
+    #         elif a is None:
+    #             setattr(ci, f'ca{index}', a - x[index])
+    #         elif b is None:
+    #             setattr(ci, f'cb{index}', x[index] - b)
+    #         else:
+    #             setattr(ci, f'ca{index}', a - x[index])
+    #             setattr(ci, f'cb{index}', x[index] - b)
 
     # Equality constraints
     ce = None
@@ -354,7 +363,7 @@ def run_pygranso(problem: Dict, trials: int):
     comparisions
     """
     # Get the device (CPU for now)
-    device = get_devices()
+    device = torch.device('cuda:1')
     fn_values = []
     interim_results = []
 
@@ -365,7 +374,7 @@ def run_pygranso(problem: Dict, trials: int):
     dimensions = problem['dimensions']
 
     # results
-    results = np.zeros((trials, max_iterations, dimensions + 1)) * np.nan
+    results = np.zeros((trials, max_iterations * 100, dimensions + 1)) * np.nan
 
     for trial in range(trials):
         # Seed everything
@@ -529,7 +538,7 @@ def run_deeplifting(
     """
     # Get the device (CPU for now)
     dimensions = problem['dimensions']
-    device = get_devices()
+    device = torch.device('cuda:0')
     fn_values = []
     iterim_results = []
 
