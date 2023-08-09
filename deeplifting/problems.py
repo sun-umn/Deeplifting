@@ -3796,7 +3796,7 @@ def branin_rcos(x, results, trial, version='numpy'):
     x1, x2 = x.flatten()
     if version == 'numpy':
         result = (
-            np.square(x2 - ((5 * np.square(x1)) / (4 * np.square(np.pi))) - 6)
+            np.square(x2 - ((5.1 * np.square(x1)) / (4 * np.square(np.pi))) - 6)
             + 10
             * (1 - (1 / (8 * np.pi)))
             * np.cos(x1)
@@ -3806,7 +3806,9 @@ def branin_rcos(x, results, trial, version='numpy'):
         )
     elif version == 'pytorch':
         result = (
-            torch.square(x2 - ((5 * torch.square(x1)) / (4 * torch.square(np.pi))) - 6)
+            torch.square(
+                x2 - ((5.1 * torch.square(x1)) / (4 * torch.square(np.pi))) - 6
+            )
             + 10
             * (1 - (1 / (8 * np.pi)))
             * torch.cos(x1)
@@ -5005,17 +5007,17 @@ alpine1_5000d_config = {
 
 alpine2_config = {
     'objective': alpine2,
-    'bounds': [(-7.917, 7.917), (-7.917, 7.917)],
+    'bounds': [(0, 10), (0, 10)],
     'max_iterations': 1000,
-    'global_minimum': 2.8**2,
+    'global_minimum': 2.808**2,
     'dimensions': 2,
 }
 
 alpine2_10d_config = {
     'objective': alpine2,
-    'bounds': [(-7.917, 7.917)],
+    'bounds': [(0, 10)],
     'max_iterations': 1000,
-    'global_minimum': 2.8**10,
+    'global_minimum': 2.808**10,
     'dimensions': 10,
 }
 
@@ -5254,7 +5256,7 @@ bukin_n2_config = {
     'objective': bukin_n2,
     'bounds': [
         (-15, -5),
-        (-3, -3),
+        (-3, 3),
     ],
     'max_iterations': 1000,
     'global_minimum': 0,
@@ -5265,7 +5267,7 @@ bukin_n4_config = {
     'objective': bukin_n4,
     'bounds': [
         (-15, -5),
-        (-3, -3),
+        (-3, 3),
     ],
     'max_iterations': 1000,
     'global_minimum': 0,

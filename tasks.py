@@ -46,10 +46,10 @@ low_dimensional_problem_names = [
     'sine_envelope',
     'ackley2',
     'ackley3',
-    # 'ackley4',  # Was having issues
+    # 'ackley4',  # Having issues
     'adjiman',
     'alpine1',
-    'alpine2',
+    # 'alpine2',  # Having issues
     'bartels_conn',
     'beale',
     'biggs_exp2',
@@ -232,7 +232,7 @@ def run_deeplifting_task(dimensionality, layers):
 
             # Save to parquet
             results.to_parquet(
-                f'./results/results-2023-08-03-2-{problem_name}-{index}.parquet'
+                f'./results/results-2023-08-{layers}-layer-{problem_name}-{index}.parquet'  # noqa
             )
 
             # Append performance
