@@ -4071,7 +4071,7 @@ def chen_v(x, results, trial, version='numpy'):
     if version == 'numpy':
         result = (
             -(0.001 / np.floor(0.001**2 + (x1**2 + x2**2 - 1) ** 2))
-            - (0.001 / np.floor(0.001**2 + x1**2 + x2**2 - 0.5) ** 2)
+            - (0.001 / np.floor(0.001**2 + (x1**2 + x2**2 - 0.5) ** 2))
             - (0.001 / np.floor(0.001**2 + (x1**2 - x2**2) ** 2))
         )
     elif version == 'pytorch':
@@ -4246,7 +4246,7 @@ def csendes(x, results, trial, version='numpy'):
     if version == 'numpy':
         result = np.sum(np.power(x, 6) * (2 + np.sin(1 / x)))
     elif version == 'pytorch':
-        result = torch.sum(torch.power(x, 6) * (2 + torch.sin(1 / x)))
+        result = torch.sum(torch.pow(x, 6) * (2 + torch.sin(1 / x)))
     else:
         raise ValueError(
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
@@ -4273,6 +4273,737 @@ def cube(x, results, trial, version='numpy'):
     x1, x2 = x.flatten()
     if version == 'numpy' or version == 'pytorch':
         result = 100 * (x2 - x1**3) ** 2 + (1 - x1) ** 2
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# nd Deb 1 fn
+def deb1(x, results, trial, version='numpy'):
+    x = x.flatten()
+    d = len(x)
+    if version == 'numpy':
+        result = -(1 / d) * np.sum(np.power(np.sin(5 * np.pi * x), 6))
+    elif version == 'pytorch':
+        result = -(1 / d) * torch.sum(torch.pow(torch.sin(5 * torch.pi * x), 6))
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        x_tuple = tuple(x.detach().cpu().numpy())
+        results[trial, iteration, :] = np.array(
+            x_tuple + (result.detach().cpu().numpy(),)
+        )
+
+    else:
+        x_tuple = tuple(x.flatten())
+        results[trial, iteration, :] = np.array(x_tuple + (result,))
+
+    return result
+
+
+# nd Deb 3 fn
+def deb3(x, results, trial, version='numpy'):
+    x = x.flatten()
+    d = len(x)
+    if version == 'numpy':
+        result = -(1 / d) * np.sum(
+            np.power(np.sin(5 * np.pi * (np.power(x, 0.75) - 0.05)), 6)
+        )
+    elif version == 'pytorch':
+        result = -(1 / d) * torch.sum(
+            torch.pow(torch.sin(5 * torch.pi * (torch.pow(x, 0.75) - 0.05)), 6)
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        x_tuple = tuple(x.detach().cpu().numpy())
+        results[trial, iteration, :] = np.array(
+            x_tuple + (result.detach().cpu().numpy(),)
+        )
+
+    else:
+        x_tuple = tuple(x.flatten())
+        results[trial, iteration, :] = np.array(x_tuple + (result,))
+
+    return result
+
+
+# Deckkers-Aarts in 2d
+def deckkers_aarts(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy' or version == 'pytorch':
+        result = (
+            (10**5) * (x1**2)
+            + x2**2
+            - (x1**2 + x2**2) ** 2
+            + (10 ** (-5)) * (x1**2 + x2**2) ** 4
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# deVilliers Glasser 1 in 4d
+def devilliers_glasser1(x, results, trial, version='numpy'):
+    x1, x2, x3, x4 = x.flatten()
+    if version == 'numpy':
+        t = 0.1 * np.arange(0, 24)
+        y = 60.137 * np.power(1.371, t) * np.sin(3.112 * t + 1.761)
+        result = np.sum(np.square(x1 * np.power(x2, t) * np.sin(x3 * t + x4) - y))
+    elif version == 'pytorch':
+        t = 0.1 * torch.arange(0, 24)
+        y = 60.137 * torch.pow(1.371, t) * torch.sin(3.112 * t + 1.761)
+        result = torch.sum(
+            torch.square(x1 * torch.pow(x2, t) * torch.sin(x3 * t + x4) - y)
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                x3.detach().cpu().numpy(),
+                x4.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, x3, x4, result))
+
+    return result
+
+
+# deVilliers Glasser 2 in 5d
+def devilliers_glasser2(x, results, trial, version='numpy'):
+    x1, x2, x3, x4, x5 = x.flatten()
+    if version == 'numpy':
+        t = 0.1 * np.arange(0, 16)
+        y = (
+            53.81
+            * np.power(1.27, t)
+            * np.tanh(3.012 * t + np.sin(2.13 * t))
+            * np.cos(np.exp(0.507) * t)
+        )
+        result = np.sum(
+            np.square(
+                x1
+                * np.power(x2, t)
+                * np.tanh(x3 * t + np.sin(x4 * t))
+                * np.cos(t * np.exp(x5))
+                - y
+            )
+        )
+    elif version == 'pytorch':
+        t = 0.1 * torch.arange(0, 16)
+        y = (
+            53.81
+            * torch.pow(1.27, t)
+            * torch.tanh(3.012 * t + torch.sin(2.13 * t))
+            * torch.cos(torch.exp(0.507) * t)
+        )
+        result = torch.sum(
+            torch.square(
+                x1
+                * torch.pow(x2, t)
+                * torch.tanh(x3 * t + torch.sin(x4 * t))
+                * torch.cos(t * torch.exp(x5))
+                - y
+            )
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                x3.detach().cpu().numpy(),
+                x4.detach().cpu().numpy(),
+                x5.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, x3, x4, x5, result))
+
+    return result
+
+
+# nd Dixon and Price
+def dixon_price(x, results, trial, version='numpy'):
+    x = x.flatten()
+    d = len(x)
+    x1 = x[0]
+    shifted_x = x[:-1]
+    x = x[1:]
+    if version == 'numpy':
+        i = np.arange(2, d)
+        result = np.square(x1 - 1) + np.sum(i * np.square(2 * np.square(x) - shifted_x))
+    elif version == 'pytorch':
+        i = torch.arange(2, d)
+        result = torch.square(x1 - 1) + torch.sum(
+            i * torch.square(2 * torch.square(x) - shifted_x)
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        x_tuple = tuple(x.detach().cpu().numpy())
+        results[trial, iteration, :] = np.array(
+            x_tuple + (result.detach().cpu().numpy(),)
+        )
+
+    else:
+        x_tuple = tuple(x.flatten())
+        results[trial, iteration, :] = np.array(x_tuple + (result,))
+
+    return result
+
+
+# Dolan fn in 5d
+def dolan(x, results, trial, version='numpy'):
+    x1, x2, x3, x4, x5 = x.flatten()
+    if version == 'numpy':
+        result = (
+            (x1 + 1.7 * x2) * np.sin(x1)
+            - 1.5 * x3
+            - 0.1 * x4 * np.cos(x4 + x5 - x1)
+            + 0.2 * x5**2
+            - x2
+            - 1
+        )
+    elif version == 'pytorch':
+        result = (
+            (x1 + 1.7 * x2) * torch.sin(x1)
+            - 1.5 * x3
+            - 0.1 * x4 * torch.cos(x4 + x5 - x1)
+            + 0.2 * x5**2
+            - x2
+            - 1
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                x3.detach().cpu().numpy(),
+                x4.detach().cpu().numpy(),
+                x5.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, x3, x4, x5, result))
+
+    return result
+
+
+# Easom in 2d
+def easom(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = (
+            -np.cos(x1)
+            * np.cos(x2)
+            * np.exp(-np.square(x1 - np.pi) - np.square(x2 - np.pi))
+        )
+    elif version == 'pytorch':
+        result = (
+            -torch.cos(x1)
+            * torch.cos(x2)
+            * torch.exp(-torch.square(x1 - torch.pi) - torch.square(x2 - torch.pi))
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# El-Attar-Vidysagar-Dutta fn in 2d
+def el_attar(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy' or version == 'pytorch':
+        result = (
+            (x1**2 + x2 - 10) ** 2
+            + (x1 + x2**2 - 7) ** 2
+            + (x1**2 + x2**3 - 1) ** 2
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# Egg Crate fn in 2d
+def egg_crate(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = (
+            x1**2 + x2**2 + 25 * (np.square(np.sin(x1)) + np.square(np.sin(x2)))
+        )
+    elif version == 'pytorch':
+        result = (
+            x1**2
+            + x2**2
+            + 25 * (torch.square(torch.sin(x1)) + torch.square(torch.sin(x2)))
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# nd Exponenetial fn
+def exp1(x, results, trial, version='numpy'):
+    x = x.flatten()
+    if version == 'numpy':
+        result = -np.exp(-0.5 * np.sum(np.square(x)))
+    elif version == 'pytorch':
+        result = -torch.exp(-0.5 * torch.sum(torch.square(x)))
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        x_tuple = tuple(x.detach().cpu().numpy())
+        results[trial, iteration, :] = np.array(
+            x_tuple + (result.detach().cpu().numpy(),)
+        )
+
+    else:
+        x_tuple = tuple(x.flatten())
+        results[trial, iteration, :] = np.array(x_tuple + (result,))
+
+    return result
+
+
+# Exp2 fn in 2d
+def exp2(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        i = np.arange(0, 10)
+        result = np.sum(
+            np.square(
+                np.exp((-i * x1) / 10)
+                - 5 * np.exp((-i * x2) / 10)
+                - np.exp(-i / 10)
+                + 5 * np.exp(-i)
+            )
+        )
+    elif version == 'pytorch':
+        i = torch.arange(0, 10)
+        result = torch.sum(
+            torch.square(
+                torch.exp((-i * x1) / 10)
+                - 5 * torch.exp((-i * x2) / 10)
+                - torch.exp(-i / 10)
+                + 5 * torch.exp(-i)
+            )
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# Freudenstein Roth fn in 2d
+def freudenstein_roth(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy' or version == 'pytorch':
+        result = (x1 - 13 + ((5 - x2) * x2 - 2) * x2) ** 2 + (
+            x1 - 29 + ((x2 + 1) * x2 - 14) * x2
+        ) ** 2
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# Giunta in 2d
+def giunta(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        term1 = (
+            np.sin((16 - 15) * x1 - 1)
+            + np.square(np.sin((16 / 15) * x1 - 1))
+            + (1 / 50) * np.sin(4 * ((16 / 15) * x1 - 1))
+        )
+        term2 = (
+            np.sin((16 - 15) * x2 - 1)
+            + np.square(np.sin((16 / 15) * x2 - 1))
+            + (1 / 50) * np.sin(4 * ((16 / 15) * x2 - 1))
+        )
+        result = 0.6 + term1 + term2
+    elif version == 'pytorch':
+        term1 = (
+            torch.sin((16 - 15) * x1 - 1)
+            + torch.square(torch.sin((16 / 15) * x1 - 1))
+            + (1 / 50) * torch.sin(4 * ((16 / 15) * x1 - 1))
+        )
+        term2 = (
+            torch.sin((16 - 15) * x2 - 1)
+            + torch.square(torch.sin((16 / 15) * x2 - 1))
+            + (1 / 50) * torch.sin(4 * ((16 / 15) * x2 - 1))
+        )
+        result = 0.6 + term1 + term2
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# Goldstein Price fn in 2d
+def goldstein_price(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy' or version == 'pytorch':
+        term1 = 1 + (x1 + x2 + 1) ** 2 * (
+            19 - 14 * x1 + 3 * x1**2 - 14 * x2 + 6 * x1 * x2 + 3 * x2**2
+        )
+        term2 = 30 + (2 * x1 - 3 * x2) ** 2 * (
+            18 - 32 * x1 + 12 * x1**2 + 48 * x2 - 36 * x1 * x2 + 27 * x2**2
+        )
+        result = term1 * term2
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# # Documentation for this problem is weird
+# # Hansen in 2d
+# def hansen(x, results, trial, version='numpy'):
+#     x1, x2 = x.flatten()
+#     if version == 'numpy':
+#         i = np.arange(0, 4)
+#         j = np.arange(0, 4)
+#         result = np.sum((i+1)*np.cos(i*x1+i+1)) * np.sum
+
+# Hartman3 in 3d
+
+# Hartman6 in 6d
+
+
+# Helical Valley in 3d
+def helical_valley(x, results, trial, version='numpy'):
+    x1, x2, x3 = x.flatten()
+    if version == 'numpy':
+        if x1 >= 0:
+            theta = (1 / (2 * np.pi)) * np.arctan(x1 / x2)
+        else:
+            theta = (1 / (2 * np.pi)) * np.arctan(x1 / x2 + 0.5)
+        result = 100 * (
+            np.square(x2 - 10 * theta) + np.square(np.sqrt(x1**2 + x2**2) - 1)
+        ) + np.square(x3)
+    elif version == 'pytorch':
+        if x1 >= 0:
+            theta = (1 / (2 * torch.pi)) * torch.atan(x1 / x2)
+        else:
+            theta = (1 / (2 * torch.pi)) * torch.atan(x1 / x2 + 0.5)
+        result = 100 * (
+            torch.square(x2 - 10 * theta)
+            + torch.square(torch.sqrt(x1**2 + x2**2) - 1)
+        ) + torch.square(x3)
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                x3.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, x3, result))
+
+    return result
+
+
+# Himmelblau fn in 2d
+def himmelblau(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy' or version == 'pytorch':
+        result = (x1**2 + x2 - 11) ** 2 + (x1 + x2**2 - 7) ** 2
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# Hosaki fn in 2d
+def hosaki(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = (
+            (1 - 8 * x1 + 7 * x1**2 - (7 / 3) * x1**3 + (1 / 4) * x1**4)
+            * x2**2
+            * np.exp(-x2)
+        )
+    elif version == 'pytorch':
+        result = (
+            (1 - 8 * x1 + 7 * x1**2 - (7 / 3) * x1**3 + (1 / 4) * x1**4)
+            * x2**2
+            * torch.exp(-x2)
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# Jennrich-Sampson fn in 2d
+def jennrich_sampson(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        i = np.arange(1, 11)
+        result = np.sum(np.square(2 + 2 * i - (np.exp(i * x1) + np.exp(i * x2))))
+    elif version == 'pytorch':
+        i = np.arange(1, 11)
+        result = torch.sum(
+            torch.square(2 + 2 * i - (torch.exp(i * x1) + torch.exp(i * x2)))
+        )
     else:
         raise ValueError(
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
@@ -5458,6 +6189,400 @@ cube_config = {
     'dimensions': 2,
 }
 
+deb1_config = {
+    'objective': deb1,
+    'bounds': [(-1, 1)],
+    'max_iterations': 1000,
+    'global_minimum': None,
+    'dimensions': 2,
+}
+
+deb1_10d_config = {
+    'objective': deb1,
+    'bounds': [(-1, 1)],
+    'max_iterations': 1000,
+    'global_minimum': None,
+    'dimensions': 10,
+}
+
+deb1_50d_config = {
+    'objective': deb1,
+    'bounds': [(-1, 1)],
+    'max_iterations': 1000,
+    'global_minimum': None,
+    'dimensions': 50,
+}
+
+deb1_100d_config = {
+    'objective': deb1,
+    'bounds': [(-1, 1)],
+    'max_iterations': 1000,
+    'global_minimum': None,
+    'dimensions': 100,
+}
+
+deb1_500d_config = {
+    'objective': deb1,
+    'bounds': [(-1, 1)],
+    'max_iterations': 1000,
+    'global_minimum': None,
+    'dimensions': 500,
+}
+
+deb1_1000d_config = {
+    'objective': deb1,
+    'bounds': [(-1, 1)],
+    'max_iterations': 1000,
+    'global_minimum': None,
+    'dimensions': 1000,
+}
+
+deb1_5000d_config = {
+    'objective': deb1,
+    'bounds': [(-1, 1)],
+    'max_iterations': 1000,
+    'global_minimum': None,
+    'dimensions': 5000,
+}
+
+deb3_config = {
+    'objective': deb3,
+    'bounds': [(-1, 1)],
+    'max_iterations': 1000,
+    'global_minimum': None,
+    'dimensions': 2,
+}
+
+deb3_10d_config = {
+    'objective': deb3,
+    'bounds': [(-1, 1)],
+    'max_iterations': 1000,
+    'global_minimum': None,
+    'dimensions': 10,
+}
+
+deb3_50d_config = {
+    'objective': deb3,
+    'bounds': [(-1, 1)],
+    'max_iterations': 1000,
+    'global_minimum': None,
+    'dimensions': 50,
+}
+
+deb3_100d_config = {
+    'objective': deb3,
+    'bounds': [(-1, 1)],
+    'max_iterations': 1000,
+    'global_minimum': None,
+    'dimensions': 100,
+}
+
+deb3_500d_config = {
+    'objective': deb3,
+    'bounds': [(-1, 1)],
+    'max_iterations': 1000,
+    'global_minimum': None,
+    'dimensions': 500,
+}
+
+deb3_1000d_config = {
+    'objective': deb3,
+    'bounds': [(-1, 1)],
+    'max_iterations': 1000,
+    'global_minimum': None,
+    'dimensions': 1000,
+}
+
+deb3_5000d_config = {
+    'objective': deb3,
+    'bounds': [(-1, 1)],
+    'max_iterations': 1000,
+    'global_minimum': None,
+    'dimensions': 5000,
+}
+
+deckkers_aarts_config = {
+    'objective': deckkers_aarts,
+    'bounds': [
+        (-20, 20),
+        (-20, 20),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': -24777,
+    'dimensions': 2,
+}
+
+devilliers_glasser1_config = {
+    'objective': devilliers_glasser1,
+    'bounds': [
+        (-500, 500),
+        (-500, 500),
+        (-500, 500),
+        (-500, 500),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 4,
+}
+
+devilliers_glasser2_config = {
+    'objective': devilliers_glasser2,
+    'bounds': [
+        (-500, 500),
+        (-500, 500),
+        (-500, 500),
+        (-500, 500),
+        (-500, 500),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 5,
+}
+
+dixon_price_config = {
+    'objective': dixon_price,
+    'bounds': [(-10, 10)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+}
+
+dixon_price_10d_config = {
+    'objective': dixon_price,
+    'bounds': [(-10, 10)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 10,
+}
+
+dixon_price_50d_config = {
+    'objective': dixon_price,
+    'bounds': [(-10, 10)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 50,
+}
+
+dixon_price_100d_config = {
+    'objective': dixon_price,
+    'bounds': [(-10, 10)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 100,
+}
+
+dixon_price_500d_config = {
+    'objective': dixon_price,
+    'bounds': [(-10, 10)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 500,
+}
+
+dixon_price_1000d_config = {
+    'objective': dixon_price,
+    'bounds': [(-10, 10)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 1000,
+}
+
+dixon_price_5000d_config = {
+    'objective': dixon_price,
+    'bounds': [(-10, 10)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 5000,
+}
+
+dolan_config = {
+    'objective': dolan,
+    'bounds': [
+        (-100, 100),
+        (-100, 100),
+        (-100, 100),
+        (-100, 100),
+        (-100, 100),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 5,
+}
+
+easom_config = {
+    'objective': easom,
+    'bounds': [
+        (-100, 100),
+        (-100, 100),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': -1,
+    'dimensions': 2,
+}
+
+el_attar_config = {
+    'objective': el_attar,
+    'bounds': [
+        (-500, 500),
+        (-500, 500),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0.470427,
+    'dimensions': 2,
+}
+
+egg_crate_config = {
+    'objective': egg_crate,
+    'bounds': [
+        (-5, 5),
+        (-5, 5),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+}
+
+exp1_config = {
+    'objective': exp1,
+    'bounds': [(-1, 1)],
+    'max_iterations': 1000,
+    'global_minimum': 1,
+    'dimensions': 2,
+}
+
+exp1_10d_config = {
+    'objective': exp1,
+    'bounds': [(-1, 1)],
+    'max_iterations': 1000,
+    'global_minimum': 1,
+    'dimensions': 10,
+}
+
+exp1_50d_config = {
+    'objective': exp1,
+    'bounds': [(-1, 1)],
+    'max_iterations': 1000,
+    'global_minimum': 1,
+    'dimensions': 50,
+}
+
+exp1_100d_config = {
+    'objective': exp1,
+    'bounds': [(-1, 1)],
+    'max_iterations': 1000,
+    'global_minimum': 1,
+    'dimensions': 100,
+}
+
+exp1_500d_config = {
+    'objective': exp1,
+    'bounds': [(-1, 1)],
+    'max_iterations': 1000,
+    'global_minimum': 1,
+    'dimensions': 500,
+}
+
+exp1_1000d_config = {
+    'objective': exp1,
+    'bounds': [(-1, 1)],
+    'max_iterations': 1000,
+    'global_minimum': 1,
+    'dimensions': 1000,
+}
+
+exp1_5000d_config = {
+    'objective': exp1,
+    'bounds': [(-1, 1)],
+    'max_iterations': 1000,
+    'global_minimum': 1,
+    'dimensions': 5000,
+}
+
+exp2_config = {
+    'objective': exp2,
+    'bounds': [
+        (0, 20),
+        (0, 20),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+}
+
+freudenstein_roth_config = {
+    'objective': freudenstein_roth,
+    'bounds': [
+        (-10, 10),
+        (-10, 10),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+}
+
+giunta_config = {
+    'objective': giunta,
+    'bounds': [
+        (-1, 1),
+        (-1, 1),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0.060447,
+    'dimensions': 2,
+}
+
+goldstein_price_config = {
+    'objective': goldstein_price,
+    'bounds': [
+        (-2, 2),
+        (-2, 2),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 3,
+    'dimensions': 2,
+}
+
+helical_valley_config = {
+    'objective': helical_valley,
+    'bounds': [(-10, 10), (-10, 10), (-10, 10)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 3,
+}
+
+himmelblau_config = {
+    'objective': himmelblau,
+    'bounds': [
+        (-5, 5),
+        (-5, 5),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+}
+
+hosaki_config = {
+    'objective': hosaki,
+    'bounds': [
+        (0, 5),
+        (0, 6),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': -2.3458,
+    'dimensions': 2,
+}
+
+jennrich_sampson_config = {
+    'objective': jennrich_sampson,
+    'bounds': [
+        (-1, 1),
+        (-1, 1),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 124.3612,
+    'dimensions': 2,
+}
+
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
     'ackley_3d': ackley_3d_config,
@@ -5576,4 +6701,47 @@ PROBLEMS_BY_NAME = {
     'csendes_1000d': csendes_1000d_config,
     'csendes_5000d': csendes_5000d_config,
     'cube': cube_config,
+    'deb1': deb1_config,
+    'deb1_10d': deb1_10d_config,
+    'deb1_50d': deb1_50d_config,
+    'deb1_100d': deb1_100d_config,
+    'deb1_500d': deb1_500d_config,
+    'deb1_1000d': deb1_1000d_config,
+    'deb1_5000d': deb1_5000d_config,
+    'deb3': deb3_config,
+    'deb3_10d': deb3_10d_config,
+    'deb3_50d': deb3_50d_config,
+    'deb3_100d': deb3_100d_config,
+    'deb3_500d': deb3_500d_config,
+    'deb3_1000d': deb3_1000d_config,
+    'deb3_5000d': deb3_5000d_config,
+    'deckkers_aarts': deckkers_aarts_config,
+    'devilliers_glasser1': devilliers_glasser1_config,
+    'devilliers_glasser2': devilliers_glasser2_config,
+    'dixon_price': dixon_price_config,
+    'dixon_price_10d': dixon_price_10d_config,
+    'dixon_price_50d': dixon_price_50d_config,
+    'dixon_price_100d': dixon_price_100d_config,
+    'dixon_price_500d': dixon_price_500d_config,
+    'dixon_price_1000d': dixon_price_1000d_config,
+    'dixon_price_5000d': dixon_price_5000d_config,
+    'dolan': dolan_config,
+    'easom': easom_config,
+    'el_attar': el_attar_config,
+    'egg_crate': egg_crate_config,
+    'exp1': exp1_config,
+    'exp1_10d': exp1_10d_config,
+    'exp1_50d': exp1_50d_config,
+    'exp1_100d': exp1_100d_config,
+    'exp1_500d': exp1_500d_config,
+    'exp1_1000d': exp1_1000d_config,
+    'exp1_5000d': exp1_5000d_config,
+    'exp2': exp2_config,
+    'freudenstein_roth': freudenstein_roth_config,
+    'giunta': giunta_config,
+    'goldstein_price': goldstein_price_config,
+    'helical_valley': helical_valley_config,
+    'himmelblau': himmelblau_config,
+    'hosaki': hosaki_config,
+    'jennrich_sampson': jennrich_sampson_config,
 }
