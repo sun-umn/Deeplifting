@@ -101,6 +101,8 @@ class DeepliftingBlock(nn.Module):
             self.activation_layer = nn.ReLU()
         elif self.activation == 'leaky_relu':
             self.activation_layer = nn.LeakyReLU()
+        else:
+            self.activation_layer = nn.Identity()
 
         # Define the Linear layer
         self.linear = nn.Linear(input_size, output_size)
@@ -249,6 +251,6 @@ class DeepliftingSkipMLP(nn.Module):
         # Final output layer
         out = self.output_layer(x)
 
-        # Run through the scaling layer
-        out = self.scaling_layer(out)
+        # # Run through the scaling layer
+        # out = self.scaling_layer(out)
         return out

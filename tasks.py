@@ -142,7 +142,8 @@ def cli():
 @click.option('--dimensionality', default='low-dimensional')
 @click.option('--layers', default=2)
 @click.option('--method', default='particle')
-def run_deeplifting_task(dimensionality, layers, method):
+@click.option('--output_activation', default='leaky_relu')
+def run_deeplifting_task(dimensionality, layers, method, output_activation):
     """
     Run deep lifting over specified available problems and over a search space
     to find the best performance
@@ -163,6 +164,7 @@ def run_deeplifting_task(dimensionality, layers, method):
     else:
         raise ValueError('Option for dimensionality does not exist!')
 
+    # Configurable number of layers
     if layers == 2:
         dl_hidden_sizes = [hidden_size_128 * 2]
     elif layers == 3:
@@ -171,6 +173,14 @@ def run_deeplifting_task(dimensionality, layers, method):
         dl_hidden_sizes = [hidden_size_128 * 4]
     else:
         raise ValueError('This many layers is not yet configured!')
+
+    # Configurable output activation function
+    if output_activation == 'sine':
+        output_activations = ['sine']
+    elif output_activation == 'leaky_relu':
+        output_activation = ['leaky_relu']
+    else:
+        raise ValueError(f'{output_activation} not supported!')
 
     # Get the available configurations
     combinations = (
@@ -234,7 +244,8 @@ def run_deeplifting_task(dimensionality, layers, method):
 
             # Save to parquet
             results.to_parquet(
-                f'./results/results-2023-08-{layers}-layer-{problem_name}-{index}.parquet'  # noqa
+                f'./results/results-2023-08-{layers}-layer'
+                f'-{problem_name}-{index}-{method}-{output_activation}.parquet'  # noqa
             )
 
             # Append performance
