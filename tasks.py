@@ -178,7 +178,7 @@ def run_deeplifting_task(dimensionality, layers, method, output_activation):
     if output_activation == 'sine':
         output_activations = ['sine']
     elif output_activation == 'leaky_relu':
-        output_activation = ['leaky_relu']
+        output_activations = ['leaky_relu']
     else:
         raise ValueError(f'{output_activation} not supported!')
 
