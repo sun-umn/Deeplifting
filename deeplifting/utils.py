@@ -32,7 +32,7 @@ def build_deeplifting_results(file_structure, epsilon=5.5e-4):
     df = pd.read_parquet(files)
 
     # Create the hit variable
-    df['hits'] = np.abs(df['global_minimum'] - df['f'])
+    df['hits'] = np.abs(df['global_minimum'] - df['f']) <= epsilon
 
     # Return the aggregated results
     return df.groupby('problem_name').agg({'hits': 'mean'})
