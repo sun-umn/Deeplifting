@@ -251,6 +251,6 @@ class DeepliftingSkipMLP(nn.Module):
         # Final output layer
         out = self.output_layer(x)
 
-        # # Run through the scaling layer
-        # out = self.scaling_layer(out)
+        # Run through the scaling layer
+        out = self.scaling_layer(out)
         return out

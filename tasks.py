@@ -46,13 +46,13 @@ low_dimensional_problem_names = [
     'sine_envelope',
     'ackley2',
     'ackley3',
-    # 'ackley4',  # Having issues
+    # # 'ackley4',  # Having issues
     'adjiman',
     'alpine1',
     'alpine2',
     'bartels_conn',
     'beale',
-    # 'biggs_exp2',  # Having issues
+    # # 'biggs_exp2',  # Having issues
     'bird',
     'bohachevsky1',
     'bohachevsky2',
@@ -166,11 +166,11 @@ def run_deeplifting_task(dimensionality, layers, method, output_activation):
 
     # Configurable number of layers
     if layers == 2:
-        dl_hidden_sizes = [hidden_size_128 * 2]
+        dl_hidden_sizes = [hidden_size_512 * 2]
     elif layers == 3:
-        dl_hidden_sizes = [hidden_size_128 * 3]
+        dl_hidden_sizes = [hidden_size_512 * 3]
     elif layers == 4:
-        dl_hidden_sizes = [hidden_size_128 * 4]
+        dl_hidden_sizes = [hidden_size_512 * 4]
     else:
         raise ValueError('This many layers is not yet configured!')
 
@@ -207,6 +207,7 @@ def run_deeplifting_task(dimensionality, layers, method, output_activation):
         agg_function,
     ) in enumerate(configurations):
         for problem_name in problem_names:
+            print(problem_name)
             # Load the problems
             problem = PROBLEMS_BY_NAME[problem_name]
 
