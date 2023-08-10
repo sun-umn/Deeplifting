@@ -21,19 +21,19 @@ from deeplifting.utils import create_contour_plot
 
 # Identify problems to run
 low_dimensional_problem_names = [
-    'ackley',
-    'bukin_n6',
-    'cross_in_tray',
-    'drop_wave',
-    'eggholder',
-    'griewank',
-    'holder_table',
-    'levy',
-    'levy_n13',
-    'rastrigin',
-    'schaffer_n2',
-    'schaffer_n4',
-    'schwefel',
+    'ackley',  # Low
+    'bukin_n6',  # High, 2 layer is best so far, takes a while to run
+    'cross_in_tray',  # Low, runs quickly
+    'drop_wave',  # Low, runs quickly
+    'eggholder',  # Medium, takes time to run
+    'griewank',  # Low, (1.0 with 3-layer, 0.95 2-layer)
+    'holder_table',  # Medium
+    'levy',  # Low, 3-layer
+    'levy_n13',  # Low, 3-layer
+    'rastrigin',  # Low, 3-layer
+    'schaffer_n2',  # Low, 3-layer
+    'schaffer_n4',  # Low, 3-layer
+    'schwefel',  # takes a while to run
     'shubert',
     'ex8_1_1',
     'kriging_peaks_red010',
