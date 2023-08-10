@@ -141,9 +141,10 @@ def cli():
 @cli.command('run-deeplifting-task')
 @click.option('--dimensionality', default='low-dimensional')
 @click.option('--layers', default=2)
+@click.option('--units', default=128)
 @click.option('--method', default='particle')
 @click.option('--output_activation', default='leaky_relu')
-def run_deeplifting_task(dimensionality, layers, method, output_activation):
+def run_deeplifting_task(dimensionality, layers, method, output_activation, units):
     """
     Run deep lifting over specified available problems and over a search space
     to find the best performance
@@ -164,13 +165,21 @@ def run_deeplifting_task(dimensionality, layers, method, output_activation):
     else:
         raise ValueError('Option for dimensionality does not exist!')
 
+    # Configuarable number of units / neurons
+    if units == 128:
+        hidden_size_units = hidden_size_128
+    elif units == 512:
+        hidden_size_units = hidden_size_512
+    else:
+        raise ValueError(f'{units} units is not supported')
+
     # Configurable number of layers
     if layers == 2:
-        dl_hidden_sizes = [hidden_size_128 * 2]
+        dl_hidden_sizes = [hidden_size_units * 2]
     elif layers == 3:
-        dl_hidden_sizes = [hidden_size_128 * 3]
+        dl_hidden_sizes = [hidden_size_units * 3]
     elif layers == 4:
-        dl_hidden_sizes = [hidden_size_128 * 4]
+        dl_hidden_sizes = [hidden_size_units * 4]
     else:
         raise ValueError('This many layers is not yet configured!')
 
@@ -193,7 +202,7 @@ def run_deeplifting_task(dimensionality, layers, method, output_activation):
     configurations = list(product(*combinations))
 
     # Number of trials
-    trials = 20
+    trials = 1
 
     # List to store performance data
     performance_df_list = []
@@ -245,7 +254,7 @@ def run_deeplifting_task(dimensionality, layers, method, output_activation):
 
             # Save to parquet
             results.to_parquet(
-                f'./results/results-2023-08-{layers}-layer'
+                f'./results/results-2023-08-{layers}-layer-{units}'
                 f'-{problem_name}-{index}-{method}-{output_activation}.parquet'  # noqa
             )
 

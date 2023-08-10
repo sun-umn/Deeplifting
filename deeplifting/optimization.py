@@ -551,7 +551,7 @@ def run_deeplifting(
     """
     # Get the device (CPU for now)
     dimensions = problem['dimensions']
-    device = torch.device('cuda:0')
+    device = torch.device('cuda:1')
     fn_values = []
     iterim_results = []
 
