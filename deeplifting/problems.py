@@ -1,7 +1,7 @@
 # third party
 import numpy as np
 import torch
-from scipy.special import gamma
+from scipy.special import factorial, gamma
 
 # first party
 from deeplifting.kriging_peaks.kriging_peaks_red import (
@@ -5019,6 +5019,529 @@ def jennrich_sampson(x, results, trial, version='numpy'):
     return result
 
 
+# Keane fn in 2d
+def keane(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        numerator = np.square(np.sin(x1 - x2)) * np.square(np.sin(x1 + x2))
+        denominator = np.sqrt(np.square(x1) + np.square(x2))
+        result = numerator / denominator
+    elif version == 'pytorch':
+        numerator = torch.square(torch.sin(x1 - x2)) * torch.square(torch.sin(x1 + x2))
+        denominator = torch.sqrt(torch.square(x1) + torch.square(x2))
+        result = numerator / denominator
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# Leon fn in 2d
+def leon(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy' or version == 'pytorch':
+        result = 100 * (x2 - x1**2) ** 2 + (1 - x1) ** 2
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# Matyas fn in 2d
+def matyas(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy' or version == 'pytorch':
+        result = 0.26 * (x1**2 + x2**2) - 0.48 * x1 * x2
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# McCormick fn in 2d
+def mccormick(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = np.sin(x1 + x2) + np.square(x1 - x2) - (3 / 2) * x1 + (5 / 2) * x2 + 1
+    elif version == 'pytorch':
+        result = (
+            torch.sin(x1 + x2) + torch.square(x1 - x2) - (3 / 2) * x1 + (5 / 2) * x2 + 1
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# Miele Cantrell fn in 4d
+def miele_cantrell(x, results, trial, version='numpy'):
+    x1, x2, x3, x4 = x.flatten()
+    if version == 'numpy':
+        result = (
+            (np.exp(-x1) - x2) ** 4
+            + 100 * (x2 - x3) ** 6
+            + (np.tan(x3 - x4)) ** 4
+            + x1**8
+        )
+    elif version == 'pytorch':
+        result = (
+            (torch.exp(-x1) - x2) ** 4
+            + 100 * (x2 - x3) ** 6
+            + (torch.tan(x3 - x4)) ** 4
+            + x1**8
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                x3.detach().cpu().numpy(),
+                x4.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, x3, x4, result))
+
+    return result
+
+
+# nd Mishra1 fn
+def mishra1(x, results, trial, version='numpy'):
+    x = x.flatten()
+    m = len(x)
+    if version == 'numpy':
+        x_m = m - np.sum(x[:-1])
+        result = np.power((1 + x_m), x_m)
+    elif version == 'pytorch':
+        x_m = m - torch.sum(x[:-1])
+        result = torch.pow((1 + x_m), x_m)
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        x_tuple = tuple(x.detach().cpu().numpy())
+        results[trial, iteration, :] = np.array(
+            x_tuple + (result.detach().cpu().numpy(),)
+        )
+
+    else:
+        x_tuple = tuple(x.flatten())
+        results[trial, iteration, :] = np.array(x_tuple + (result,))
+
+    return result
+
+
+# nd Mishra2 fn
+def mishra2(x, results, trial, version='numpy'):
+    x = x.flatten()
+    m = len(x)
+    shifted_x = x[1:]
+    x = x[:-1]
+    if version == 'numpy':
+        x_m = m - np.sum(0.5 * (x + shifted_x))
+        result = np.power((1 + x_m), x_m)
+    elif version == 'pytorch':
+        x_m = m - torch.sum(0.5 * (x + shifted_x))
+        result = torch.pow((1 + x_m), x_m)
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        x_tuple = tuple(x.detach().cpu().numpy())
+        results[trial, iteration, :] = np.array(
+            x_tuple + (result.detach().cpu().numpy(),)
+        )
+
+    else:
+        x_tuple = tuple(x.flatten())
+        results[trial, iteration, :] = np.array(x_tuple + (result,))
+
+    return result
+
+
+# Mishra3 fn in 2d
+def mishra3(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        inner = np.sqrt(np.abs(x1**2 + x2**2))
+        result = np.sqrt(np.abs(np.cos(inner))) + 0.01 * (x1 + x2)
+    elif version == 'pytorch':
+        inner = torch.sqrt(torch.abs(x1**2 + x2**2))
+        result = torch.sqrt(torch.abs(torch.cos(inner))) + 0.01 * (x1 + x2)
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# Mishra4 fn in 2d
+def mishra4(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        inner = np.sqrt(np.abs(x1**2 + x2**2))
+        result = np.sqrt(np.abs(np.sin(inner))) + 0.01 * (x1 + x2)
+    elif version == 'pytorch':
+        inner = torch.sqrt(torch.abs(x1**2 + x2**2))
+        result = torch.sqrt(torch.abs(torch.sin(inner))) + 0.01 * (x1 + x2)
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# Mishra5 in 2d
+def mishra5(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        term1 = np.square(np.sin(np.square(np.cos(x1) + np.cos(x2))))
+        term2 = np.square(np.cos(np.sin(x1) + np.sin(x2)))
+        result = np.square(term1 + term2 + x1) + 0.01 * (x1 + x2)
+    elif version == 'pytorch':
+        term1 = torch.square(torch.sin(torch.square(torch.cos(x1) + torch.cos(x2))))
+        term2 = torch.square(torch.cos(torch.sin(x1) + torch.sin(x2)))
+        result = torch.square(term1 + term2 + x1) + 0.01 * (x1 + x2)
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# Mishra6 in 2d
+def mishra6(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        term1 = np.square(np.sin(np.square(np.cos(x1) + np.cos(x2))))
+        term2 = np.square(np.cos(np.sin(x1) + np.sin(x2)))
+        result = -np.log(np.square(term1 - term2 + x1)) + +0.01 * (
+            np.square(x1 - 1) + np.square(x2 - 1)
+        )
+    elif version == 'pytorch':
+        term1 = torch.square(torch.sin(torch.square(torch.cos(x1) + torch.cos(x2))))
+        term2 = torch.square(torch.cos(torch.sin(x1) + torch.sin(x2)))
+        result = -torch.log(torch.square(term1 - term2 + x1)) + +0.01 * (
+            torch.square(x1 - 1) + torch.square(x2 - 1)
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# nd Mishra7 fn
+def mishra7(x, results, trial, version='numpy'):
+    x = x.flatten()
+    n = len(x)
+    n_fac = factorial(n)
+    if version == 'numpy':
+        result = np.square(np.sum(x - n_fac))
+    elif version == 'pytorch':
+        result = torch.square(torch.sum(x - n_fac))
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        x_tuple = tuple(x.detach().cpu().numpy())
+        results[trial, iteration, :] = np.array(
+            x_tuple + (result.detach().cpu().numpy(),)
+        )
+
+    else:
+        x_tuple = tuple(x.flatten())
+        results[trial, iteration, :] = np.array(x_tuple + (result,))
+
+    return result
+
+
+# Mishra8 fn in 2d
+def mishra8(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        term1 = (
+            x1**10
+            - 20 * x1**9
+            + 180 * x1**8
+            - 960 * x1**7
+            + 3360 * x1**6
+            - 8064 * x1**5
+            + 1334 * x1**4
+            - 15360 * x1**3
+            + 11520 * x1
+            - 5120 * x1
+            + 2624
+        )
+        term2 = x2**4 + 12 * x2**3 + 54 * x**2 + 108 * x2 + 81
+        result = 0.001 * np.square(np.abs(term1) * np.abs(term2))
+    elif version == 'pytorch':
+        term1 = (
+            x1**10
+            - 20 * x1**9
+            + 180 * x1**8
+            - 960 * x1**7
+            + 3360 * x1**6
+            - 8064 * x1**5
+            + 1334 * x1**4
+            - 15360 * x1**3
+            + 11520 * x1
+            - 5120 * x1
+            + 2624
+        )
+        term2 = x2**4 + 12 * x2**3 + 54 * x**2 + 108 * x2 + 81
+        result = 0.001 * torch.square(torch.abs(term1) * torch.abs(term2))
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+# Mishra9 fn in 3d
+def mishra9(x, results, trial, version='numpy'):
+    x1, x2, x3 = x.flatten()
+    if version == 'numpy' or version == 'pytorch':
+        a = 2 * x1**3 + 5 * x1 * x2 + 4 * x3 - 2 * x1**2 * x3 - 18
+        b = x1 + x2**3 + x1 * x3**2 - 22
+        c = 8 * x1**2 + 2 * x2 * x3 + 2 * x2**2 + 3 * x2**3 - 52
+        result = (
+            a * (b**2) * c + a * b * (c**2) + b**2 + (x1 + x2 + x3) ** 2
+        ) ** 2
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                x3.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, x3, result))
+
+    return result
+
+
+# Mishra10 in 2d
+# Not sure how to implement
+
+
+# nd Mishra11 fn
+def mishra11(x, results, trial, version='numpy'):
+    x = x.flatten()
+    d = len(x)
+    if version == 'numpy':
+        sum = np.sum(np.abs(x))
+        prod = np.prod(np.abs(x))
+        result = np.square((1 / d) * sum - np.power(prod, (1 / d)))
+    elif version == 'pytorch':
+        sum = torch.sum(torch.abs(x))
+        prod = torch.prod(torch.abs(x))
+        result = torch.square((1 / d) * sum - torch.pow(prod, (1 / d)))
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        x_tuple = tuple(x.detach().cpu().numpy())
+        results[trial, iteration, :] = np.array(
+            x_tuple + (result.detach().cpu().numpy(),)
+        )
+
+    else:
+        x_tuple = tuple(x.flatten())
+        results[trial, iteration, :] = np.array(x_tuple + (result,))
+
+    return result
+
+
 # Problem configurations
 # Ackley
 ackley_config = {
@@ -6575,6 +7098,354 @@ jennrich_sampson_config = {
     'dimensions': 2,
 }
 
+keane_config = {
+    'objective': keane,
+    'bounds': [
+        (0, 10),
+        (0, 10),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': -0.673668,
+    'dimensions': 2,
+}
+
+leon_config = {
+    'objective': leon,
+    'bounds': [
+        (-1.2, 1.2),
+        (-1.2, 1.2),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+}
+
+matyas_config = {
+    'objective': matyas,
+    'bounds': [
+        (-10, 10),
+        (-10, 10),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+}
+
+mccormick_config = {
+    'objective': mccormick,
+    'bounds': [
+        (-1.5, 1.5),
+        (-3, 3),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': -1.9133,
+    'dimensions': 2,
+}
+
+miele_cantrell_config = {
+    'objective': miele_cantrell,
+    'bounds': [
+        (-1, 1),
+        (-1, 1),
+        (-1, 1),
+        (-1, 1),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 4,
+}
+
+mishra1_config = {
+    'objective': mishra1,
+    'bounds': [(0, 1)],
+    'max_iterations': 1000,
+    'global_minimum': 2,
+    'dimensions': 2,
+}
+
+mishra1_10d_config = {
+    'objective': mishra1,
+    'bounds': [(0, 1)],
+    'max_iterations': 1000,
+    'global_minimum': 2,
+    'dimensions': 10,
+}
+
+mishra1_50d_config = {
+    'objective': mishra1,
+    'bounds': [(0, 1)],
+    'max_iterations': 1000,
+    'global_minimum': 2,
+    'dimensions': 50,
+}
+
+mishra1_100d_config = {
+    'objective': mishra1,
+    'bounds': [(0, 1)],
+    'max_iterations': 1000,
+    'global_minimum': 2,
+    'dimensions': 100,
+}
+
+mishra1_500d_config = {
+    'objective': mishra1,
+    'bounds': [(0, 1)],
+    'max_iterations': 1000,
+    'global_minimum': 2,
+    'dimensions': 500,
+}
+
+mishra1_1000d_config = {
+    'objective': mishra1,
+    'bounds': [(0, 1)],
+    'max_iterations': 1000,
+    'global_minimum': 2,
+    'dimensions': 1000,
+}
+
+mishra1_5000d_config = {
+    'objective': mishra1,
+    'bounds': [(0, 1)],
+    'max_iterations': 1000,
+    'global_minimum': 2,
+    'dimensions': 5000,
+}
+
+mishra2_config = {
+    'objective': mishra1,
+    'bounds': [(0, 1)],
+    'max_iterations': 1000,
+    'global_minimum': 2,
+    'dimensions': 2,
+}
+
+mishra2_10d_config = {
+    'objective': mishra1,
+    'bounds': [(0, 1)],
+    'max_iterations': 1000,
+    'global_minimum': 2,
+    'dimensions': 10,
+}
+
+mishra2_50d_config = {
+    'objective': mishra1,
+    'bounds': [(0, 1)],
+    'max_iterations': 1000,
+    'global_minimum': 2,
+    'dimensions': 50,
+}
+
+mishra2_100d_config = {
+    'objective': mishra1,
+    'bounds': [(0, 1)],
+    'max_iterations': 1000,
+    'global_minimum': 2,
+    'dimensions': 100,
+}
+
+mishra2_500d_config = {
+    'objective': mishra1,
+    'bounds': [(0, 1)],
+    'max_iterations': 1000,
+    'global_minimum': 2,
+    'dimensions': 500,
+}
+
+mishra2_1000d_config = {
+    'objective': mishra1,
+    'bounds': [(0, 1)],
+    'max_iterations': 1000,
+    'global_minimum': 2,
+    'dimensions': 1000,
+}
+
+mishra2_5000d_config = {
+    'objective': mishra1,
+    'bounds': [(0, 1)],
+    'max_iterations': 1000,
+    'global_minimum': 2,
+    'dimensions': 5000,
+}
+
+mishra3_config = {
+    'objective': mishra3,
+    'bounds': [
+        (None, None),
+        (None, None),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': -0.18467,
+    'dimensions': 2,
+}
+
+mishra4_config = {
+    'objective': mishra4,
+    'bounds': [
+        (None, None),
+        (None, None),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': -0.199409,
+    'dimensions': 2,
+}
+
+mishra5_config = {
+    'objective': mishra5,
+    'bounds': [
+        (None, None),
+        (None, None),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': -1.01983,
+    'dimensions': 2,
+}
+
+mishra6_config = {
+    'objective': mishra6,
+    'bounds': [
+        (None, None),
+        (None, None),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': -2.28395,
+    'dimensions': 2,
+}
+
+mishra7_config = {
+    'objective': mishra7,
+    'bounds': [(None, None)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+}
+
+mishra7_10d_config = {
+    'objective': mishra7,
+    'bounds': [(None, None)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 10,
+}
+
+mishra7_50d_config = {
+    'objective': mishra7,
+    'bounds': [(None, None)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 50,
+}
+
+mishra7_100d_config = {
+    'objective': mishra7,
+    'bounds': [(None, None)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 100,
+}
+
+mishra7_500d_config = {
+    'objective': mishra7,
+    'bounds': [(None, None)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 500,
+}
+
+mishra7_1000d_config = {
+    'objective': mishra7,
+    'bounds': [(None, None)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 1000,
+}
+
+mishra7_5000d_config = {
+    'objective': mishra7,
+    'bounds': [(None, None)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 5000,
+}
+
+mishra8_config = {
+    'objective': mishra8,
+    'bounds': [
+        (None, None),
+        (None, None),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+}
+
+mishra9_config = {
+    'objective': mishra9,
+    'bounds': [
+        (None, None),
+        (None, None),
+        (None, None),
+    ],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 3,
+}
+
+mishra11_config = {
+    'objective': mishra11,
+    'bounds': [(None, None)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+}
+
+mishra11_10d_config = {
+    'objective': mishra11,
+    'bounds': [(None, None)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 10,
+}
+
+mishra11_50d_config = {
+    'objective': mishra11,
+    'bounds': [(None, None)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 50,
+}
+
+mishra11_100d_config = {
+    'objective': mishra11,
+    'bounds': [(None, None)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 100,
+}
+
+mishra11_500d_config = {
+    'objective': mishra11,
+    'bounds': [(None, None)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 500,
+}
+
+mishra11_1000d_config = {
+    'objective': mishra11,
+    'bounds': [(None, None)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 1000,
+}
+
+mishra11_5000d_config = {
+    'objective': mishra11,
+    'bounds': [(None, None)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 5000,
+}
+
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
     'ackley_3d': ackley_3d_config,
@@ -6736,4 +7607,37 @@ PROBLEMS_BY_NAME = {
     'himmelblau': himmelblau_config,
     'hosaki': hosaki_config,
     'jennrich_sampson': jennrich_sampson_config,
+    'keane': keane_config,
+    'leon': leon_config,
+    'matyas': matyas_config,
+    'mccormick': mccormick_config,
+    'miele_cantrell': miele_cantrell_config,
+    'mishra1': mishra1_config,
+    'mishra1_10d': mishra1_10d_config,
+    'mishra1_50d': mishra1_50d_config,
+    'mishra1_100d': mishra1_100d_config,
+    'mishra1_500d': mishra1_500d_config,
+    'mishra1_1000d': mishra1_1000d_config,
+    'mishra1_5000d': mishra1_5000d_config,
+    'mishra2': mishra2_config,
+    'mishra2_10d': mishra2_10d_config,
+    'mishra2_50d': mishra2_50d_config,
+    'mishra2_100d': mishra2_100d_config,
+    'mishra2_500d': mishra2_500d_config,
+    'mishra2_1000d': mishra2_1000d_config,
+    'mishra2_5000d': mishra2_5000d_config,
+    'mishra3': mishra3_config,
+    'mishra4': mishra4_config,
+    'mishra5': mishra5_config,
+    'mishra6': mishra6_config,
+    'mishra7': mishra7_config,
+    'mishra7_10d': mishra7_10d_config,
+    'mishra7_50d': mishra7_50d_config,
+    'mishra7_100d': mishra7_100d_config,
+    'mishra7_500d': mishra7_500d_config,
+    'mishra7_1000d': mishra7_1000d_config,
+    'mishra7_5000d': mishra7_5000d_config,
+    'mishra8': mishra8_config,
+    'mishra9': mishra9_config,
+    'mishra11': mishra11_config,
 }
