@@ -3841,17 +3841,9 @@ def branin_rcos(x, results, trial, version='numpy'):
 def brent(x, results, trial, version='numpy'):
     x1, x2 = x.flatten()
     if version == 'numpy':
-        result = (
-            np.square(x1 + 10)
-            + np.square(x2 + 10)
-            + np.exp(-np.square(x1) - np.square(x2))
-        )
+        result = (x1 + 10) ** 2 + (x2 + 10) ** 2 + np.exp(-(x1**2) - (x2**2))
     elif version == 'pytorch':
-        result = (
-            torch.square(x1 + 10)
-            + torch.square(x2 + 10)
-            + torch.exp(-torch.square(x1) - torch.square(x2))
-        )
+        result = (x1 + 10) ** 2 + (x2 + 10) ** 2 + torch.exp(-(x1**2) - (x2**2))
     else:
         raise ValueError(
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
@@ -5585,7 +5577,7 @@ sine_envelope_config = {
         (-100, 100),
     ],
     'max_iterations': 1000,
-    'global_minimum': -0.72984,
+    'global_minimum': 0.0,
     'dimensions': 2,
 }
 

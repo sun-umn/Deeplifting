@@ -39,44 +39,44 @@ low_dimensional_problem_names = [
     # 'kriging_peaks_red010',
     # 'kriging_peaks_red020',
     # # 'kriging_peaks_red030',
-    'mathopt6',
-    'quantum',
-    'rosenbrock',
-    'cross_leg_table',
-    'sine_envelope',
-    'ackley2',
-    'ackley3',
-    # # 'ackley4',  # Having issues
+    # 'mathopt6',
+    # 'quantum',
+    # 'rosenbrock',
+    # 'cross_leg_table',
+    # 'sine_envelope',  # Having issues
+    # 'ackley2',
+    # 'ackley3',  # Having issues
+    # 'ackley4',  # Having issues
     'adjiman',
     'alpine1',
     'alpine2',
     'bartels_conn',
     'beale',
-    # # 'biggs_exp2',  # Having issues
+    # 'biggs_exp2',  # Having issues
     'bird',
-    'bohachevsky1',
-    'bohachevsky2',
+    # 'bohachevsky1',
+    # 'bohachevsky2',  # Having issues
     'bohachevsky3',
     'booth',
-    # 'branin_rcos',
-    'brent',
-    # 'brown',
+    # 'branin_rcos',  # Having issues
+    # 'brent',
+    # # 'brown',
     'bukin_n2',
     'bukin_n4',
     'camel_3hump',
     'camel_6hump',
-    # 'chen_bird',
-    # 'chen_v',
-    'chichinadze',
+    # 'chen_bird',  # Having issues
+    # 'chen_v',  # Having issues
+    # 'chichinadze',  # Having issues
     'chung_reynolds',
-    'cube',
+    'cube',  # Correct but paper has wrong x*
 ]
 
 high_dimensional_problem_names = [
-    'ackley_30d',
-    'ackley_100d',
+    # 'ackley_30d',
+    # 'ackley_100d',
     'ackley_1000d',
-    'ex8_6_2',
+    # 'ex8_6_2',
 ]
 
 # Identify available hidden sizes
@@ -144,7 +144,10 @@ def cli():
 @click.option('--units', default=128)
 @click.option('--method', default='particle')
 @click.option('--output_activation', default='leaky_relu')
-def run_deeplifting_task(dimensionality, layers, method, output_activation, units):
+@click.option('--agg_function', default='sum')
+def run_deeplifting_task(
+    dimensionality, layers, method, output_activation, units, agg_function
+):
     """
     Run deep lifting over specified available problems and over a search space
     to find the best performance
@@ -191,6 +194,12 @@ def run_deeplifting_task(dimensionality, layers, method, output_activation, unit
     else:
         raise ValueError(f'{output_activation} not supported!')
 
+    # Aggregate function
+    if agg_function == 'sum':
+        agg_functions = ['sum']
+    elif agg_function == 'max':
+        agg_functions = ['max']
+
     # Get the available configurations
     combinations = (
         input_sizes,
@@ -202,7 +211,7 @@ def run_deeplifting_task(dimensionality, layers, method, output_activation, unit
     configurations = list(product(*combinations))
 
     # Number of trials
-    trials = 1
+    trials = 20
 
     # List to store performance data
     performance_df_list = []
@@ -254,7 +263,7 @@ def run_deeplifting_task(dimensionality, layers, method, output_activation, unit
 
             # Save to parquet
             results.to_parquet(
-                f'./results/results-2023-08-{layers}-layer-{units}'
+                f'./results/results-2023-08-{layers}-layer-{units}-{agg_function}'
                 f'-{problem_name}-{index}-{method}-{output_activation}.parquet'  # noqa
             )
 

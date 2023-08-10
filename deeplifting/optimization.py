@@ -608,7 +608,7 @@ def run_deeplifting(
         opts.double_precision = True
         # opts.disable_terminationcode_6 = True
         # opts.halt_on_linesearch_bracket = False
-        opts.opt_tol = 1e-20
+        opts.opt_tol = 1e-10
         opts.maxit = 1000
 
         # Get the maximum iterations
