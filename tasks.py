@@ -166,11 +166,11 @@ def run_deeplifting_task(dimensionality, layers, method, output_activation):
 
     # Configurable number of layers
     if layers == 2:
-        dl_hidden_sizes = [hidden_size_512 * 2]
+        dl_hidden_sizes = [hidden_size_128 * 2]
     elif layers == 3:
-        dl_hidden_sizes = [hidden_size_512 * 3]
+        dl_hidden_sizes = [hidden_size_128 * 3]
     elif layers == 4:
-        dl_hidden_sizes = [hidden_size_512 * 4]
+        dl_hidden_sizes = [hidden_size_128 * 4]
     else:
         raise ValueError('This many layers is not yet configured!')
 
