@@ -5534,6 +5534,84 @@ def mishra11(x, results, trial, version='numpy'):
     return result
 
 
+# Adding the XinSheYang 2 & 3 functions
+# researched that they are very difficult to find
+# the minima
+def xinsheyang_n2(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        component1 = np.abs(x1) + np.abs(x2)
+        component2 = np.exp(-(np.sin(x1**2) + np.sin(x2**2)))
+        result = component1 * component2
+    elif version == 'pytorch':
+        component1 = torch.abs(x1) + torch.abs(x2)
+        component2 = torch.exp(-(torch.sin(x1**2) + torch.sin(x2**2)))
+        result = component1 * component2
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+def xinsheyang_n3(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    beta = 15
+    m = 5
+    if version == 'numpy':
+        component1 = np.exp(-((x1 / beta) ** (2 * m) + (x2 / beta) ** (2 * m)))
+        component2 = (
+            2 * np.exp(-(x1**2 + x2**2)) * np.cos(x1) ** 2 * np.cos(x2) ** 2
+        )
+        result = component1 - component2
+    elif version == 'pytorch':
+        component1 = torch.exp(-((x1 / beta) ** (2 * m) + (x2 / beta) ** (2 * m)))
+        component2 = (
+            2
+            * torch.exp(-(x1**2 + x2**2))
+            * torch.cos(x1) ** 2
+            * torch.cos(x2) ** 2
+        )
+        result = component1 - component2
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
 # Problem configurations
 # Ackley
 ackley_config = {
@@ -7438,6 +7516,22 @@ mishra11_5000d_config = {
     'dimensions': 5000,
 }
 
+xinsheyang_n2_config = {
+    'objective': xinsheyang_n2,
+    'bounds': [(-2 * np.pi, 2 * np.pi), (-2 * np.pi, 2 * np.pi)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+}
+
+xinsheyang_n3_config = {
+    'objective': xinsheyang_n3,
+    'bounds': [(-2 * np.pi, 2 * np.pi), (-2 * np.pi, 2 * np.pi)],
+    'max_iterations': 1000,
+    'global_minimum': -1,
+    'dimensions': 2,
+}
+
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
     'ackley_3d': ackley_3d_config,
@@ -7632,4 +7726,6 @@ PROBLEMS_BY_NAME = {
     'mishra8': mishra8_config,
     'mishra9': mishra9_config,
     'mishra11': mishra11_config,
+    'xinsheyang_n2': xinsheyang_n2_config,
+    'xinsheyang_n3': xinsheyang_n3_config,
 }
