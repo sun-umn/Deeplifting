@@ -5753,11 +5753,11 @@ def layeb7(x, results, trial, version='numpy'):
     if version == 'numpy':
         component1 = np.abs(np.cos(x1 + x2 - np.pi / 2)) ** 0.1
         component2 = np.exp(np.cos(16.0 * x1 * x2 / np.pi))
-        result = 100.0 * component1 - component2 + np.exp(1)
+        result = 100.0 * component1 - component2 + np.e
     elif version == 'pytorch':
         component1 = torch.abs(torch.cos(x1 + x2 - torch.pi / 2)) ** 0.1
         component2 = torch.exp(torch.cos(16.0 * x1 * x2 / torch.pi))
-        result = 100.0 * component1 - component2 + torch.exp(1)
+        result = 100.0 * component1 - component2 + torch.e
     else:
         raise ValueError(
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
