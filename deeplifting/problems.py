@@ -5717,6 +5717,37 @@ def layeb4(x, results, trial, version='numpy'):
     return result
 
 
+def layeb6(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        component1 = np.cos((x1**2 + x2**2) ** 0.5)
+        result = np.abs(component1 * np.sin(x2) + np.cos(x2) + 1.0) ** 0.1
+    elif version == 'pytorch':
+        component1 = torch.cos((x1**2 + x2**2) ** 0.5)
+        result = torch.abs(component1 * torch.sin(x2) + torch.cos(x2) + 1.0) ** 0.1
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
 # Problem configurations
 # Ackley
 ackley_config = {
@@ -7661,6 +7692,14 @@ layeb4_config = {
     'dimensions': 2,
 }
 
+layeb6_config = {
+    'objective': layeb6,
+    'bounds': [(-10, 10), (-10, 10)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+}
+
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
     'ackley_3d': ackley_3d_config,
@@ -7860,4 +7899,5 @@ PROBLEMS_BY_NAME = {
     'layeb12': layeb12_config,
     'layeb3': layeb3_config,
     'layeb4': layeb4_config,
+    'layeb6': layeb6_config,
 }
