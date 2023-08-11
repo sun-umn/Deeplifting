@@ -5612,6 +5612,41 @@ def xinsheyang_n3(x, results, trial, version='numpy'):
     return result
 
 
+# Found another paper with "new difficult" test problems
+# https://arxiv.org/pdf/2202.04606.pdf
+def layeb12(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        component1 = np.cos(np.pi / 2 * x1 - np.pi / 4 * x2 - np.pi / 2)
+        component2 = np.exp(np.cos(2 * np.pi * x1 * x2))
+        result = -(component1 * component2 + 1)
+    elif version == 'pytorch':
+        component1 = torch.cos(torch.pi / 2 * x1 - torch.pi / 4 * x2 - torch.pi / 2)
+        component2 = torch.exp(torch.cos(2 * torch.pi * x1 * x2))
+        result = -(component1 * component2 + 1)
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
 # Problem configurations
 # Ackley
 ackley_config = {
@@ -7532,6 +7567,14 @@ xinsheyang_n3_config = {
     'dimensions': 2,
 }
 
+layeb12_config = {
+    'objective': layeb12,
+    'bounds': [(-5, 5), (-5, 5)],
+    'max_iterations': 1000,
+    'global_minimum': -(np.e + 1),
+    'dimensions': 2,
+}
+
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
     'ackley_3d': ackley_3d_config,
@@ -7728,4 +7771,5 @@ PROBLEMS_BY_NAME = {
     'mishra11': mishra11_config,
     'xinsheyang_n2': xinsheyang_n2_config,
     'xinsheyang_n3': xinsheyang_n3_config,
+    'layeb12': layeb12_config,
 }
