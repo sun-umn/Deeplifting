@@ -387,7 +387,7 @@ def run_create_trajectory_plot():
     """
     print('Create trajectory plot!')
     # Problem set up
-    problem_name = 'eggholder'
+    problem_name = 'cross_in_tray'
     trials = 1
     index = 0
     problem = PROBLEMS_BY_NAME[problem_name]
@@ -427,7 +427,7 @@ def run_create_trajectory_plot():
 
     # Create models and trajectories
     trajectories = [
-        deeplifting_trajectory_data,
+        deeplifting_trajectory_data.tolist(),
         ipopt_trajectory_data,
         dual_annealing_trajectory_data,
         differential_evolution_trajectory_data,
@@ -448,7 +448,7 @@ def run_create_trajectory_plot():
         problem=problem,
         models=models,
         trajectories=trajectories,
-        colormap='OrRd_r',
+        colormap='Greys',
     )
 
     return fig

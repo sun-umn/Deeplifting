@@ -363,7 +363,7 @@ def run_pygranso(problem: Dict, trials: int):
     comparisions
     """
     # Get the device (CPU for now)
-    device = torch.device('cuda:1')
+    device = torch.device('cpu')
     fn_values = []
     interim_results = []
 
@@ -551,7 +551,7 @@ def run_deeplifting(
     """
     # Get the device (CPU for now)
     dimensions = problem['dimensions']
-    device = torch.device('cuda:1')
+    device = torch.device('cpu')
     fn_values = []
     iterim_results = []
 

@@ -96,7 +96,7 @@ def add_jitter(points, jitter_amount=0.05):
     return points + jitter
 
 
-def create_contour_plot(problem_name, problem, models, trajectories, colormap='OrRd_r'):
+def create_contour_plot(problem_name, problem, models, trajectories, colormap='Greys'):
     """
     Function that will build out the plots and the solution
     found for the optimization. For our purposes we will mainly
@@ -146,34 +146,50 @@ def create_contour_plot(problem_name, problem, models, trajectories, colormap='O
     fig = plt.figure(figsize=(8, 6))
     ax1 = fig.add_subplot(111)
 
-    contour = ax1.contour(x, y, z, levels=10, cmap=colormap, alpha=0.5)
+    contour = ax1.contourf(x, y, z, levels=10, cmap=colormap, alpha=0.90)
     fig.colorbar(contour, ax=ax1)
 
-    # Define colors and markers for the models
-    colors = ['black', 'black', 'black', 'black', 'black']
+    # # Define colors and markers for the models
+    # colormaps = [cm.autumn_r, cm.winter, cm.cool, cm.copper, cm.rainbow]
+    model_colors = ['red', 'maroon', 'orange', 'black', 'gold']
     markers = ['o', 's', '^', 'd', 'p']
 
     # Plot each set of points
     for idx, points in enumerate(trajectories):
+        if len(points) > 2:
+            mid_point = len(points) // 2
+            points = [points[0], points[mid_point], points[-1]]
+
         x_values, y_values = zip(*points)
+
+        # # Create a colormap
+        # colormap = colormaps[idx]
+        # colors = colormap(np.linspace(0, 1, len(points)))
+
         plt.scatter(
             x_values,
             y_values,
-            color=colors[idx],
+            color=model_colors[idx],
             label=models[idx],
             marker=markers[idx],
         )
 
-        # Connect the points with lines
-        plt.plot(x_values, y_values, color=colors[idx])
+        # for color_idx, (x, y) in enumerate(points):
+        for i in range(len(points) - 1):
+            x1, y1 = points[i]
+            x2, y2 = points[i + 1]
 
-        for i, point in enumerate(points):
+            # Connect the points with lines
+            # plt.plot(x, y, markers[idx], color=colors[i])
+            plt.plot([x1, x2], [y1, y2], color=model_colors[idx], lw=3)
+
+            # Add the annotation
             plt.annotate(
                 str(i),
-                xy=point,
+                xy=(x1, y1),
                 xytext=(-10, 5),
                 textcoords='offset points',
-                color=colors[idx],
+                color=model_colors[idx],
             )
 
     plt.xlabel('X')
