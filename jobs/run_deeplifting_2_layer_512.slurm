@@ -9,4 +9,4 @@
 #SBATCH --gres=gpu:1
 cd /home/jusun/dever120/Deeplifting
 export PATH=/home/jusun/dever120/miniconda3/envs/deeplifting/bin:$PATH
-python -m tasks run-deeplifting-task --dimensionality='low-dimensional' --layers=2 --units=512
+python -m tasks run-deeplifting-task --dimensionality='low-dimensional' --layers=2 --units=512 --output_activation='sine' --agg_function='max'
