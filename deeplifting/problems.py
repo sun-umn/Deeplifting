@@ -5687,11 +5687,11 @@ def layeb3(x, results, trial, version='numpy'):
 def layeb4(x, results, trial, version='numpy'):
     x1, x2 = x.flatten()
     if version == 'numpy':
-        component1 = np.log(np.abs(x1 * x2)) + 0.0001
+        component1 = np.log(np.abs(x1 * x2) + 1e-3)
         component2 = np.cos(x1 + x2)
         result = component1 + component2
     elif version == 'pytorch':
-        component1 = torch.log(torch.abs(x1 * x2)) + 0.0001
+        component1 = torch.log(torch.abs(x1 * x2) + 1e-3)
         component2 = torch.cos(x1 + x2)
         result = component1 + component2
     else:
