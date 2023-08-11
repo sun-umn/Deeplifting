@@ -5647,6 +5647,76 @@ def layeb12(x, results, trial, version='numpy'):
     return result
 
 
+def layeb3(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        component1 = np.sin(x1)
+        component2 = np.exp(np.abs(100.0 - np.sqrt(x1**2 + x2**2) / np.pi))
+        component3 = np.sin(x2)
+        result = np.abs(component1 * component2 + component3 + 1) ** -0.1
+    elif version == 'pytorch':
+        component1 = torch.sin(x1)
+        component2 = torch.exp(
+            torch.abs(100.0 - torch.sqrt(x1**2 + x2**2) / torch.pi)
+        )
+        component3 = torch.sin(x2)
+        result = torch.abs(component1 * component2 + component3 + 1) ** -0.1
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
+def layeb4(x, results, trial, version='numpy'):
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        component1 = np.log(np.abs(x1 * x2)) + 0.0001
+        component2 = np.cos(x1 + x2)
+        result = component1 + component2
+    elif version == 'pytorch':
+        component1 = torch.log(torch.abs(x1 * x2)) + 0.0001
+        component2 = torch.cos(x1 + x2)
+        result = component1 + component2
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if isinstance(result, torch.Tensor):
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+
+    else:
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return result
+
+
 # Problem configurations
 # Ackley
 ackley_config = {
@@ -7575,6 +7645,22 @@ layeb12_config = {
     'dimensions': 2,
 }
 
+layeb3_config = {
+    'objective': layeb3,
+    'bounds': [(-10, 10), (-10, 10)],
+    'max_iterations': 1000,
+    'global_minimum': -1,
+    'dimensions': 2,
+}
+
+layeb4_config = {
+    'objective': layeb4,
+    'bounds': [(-10, 10), (-10, 10)],
+    'max_iterations': 1000,
+    'global_minimum': (np.log(0.001) - 1),
+    'dimensions': 2,
+}
+
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
     'ackley_3d': ackley_3d_config,
@@ -7772,4 +7858,6 @@ PROBLEMS_BY_NAME = {
     'xinsheyang_n2': xinsheyang_n2_config,
     'xinsheyang_n3': xinsheyang_n3_config,
     'layeb12': layeb12_config,
+    'layeb3': layeb3_config,
+    'layeb4': layeb4_config,
 }
