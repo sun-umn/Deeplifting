@@ -451,7 +451,7 @@ def run_create_trajectory_plot():
         colormap='Greys',
     )
 
-    return fig
+    fig.savefig('./images/trajectory.png', bbox_inches='tight', pad_inches=0.05)
 
 
 @cli.command('run-deeplifting-and-save')
