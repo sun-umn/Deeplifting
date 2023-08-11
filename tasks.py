@@ -47,29 +47,30 @@ low_dimensional_problem_names = [
     # 'ackley2',
     # 'ackley3',  # Having issues
     # 'ackley4',  # Having issues
-    'adjiman',
-    'alpine1',
-    'alpine2',
-    'bartels_conn',
-    'beale',
-    # 'biggs_exp2',  # Having issues
+    # 'adjiman',
+    # 'alpine1',
+    # 'alpine2',
+    # 'bartels_conn',
+    # 'beale',
+    # # 'biggs_exp2',  # Having issues
     'bird',
     # 'bohachevsky1',
     # 'bohachevsky2',  # Having issues
     'bohachevsky3',
-    'booth',
+    # 'booth',
     # 'branin_rcos',  # Having issues
     # 'brent',
-    # # 'brown',
-    'bukin_n2',
-    'bukin_n4',
-    'camel_3hump',
-    'camel_6hump',
+    # 'brown',
+    # 'bukin_n2',
+    # 'bukin_n4',
+    # 'camel_3hump',
+    # 'camel_6hump',
     # 'chen_bird',  # Having issues
     # 'chen_v',  # Having issues
     # 'chichinadze',  # Having issues
-    'chung_reynolds',
-    'cube',  # Correct but paper has wrong x*
+    # 'chung_reynolds',
+    # 'cube',  # Correct but paper has wrong x*
+    # 'damavandi',
 ]
 
 high_dimensional_problem_names = [

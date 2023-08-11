@@ -2568,23 +2568,15 @@ def damavandi(x, results, trial, version='numpy'):
     """
     x1, x2 = x.flatten()
     if version == 'numpy':
-        result = (
-            1
-            - np.abs(
-                (np.sin(np.pi * (x1 - 2)) * np.sin(np.pi * (x2 - 2)))
-                / ((np.pi**2) * (x1 - 2) * (x2 - 2))
-            )
-            ** 5
-        ) * (2 + (x1 - 7) ** 2 + 2 * (x2 - 7) ** 2)
+        r = x1**2 + x2**2
+        theta = np.arctan(x2 / x1)
+        component1 = (r - 10) / (5**0.5 * np.cos(theta))
+        result = (1 - np.abs(component1) ** 5) * (2 + component1) + 1e-4
     elif version == 'pytorch':
-        result = (
-            1
-            - torch.abs(
-                (torch.sin(np.pi * (x1 - 2)) * torch.sin(np.pi * (x2 - 2)))
-                / ((np.pi**2) * (x1 - 2) * (x2 - 2))
-            )
-            ** 5
-        ) * (2 + (x1 - 7) ** 2 + 2 * (x2 - 7) ** 2)
+        r = x1**2 + x2**2
+        theta = torch.arctan(x2 / x1)
+        component1 = (r - 10) / (5**0.5 * torch.cos(theta))
+        result = (1 - torch.abs(component1) ** 5) * (2 + component1) + 1e-4
     else:
         raise ValueError(
             "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
@@ -6253,7 +6245,7 @@ alpine2_config = {
     'objective': alpine2,
     'bounds': [(0, 10), (0, 10)],
     'max_iterations': 1000,
-    'global_minimum': 2.808**2,
+    'global_minimum': -6.1295,
     'dimensions': 2,
 }
 

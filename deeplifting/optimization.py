@@ -617,7 +617,7 @@ def run_deeplifting(
         # results
         results = np.zeros((trials, max_iterations * 10, dimensions + 1)) * np.nan
         deeplifting_results = (
-            np.zeros((trials, max_iterations * 10, dimensions + 1)) * np.nan
+            np.zeros((trials, max_iterations * 100, dimensions + 1)) * np.nan
         )
 
         # Set up the function with the results
