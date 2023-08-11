@@ -22,25 +22,25 @@ from deeplifting.utils import create_contour_plot
 # Identify problems to run
 low_dimensional_problem_names = [
     # 'ackley',  # Low
-    # 'bukin_n6',  # High, 2 layer is best so far, takes a while to run
+    'bukin_n6',  # High, 2 layer is best so far, takes a while to run
     # 'cross_in_tray',  # Low, runs quickly
     # 'drop_wave',  # Low, runs quickly
-    # 'eggholder',  # Medium, takes time to run
+    'eggholder',  # Medium, takes time to run
     # 'griewank',  # Low, (1.0 with 3-layer, 0.95 2-layer)
-    # 'holder_table',  # Medium
+    'holder_table',  # Medium
     # 'levy',  # Low, 3-layer
     # 'levy_n13',  # Low, 3-layer
     # 'rastrigin',  # Low, 3-layer
     # 'schaffer_n2',  # Low, 3-layer
     # 'schaffer_n4',  # Low, 3-layer
-    # 'schwefel',  # Takes a while to run, DA is better at 100% but we are at 85%
-    # 'shubert',  # Takes a while to run,
+    'schwefel',  # Takes a while to run, DA is better at 100% but we are at 85%
+    'shubert',  # Takes a while to run,
     # 'ex8_1_1',
     # 'kriging_peaks_red010',
     # 'kriging_peaks_red020',
     # # 'kriging_peaks_red030',
-    # 'mathopt6',
-    # 'quantum',
+    'mathopt6',
+    'quantum',
     # 'rosenbrock',
     # 'cross_leg_table',
     # 'sine_envelope',  # Having issues
@@ -56,7 +56,7 @@ low_dimensional_problem_names = [
     'bird',
     # 'bohachevsky1',
     # 'bohachevsky2',  # Having issues
-    'bohachevsky3',
+    # 'bohachevsky3',
     # 'booth',
     # 'branin_rcos',  # Having issues
     # 'brent',
