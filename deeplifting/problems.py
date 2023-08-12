@@ -5985,12 +5985,28 @@ ackley_100d_config = {
     'dimensions': 100,
 }
 
+ackley_500d_config = {
+    'objective': ndackley,
+    'bounds': [(-32.768, 32.768)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 500,
+}
+
 ackley_1000d_config = {
     'objective': ndackley,
     'bounds': [(-32.768, 32.768)],  # Will use a single level bound and then expand
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 1000,
+}
+
+ackley_2500d_config = {
+    'objective': ndackley,
+    'bounds': [(-32.768, 32.768)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 2500,
 }
 
 # Multi-Dimensional Problems #
@@ -6028,12 +6044,28 @@ griewank_100d_config = {
     'dimensions': 100,
 }
 
+griewank_500d_config = {
+    'objective': ndgriewank,
+    'bounds': [(-600, 600)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 500,
+}
+
 griewank_1000d_config = {
     'objective': ndgriewank,
     'bounds': [(-600, 600)],  # Will use a single level bound and then expand
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 1000,
+}
+
+griewank_2500d_config = {
+    'objective': ndgriewank,
+    'bounds': [(-600, 600)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 2500,
 }
 
 # Multi-Dimensional Problems #
@@ -6088,6 +6120,38 @@ rastrigin_30d_config = {
     'dimensions': 30,
 }
 
+rastrigin_100d_config = {
+    'objective': ndrastrigin,
+    'bounds': [(-5.12, 5.12)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 100,
+}
+
+rastrigin_500d_config = {
+    'objective': ndrastrigin,
+    'bounds': [(-5.12, 5.12)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 500,
+}
+
+rastrigin_1000d_config = {
+    'objective': ndrastrigin,
+    'bounds': [(-5.12, 5.12)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 1000,
+}
+
+rastrigin_2500d_config = {
+    'objective': ndrastrigin,
+    'bounds': [(-5.12, 5.12)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 2500,
+}
+
 
 schwefel_3d_config = {
     'objective': ndschwefel,
@@ -6111,6 +6175,38 @@ schwefel_30d_config = {
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 30,
+}
+
+schwefel_100d_config = {
+    'objective': ndschwefel,
+    'bounds': [(-500, 500)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 100,
+}
+
+schwefel_500d_config = {
+    'objective': ndschwefel,
+    'bounds': [(-500, 500)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 500,
+}
+
+schwefel_1000d_config = {
+    'objective': ndschwefel,
+    'bounds': [(-500, 500)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 1000,
+}
+
+schwefel_2500d_config = {
+    'objective': ndschwefel,
+    'bounds': [(-500, 500)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 2500,
 }
 
 # ex8_6_2 from MINLP
@@ -7784,21 +7880,11 @@ layeb8_config = {
 
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
-    'ackley_3d': ackley_3d_config,
-    'ackley_5d': ackley_5d_config,
-    'ackley_30d': ackley_30d_config,
-    'ackley_100d': ackley_100d_config,
-    'ackley_1000d': ackley_1000d_config,
     'bukin_n6': bukin_n6_config,
     'cross_in_tray': cross_in_tray_config,
     'drop_wave': drop_wave_config,
     'eggholder': eggholder_config,
     'griewank': griewank_config,
-    'griewank_3d': griewank_3d_config,
-    'griewank_5d': griewank_5d_config,
-    'griewank_30d': griewank_30d_config,
-    'griewank_100d': griewank_100d_config,
-    'griewank_1000d': griewank_1000d_config,
     'holder_table': holder_table_config,
     'langermann': langermann_config,
     'levy': levy_config,
@@ -7810,12 +7896,12 @@ PROBLEMS_BY_NAME = {
     'rastrigin_3d': rastrigin_3d_config,
     'rastrigin_5d': rastrigin_3d_config,
     'rastrigin_30d': rastrigin_30d_config,
+    'rastrigin_100d': rastrigin_100d_config,
+    'rastrigin_1000': rastrigin_1000d_config,
+    'rastrigin_2500d': rastrigin_2500d_config,
     'schaffer_n2': schaffer_n2_config,
     'schaffer_n4': schaffer_n4_config,
     'schwefel': schwefel_config,
-    'schwefel_3d': schwefel_3d_config,
-    'schwefel_5d': schwefel_5d_config,
-    'schwefel_30d': schwefel_30d_config,
     'shubert': shubert_config,
     'ex8_6_2': ex8_6_2_config,
     'least': least_config,
@@ -7984,4 +8070,38 @@ PROBLEMS_BY_NAME = {
     'layeb6': layeb6_config,
     'layeb7': layeb7_config,
     'layeb8': layeb8_config,
+}
+
+HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
+    # Ackley Series
+    'ackley_3d': ackley_3d_config,
+    'ackley_5d': ackley_5d_config,
+    'ackley_30d': ackley_30d_config,
+    'ackley_100d': ackley_100d_config,
+    'ackley_500d': ackley_500d_config,
+    'ackley_1000d': ackley_1000d_config,
+    'ackley_2500d': ackley_2500d_config,
+    # Griewank Series
+    'griewank_3d': griewank_3d_config,
+    'griewank_5d': griewank_5d_config,
+    'griewank_30d': griewank_30d_config,
+    'griewank_100d': griewank_100d_config,
+    'griewank_500d': griewank_500d_config,
+    'griewank_1000d': griewank_1000d_config,
+    'griewank_2500d': griewank_2500d_config,
+    # Rastrigin Series
+    'rastrigin_3d': rastrigin_3d_config,
+    'rastrigin_5d': rastrigin_3d_config,
+    'rastrigin_30d': rastrigin_30d_config,
+    'rastrigin_100d': rastrigin_100d_config,
+    'rastrigin_1000': rastrigin_1000d_config,
+    'rastrigin_2500d': rastrigin_2500d_config,
+    # Schewefel series
+    'schwefel_3d': schwefel_3d_config,
+    'schwefel_5d': schwefel_5d_config,
+    'schwefel_30d': schwefel_30d_config,
+    'schwefel_100d': schwefel_100d_config,
+    'schwefel_500d': schwefel_500d_config,
+    'schwefel_1000d': schwefel_1000d_config,
+    'schwefel_2500d': schwefel_2500d_config,
 }

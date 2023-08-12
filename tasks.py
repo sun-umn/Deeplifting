@@ -16,7 +16,7 @@ from deeplifting.optimization import (
     run_ipopt,
     run_pygranso,
 )
-from deeplifting.problems import PROBLEMS_BY_NAME
+from deeplifting.problems import HIGH_DIMENSIONAL_PROBLEMS_BY_NAME, PROBLEMS_BY_NAME
 from deeplifting.utils import create_contour_plot
 
 # Identify problems to run
@@ -74,10 +74,45 @@ low_dimensional_problem_names = [
 ]
 
 high_dimensional_problem_names = [
-    # 'ackley_30d',
-    # 'ackley_100d',
+    # Ackley Series
+    'ackley_3d',
+    'ackley_5d',
+    'ackley_30d',
+    'ackley_100d',
+    'ackley_500d',
     'ackley_1000d',
-    # 'ex8_6_2',
+    'ackley_2500d',
+    # Griewank Series
+    'griewank_3d',
+    'griewank_5d',
+    'griewank_30d',
+    'griewank_100d',
+    'griewank_500d',
+    'griewank_1000d',
+    'griewank_2500d',
+    # Levy Series
+    'levy_3d',
+    'levy_5d',
+    'levy_30d',
+    'levy_100d',
+    'levy_500d',
+    'levy_1000d',
+    'levy_2500d',
+    # Rastrigin Series
+    'rastrigin_3d',
+    'rastrigin_5d',
+    'rastrigin_30d',
+    'rastrigin_100d',
+    'rastrigin_1000',
+    'rastrigin_2500d',
+    # Schewefel series
+    'schwefel_3d',
+    'schwefel_5d',
+    'schwefel_30d',
+    'schwefel_100d',
+    'schwefel_500d',
+    'schwefel_1000d',
+    'schwefel_2500d',
 ]
 
 # Identify available hidden sizes
@@ -146,8 +181,15 @@ def cli():
 @click.option('--method', default='particle')
 @click.option('--output_activation', default='leaky_relu')
 @click.option('--agg_function', default='sum')
+@click.option('--trials', default=20)
 def run_deeplifting_task(
-    dimensionality, layers, method, output_activation, units, agg_function
+    dimensionality,
+    layers,
+    method,
+    output_activation,
+    units,
+    agg_function,
+    trials,
 ):
     """
     Run deep lifting over specified available problems and over a search space
@@ -164,8 +206,10 @@ def run_deeplifting_task(
 
     if dimensionality == 'low-dimensional':
         problem_names = low_dimensional_problem_names
+        PROBLEMS = PROBLEMS_BY_NAME
     elif dimensionality == 'high-dimensional':
         problem_names = high_dimensional_problem_names
+        PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
     else:
         raise ValueError('Option for dimensionality does not exist!')
 
@@ -211,9 +255,6 @@ def run_deeplifting_task(
     )
     configurations = list(product(*combinations))
 
-    # Number of trials
-    trials = 20
-
     # List to store performance data
     performance_df_list = []
 
@@ -228,7 +269,7 @@ def run_deeplifting_task(
         for problem_name in problem_names:
             print(problem_name)
             # Load the problems
-            problem = PROBLEMS_BY_NAME[problem_name]
+            problem = PROBLEMS[problem_name]
 
             # Get the outputs
             outputs = run_deeplifting(
@@ -261,11 +302,13 @@ def run_deeplifting_task(
             results['agg_function'] = agg_function
             results['problem_name'] = problem_name
             results['global_minimum'] = problem['global_minimum']
+            results['dimensions'] = output_size
 
             # Save to parquet
             results.to_parquet(
                 f'./results/results-2023-08-{layers}-layer-{units}-{agg_function}'
-                f'-{problem_name}-{index}-{method}-{output_activation}.parquet'  # noqa
+                f'-{problem_name}-{index}-{method}-{output_activation}'
+                f'{dimensionality}.parquet'  # noqa
             )
 
             # Append performance
@@ -274,7 +317,8 @@ def run_deeplifting_task(
 
 @cli.command('run-algorithm-comparisons')
 @click.option('--dimensionality', default='low-dimensional')
-def run_algorithm_comparison_task(dimensionality):
+@click.option('--trials', trials=20)
+def run_algorithm_comparison_task(dimensionality, trials):
     """
     Function that will run the competing algorithms to Deeplifting.
     The current competitor models are:
@@ -284,7 +328,6 @@ def run_algorithm_comparison_task(dimensionality):
     4. PyGRANSO
     """
     print('Run Algorithms!')
-    trials = 20
 
     if dimensionality == 'low-dimensional':
         problem_names = low_dimensional_problem_names
@@ -302,21 +345,24 @@ def run_algorithm_comparison_task(dimensionality):
         # Get the known minimum
         minimum_value = problem['global_minimum']
 
-        # First run IPOPT
-        outputs_ipopt = run_ipopt(problem, trials=trials)
+        # Get the dimensions
+        dimensions = problem['dimensions']
 
-        # Get the final results for all IPOPT runs
-        ipopt_results = pd.DataFrame(
-            outputs_ipopt['final_results'],
-            columns=['x1', 'x2', 'f', 'algorithm', 'time'],
-        )
-        ipopt_results['problem_name'] = problem_name
-        ipopt_results['hits'] = np.where(
-            np.abs(ipopt_results['f'] - minimum_value) <= 1e-4, 1, 0
-        )
+        # # First run IPOPT
+        # outputs_ipopt = run_ipopt(problem, trials=trials)
 
-        # Add IPOPT to the problem_performance_list
-        problem_performance_list.append(ipopt_results)
+        # # Get the final results for all IPOPT runs
+        # ipopt_results = pd.DataFrame(
+        #     outputs_ipopt['final_results'],
+        #     columns=['x1', 'x2', 'f', 'algorithm', 'time'],
+        # )
+        # ipopt_results['problem_name'] = problem_name
+        # ipopt_results['hits'] = np.where(
+        #     np.abs(ipopt_results['f'] - minimum_value) <= 1e-4, 1, 0
+        # )
+
+        # # Add IPOPT to the problem_performance_list
+        # problem_performance_list.append(ipopt_results)
 
         # Next add dual annealing
         outputs_dual_annealing = run_dual_annealing(problem, trials=trials)
@@ -330,6 +376,7 @@ def run_algorithm_comparison_task(dimensionality):
         dual_annleaing_results['hits'] = np.where(
             np.abs(dual_annleaing_results['f'] - minimum_value) <= 1e-4, 1, 0
         )
+        dual_annleaing_results['dimensions'] = dimensions
 
         # Add dual annealing to the problem_performance_list
         problem_performance_list.append(dual_annleaing_results)
@@ -348,31 +395,32 @@ def run_algorithm_comparison_task(dimensionality):
         differential_evolution_results['hits'] = np.where(
             np.abs(differential_evolution_results['f'] - minimum_value) <= 1e-4, 1, 0
         )
+        differential_evolution_results['dimensions'] = dimensions
 
         # Add differential evolution to the problem_performance_list
         problem_performance_list.append(differential_evolution_results)
 
-        # Next add pygranso
-        outputs_pygranso = run_pygranso(problem, trials=trials)
+        # # Next add pygranso
+        # outputs_pygranso = run_pygranso(problem, trials=trials)
 
-        # Get the final results for all differential evolution runs
-        pygranso_results = pd.DataFrame(
-            outputs_pygranso['final_results'],
-            columns=['x1', 'x2', 'f', 'algorithm', 'time'],
-        )
-        pygranso_results['problem_name'] = problem_name
-        pygranso_results['hits'] = np.where(
-            np.abs(pygranso_results['f'] - minimum_value) <= 1e-4, 1, 0
-        )
+        # # Get the final results for all differential evolution runs
+        # pygranso_results = pd.DataFrame(
+        #     outputs_pygranso['final_results'],
+        #     columns=['x1', 'x2', 'f', 'algorithm', 'time'],
+        # )
+        # pygranso_results['problem_name'] = problem_name
+        # pygranso_results['hits'] = np.where(
+        #     np.abs(pygranso_results['f'] - minimum_value) <= 1e-4, 1, 0
+        # )
 
-        # Add differential evolution to the problem_performance_list
-        problem_performance_list.append(pygranso_results)
+        # # Add differential evolution to the problem_performance_list
+        # problem_performance_list.append(pygranso_results)
 
         # Concatenate all of the data at the end of each problem because
         # we can save intermediate results
         problem_performance_df = pd.concat(problem_performance_list, ignore_index=True)
         problem_performance_df.to_parquet(
-            f'./results/algorithm-comparisons-{problem_name}.parquet'
+            f'./results/algorithm-comparisons-{problem_name}-{dimensionality}.parquet'
         )
 
 
