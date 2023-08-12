@@ -98,14 +98,14 @@ high_dimensional_problem_names = [
     'griewank_500d',
     'griewank_1000d',
     'griewank_2500d',
-    # Levy Series
-    'levy_3d',
-    'levy_5d',
-    'levy_30d',
-    'levy_100d',
-    'levy_500d',
-    'levy_1000d',
-    'levy_2500d',
+    # # Levy Series
+    # 'levy_3d',
+    # 'levy_5d',
+    # 'levy_30d',
+    # 'levy_100d',
+    # 'levy_500d',
+    # 'levy_1000d',
+    # 'levy_2500d',
     # Rastrigin Series
     'rastrigin_3d',
     'rastrigin_5d',
