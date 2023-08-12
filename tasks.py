@@ -359,6 +359,10 @@ def run_algorithm_comparison_task(dimensionality, trials):
         # Get the dimensions
         dimensions = problem['dimensions']
 
+        # Create column names
+        x_columns = [f'x{i + 1}' for i in range(dimensions)]
+        columns = x_columns + ['f', 'algorithm', 'time']
+
         # # First run IPOPT
         # outputs_ipopt = run_ipopt(problem, trials=trials)
 
@@ -381,7 +385,7 @@ def run_algorithm_comparison_task(dimensionality, trials):
         # Get the final results for all dual annealing runs
         dual_annleaing_results = pd.DataFrame(
             outputs_dual_annealing['final_results'],
-            columns=['x1', 'x2', 'f', 'algorithm', 'time'],
+            columns=columns,
         )
         dual_annleaing_results['problem_name'] = problem_name
         dual_annleaing_results['hits'] = np.where(
@@ -400,7 +404,7 @@ def run_algorithm_comparison_task(dimensionality, trials):
         # Get the final results for all differential evolution runs
         differential_evolution_results = pd.DataFrame(
             outputs_differential_evolution['final_results'],
-            columns=['x1', 'x2', 'f', 'algorithm', 'time'],
+            columns=columns,
         )
         differential_evolution_results['problem_name'] = problem_name
         differential_evolution_results['hits'] = np.where(
