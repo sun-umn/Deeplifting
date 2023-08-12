@@ -345,6 +345,7 @@ def run_algorithm_comparison_task(dimensionality, trials):
         raise ValueError('Option for dimensionality does not exist!')
 
     for problem_name in problem_names:
+        print(problem_name)
         problem_performance_list = []
 
         # Setup the problem
