@@ -339,8 +339,10 @@ def run_algorithm_comparison_task(dimensionality, trials):
 
     if dimensionality == 'low-dimensional':
         problem_names = low_dimensional_problem_names
+        PROBLEMS = PROBLEMS_BY_NAME
     elif dimensionality == 'high-dimensional':
         problem_names = high_dimensional_problem_names
+        PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
     else:
         raise ValueError('Option for dimensionality does not exist!')
 
@@ -349,7 +351,7 @@ def run_algorithm_comparison_task(dimensionality, trials):
         problem_performance_list = []
 
         # Setup the problem
-        problem = PROBLEMS_BY_NAME[problem_name]
+        problem = PROBLEMS[problem_name]
 
         # Get the known minimum
         minimum_value = problem['global_minimum']
