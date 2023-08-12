@@ -325,7 +325,7 @@ def run_deeplifting_task(
 
 @cli.command('run-algorithm-comparisons')
 @click.option('--dimensionality', default='low-dimensional')
-@click.option('--trials', trials=20)
+@click.option('--trials', default=20)
 def run_algorithm_comparison_task(dimensionality, trials):
     """
     Function that will run the competing algorithms to Deeplifting.
