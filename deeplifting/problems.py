@@ -1026,7 +1026,7 @@ def ndschwefel(x, results, trial, version='numpy'):
     if version == 'numpy':
         result = 418.9829 * d - np.sum(x * np.sin(np.sqrt(np.abs(x))))
     elif version == 'pytorch':
-        result == 418.9829 * d - torch.sum(x * torch.sin(torch.sqrt(torch.abs(x))))
+        result = 418.9829 * d - torch.sum(x * torch.sin(torch.sqrt(torch.abs(x))))
     else:
         raise ValueError(
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."

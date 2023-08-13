@@ -551,7 +551,7 @@ def run_deeplifting(
     """
     # Get the device (CPU for now)
     dimensions = problem['dimensions']
-    device = torch.device('cpu')
+    device = torch.device('cuda:0')
     fn_values = []
     iterim_results = []
 
@@ -609,13 +609,13 @@ def run_deeplifting(
         # opts.disable_terminationcode_6 = True
         # opts.halt_on_linesearch_bracket = False
         opts.opt_tol = 1e-10
-        opts.maxit = 1000
+        opts.maxit = 2000
 
         # Get the maximum iterations
         max_iterations = problem['max_iterations']
 
         # results
-        results = np.zeros((trials, max_iterations * 10, dimensions + 1)) * np.nan
+        results = np.zeros((trials, max_iterations * 100, dimensions + 1)) * np.nan
         deeplifting_results = (
             np.zeros((trials, max_iterations * 100, dimensions + 1)) * np.nan
         )
