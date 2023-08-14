@@ -82,22 +82,22 @@ low_dimensional_problem_names = [
 ]
 
 high_dimensional_problem_names = [
-    # Ackley Series
-    'ackley_3d',
-    'ackley_5d',
-    'ackley_30d',
-    'ackley_100d',
-    'ackley_500d',
-    'ackley_1000d',
-    'ackley_2500d',
-    # Griewank Series
-    'griewank_3d',
-    'griewank_5d',
-    'griewank_30d',
-    'griewank_100d',
-    'griewank_500d',
-    'griewank_1000d',
-    'griewank_2500d',
+    # # Ackley Series
+    # 'ackley_3d',
+    # 'ackley_5d',
+    # 'ackley_30d',
+    # 'ackley_100d',
+    # 'ackley_500d',
+    # 'ackley_1000d',
+    # 'ackley_2500d',
+    # # Griewank Series
+    # 'griewank_3d',
+    # 'griewank_5d',
+    # 'griewank_30d',
+    # 'griewank_100d',
+    # 'griewank_500d',
+    # 'griewank_1000d',
+    # 'griewank_2500d',
     # # Levy Series
     # 'levy_3d',
     # 'levy_5d',
@@ -106,21 +106,21 @@ high_dimensional_problem_names = [
     # 'levy_500d',
     # 'levy_1000d',
     # 'levy_2500d',
-    # Rastrigin Series
-    'rastrigin_3d',
-    'rastrigin_5d',
-    'rastrigin_30d',
-    'rastrigin_100d',
-    'rastrigin_1000',
-    'rastrigin_2500d',
+    # # Rastrigin Series
+    # 'rastrigin_3d',
+    # 'rastrigin_5d',
+    # 'rastrigin_30d',
+    # 'rastrigin_100d',
+    # 'rastrigin_1000',
+    # 'rastrigin_2500d',
     # Schewefel series
-    'schwefel_3d',
-    'schwefel_5d',
-    'schwefel_30d',
+    # 'schwefel_3d',
+    # 'schwefel_5d',
+    # 'schwefel_30d',
     'schwefel_100d',
-    'schwefel_500d',
-    'schwefel_1000d',
-    'schwefel_2500d',
+    # 'schwefel_500d',
+    # 'schwefel_1000d',
+    # 'schwefel_2500d',
 ]
 
 # Identify available hidden sizes
