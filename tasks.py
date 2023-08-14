@@ -117,10 +117,10 @@ high_dimensional_problem_names = [
     # 'schwefel_3d',
     # 'schwefel_5d',
     # 'schwefel_30d',
-    'schwefel_100d',
+    # 'schwefel_100d',
     # 'schwefel_500d',
     # 'schwefel_1000d',
-    # 'schwefel_2500d',
+    'schwefel_2500d',
 ]
 
 # Identify available hidden sizes
