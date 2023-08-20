@@ -2,4 +2,5 @@
 .DS_Store
 __pycache__
 results/
+search_results/
 .neptune
