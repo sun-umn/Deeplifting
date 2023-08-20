@@ -207,13 +207,7 @@ def cli():
 @click.option('--agg_function', default='sum')
 @click.option('--trials', default=20)
 def run_deeplifting_task(
-    dimensionality,
-    layers,
-    method,
-    output_activation,
-    units,
-    agg_function,
-    trials,
+    dimensionality, layers, method, output_activation, units, agg_function, trials
 ):
     """
     Run deep lifting over specified available problems and over a search space
@@ -286,12 +280,9 @@ def run_deeplifting_task(
     performance_df_list = []
 
     # Run over the experiments
-    for index, (
-        input_size,
-        hidden_size,
-        hidden_activation,
-        output_activation,
-        agg_function,
+    for (
+        index,
+        (input_size, hidden_size, hidden_activation, output_activation, agg_function),
     ) in enumerate(configurations):
         for problem_name in problem_names:
             print(problem_name)
@@ -316,10 +307,7 @@ def run_deeplifting_task(
             x_columns = [f'x{i + 1}' for i in range(output_size)]
             columns = x_columns + ['f', 'algorithm', 'total_time']
 
-            results = pd.DataFrame(
-                outputs['final_results'],
-                columns=columns,
-            )
+            results = pd.DataFrame(outputs['final_results'], columns=columns)
 
             # Add meta data to the results
             results['input_size'] = input_size
@@ -403,8 +391,7 @@ def run_algorithm_comparison_task(dimensionality, trials):
 
         # Get the final results for all dual annealing runs
         dual_annleaing_results = pd.DataFrame(
-            outputs_dual_annealing['final_results'],
-            columns=columns,
+            outputs_dual_annealing['final_results'], columns=columns
         )
         dual_annleaing_results['problem_name'] = problem_name
         dual_annleaing_results['hits'] = np.where(
@@ -422,8 +409,7 @@ def run_algorithm_comparison_task(dimensionality, trials):
 
         # Get the final results for all differential evolution runs
         differential_evolution_results = pd.DataFrame(
-            outputs_differential_evolution['final_results'],
-            columns=columns,
+            outputs_differential_evolution['final_results'], columns=columns
         )
         differential_evolution_results['problem_name'] = problem_name
         differential_evolution_results['hits'] = np.where(
@@ -563,12 +549,9 @@ def run_saved_model_task():
     trials = 5
 
     # Run over the experiments
-    for index, (
-        input_size,
-        hidden_size,
-        hidden_activation,
-        output_activation,
-        agg_function,
+    for (
+        index,
+        (input_size, hidden_size, hidden_activation, output_activation, agg_function),
     ) in enumerate(configurations):
         # Get problem_information
         problem = PROBLEMS_BY_NAME[problem_name]
@@ -617,18 +600,15 @@ def find_best_architecture_task(problem_name):
     )
     configurations = list(product(*combinations))
     method = 'single-value'
-    trials = 5
+    trials = 1
 
     # List to store performance data
     performance_df_list = []
 
     # Run over the experiments
-    for index, (
-        input_size,
-        hidden_size,
-        hidden_activation,
-        output_activation,
-        agg_function,
+    for (
+        index,
+        (input_size, hidden_size, hidden_activation, output_activation, agg_function),
     ) in enumerate(configurations):
         print(problem_name)
         # Load the problems
@@ -652,10 +632,7 @@ def find_best_architecture_task(problem_name):
         x_columns = [f'x{i + 1}' for i in range(output_size)]
         columns = x_columns + ['f', 'algorithm', 'total_time']
 
-        results = pd.DataFrame(
-            outputs['final_results'],
-            columns=columns,
-        )
+        results = pd.DataFrame(outputs['final_results'], columns=columns)
 
         # Add meta data to the results
         results['input_size'] = input_size

@@ -25,10 +25,7 @@ from deeplifting.utils import (
     set_seed,
 )
 
-EXCLUDE_PROBLEMS = [
-    'ackley_2500d',
-    'schwefel_2500d',
-]
+EXCLUDE_PROBLEMS = ['ackley_2500d', 'schwefel_2500d']
 
 
 def run_ipopt(problem: Dict, trials: int):
@@ -683,11 +680,7 @@ def run_deeplifting(
         )
         xf, f = deeplifting_predictions(outputs, final_fn)
         f = f.detach().cpu().numpy()
-        data_point = tuple(xf) + (
-            float(f),
-            'Deeplifting',
-            total_time,
-        )
+        data_point = tuple(xf) + (float(f), 'Deeplifting', total_time)
         fn_values.append(data_point)
 
         # If save model then we need to save the configuration of the
@@ -722,18 +715,7 @@ def run_deeplifting(
                 json.dump(config, json_file, indent=4)
 
         # Collect garbage and empty cache
-        del (
-            model,
-            nvar,
-            x0,
-            opts,
-            soln,
-            outputs,
-            xf,
-            f,
-            data_point,
-            final_fn,
-        )
+        del (model, nvar, x0, opts, soln, outputs, xf, f, data_point, final_fn)
         gc.collect()
         torch.cuda.empty_cache()
 

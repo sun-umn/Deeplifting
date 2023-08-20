@@ -6454,11 +6454,7 @@ ex8_6_2_config = {
 # least from MINLP
 least_config = {
     'objective': least,
-    'bounds': [
-        (-1e20, 1e20),
-        (-1e20, 1e20),
-        (-5.0, 5.0),
-    ],
+    'bounds': [(-1e20, 1e20), (-1e20, 1e20), (-5.0, 5.0)],
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 3,
@@ -6467,10 +6463,7 @@ least_config = {
 # ex4_1_5 from MINLP
 ex4_1_5_config = {
     'objective': ex4_1_5,
-    'bounds': [
-        (-5, None),
-        (None, 5),
-    ],
+    'bounds': [(-5, None), (None, 5)],
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 2,
@@ -6478,10 +6471,7 @@ ex4_1_5_config = {
 
 ex8_1_1_config = {
     'objective': ex8_1_1,
-    'bounds': [
-        (-1, 2),
-        (-1, 1),
-    ],
+    'bounds': [(-1, 2), (-1, 1)],
     'max_iterations': 1000,
     'global_minimum': -2.02180678,
     'dimensions': 2,
@@ -6489,10 +6479,7 @@ ex8_1_1_config = {
 
 ex8_1_3_config = {
     'objective': ex8_1_3,
-    'bounds': [
-        (None, None),
-        (None, None),
-    ],
+    'bounds': [(None, None), (None, None)],
     'max_iterations': 1000,
     'global_minimum': 3.0,
     'dimensions': 2,
@@ -6500,10 +6487,7 @@ ex8_1_3_config = {
 
 ex8_1_4_config = {
     'objective': ex8_1_4,
-    'bounds': [
-        (None, None),
-        (None, None),
-    ],
+    'bounds': [(None, None), (None, None)],
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 2,
@@ -6511,10 +6495,7 @@ ex8_1_4_config = {
 
 ex8_1_5_config = {
     'objective': ex8_1_5,
-    'bounds': [
-        (None, None),
-        (None, None),
-    ],
+    'bounds': [(None, None), (None, None)],
     'max_iterations': 1000,
     'global_minimum': -1.0316,
     'dimensions': 2,
@@ -6522,10 +6503,7 @@ ex8_1_5_config = {
 
 ex8_1_6_config = {
     'objective': ex8_1_6,
-    'bounds': [
-        (None, None),
-        (None, None),
-    ],
+    'bounds': [(None, None), (None, None)],
     'max_iterations': 1000,
     'global_minimum': -10.0860,
     'dimensions': 2,
@@ -6533,10 +6511,7 @@ ex8_1_6_config = {
 
 kriging_peaks_red010_config = {
     'objective': kriging_peaks_red010,
-    'bounds': [
-        (-3, 3),
-        (-3, 3),
-    ],
+    'bounds': [(-3, 3), (-3, 3)],
     'max_iterations': 1000,
     'global_minimum': 0.2911,
     'dimensions': 2,
@@ -6544,10 +6519,7 @@ kriging_peaks_red010_config = {
 
 kriging_peaks_red020_config = {
     'objective': kriging_peaks_red020,
-    'bounds': [
-        (-3, 3),
-        (-3, 3),
-    ],
+    'bounds': [(-3, 3), (-3, 3)],
     'max_iterations': 1000,
     'global_minimum': 0.3724,
     'dimensions': 2,
@@ -6555,10 +6527,7 @@ kriging_peaks_red020_config = {
 
 kriging_peaks_red030_config = {
     'objective': kriging_peaks_red030,
-    'bounds': [
-        (-3, 3),
-        (-3, 3),
-    ],
+    'bounds': [(-3, 3), (-3, 3)],
     'max_iterations': 1000,
     'global_minimum': -1.5886,
     'dimensions': 2,
@@ -6566,10 +6535,7 @@ kriging_peaks_red030_config = {
 
 kriging_peaks_red050_config = {
     'objective': kriging_peaks_red050,
-    'bounds': [
-        (-3, 3),
-        (-3, 3),
-    ],
+    'bounds': [(-3, 3), (-3, 3)],
     'max_iterations': 1000,
     'global_minimum': -1.1566,
     'dimensions': 2,
@@ -6577,10 +6543,7 @@ kriging_peaks_red050_config = {
 
 kriging_peaks_red100_config = {
     'objective': kriging_peaks_red100,
-    'bounds': [
-        (-3, 3),
-        (-3, 3),
-    ],
+    'bounds': [(-3, 3), (-3, 3)],
     'max_iterations': 1000,
     'global_minimum': -2.6375,
     'dimensions': 2,
@@ -6588,10 +6551,7 @@ kriging_peaks_red100_config = {
 
 kriging_peaks_red200_config = {
     'objective': kriging_peaks_red200,
-    'bounds': [
-        (-3, 3),
-        (-3, 3),
-    ],
+    'bounds': [(-3, 3), (-3, 3)],
     'max_iterations': 1000,
     'global_minimum': -3.8902,
     'dimensions': 2,
@@ -6599,10 +6559,7 @@ kriging_peaks_red200_config = {
 
 kriging_peaks_red500_config = {
     'objective': kriging_peaks_red500,
-    'bounds': [
-        (-3, 3),
-        (-3, 3),
-    ],
+    'bounds': [(-3, 3), (-3, 3)],
     'max_iterations': 1000,
     'global_minimum': -4.9280,
     'dimensions': 2,
@@ -6610,10 +6567,7 @@ kriging_peaks_red500_config = {
 
 mathopt6_config = {
     'objective': mathopt6,
-    'bounds': [
-        (-3, 3),
-        (-3, 3),
-    ],
+    'bounds': [(-3, 3), (-3, 3)],
     'max_iterations': 1000,
     'global_minimum': -3.3069,
     'dimensions': 2,
@@ -6621,10 +6575,7 @@ mathopt6_config = {
 
 quantum_config = {
     'objective': quantum,
-    'bounds': [
-        (1, 10),
-        (1, 10),
-    ],
+    'bounds': [(1, 10), (1, 10)],
     'max_iterations': 1000,
     'global_minimum': 0.8049,
     'dimensions': 2,
@@ -6632,10 +6583,7 @@ quantum_config = {
 
 rosenbrock_config = {
     'objective': rosenbrock,
-    'bounds': [
-        (-10, 5),
-        (-10, 10),
-    ],
+    'bounds': [(-10, 5), (-10, 10)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2,
@@ -6643,10 +6591,7 @@ rosenbrock_config = {
 
 damavandi_config = {
     'objective': damavandi,
-    'bounds': [
-        (0, 14),
-        (0, 14),
-    ],
+    'bounds': [(0, 14), (0, 14)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2,
@@ -6654,10 +6599,7 @@ damavandi_config = {
 
 cross_leg_table_config = {
     'objective': cross_leg_table,
-    'bounds': [
-        (-10, 10),
-        (-10, 10),
-    ],
+    'bounds': [(-10, 10), (-10, 10)],
     'max_iterations': 1000,
     'global_minimum': -1,
     'dimensions': 2,
@@ -6665,10 +6607,7 @@ cross_leg_table_config = {
 
 sine_envelope_config = {
     'objective': sine_envelope,
-    'bounds': [
-        (-100, 100),
-        (-100, 100),
-    ],
+    'bounds': [(-100, 100), (-100, 100)],
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 2,
@@ -6676,10 +6615,7 @@ sine_envelope_config = {
 
 ackley2_config = {
     'objective': ackley2,
-    'bounds': [
-        (-32, 32),
-        (-32, 32),
-    ],
+    'bounds': [(-32, 32), (-32, 32)],
     'max_iterations': 1000,
     'global_minimum': -200,
     'dimensions': 2,
@@ -6687,10 +6623,7 @@ ackley2_config = {
 
 ackley3_config = {
     'objective': ackley3,
-    'bounds': [
-        (-32, 32),
-        (-32, 32),
-    ],
+    'bounds': [(-32, 32), (-32, 32)],
     'max_iterations': 1000,
     'global_minimum': -219.1418,
     'dimensions': 2,
@@ -6754,10 +6687,7 @@ ackley4_5000d_config = {
 
 adjiman_config = {
     'objective': adjiman,
-    'bounds': [
-        (-1, 2),
-        (-1, 1),
-    ],
+    'bounds': [(-1, 2), (-1, 1)],
     'max_iterations': 1000,
     'global_minimum': -2.02181,
     'dimensions': 2,
@@ -6837,11 +6767,7 @@ alpine2_10d_config = {
 
 brad_config = {
     'objective': brad,
-    'bounds': [
-        (-0.25, 0.25),
-        (0.01, 1e10),
-        (-1e10, 2.5),
-    ],
+    'bounds': [(-0.25, 0.25), (0.01, 1e10), (-1e10, 2.5)],
     'max_iterations': 1000,
     'global_minimum': 0.00821487,
     'dimensions': 3,
@@ -6849,10 +6775,7 @@ brad_config = {
 
 bartels_conn_config = {
     'objective': bartels_conn,
-    'bounds': [
-        (-500, 500),
-        (-500, 500),
-    ],
+    'bounds': [(-500, 500), (-500, 500)],
     'max_iterations': 1000,
     'global_minimum': 1,
     'dimensions': 2,
@@ -6860,10 +6783,7 @@ bartels_conn_config = {
 
 beale_config = {
     'objective': beale,
-    'bounds': [
-        (-4.5, 4.5),
-        (-4.5, 4.5),
-    ],
+    'bounds': [(-4.5, 4.5), (-4.5, 4.5)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2,
@@ -6871,10 +6791,7 @@ beale_config = {
 
 biggs_exp2_config = {
     'objective': biggs_exp2,
-    'bounds': [
-        (0, 20),
-        (0, 20),
-    ],
+    'bounds': [(0, 20), (0, 20)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2,
@@ -6882,11 +6799,7 @@ biggs_exp2_config = {
 
 biggs_exp3_config = {
     'objective': biggs_exp3,
-    'bounds': [
-        (0, 20),
-        (0, 20),
-        (0, 20),
-    ],
+    'bounds': [(0, 20), (0, 20), (0, 20)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 3,
@@ -6894,12 +6807,7 @@ biggs_exp3_config = {
 
 biggs_exp4_config = {
     'objective': biggs_exp4,
-    'bounds': [
-        (0, 20),
-        (0, 20),
-        (0, 20),
-        (0, 20),
-    ],
+    'bounds': [(0, 20), (0, 20), (0, 20), (0, 20)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 4,
@@ -6907,13 +6815,7 @@ biggs_exp4_config = {
 
 biggs_exp5_config = {
     'objective': biggs_exp5,
-    'bounds': [
-        (0, 20),
-        (0, 20),
-        (0, 20),
-        (0, 20),
-        (0, 20),
-    ],
+    'bounds': [(0, 20), (0, 20), (0, 20), (0, 20), (0, 20)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 5,
@@ -6921,13 +6823,7 @@ biggs_exp5_config = {
 
 biggs_exp6_config = {
     'objective': biggs_exp6,
-    'bounds': [
-        (0, 20),
-        (0, 20),
-        (0, 20),
-        (0, 20),
-        (0, 20),
-    ],
+    'bounds': [(0, 20), (0, 20), (0, 20), (0, 20), (0, 20)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 6,
@@ -6935,10 +6831,7 @@ biggs_exp6_config = {
 
 bird_config = {
     'objective': bird,
-    'bounds': [
-        (-2 * np.pi, 2 * np.pi),
-        (-2 * np.pi, 2 * np.pi),
-    ],
+    'bounds': [(-2 * np.pi, 2 * np.pi), (-2 * np.pi, 2 * np.pi)],
     'max_iterations': 1000,
     'global_minimum': -106.764537,
     'dimensions': 2,
@@ -6946,10 +6839,7 @@ bird_config = {
 
 bohachevsky1_config = {
     'objective': bohachevsky1,
-    'bounds': [
-        (-100, 100),
-        (-100, 100),
-    ],
+    'bounds': [(-100, 100), (-100, 100)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2,
@@ -6957,10 +6847,7 @@ bohachevsky1_config = {
 
 bohachevsky2_config = {
     'objective': bohachevsky2,
-    'bounds': [
-        (-100, 100),
-        (-100, 100),
-    ],
+    'bounds': [(-100, 100), (-100, 100)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2,
@@ -6968,10 +6855,7 @@ bohachevsky2_config = {
 
 bohachevsky3_config = {
     'objective': bohachevsky3,
-    'bounds': [
-        (-100, 100),
-        (-100, 100),
-    ],
+    'bounds': [(-100, 100), (-100, 100)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2,
@@ -6979,10 +6863,7 @@ bohachevsky3_config = {
 
 booth_config = {
     'objective': booth,
-    'bounds': [
-        (-10, 10),
-        (-10, 10),
-    ],
+    'bounds': [(-10, 10), (-10, 10)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2,
@@ -6990,10 +6871,7 @@ booth_config = {
 
 branin_rcos_config = {
     'objective': branin_rcos,
-    'bounds': [
-        (-5, 15),
-        (-5, 15),
-    ],
+    'bounds': [(-5, 15), (-5, 15)],
     'max_iterations': 1000,
     'global_minimum': 5.559037,
     'dimensions': 2,
@@ -7001,10 +6879,7 @@ branin_rcos_config = {
 
 brent_config = {
     'objective': brent,
-    'bounds': [
-        (-10, 10),
-        (-10, 10),
-    ],
+    'bounds': [(-10, 10), (-10, 10)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2,
@@ -7068,10 +6943,7 @@ brown_5000d_config = {
 
 bukin_n2_config = {
     'objective': bukin_n2,
-    'bounds': [
-        (-15, -5),
-        (-3, 3),
-    ],
+    'bounds': [(-15, -5), (-3, 3)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2,
@@ -7079,10 +6951,7 @@ bukin_n2_config = {
 
 bukin_n4_config = {
     'objective': bukin_n4,
-    'bounds': [
-        (-15, -5),
-        (-3, 3),
-    ],
+    'bounds': [(-15, -5), (-3, 3)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2,
@@ -7090,10 +6959,7 @@ bukin_n4_config = {
 
 camel_3hump_config = {
     'objective': camel_3hump,
-    'bounds': [
-        (-5, 5),
-        (-5, 5),
-    ],
+    'bounds': [(-5, 5), (-5, 5)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2,
@@ -7101,10 +6967,7 @@ camel_3hump_config = {
 
 camel_6hump_config = {
     'objective': camel_6hump,
-    'bounds': [
-        (-5, 5),
-        (-5, 5),
-    ],
+    'bounds': [(-5, 5), (-5, 5)],
     'max_iterations': 1000,
     'global_minimum': -1.0316,
     'dimensions': 2,
@@ -7112,10 +6975,7 @@ camel_6hump_config = {
 
 chen_bird_config = {
     'objective': chen_bird,
-    'bounds': [
-        (-500, 500),
-        (-500, 500),
-    ],
+    'bounds': [(-500, 500), (-500, 500)],
     'max_iterations': 1000,
     'global_minimum': -2000,
     'dimensions': 2,
@@ -7123,10 +6983,7 @@ chen_bird_config = {
 
 chen_v_config = {
     'objective': chen_v,
-    'bounds': [
-        (-500, 500),
-        (-500, 500),
-    ],
+    'bounds': [(-500, 500), (-500, 500)],
     'max_iterations': 1000,
     'global_minimum': -2000,
     'dimensions': 2,
@@ -7134,10 +6991,7 @@ chen_v_config = {
 
 chichinadze_config = {
     'objective': chichinadze,
-    'bounds': [
-        (-30, 30),
-        (-30, 30),
-    ],
+    'bounds': [(-30, 30), (-30, 30)],
     'max_iterations': 1000,
     'global_minimum': -43.3159,
     'dimensions': 2,
@@ -7265,10 +7119,7 @@ csendes_5000d_config = {
 
 cube_config = {
     'objective': cube,
-    'bounds': [
-        (-10, 10),
-        (-10, 10),
-    ],
+    'bounds': [(-10, 10), (-10, 10)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2,
@@ -7388,10 +7239,7 @@ deb3_5000d_config = {
 
 deckkers_aarts_config = {
     'objective': deckkers_aarts,
-    'bounds': [
-        (-20, 20),
-        (-20, 20),
-    ],
+    'bounds': [(-20, 20), (-20, 20)],
     'max_iterations': 1000,
     'global_minimum': -24777,
     'dimensions': 2,
@@ -7399,12 +7247,7 @@ deckkers_aarts_config = {
 
 devilliers_glasser1_config = {
     'objective': devilliers_glasser1,
-    'bounds': [
-        (-500, 500),
-        (-500, 500),
-        (-500, 500),
-        (-500, 500),
-    ],
+    'bounds': [(-500, 500), (-500, 500), (-500, 500), (-500, 500)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 4,
@@ -7412,13 +7255,7 @@ devilliers_glasser1_config = {
 
 devilliers_glasser2_config = {
     'objective': devilliers_glasser2,
-    'bounds': [
-        (-500, 500),
-        (-500, 500),
-        (-500, 500),
-        (-500, 500),
-        (-500, 500),
-    ],
+    'bounds': [(-500, 500), (-500, 500), (-500, 500), (-500, 500), (-500, 500)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 5,
@@ -7482,13 +7319,7 @@ dixon_price_5000d_config = {
 
 dolan_config = {
     'objective': dolan,
-    'bounds': [
-        (-100, 100),
-        (-100, 100),
-        (-100, 100),
-        (-100, 100),
-        (-100, 100),
-    ],
+    'bounds': [(-100, 100), (-100, 100), (-100, 100), (-100, 100), (-100, 100)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 5,
@@ -7496,10 +7327,7 @@ dolan_config = {
 
 easom_config = {
     'objective': easom,
-    'bounds': [
-        (-100, 100),
-        (-100, 100),
-    ],
+    'bounds': [(-100, 100), (-100, 100)],
     'max_iterations': 1000,
     'global_minimum': -1,
     'dimensions': 2,
@@ -7507,10 +7335,7 @@ easom_config = {
 
 el_attar_config = {
     'objective': el_attar,
-    'bounds': [
-        (-500, 500),
-        (-500, 500),
-    ],
+    'bounds': [(-500, 500), (-500, 500)],
     'max_iterations': 1000,
     'global_minimum': 0.470427,
     'dimensions': 2,
@@ -7518,10 +7343,7 @@ el_attar_config = {
 
 egg_crate_config = {
     'objective': egg_crate,
-    'bounds': [
-        (-5, 5),
-        (-5, 5),
-    ],
+    'bounds': [(-5, 5), (-5, 5)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2,
@@ -7585,10 +7407,7 @@ exp1_5000d_config = {
 
 exp2_config = {
     'objective': exp2,
-    'bounds': [
-        (0, 20),
-        (0, 20),
-    ],
+    'bounds': [(0, 20), (0, 20)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2,
@@ -7596,10 +7415,7 @@ exp2_config = {
 
 freudenstein_roth_config = {
     'objective': freudenstein_roth,
-    'bounds': [
-        (-10, 10),
-        (-10, 10),
-    ],
+    'bounds': [(-10, 10), (-10, 10)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2,
@@ -7607,10 +7423,7 @@ freudenstein_roth_config = {
 
 giunta_config = {
     'objective': giunta,
-    'bounds': [
-        (-1, 1),
-        (-1, 1),
-    ],
+    'bounds': [(-1, 1), (-1, 1)],
     'max_iterations': 1000,
     'global_minimum': 0.060447,
     'dimensions': 2,
@@ -7618,10 +7431,7 @@ giunta_config = {
 
 goldstein_price_config = {
     'objective': goldstein_price,
-    'bounds': [
-        (-2, 2),
-        (-2, 2),
-    ],
+    'bounds': [(-2, 2), (-2, 2)],
     'max_iterations': 1000,
     'global_minimum': 3,
     'dimensions': 2,
@@ -7637,10 +7447,7 @@ helical_valley_config = {
 
 himmelblau_config = {
     'objective': himmelblau,
-    'bounds': [
-        (-5, 5),
-        (-5, 5),
-    ],
+    'bounds': [(-5, 5), (-5, 5)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2,
@@ -7648,10 +7455,7 @@ himmelblau_config = {
 
 hosaki_config = {
     'objective': hosaki,
-    'bounds': [
-        (0, 5),
-        (0, 6),
-    ],
+    'bounds': [(0, 5), (0, 6)],
     'max_iterations': 1000,
     'global_minimum': -2.3458,
     'dimensions': 2,
@@ -7659,10 +7463,7 @@ hosaki_config = {
 
 jennrich_sampson_config = {
     'objective': jennrich_sampson,
-    'bounds': [
-        (-1, 1),
-        (-1, 1),
-    ],
+    'bounds': [(-1, 1), (-1, 1)],
     'max_iterations': 1000,
     'global_minimum': 124.3612,
     'dimensions': 2,
@@ -7670,10 +7471,7 @@ jennrich_sampson_config = {
 
 keane_config = {
     'objective': keane,
-    'bounds': [
-        (0, 10),
-        (0, 10),
-    ],
+    'bounds': [(0, 10), (0, 10)],
     'max_iterations': 1000,
     'global_minimum': -0.673668,
     'dimensions': 2,
@@ -7681,10 +7479,7 @@ keane_config = {
 
 leon_config = {
     'objective': leon,
-    'bounds': [
-        (-1.2, 1.2),
-        (-1.2, 1.2),
-    ],
+    'bounds': [(-1.2, 1.2), (-1.2, 1.2)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2,
@@ -7692,10 +7487,7 @@ leon_config = {
 
 matyas_config = {
     'objective': matyas,
-    'bounds': [
-        (-10, 10),
-        (-10, 10),
-    ],
+    'bounds': [(-10, 10), (-10, 10)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2,
@@ -7703,10 +7495,7 @@ matyas_config = {
 
 mccormick_config = {
     'objective': mccormick,
-    'bounds': [
-        (-1.5, 1.5),
-        (-3, 3),
-    ],
+    'bounds': [(-1.5, 1.5), (-3, 3)],
     'max_iterations': 1000,
     'global_minimum': -1.9133,
     'dimensions': 2,
@@ -7714,12 +7503,7 @@ mccormick_config = {
 
 miele_cantrell_config = {
     'objective': miele_cantrell,
-    'bounds': [
-        (-1, 1),
-        (-1, 1),
-        (-1, 1),
-        (-1, 1),
-    ],
+    'bounds': [(-1, 1), (-1, 1), (-1, 1), (-1, 1)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 4,
@@ -7839,10 +7623,7 @@ mishra2_5000d_config = {
 
 mishra3_config = {
     'objective': mishra3,
-    'bounds': [
-        (None, None),
-        (None, None),
-    ],
+    'bounds': [(None, None), (None, None)],
     'max_iterations': 1000,
     'global_minimum': -0.18467,
     'dimensions': 2,
@@ -7850,10 +7631,7 @@ mishra3_config = {
 
 mishra4_config = {
     'objective': mishra4,
-    'bounds': [
-        (None, None),
-        (None, None),
-    ],
+    'bounds': [(None, None), (None, None)],
     'max_iterations': 1000,
     'global_minimum': -0.199409,
     'dimensions': 2,
@@ -7861,10 +7639,7 @@ mishra4_config = {
 
 mishra5_config = {
     'objective': mishra5,
-    'bounds': [
-        (None, None),
-        (None, None),
-    ],
+    'bounds': [(None, None), (None, None)],
     'max_iterations': 1000,
     'global_minimum': -1.01983,
     'dimensions': 2,
@@ -7872,10 +7647,7 @@ mishra5_config = {
 
 mishra6_config = {
     'objective': mishra6,
-    'bounds': [
-        (None, None),
-        (None, None),
-    ],
+    'bounds': [(None, None), (None, None)],
     'max_iterations': 1000,
     'global_minimum': -2.28395,
     'dimensions': 2,
@@ -7939,10 +7711,7 @@ mishra7_5000d_config = {
 
 mishra8_config = {
     'objective': mishra8,
-    'bounds': [
-        (None, None),
-        (None, None),
-    ],
+    'bounds': [(None, None), (None, None)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2,
@@ -7950,11 +7719,7 @@ mishra8_config = {
 
 mishra9_config = {
     'objective': mishra9,
-    'bounds': [
-        (None, None),
-        (None, None),
-        (None, None),
-    ],
+    'bounds': [(None, None), (None, None), (None, None)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 3,

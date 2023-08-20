@@ -46,10 +46,7 @@ class AddOffset(nn.Module):
         self.scale = nn.Parameter(
             torch.tensor(scale, dtype=torch.double), requires_grad=True
         )
-        self.bias = nn.Parameter(
-            torch.zeros(1),
-            requires_grad=True,
-        )
+        self.bias = nn.Parameter(torch.zeros(1), requires_grad=True)
 
     def forward(self, x):  # noqa
         return x + (self.scale * self.bias)
