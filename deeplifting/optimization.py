@@ -17,6 +17,7 @@ from scipy.optimize import differential_evolution, dual_annealing
 
 # first party
 from deeplifting.models import DeepliftingSkipMLP
+from deeplifting.problems import HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
 from deeplifting.utils import (
     DifferentialEvolutionCallback,
     DualAnnealingCallback,
@@ -25,7 +26,8 @@ from deeplifting.utils import (
     set_seed,
 )
 
-EXCLUDE_PROBLEMS = ['ackley_2500d', 'schwefel_2500d']
+# Do NOT save intermediate paths for high dimensional problems
+EXCLUDE_PROBLEMS = list(HIGH_DIMENSIONAL_PROBLEMS_BY_NAME.keys())
 
 
 def run_ipopt(problem: Dict, trials: int):

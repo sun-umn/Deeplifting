@@ -7309,12 +7309,12 @@ dixon_price_1000d_config = {
     'dimensions': 1000,
 }
 
-dixon_price_5000d_config = {
+dixon_price_2500d_config = {
     'objective': dixon_price,
     'bounds': [(-10, 10)],
     'max_iterations': 1000,
     'global_minimum': 0,
-    'dimensions': 5000,
+    'dimensions': 2500,
 }
 
 dolan_config = {
@@ -7955,12 +7955,6 @@ PROBLEMS_BY_NAME = {
     'devilliers_glasser1': devilliers_glasser1_config,
     'devilliers_glasser2': devilliers_glasser2_config,
     'dixon_price': dixon_price_config,
-    'dixon_price_10d': dixon_price_10d_config,
-    'dixon_price_50d': dixon_price_50d_config,
-    'dixon_price_100d': dixon_price_100d_config,
-    'dixon_price_500d': dixon_price_500d_config,
-    'dixon_price_1000d': dixon_price_1000d_config,
-    'dixon_price_5000d': dixon_price_5000d_config,
     'dolan': dolan_config,
     'easom': easom_config,
     'el_attar': el_attar_config,
@@ -8024,7 +8018,7 @@ PROBLEMS_BY_NAME = {
 }
 
 HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
-    # Ackley Series
+    # Ackley Series - Origin Solution
     'ackley_3d': ackley_3d_config,
     'ackley_5d': ackley_5d_config,
     'ackley_30d': ackley_30d_config,
@@ -8032,13 +8026,13 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'ackley_500d': ackley_500d_config,
     'ackley_1000d': ackley_1000d_config,
     'ackley_2500d': ackley_2500d_config,
-    # Alpine1 Series
+    # Alpine1 Series - Origin Solution
     'alpine1_10d': alpine1_10d_config,
     'alpine1_100d': alpine1_100d_config,
     'alpine1_500d': alpine1_500d_config,
     'alpine1_1000d': alpine1_1000d_config,
     'alpine1_2500d': alpine1_2500d_config,
-    # Chung-Reynolds Series
+    # Chung-Reynolds Series - Origin Solution
     'chung_reynolds': chung_reynolds_config,
     'chung_reyonlds_10d': chung_reynolds_10d_config,
     'chung_reynolds_50d': chung_reynolds_50d_config,
@@ -8046,7 +8040,7 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'chung_reynolds_500d': chung_reynolds_500d_config,
     'chung_reynolds_1000d': chung_reynolds_1000d_config,
     'chung_reynolds_2500d': chung_reynolds_2500d_config,
-    # Griewank Series
+    # Griewank Series - Origin Solution
     'griewank_3d': griewank_3d_config,
     'griewank_5d': griewank_5d_config,
     'griewank_30d': griewank_30d_config,
@@ -8054,7 +8048,7 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'griewank_500d': griewank_500d_config,
     'griewank_1000d': griewank_1000d_config,
     'griewank_2500d': griewank_2500d_config,
-    # Levy Series
+    # Levy Series - Non-origin solution
     'levy_3d': levy_3d_config,
     'levy_5d': levy_5d_config,
     'levy_30d': levy_30d_config,
@@ -8062,14 +8056,7 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'levy_500d': levy_500d_config,
     'levy_1000d': levy_1000d_config,
     'levy_2500d': levy_2500d_config,
-    # Rastrigin Series
-    'rastrigin_3d': rastrigin_3d_config,
-    'rastrigin_5d': rastrigin_3d_config,
-    'rastrigin_30d': rastrigin_30d_config,
-    'rastrigin_100d': rastrigin_100d_config,
-    'rastrigin_1000': rastrigin_1000d_config,
-    'rastrigin_2500d': rastrigin_2500d_config,
-    # Schewefel series
+    # Schewefel series - Non-origin solution
     'schwefel_3d': schwefel_3d_config,
     'schwefel_5d': schwefel_5d_config,
     'schwefel_30d': schwefel_30d_config,
@@ -8077,15 +8064,7 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'schwefel_500d': schwefel_500d_config,
     'schwefel_1000d': schwefel_1000d_config,
     'schwefel_2500d': schwefel_2500d_config,
-    # Shubert Series
-    'shubert_3d': shubert_3d_config,
-    'shubert_5d': shubert_5d_config,
-    'shubert_30d': shubert_30d_config,
-    'shubert_100d': shubert_100d_config,
-    'shubert_500d': shubert_500d_config,
-    'shubert_1000d': shubert_1000d_config,
-    'shubert_2500d': shubert_2500d_config,
-    # Step 2 Series
+    # Step 2 Series - Non-origin solution
     'step2_3d': shubert_3d_config,
     'step2_5d': shubert_5d_config,
     'step2_30d': shubert_30d_config,
