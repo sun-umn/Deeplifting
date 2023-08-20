@@ -612,13 +612,13 @@ def run_deeplifting(
         opts.torch_device = device
         opts.print_frequency = 1
         # opts.print_level = 0
-        opts.limited_mem_size = 5
+        opts.limited_mem_size = 50
         opts.stat_l2_model = False
         opts.double_precision = True
         # opts.disable_terminationcode_6 = True
         # opts.halt_on_linesearch_bracket = False
-        opts.opt_tol = 1e-10
-        opts.maxit = 1
+        opts.opt_tol = 1e-7
+        opts.maxit = 2000
 
         # Get the maximum iterations
         max_iterations = problem['max_iterations']

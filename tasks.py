@@ -148,24 +148,24 @@ search_hidden_sizes = [
     hidden_size_128 * 4,
     hidden_size_128 * 5,
     hidden_size_128 * 10,
-    # Hidden sizes of 256
-    hidden_size_256 * 2,
-    hidden_size_256 * 3,
-    hidden_size_256 * 4,
-    hidden_size_256 * 5,
-    hidden_size_256 * 10,
+    # # Hidden sizes of 256
+    # hidden_size_256 * 2,
+    # hidden_size_256 * 3,
+    # hidden_size_256 * 4,
+    # hidden_size_256 * 5,
+    # hidden_size_256 * 10,
     # Hidden sizes of 512
     hidden_size_512 * 2,
     hidden_size_512 * 3,
     hidden_size_512 * 4,
     hidden_size_512 * 5,
     hidden_size_512 * 10,
-    # Hidden sizes of 768
-    hidden_size_768 * 2,
-    hidden_size_768 * 3,
-    hidden_size_768 * 4,
-    hidden_size_768 * 5,
-    hidden_size_768 * 10,
+    # # Hidden sizes of 768
+    # hidden_size_768 * 2,
+    # hidden_size_768 * 3,
+    # hidden_size_768 * 4,
+    # hidden_size_768 * 5,
+    # hidden_size_768 * 10,
     # Hidden sizes of 1024
     hidden_size_1024 * 2,
     hidden_size_1024 * 3,
@@ -181,16 +181,16 @@ search_hidden_sizes = [
 ]
 
 # Input sizes
-search_input_sizes = [1, 128, 256, 512]
+search_input_sizes = [1]
 
 # Hidden activations
-search_hidden_activations = ['sine', 'leaky_relu']
+search_hidden_activations = ['sine']
 
 # Ouput activations
-search_output_activations = ['sine', 'leaky_relu']
+search_output_activations = ['leaky_relu']
 
 # Aggregate functions - for skip connections
-search_agg_functions = ['max', 'sum']
+search_agg_functions = ['sum']
 
 
 @click.group()
@@ -600,7 +600,7 @@ def find_best_architecture_task(problem_name):
     )
     configurations = list(product(*combinations))
     method = 'single-value'
-    trials = 1
+    trials = 10
 
     # List to store performance data
     performance_df_list = []
@@ -650,7 +650,7 @@ def find_best_architecture_task(problem_name):
         results.to_parquet(
             f'./search_results/results-2023-08-{layers}-layer-{units}-{agg_function}'
             f'-{problem_name}-{index}-{method}-{output_activation}-'
-            f'{dimensionality}.parquet'  # noqa
+            f'input-size-{input_size}.parquet'  # noqa
         )
 
         # Append performance
