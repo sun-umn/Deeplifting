@@ -5783,6 +5783,32 @@ def ndlevy(x, results, trial, version='numpy'):
     return result
 
 
+def ndqing(x, results, trial, version='numpy'):
+    """
+    Implemention of the n-dimensional Qing function
+
+    Args:
+    x: A d-dimensional array or tensor
+    version: A string, either 'numpy' or 'pytorch'
+
+    Returns:
+    result: Value of the Qing function
+    """
+    x = x.flatten()
+    if version == 'numpy':
+        i = np.arange(1, len(x) + 1)
+        result = np.sum((x**2 - i) ** 2)
+    elif version == 'pytorch':
+        i = torch.arange(1, len(x) + 1)
+        result = torch.sum((x**2 - i) ** 2)
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    return result
+
+
 def ndschwefel(x, results, trial, version='numpy'):
     """
     Implemention of the n-dimensional levy function
@@ -5800,44 +5826,6 @@ def ndschwefel(x, results, trial, version='numpy'):
         result = 418.9829 * d - np.sum(x * np.sin(np.sqrt(np.abs(x))))
     elif version == 'pytorch':
         result = 418.9829 * d - torch.sum(x * torch.sin(torch.sqrt(torch.abs(x))))
-    else:
-        raise ValueError(
-            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
-        )
-
-    return result
-
-
-def ndshubert(x, results, trial, version='numpy'):
-    """
-    Implemention of the n-dimensional Shubert function
-
-    Args:
-    x: A d-dimensional array or tensor
-    version: A string, either 'numpy' or 'pytorch'
-
-    Returns:
-    result: Value of the Rastrigin function
-    """
-    x = x.flatten()
-    if version == 'numpy':
-        component1 = np.cos(2 * x + 1)
-        component2 = np.cos(3 * x + 2)
-        component3 = np.cos(4 * x + 3)
-        component4 = np.cos(5 * x + 4)
-        component5 = np.cos(6 * x + 5)
-        result = np.prod(
-            np.sum(component1 + component2 + component3 + component4 + component5)
-        )
-    elif version == 'pytorch':
-        component1 = torch.cos(2 * x + 1)
-        component2 = torch.cos(3 * x + 2)
-        component3 = torch.cos(4 * x + 3)
-        component4 = torch.cos(5 * x + 4)
-        component5 = torch.cos(6 * x + 5)
-        result = torch.prod(
-            torch.sum(component1 + component2 + component3 + component4 + component5)
-        )
     else:
         raise ValueError(
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
@@ -6298,59 +6286,59 @@ schwefel_2500d_config = {
 }
 
 # ND Shubert
-shubert_3d_config = {
-    'objective': ndshubert,
-    'bounds': [(-10, 10)],  # Will use a single level bound and then expand
+qing_3d_config = {
+    'objective': ndqing,
+    'bounds': [(-500, 500)],  # Will use a single level bound and then expand
     'max_iterations': 1000,
-    'global_minimum': -186.7309,
+    'global_minimum': 0,
     'dimensions': 3,
 }
 
-shubert_5d_config = {
-    'objective': ndshubert,
-    'bounds': [(-10, 10)],  # Will use a single level bound and then expand
+qing_5d_config = {
+    'objective': ndqing,
+    'bounds': [(-500, 500)],  # Will use a single level bound and then expand
     'max_iterations': 1000,
-    'global_minimum': -186.7309,
+    'global_minimum': 0,
     'dimensions': 5,
 }
 
-shubert_30d_config = {
-    'objective': ndshubert,
-    'bounds': [(-10, 10)],  # Will use a single level bound and then expand
+qing_30d_config = {
+    'objective': ndqing,
+    'bounds': [(-500, 500)],  # Will use a single level bound and then expand
     'max_iterations': 1000,
-    'global_minimum': -186.7309,
+    'global_minimum': 0,
     'dimensions': 30,
 }
 
-shubert_100d_config = {
-    'objective': ndshubert,
-    'bounds': [(-10, 10)],  # Will use a single level bound and then expand
+qing_100d_config = {
+    'objective': ndqing,
+    'bounds': [(-500, 500)],  # Will use a single level bound and then expand
     'max_iterations': 1000,
-    'global_minimum': -186.7309,
+    'global_minimum': 0,
     'dimensions': 100,
 }
 
-shubert_500d_config = {
-    'objective': ndshubert,
-    'bounds': [(-10, 10)],  # Will use a single level bound and then expand
+qing_500d_config = {
+    'objective': ndqing,
+    'bounds': [(-500, 500)],  # Will use a single level bound and then expand
     'max_iterations': 1000,
-    'global_minimum': -186.7309,
+    'global_minimum': 0,
     'dimensions': 500,
 }
 
-shubert_1000d_config = {
-    'objective': ndshubert,
-    'bounds': [(-10, 10)],  # Will use a single level bound and then expand
+qing_1000d_config = {
+    'objective': ndqing,
+    'bounds': [(-500, 500)],  # Will use a single level bound and then expand
     'max_iterations': 1000,
-    'global_minimum': -186.7309,
+    'global_minimum': 0,
     'dimensions': 1000,
 }
 
-shubert_2500d_config = {
-    'objective': ndshubert,
-    'bounds': [(-10, 10)],  # Will use a single level bound and then expand
+qing_2500d_config = {
+    'objective': ndqing,
+    'bounds': [(-500, 500)],  # Will use a single level bound and then expand
     'max_iterations': 1000,
-    'global_minimum': -186.7309,
+    'global_minimum': 0,
     'dimensions': 2500,
 }
 
@@ -8056,6 +8044,14 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'levy_500d': levy_500d_config,
     'levy_1000d': levy_1000d_config,
     'levy_2500d': levy_2500d_config,
+    # Qing Series - Non-origin solution
+    'qing_3d': qing_3d_config,
+    'qing_5d': qing_5d_config,
+    'qing_30d': qing_30d_config,
+    'qing_100d': qing_100d_config,
+    'qing_500d': qing_500d_config,
+    'qing_1000d': qing_1000d_config,
+    'qing_2500d': qing_2500d_config,
     # Schewefel series - Non-origin solution
     'schwefel_3d': schwefel_3d_config,
     'schwefel_5d': schwefel_5d_config,
@@ -8065,11 +8061,11 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'schwefel_1000d': schwefel_1000d_config,
     'schwefel_2500d': schwefel_2500d_config,
     # Step 2 Series - Non-origin solution
-    'step2_3d': shubert_3d_config,
-    'step2_5d': shubert_5d_config,
-    'step2_30d': shubert_30d_config,
-    'step2_100d': shubert_100d_config,
-    'step2_500d': shubert_500d_config,
-    'step2_1000d': shubert_1000d_config,
-    'step2_2500d': shubert_2500d_config,
+    'step2_3d': step2_3d_config,
+    'step2_5d': step2_5d_config,
+    'step2_30d': step2_30d_config,
+    'step2_100d': step2_100d_config,
+    'step2_500d': step2_500d_config,
+    'step2_1000d': step2_1000d_config,
+    'step2_2500d': step2_2500d_config,
 }

@@ -620,7 +620,7 @@ def run_deeplifting(
         # opts.disable_terminationcode_6 = True
         # opts.halt_on_linesearch_bracket = False
         opts.opt_tol = 1e-7
-        opts.maxit = 2000
+        opts.maxit = 10000
 
         # Get the maximum iterations
         max_iterations = problem['max_iterations']
