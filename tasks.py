@@ -120,7 +120,15 @@ high_dimensional_problem_names = [
     # 'schwefel_100d',
     # 'schwefel_500d',
     # 'schwefel_1000d',
-    'schwefel_2500d',
+    # 'schwefel_2500d',
+    # Shubert series
+    # 'shubert_3d',
+    # 'shubert_5d',
+    'shubert_30d',
+    # 'shubert_100d',
+    # 'shubert_500d',
+    # 'shubert_1000d',
+    # 'shubert_2500d',
 ]
 
 # Identify available hidden sizes
@@ -133,48 +141,56 @@ hidden_size_1024 = (1024,)
 hidden_size_2048 = (2048,)
 
 # Hidden size combinations
-hidden_sizes = [
+search_hidden_sizes = [
     # Hidden sizes of 128
     hidden_size_128 * 2,
-    # hidden_size_128 * 3,
-    # hidden_size_128 * 4,
-    # hidden_size_128 * 5,
-    # # Hidden sizes of 256
-    # hidden_size_256 * 2,
-    # hidden_size_256 * 3,
-    # hidden_size_256 * 4,
-    # hidden_size_256 * 5,
-    # # Hidden sizes of 512
-    # hidden_size_512 * 2,
-    # hidden_size_512 * 3,
-    # hidden_size_512 * 4,
-    # hidden_size_512 * 5,
-    # # Hidden sizes of 768
-    # hidden_size_768 * 2,
-    # hidden_size_768 * 3,
-    # hidden_size_768 * 4,
-    # hidden_size_768 * 5,
-    # # Hidden sizes of 1024
-    # hidden_size_1024 * 2,
-    # hidden_size_1024 * 3,
-    # hidden_size_1024 * 4,
-    # # Hidden sizes of 2048
-    # hidden_size_2048 * 2,
-    # hidden_size_2048 * 3,
-    # hidden_size_2048 * 4,
+    hidden_size_128 * 3,
+    hidden_size_128 * 4,
+    hidden_size_128 * 5,
+    hidden_size_128 * 10,
+    # Hidden sizes of 256
+    hidden_size_256 * 2,
+    hidden_size_256 * 3,
+    hidden_size_256 * 4,
+    hidden_size_256 * 5,
+    hidden_size_256 * 10,
+    # Hidden sizes of 512
+    hidden_size_512 * 2,
+    hidden_size_512 * 3,
+    hidden_size_512 * 4,
+    hidden_size_512 * 5,
+    hidden_size_512 * 10,
+    # Hidden sizes of 768
+    hidden_size_768 * 2,
+    hidden_size_768 * 3,
+    hidden_size_768 * 4,
+    hidden_size_768 * 5,
+    hidden_size_768 * 10,
+    # Hidden sizes of 1024
+    hidden_size_1024 * 2,
+    hidden_size_1024 * 3,
+    hidden_size_1024 * 4,
+    hidden_size_1024 * 5,
+    hidden_size_1024 * 10,
+    # Hidden sizes of 2048
+    hidden_size_2048 * 2,
+    hidden_size_2048 * 3,
+    hidden_size_2048 * 4,
+    hidden_size_2048 * 5,
+    hidden_size_2048 * 10,
 ]
 
 # Input sizes
-input_sizes = [512]
+search_input_sizes = [1, 128, 256, 512]
 
 # Hidden activations
-hidden_activations = ['sine']
+search_hidden_activations = ['sine', 'leaky_relu']
 
 # Ouput activations
-output_activations = ['leaky_relu']
+search_output_activations = ['sine', 'leaky_relu']
 
 # Aggregate functions - for skip connections
-agg_functions = ['sum']
+search_agg_functions = ['max', 'sum']
 
 
 @click.group()
@@ -211,6 +227,9 @@ def run_deeplifting_task(
         project="dever120/Deeplifting",
         api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzYmIwMTUyNC05YmZmLTQ1NzctOTEyNS1kZTIxYjU5NjY5YjAifQ==",  # noqa
     )  # your credentials
+
+    input_sizes = [512]
+    hidden_activations = ['sine']
 
     if dimensionality == 'low-dimensional':
         problem_names = low_dimensional_problem_names
@@ -523,6 +542,12 @@ def run_saved_model_task():
     Run deep lifting over specified available problems and over a search space
     to find the best performance
     """
+    input_sizes = [512]
+    hidden_sizes = [hidden_size_128 * 2]
+    hidden_activations = ['sine']
+    output_activations = ['leaky_relu']
+    agg_functions = ['sum']
+
     # Get the available configurations
     problem_name = 'eggholder'
     combinations = (
@@ -560,6 +585,99 @@ def run_saved_model_task():
             agg_function=agg_function,
             save_model_path='./models/',
         )
+
+
+@cli.command('find-best-deeplifting-architecture')
+@click.option('--problem_name', default='ackley_2500d')
+def find_best_architecture_task(problem_name):
+    """
+    Function that we will use to find the best architecture over multiple
+    "hard" high-dimensional problems. We will aim to tackle a large dimensional
+    space with this function, 2500+
+    """
+    # Enable the neptune run
+    # Get api token
+    # TODO: If api token is not present log a warning
+    # and default to saving files locally
+    run = neptune.init_run(  # noqa
+        project="dever120/Deeplifting",
+        api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzYmIwMTUyNC05YmZmLTQ1NzctOTEyNS1kZTIxYjU5NjY5YjAifQ==",  # noqa
+    )  # your credentials
+
+    # Get the problem list
+    PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
+
+    # Get the available configurations
+    combinations = (
+        search_input_sizes,
+        search_hidden_sizes,
+        search_hidden_activations,
+        search_output_activations,
+        search_agg_functions,
+    )
+    configurations = list(product(*combinations))
+    method = 'single-value'
+    trials = 5
+
+    # List to store performance data
+    performance_df_list = []
+
+    # Run over the experiments
+    for index, (
+        input_size,
+        hidden_size,
+        hidden_activation,
+        output_activation,
+        agg_function,
+    ) in enumerate(configurations):
+        print(problem_name)
+        # Load the problems
+        problem = PROBLEMS[problem_name]
+
+        # Get the outputs
+        outputs = run_deeplifting(
+            problem,
+            problem_name=problem_name,
+            trials=trials,
+            input_size=input_size,
+            hidden_sizes=hidden_size,
+            activation=hidden_activation,
+            output_activation=output_activation,
+            agg_function=agg_function,
+            method=method,
+        )
+
+        # Get the results of the outputs
+        output_size = problem['dimensions']
+        x_columns = [f'x{i + 1}' for i in range(output_size)]
+        columns = x_columns + ['f', 'algorithm', 'total_time']
+
+        results = pd.DataFrame(
+            outputs['final_results'],
+            columns=columns,
+        )
+
+        # Add meta data to the results
+        results['input_size'] = input_size
+        results['hidden_size'] = '-'.join(map(str, hidden_size))
+        results['hidden_activation'] = hidden_activation
+        results['output_activation'] = output_activation
+        results['agg_function'] = agg_function
+        results['problem_name'] = problem_name
+        results['global_minimum'] = problem['global_minimum']
+        results['dimensions'] = output_size
+
+        # Save to parquet
+        layers = len(hidden_size)
+        units = hidden_size[0]
+        results.to_parquet(
+            f'./search_results/results-2023-08-{layers}-layer-{units}-{agg_function}'
+            f'-{problem_name}-{index}-{method}-{output_activation}-'
+            f'{dimensionality}.parquet'  # noqa
+        )
+
+        # Append performance
+        performance_df_list.append(results)
 
 
 if __name__ == "__main__":

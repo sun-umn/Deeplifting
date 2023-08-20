@@ -60,52 +60,6 @@ def ackley(x, results, trial, version='numpy'):
     return result
 
 
-def ndackley(x, results, trial, version='numpy'):
-    """
-    Compute the Ackley function.
-
-    Args:
-    x: A d-dimensional array or tensor
-    version: A string, either 'numpy' or 'pytorch'
-
-    Returns:
-    result: Value of the Ackley function
-    """
-    a = 20
-    b = 0.2
-    c = 2 * np.pi
-
-    d = len(x)
-    x = x.flatten()
-
-    if version == 'numpy':
-        arg1 = -b * np.sqrt(1.0 / d * np.sum(np.square(x)))
-        arg2 = 1.0 / d * np.sum(np.cos(c * x))
-        result = -a * np.exp(arg1) - np.exp(arg2) + a + np.e
-
-    elif version == 'pytorch':
-        arg1 = -b * torch.sqrt(1.0 / d * torch.sum(x**2))
-        arg2 = 1.0 / d * torch.sum(torch.cos(c * x))
-        result = -a * torch.exp(arg1) - torch.exp(arg2) + a + np.e
-    else:
-        raise ValueError("Invalid implementation: choose 'numpy' or 'pytorch'")
-
-    # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        x_tuple = tuple(x.detach().cpu().numpy())
-        results[trial, iteration, :] = np.array(
-            x_tuple + (result.detach().cpu().numpy(),)
-        )
-
-    else:
-        x_tuple = tuple(x.flatten())
-        results[trial, iteration, :] = np.array(x_tuple + (result,))
-
-    return result
-
-
 def bukin_n6(x, results, trial, version='numpy'):
     """
     Function that implements the Bukin Function N.6 in both
@@ -385,49 +339,6 @@ def griewank(x, results, trial, version='numpy'):
     return result
 
 
-def ndgriewank(x, results, trial, version='numpy'):
-    """
-    Implementation of the n-dimensional Griewank function
-
-    Args:
-    x: A d-dimensional array or tensor
-    version: A string, either 'numpy' or 'pytorch'
-
-    Returns:
-    result: Value of the griewank function
-    """
-    d = len(x)
-    x = x.flatten()
-
-    if version == 'numpy':
-        sqrt_i = np.sqrt(np.arange(1, d + 1)).flatten()
-        result = np.sum(np.square(x) / 4000) - np.prod(np.cos(x / sqrt_i)) + 1
-    elif version == 'pytorch':
-        sqrt_i = torch.sqrt(torch.arange(1, d + 1)).flatten()
-        result = (
-            torch.sum(torch.square(x) / 4000) - torch.prod(torch.cos(x / sqrt_i)) + 1
-        )
-    else:
-        raise ValueError(
-            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
-        )
-
-    # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        x_tuple = tuple(x.detach().cpu().numpy())
-        results[trial, iteration, :] = np.array(
-            x_tuple + (result.detach().cpu().numpy(),)
-        )
-
-    else:
-        x_tuple = tuple(x.flatten())
-        results[trial, iteration, :] = np.array(x_tuple + (result,))
-
-    return result
-
-
 def holder_table(x, results, trial, version='numpy'):
     """
     Implementation of the 2D Holder Table function.
@@ -622,57 +533,6 @@ def levy(x, results, trial, version='numpy'):
 
     else:
         results[trial, iteration, :] = np.array((x1, x2, result))
-
-    return result
-
-
-def ndlevy(x, results, trial, version='numpy'):
-    """
-    Implemention of the n-dimensional levy function
-
-    Args:
-    x: A d-dimensional array or tensor
-    version: A string, either 'numpy' or 'pytorch'
-
-    Returns:
-    result: Value of the Levy function
-    """
-    x = x.flatten()
-    w = ((x - 1) / 2) + 1
-    w1 = w[0]
-    wd = w[-1]
-    w = w[0:-1]
-    if version == 'numpy':
-        result = (
-            np.square(np.sin(np.pi * w1))
-            + np.sum(np.square(w - 1) * (1 + 10 * np.square(np.sin(np.pi * w + 1))))
-            + np.square(wd - 1) * (1 + np.square(np.sin(2 * np.pi * wd)))
-        )
-    elif version == 'pytorch':
-        result = (
-            torch.square(torch.sin(np.pi * w1))
-            + torch.sum(
-                torch.square(w - 1) * (1 + 10 * torch.square(torch.sin(np.pi * w + 1)))
-            )
-            + torch.square(wd - 1) * (1 + torch.square(torch.sin(2 * np.pi * wd)))
-        )
-    else:
-        raise ValueError(
-            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
-        )
-
-    # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        x_tuple = tuple(x.detach().cpu().numpy())
-        results[trial, iteration, :] = np.array(
-            x_tuple + (result.detach().cpu().numpy(),)
-        )
-
-    else:
-        x_tuple = tuple(x.flatten())
-        results[trial, iteration, :] = np.array(x_tuple + (result,))
 
     return result
 
@@ -1006,44 +866,6 @@ def schwefel(x, results, trial, version='numpy'):
 
     else:
         results[trial, iteration, :] = np.array((x1, x2, result))
-
-    return result
-
-
-def ndschwefel(x, results, trial, version='numpy'):
-    """
-    Implemention of the n-dimensional levy function
-
-    Args:
-    x: A d-dimensional array or tensor
-    version: A string, either 'numpy' or 'pytorch'
-
-    Returns:
-    result: Value of the Rastrigin function
-    """
-    x = x.flatten()
-    d = len(x)
-    if version == 'numpy':
-        result = 418.9829 * d - np.sum(x * np.sin(np.sqrt(np.abs(x))))
-    elif version == 'pytorch':
-        result = 418.9829 * d - torch.sum(x * torch.sin(torch.sqrt(torch.abs(x))))
-    else:
-        raise ValueError(
-            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
-        )
-
-    # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        x_tuple = tuple(x.detach().cpu().numpy())
-        results[trial, iteration, :] = np.array(
-            x_tuple + (result.detach().cpu().numpy(),)
-        )
-
-    else:
-        x_tuple = tuple(x.flatten())
-        results[trial, iteration, :] = np.array(x_tuple + (result,))
 
     return result
 
@@ -2972,44 +2794,6 @@ def alpine1(x, results, trial, version='numpy'):
 
     else:
         results[trial, iteration, :] = np.array((x1, x2, result))
-
-    return result
-
-
-# nd Alpine1
-def ndalpine1(x, results, trial, version='numpy'):
-    """
-    Compute the Alpine1 function.
-
-    Args:
-    x: A d-dimensional array or tensor
-    version: A string, either 'numpy' or 'pytorch'
-
-    Returns:
-    result: Value of the Ackley function
-    """
-    x = x.flatten()
-    if version == 'numpy':
-        result = np.sum(np.abs(x * np.sin(x) + 0.1 * x))
-    elif version == 'pytorch':
-        result = torch.sum(torch.abs(x * torch.sin(x) + 0.1 * x))
-    else:
-        raise ValueError(
-            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
-        )
-
-    # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        x_tuple = tuple(x.detach().cpu().numpy())
-        results[trial, iteration, :] = np.array(
-            x_tuple + (result.detach().cpu().numpy(),)
-        )
-
-    else:
-        x_tuple = tuple(x.flatten())
-        results[trial, iteration, :] = np.array(x_tuple + (result,))
 
     return result
 
@@ -5814,6 +5598,278 @@ def layeb8(x, results, trial, version='numpy'):
     return result
 
 
+# Note: High Dimensional Problems
+# We are having issues with slowness becuase we are trying to get the intermediate
+# paths, which might not really make sense for high dimensional problems. I am
+# going to refactor some of the high dimensional problems chosen here.
+
+
+def ndackley(x, results, trial, version='numpy'):
+    """
+    Compute the Ackley function.
+
+    Args:
+    x: A d-dimensional array or tensor
+    version: A string, either 'numpy' or 'pytorch'
+
+    Returns:
+    result: Value of the Ackley function
+
+    Note: results will be passed with trial but never
+    used for nd function
+    """
+    a = 20
+    b = 0.2
+    c = 2 * np.pi
+
+    d = len(x)
+    x = x.flatten()
+
+    if version == 'numpy':
+        arg1 = -b * np.sqrt(1.0 / d * np.sum(np.square(x)))
+        arg2 = 1.0 / d * np.sum(np.cos(c * x))
+        result = -a * np.exp(arg1) - np.exp(arg2) + a + np.e
+
+    elif version == 'pytorch':
+        arg1 = -b * torch.sqrt(1.0 / d * torch.sum(x**2))
+        arg2 = 1.0 / d * torch.sum(torch.cos(c * x))
+        result = -a * torch.exp(arg1) - torch.exp(arg2) + a + np.e
+    else:
+        raise ValueError("Invalid implementation: choose 'numpy' or 'pytorch'")
+
+    return result
+
+
+def nd_modified_ackley(x, results, trial, version='numpy'):
+    """
+    Compute the Modified Ackley function.
+
+    Args:
+    x: A d-dimensional array or tensor
+    version: A string, either 'numpy' or 'pytorch'
+
+    Returns:
+    result: Value of the Modified Ackley function
+
+    Note: results will be passed with trial but never
+    used for nd function
+    """
+    x = x.flatten()
+
+    x1 = x[:-1]
+    x2 = x[1:]
+
+    if version == 'numpy':
+        component1 = np.sqrt(x1**2 + x2**2)
+        component2 = 3 * (np.cos(2 * x1) + np.sin(2 * x2))
+        result = np.sum(np.exp(-0.2) * component1 + component2)
+
+    elif version == 'pytorch':
+        component1 = torch.sqrt(x1**2 + x2**2)
+        component2 = 3 * (torch.cos(2 * x1) + torch.sin(2 * x2))
+        result = torch.sum(torch.exp(-0.2) * component1 + component2)
+    else:
+        raise ValueError("Invalid implementation: choose 'numpy' or 'pytorch'")
+
+    return result
+
+
+# nd Alpine1
+def ndalpine1(x, results, trial, version='numpy'):
+    """
+    Compute the Alpine1 function.
+
+    Args:
+    x: A d-dimensional array or tensor
+    version: A string, either 'numpy' or 'pytorch'
+
+    Returns:
+    result: Value of the Alpine1 function
+    """
+    x = x.flatten()
+    if version == 'numpy':
+        result = np.sum(np.abs(x * np.sin(x) + 0.1 * x))
+    elif version == 'pytorch':
+        result = torch.sum(torch.abs(x * torch.sin(x) + 0.1 * x))
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    return result
+
+
+# nd Chung Reynolds
+def nd_chung_reynolds(x, results, trial, version='numpy'):
+    x = x.flatten()
+    if version == 'numpy':
+        result = np.sum(x**2) ** 2
+    elif version == 'pytorch':
+        result = torch.sum(x**2) ** 2
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    return result
+
+
+def ndgriewank(x, results, trial, version='numpy'):
+    """
+    Implementation of the n-dimensional Griewank function
+
+    Args:
+    x: A d-dimensional array or tensor
+    version: A string, either 'numpy' or 'pytorch'
+
+    Returns:
+    result: Value of the griewank function
+    """
+    d = len(x)
+    x = x.flatten()
+
+    if version == 'numpy':
+        sqrt_i = np.sqrt(np.arange(1, d + 1)).flatten()
+        result = np.sum(np.square(x) / 4000) - np.prod(np.cos(x / sqrt_i)) + 1
+    elif version == 'pytorch':
+        sqrt_i = torch.sqrt(torch.arange(1, d + 1)).flatten()
+        result = (
+            torch.sum(torch.square(x) / 4000) - torch.prod(torch.cos(x / sqrt_i)) + 1
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    return result
+
+
+def ndlevy(x, results, trial, version='numpy'):
+    """
+    Implemention of the n-dimensional levy function
+
+    Args:
+    x: A d-dimensional array or tensor
+    version: A string, either 'numpy' or 'pytorch'
+
+    Returns:
+    result: Value of the Levy function
+    """
+    x = x.flatten()
+    w = ((x - 1) / 2) + 1
+    w1 = w[0]
+    wd = w[-1]
+    w = w[0:-1]
+
+    if version == 'numpy':
+        result = (
+            np.square(np.sin(np.pi * w1))
+            + np.sum(np.square(w - 1) * (1 + 10 * np.square(np.sin(np.pi * w + 1))))
+            + np.square(wd - 1) * (1 + np.square(np.sin(2 * np.pi * wd)))
+        )
+    elif version == 'pytorch':
+        result = (
+            torch.square(torch.sin(np.pi * w1))
+            + torch.sum(
+                torch.square(w - 1) * (1 + 10 * torch.square(torch.sin(np.pi * w + 1)))
+            )
+            + torch.square(wd - 1) * (1 + torch.square(torch.sin(2 * np.pi * wd)))
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    return result
+
+
+def ndschwefel(x, results, trial, version='numpy'):
+    """
+    Implemention of the n-dimensional levy function
+
+    Args:
+    x: A d-dimensional array or tensor
+    version: A string, either 'numpy' or 'pytorch'
+
+    Returns:
+    result: Value of the Rastrigin function
+    """
+    x = x.flatten()
+    d = len(x)
+    if version == 'numpy':
+        result = 418.9829 * d - np.sum(x * np.sin(np.sqrt(np.abs(x))))
+    elif version == 'pytorch':
+        result = 418.9829 * d - torch.sum(x * torch.sin(torch.sqrt(torch.abs(x))))
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    return result
+
+
+def ndshubert(x, results, trial, version='numpy'):
+    """
+    Implemention of the n-dimensional Shubert function
+
+    Args:
+    x: A d-dimensional array or tensor
+    version: A string, either 'numpy' or 'pytorch'
+
+    Returns:
+    result: Value of the Rastrigin function
+    """
+    x = x.flatten()
+    if version == 'numpy':
+        component1 = np.cos(2 * x + 1)
+        component2 = np.cos(3 * x + 2)
+        component3 = np.cos(4 * x + 3)
+        component4 = np.cos(5 * x + 4)
+        component5 = np.cos(6 * x + 5)
+        result = np.prod(
+            np.sum(component1 + component2 + component3 + component4 + component5)
+        )
+    elif version == 'pytorch':
+        component1 = torch.cos(2 * x + 1)
+        component2 = torch.cos(3 * x + 2)
+        component3 = torch.cos(4 * x + 3)
+        component4 = torch.cos(5 * x + 4)
+        component5 = torch.cos(6 * x + 5)
+        result = torch.prod(
+            torch.sum(component1 + component2 + component3 + component4 + component5)
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    return result
+
+
+def ndstep2(x, results, trial, version='numpy'):
+    """
+    Implemention of the n-dimensional Step 2 function
+
+    Args:
+    x: A d-dimensional array or tensor
+    version: A string, either 'numpy' or 'pytorch'
+
+    Returns:
+    result: Value of the Step 2 function
+    """
+    x = x.flatten()
+    if version == 'numpy':
+        result = np.floor(np.abs(x + 0.5))
+    elif version == 'pytorch':
+        result = torch.floor(torch.abs(x + 0.5))
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    return result
+
+
 # Problem configurations
 # Ackley
 ackley_config = {
@@ -6095,6 +6151,38 @@ levy_30d_config = {
     'dimensions': 30,
 }
 
+levy_100d_config = {
+    'objective': ndlevy,
+    'bounds': [(-10, 10)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 100,
+}
+
+levy_500d_config = {
+    'objective': ndlevy,
+    'bounds': [(-10, 10)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 500,
+}
+
+levy_1000d_config = {
+    'objective': ndlevy,
+    'bounds': [(-10, 10)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 1000,
+}
+
+levy_2500d_config = {
+    'objective': ndlevy,
+    'bounds': [(-10, 10)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 2500,
+}
+
 # Multi-Dimensional Problems #
 rastrigin_3d_config = {
     'objective': ndrastrigin,
@@ -6204,6 +6292,120 @@ schwefel_1000d_config = {
 schwefel_2500d_config = {
     'objective': ndschwefel,
     'bounds': [(-500, 500)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 2500,
+}
+
+# ND Shubert
+shubert_3d_config = {
+    'objective': ndshubert,
+    'bounds': [(-10, 10)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': -186.7309,
+    'dimensions': 3,
+}
+
+shubert_5d_config = {
+    'objective': ndshubert,
+    'bounds': [(-10, 10)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': -186.7309,
+    'dimensions': 5,
+}
+
+shubert_30d_config = {
+    'objective': ndshubert,
+    'bounds': [(-10, 10)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': -186.7309,
+    'dimensions': 30,
+}
+
+shubert_100d_config = {
+    'objective': ndshubert,
+    'bounds': [(-10, 10)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': -186.7309,
+    'dimensions': 100,
+}
+
+shubert_500d_config = {
+    'objective': ndshubert,
+    'bounds': [(-10, 10)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': -186.7309,
+    'dimensions': 500,
+}
+
+shubert_1000d_config = {
+    'objective': ndshubert,
+    'bounds': [(-10, 10)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': -186.7309,
+    'dimensions': 1000,
+}
+
+shubert_2500d_config = {
+    'objective': ndshubert,
+    'bounds': [(-10, 10)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': -186.7309,
+    'dimensions': 2500,
+}
+
+# ND Step 2
+step2_3d_config = {
+    'objective': ndstep2,
+    'bounds': [(-100, 100)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 3,
+}
+
+step2_5d_config = {
+    'objective': ndstep2,
+    'bounds': [(-100, 100)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 5,
+}
+
+step2_30d_config = {
+    'objective': ndstep2,
+    'bounds': [(-100, 100)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 30,
+}
+
+step2_100d_config = {
+    'objective': ndstep2,
+    'bounds': [(-100, 100)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 100,
+}
+
+step2_500d_config = {
+    'objective': ndstep2,
+    'bounds': [(-100, 100)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 500,
+}
+
+step2_1000d_config = {
+    'objective': ndstep2,
+    'bounds': [(-100, 100)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 1000,
+}
+
+step2_2500d_config = {
+    'objective': ndstep2,
+    'bounds': [(-100, 100)],  # Will use a single level bound and then expand
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 2500,
@@ -6570,7 +6772,7 @@ alpine1_config = {
 }
 
 alpine1_10d_config = {
-    'objective': alpine1,
+    'objective': ndalpine1,
     'bounds': [(-10, 10)],
     'max_iterations': 1000,
     'global_minimum': 0,
@@ -6578,7 +6780,7 @@ alpine1_10d_config = {
 }
 
 alpine1_50d_config = {
-    'objective': alpine1,
+    'objective': ndalpine1,
     'bounds': [(-10, 10)],
     'max_iterations': 1000,
     'global_minimum': 0,
@@ -6586,7 +6788,7 @@ alpine1_50d_config = {
 }
 
 alpine1_100d_config = {
-    'objective': alpine1,
+    'objective': ndalpine1,
     'bounds': [(-10, 10)],
     'max_iterations': 1000,
     'global_minimum': 0,
@@ -6594,7 +6796,7 @@ alpine1_100d_config = {
 }
 
 alpine1_500d_config = {
-    'objective': alpine1,
+    'objective': ndalpine1,
     'bounds': [(-10, 10)],
     'max_iterations': 1000,
     'global_minimum': 0,
@@ -6602,19 +6804,19 @@ alpine1_500d_config = {
 }
 
 alpine1_1000d_config = {
-    'objective': alpine1,
+    'objective': ndalpine1,
     'bounds': [(-10, 10)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 1000,
 }
 
-alpine1_5000d_config = {
-    'objective': alpine1,
+alpine1_2500d_config = {
+    'objective': ndalpine1,
     'bounds': [(-10, 10)],
     'max_iterations': 1000,
     'global_minimum': 0,
-    'dimensions': 5000,
+    'dimensions': 2500,
 }
 
 alpine2_config = {
@@ -6950,7 +7152,7 @@ chung_reynolds_config = {
 }
 
 chung_reynolds_10d_config = {
-    'objective': chung_reynolds,
+    'objective': nd_chung_reynolds,
     'bounds': [(-100, 100)],
     'max_iterations': 1000,
     'global_minimum': 0,
@@ -6958,7 +7160,7 @@ chung_reynolds_10d_config = {
 }
 
 chung_reynolds_50d_config = {
-    'objective': chung_reynolds,
+    'objective': nd_chung_reynolds,
     'bounds': [(-100, 100)],
     'max_iterations': 1000,
     'global_minimum': 0,
@@ -6966,7 +7168,7 @@ chung_reynolds_50d_config = {
 }
 
 chung_reynolds_100d_config = {
-    'objective': chung_reynolds,
+    'objective': nd_chung_reynolds,
     'bounds': [(-100, 100)],
     'max_iterations': 1000,
     'global_minimum': 0,
@@ -6974,7 +7176,7 @@ chung_reynolds_100d_config = {
 }
 
 chung_reynolds_500d_config = {
-    'objective': chung_reynolds,
+    'objective': nd_chung_reynolds,
     'bounds': [(-100, 100)],
     'max_iterations': 1000,
     'global_minimum': 0,
@@ -6982,19 +7184,19 @@ chung_reynolds_500d_config = {
 }
 
 chung_reynolds_1000d_config = {
-    'objective': chung_reynolds,
+    'objective': nd_chung_reynolds,
     'bounds': [(-100, 100)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 1000,
 }
 
-chung_reynolds_5000d_config = {
-    'objective': chung_reynolds,
+chung_reynolds_2500d_config = {
+    'objective': nd_chung_reynolds,
     'bounds': [(-100, 100)],
     'max_iterations': 1000,
     'global_minimum': 0,
-    'dimensions': 5000,
+    'dimensions': 2500,
 }
 
 cosine_mixture_config = {
@@ -7887,10 +8089,6 @@ PROBLEMS_BY_NAME = {
     'griewank': griewank_config,
     'holder_table': holder_table_config,
     'langermann': langermann_config,
-    'levy': levy_config,
-    'levy_3d': levy_3d_config,
-    'levy_5d': levy_5d_config,
-    'levy_30d': levy_30d_config,
     'levy_n13': levy_n13_config,
     'rastrigin': rastrigin_config,
     'rastrigin_3d': rastrigin_3d_config,
@@ -7934,11 +8132,6 @@ PROBLEMS_BY_NAME = {
     'ackley4_5000d': ackley4_5000d_config,
     'adjiman': adjiman_config,
     'alpine1': alpine1_config,
-    'alpine1_10d': alpine1_10d_config,
-    'alpine1_100d': alpine1_100d_config,
-    'alpine1_500d': alpine1_500d_config,
-    'alpine1_1000d': alpine1_1000d_config,
-    'alpine1_5000d': alpine1_5000d_config,
     'alpine2': alpine2_config,
     'alpine2_10d': alpine2_10d_config,
     'brad': brad_config,
@@ -7970,13 +8163,6 @@ PROBLEMS_BY_NAME = {
     'chen_bird': chen_bird_config,
     'chen_v': chen_v_config,
     'chichinadze': chichinadze_config,
-    'chung_reynolds': chung_reynolds_config,
-    'chung_reyonlds_10d': chung_reynolds_10d_config,
-    'chung_reynolds_50d': chung_reynolds_50d_config,
-    'chung_reynolds_100d': chung_reynolds_100d_config,
-    'chung_reynolds_500d': chung_reynolds_500d_config,
-    'chung_reynolds_1000d': chung_reynolds_1000d_config,
-    'chung_reynolds_5000d': chung_reynolds_5000d_config,
     'cosine_mixture': cosine_mixture_config,
     'csendes': csendes_config,
     'csendes_10d': csendes_10d_config,
@@ -8081,6 +8267,20 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'ackley_500d': ackley_500d_config,
     'ackley_1000d': ackley_1000d_config,
     'ackley_2500d': ackley_2500d_config,
+    # Alpine1 Series
+    'alpine1_10d': alpine1_10d_config,
+    'alpine1_100d': alpine1_100d_config,
+    'alpine1_500d': alpine1_500d_config,
+    'alpine1_1000d': alpine1_1000d_config,
+    'alpine1_2500d': alpine1_2500d_config,
+    # Chung-Reynolds Series
+    'chung_reynolds': chung_reynolds_config,
+    'chung_reyonlds_10d': chung_reynolds_10d_config,
+    'chung_reynolds_50d': chung_reynolds_50d_config,
+    'chung_reynolds_100d': chung_reynolds_100d_config,
+    'chung_reynolds_500d': chung_reynolds_500d_config,
+    'chung_reynolds_1000d': chung_reynolds_1000d_config,
+    'chung_reynolds_2500d': chung_reynolds_2500d_config,
     # Griewank Series
     'griewank_3d': griewank_3d_config,
     'griewank_5d': griewank_5d_config,
@@ -8089,6 +8289,14 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'griewank_500d': griewank_500d_config,
     'griewank_1000d': griewank_1000d_config,
     'griewank_2500d': griewank_2500d_config,
+    # Levy Series
+    'levy_3d': levy_3d_config,
+    'levy_5d': levy_5d_config,
+    'levy_30d': levy_30d_config,
+    'levy_100d': levy_100d_config,
+    'levy_500d': levy_500d_config,
+    'levy_1000d': levy_1000d_config,
+    'levy_2500d': levy_2500d_config,
     # Rastrigin Series
     'rastrigin_3d': rastrigin_3d_config,
     'rastrigin_5d': rastrigin_3d_config,
@@ -8104,4 +8312,20 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'schwefel_500d': schwefel_500d_config,
     'schwefel_1000d': schwefel_1000d_config,
     'schwefel_2500d': schwefel_2500d_config,
+    # Shubert Series
+    'shubert_3d': shubert_3d_config,
+    'shubert_5d': shubert_5d_config,
+    'shubert_30d': shubert_30d_config,
+    'shubert_100d': shubert_100d_config,
+    'shubert_500d': shubert_500d_config,
+    'shubert_1000d': shubert_1000d_config,
+    'shubert_2500d': shubert_2500d_config,
+    # Step 2 Series
+    'step2_3d': shubert_3d_config,
+    'step2_5d': shubert_5d_config,
+    'step2_30d': shubert_30d_config,
+    'step2_100d': shubert_100d_config,
+    'step2_500d': shubert_500d_config,
+    'step2_1000d': shubert_1000d_config,
+    'step2_2500d': shubert_2500d_config,
 }

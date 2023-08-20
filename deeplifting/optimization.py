@@ -3,7 +3,7 @@ import gc
 import json
 import os
 import time
-from typing import Dict, List
+from typing import Dict
 
 # third party
 import numpy as np
@@ -24,6 +24,11 @@ from deeplifting.utils import (
     initialize_vector,
     set_seed,
 )
+
+EXCLUDE_PROBLEMS = [
+    'ackley_2500d',
+    'schwefel_2500d',
+]
 
 
 def run_ipopt(problem: Dict, trials: int):
@@ -504,7 +509,13 @@ def deeplifting_predictions(x, objective, method='particle'):
 
 
 def deeplifting_nd_fn(
-    model, objective, trial, dimensions, deeplifting_results, method='particle'
+    model,
+    objective,
+    trial,
+    dimensions,
+    deeplifting_results,
+    problem_name,
+    method='particle',
 ):
     """
     Combined funtion used for PyGranso
@@ -519,9 +530,10 @@ def deeplifting_nd_fn(
     f_copy = f.detach().cpu().numpy()
 
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(deeplifting_results[trial]), axis=1))
-    deeplifting_results[trial, iteration, :dimensions] = x
-    deeplifting_results[trial, iteration, -1] = f_copy
+    if problem_name not in EXCLUDE_PROBLEMS:
+        iteration = np.argmin(~np.any(np.isnan(deeplifting_results[trial]), axis=1))
+        deeplifting_results[trial, iteration, :dimensions] = x
+        deeplifting_results[trial, iteration, -1] = f_copy
 
     # Inequality constraint
     ci = None
@@ -609,7 +621,7 @@ def run_deeplifting(
         # opts.disable_terminationcode_6 = True
         # opts.halt_on_linesearch_bracket = False
         opts.opt_tol = 1e-10
-        opts.maxit = 2000
+        opts.maxit = 1
 
         # Get the maximum iterations
         max_iterations = problem['max_iterations']
@@ -632,6 +644,7 @@ def run_deeplifting(
             trial,
             dimensions,
             deeplifting_results,
+            problem_name=problem_name,
             method=method,
         )  # noqa
 
@@ -640,7 +653,8 @@ def run_deeplifting(
         halt_log_fn, get_log_fn = mHLF_obj.makeHaltLogFunctions(opts.maxit)
 
         #  Set PyGRANSO's logging function in opts
-        opts.halt_log_fn = halt_log_fn
+        if problem_name not in EXCLUDE_PROBLEMS:
+            opts.halt_log_fn = halt_log_fn
 
         # Run the main algorithm
         start_time = time.time()
@@ -651,13 +665,14 @@ def run_deeplifting(
         # GET THE HISTORY OF ITERATES
         # Even if an error is thrown, the log generated until the error can be
         # obtained by calling get_log_fn()
-        log = get_log_fn()
+        if problem_name not in EXCLUDE_PROBLEMS:
+            log = get_log_fn()
 
-        # Final structure
-        indexes = (pd.Series(log.fn_evals).cumsum() - 1).values.tolist()
+            # Final structure
+            indexes = (pd.Series(log.fn_evals).cumsum() - 1).values.tolist()
 
-        # Append intermediate results
-        iterim_results.append(deeplifting_results[trial, indexes, :dimensions])
+            # Append intermediate results
+            iterim_results.append(deeplifting_results[trial, indexes, :dimensions])
 
         # Get final x we will also need to map
         # it to the same bounds
@@ -707,15 +722,19 @@ def run_deeplifting(
                 json.dump(config, json_file, indent=4)
 
         # Collect garbage and empty cache
-        del (model, nvar, x0, opts, soln, outputs, xf, f)
+        del (
+            model,
+            nvar,
+            x0,
+            opts,
+            soln,
+            outputs,
+            xf,
+            f,
+            data_point,
+            final_fn,
+        )
         gc.collect()
         torch.cuda.empty_cache()
 
     return {'results': None, 'final_results': fn_values, 'callbacks': iterim_results}
-
-
-def run_deeplifting_optimization(problem: Dict, algorithms: List) -> pd.DataFrame:
-    """
-    Function that runs optimization with different specified
-    algorithms for our deeplifitng research.
-    """
