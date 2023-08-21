@@ -157,7 +157,7 @@ search_hidden_sizes = [
 ]
 
 # Input sizes
-search_input_sizes = [1024]
+search_input_sizes = [512]
 
 # Hidden activations
 search_hidden_activations = ['sine']
