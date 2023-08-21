@@ -5850,9 +5850,9 @@ def ndstep2(x, version='numpy'):
     """
     x = x.flatten()
     if version == 'numpy':
-        result = np.floor(np.abs(x + 0.5))
+        result = np.sum(np.floor(x + 0.5) ** 2)
     elif version == 'pytorch':
-        result = torch.floor(torch.abs(x + 0.5))
+        result = torch.sum(torch.floor(x + 0.5) ** 2)
     else:
         raise ValueError(
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."

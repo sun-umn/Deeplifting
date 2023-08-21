@@ -144,7 +144,7 @@ hidden_size_2048 = (2048,)
 
 # Hidden size combinations
 search_hidden_sizes = [
-    # Hidden sizes of 128
+    # # Hidden sizes of 128
     # hidden_size_128 * 2,
     # hidden_size_128 * 3,
     # hidden_size_128 * 4,
@@ -156,7 +156,7 @@ search_hidden_sizes = [
     # hidden_size_512 * 5,
     # hidden_size_512 * 10,
     # # Hidden sizes of 1024
-    hidden_size_1024 * 2,
+    # hidden_size_1024 * 2,
     # hidden_size_1024 * 3,
     # hidden_size_1024 * 4,
     # hidden_size_1024 * 5,
@@ -165,7 +165,8 @@ search_hidden_sizes = [
     # hidden_size_2048 * 2,
     # hidden_size_2048 * 3,
     # hidden_size_2048 * 4,
-    # hidden_size_2048 * 5,
+    hidden_size_2048
+    * 5,
 ]
 
 # Input sizes
@@ -575,6 +576,7 @@ def find_best_architecture_task(problem_name, method):
         project="dever120/Deeplifting",
         api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzYmIwMTUyNC05YmZmLTQ1NzctOTEyNS1kZTIxYjU5NjY5YjAifQ==",  # noqa
     )  # your credentials
+    run['sys/tags'].add([problem_name, method])
 
     # Get the problem list
     PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
