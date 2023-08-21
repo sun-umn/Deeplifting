@@ -732,6 +732,7 @@ def deeplifting_high_dimension_fn(
     Combined funtion used for PyGranso
     """
     outputs = model(inputs=None)
+    outputs = outputs.mean(axis=0)
     f = objective(outputs, version='pytorch')
 
     # Inequality constraint
@@ -833,6 +834,7 @@ def run_high_dimensional_deeplifting(
         # Get final x we will also need to map
         # it to the same bounds
         outputs = model(inputs=None)
+        outputs = outputs.mean(axis=0)
         final_fn = objective(outputs, version='pytorch')
         f = final_fn.detach().cpu().numpy()
         xf = outputs.detach().cpu().numpy()
