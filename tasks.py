@@ -146,7 +146,6 @@ search_hidden_sizes = [
     hidden_size_128 * 3,
     hidden_size_128 * 4,
     hidden_size_128 * 5,
-    hidden_size_128 * 10,
     # # Hidden sizes of 256
     # hidden_size_256 * 2,
     # hidden_size_256 * 3,
@@ -157,7 +156,6 @@ search_hidden_sizes = [
     hidden_size_512 * 3,
     hidden_size_512 * 4,
     hidden_size_512 * 5,
-    hidden_size_512 * 10,
     # # Hidden sizes of 768
     # hidden_size_768 * 2,
     # hidden_size_768 * 3,
@@ -173,7 +171,6 @@ search_hidden_sizes = [
     hidden_size_2048 * 3,
     hidden_size_2048 * 4,
     hidden_size_2048 * 5,
-    hidden_size_2048 * 10,
 ]
 
 # Input sizes
@@ -596,7 +593,7 @@ def find_best_architecture_task(problem_name):
     )
     configurations = list(product(*combinations))
     method = 'single-value'
-    trials = 10
+    trials = 1
 
     # List to store performance data
     performance_df_list = []
