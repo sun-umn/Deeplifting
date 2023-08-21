@@ -5800,7 +5800,9 @@ def ndqing(x, version='numpy'):
         i = np.arange(1, len(x) + 1)
         result = np.sum((x**2 - i) ** 2)
     elif version == 'pytorch':
+        device = x.device
         i = torch.arange(1, len(x) + 1)
+        i = i.to(device=device)
         result = torch.sum((x**2 - i) ** 2)
     else:
         raise ValueError(
