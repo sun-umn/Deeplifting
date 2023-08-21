@@ -904,13 +904,19 @@ def run_lbfgs_deeplifting(
         optimizer = optim.LBFGS(
             model.parameters(),
             lr=1.0,
-            history_size=5,
+            history_size=50,
             max_iter=25,
             line_search_fn='strong_wolfe',
         )
 
         # Set up a training loop
         start = time.time()
+
+        # Get starting loss
+        outputs = model(inputs=None)
+        outputs = outputs.mean(axis=0)
+        current_loss = objective(outputs, version='pytorch')
+
         for epoch in range(10000):
 
             def closure():
@@ -919,6 +925,7 @@ def run_lbfgs_deeplifting(
 
                 # The loss is the sum of the compliance
                 outputs = model(inputs=None)
+                outputs = outputs.mean(axis=0)
                 loss = objective(outputs, version='pytorch')
 
                 # Go through the backward pass and create the gradients
@@ -930,7 +937,21 @@ def run_lbfgs_deeplifting(
             optimizer.step(closure)
 
             outputs = model(inputs=None)
-            print(objective(outputs, version='pytorch'))
+            outputs = outputs.mean(axis=0)
+            updated_loss = objective(outputs, version='pytorch')
+
+            # Break loop if tolerance is met
+            flat_grad = optimizer._gather_flat_grad()  # type: ignore
+            opt_cond = flat_grad.abs().max() <= 1e-10
+            if opt_cond:
+                break
+
+            if torch.abs(updated_loss - current_loss) <= 1e-10:
+                break
+            else:
+                current_loss = updated_loss
+
+            print(updated_loss, flat_grad.abs().max())
 
         end = time.time()
         total_time = end - start
@@ -938,10 +959,11 @@ def run_lbfgs_deeplifting(
         # Get final x we will also need to map
         # it to the same bounds
         outputs = model(inputs=None)
+        outputs = outputs.mean(axis=0)
         final_fn = objective(outputs, version='pytorch')
         f = final_fn.detach().cpu().numpy()
         xf = outputs.detach().cpu().numpy()
-        data_point = tuple(xf) + (float(f), 'Deeplifting-LBFGS', total_time)
+        data_point = tuple(xf.flatten()) + (float(f), 'Deeplifting-LBFGS', total_time)
         fn_values.append(data_point)
 
         # Collect garbage and empty cache

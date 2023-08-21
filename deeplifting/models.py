@@ -107,12 +107,18 @@ class DeepliftingBlock(nn.Module):
         # Define the Batch Normalization layer
         self.batch_norm = nn.BatchNorm1d(output_size)
 
+        # Dropout
+        self.dropout = nn.Dropout(p=0.01)
+
     def forward(self, x):
         # Linear layer
         x = self.linear(x)
 
         # # Batch Normalization
         # x = self.batch_norm(x)
+
+        # # Dropout
+        # x = self.dropout(x)
 
         # Activation function
         x = self.activation_layer(x)
@@ -186,7 +192,7 @@ class DeepliftingSkipMLP(nn.Module):
         self.layers = nn.ModuleList()
         self.skip_every_n = skip_every_n
         self.agg_function = agg_function
-        self.first_hidden_Size = 128
+        self.first_hidden_Size = 512
 
         # Input layer
         self.layers.append(
