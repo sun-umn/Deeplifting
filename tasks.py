@@ -588,7 +588,7 @@ def find_best_architecture_task(problem_name, method):
         search_agg_functions,
     )
     configurations = list(product(*combinations))
-    trials = 1
+    trials = 5
 
     # List to store performance data
     performance_df_list = []
