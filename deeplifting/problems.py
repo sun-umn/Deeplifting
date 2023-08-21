@@ -5744,6 +5744,41 @@ def ndgriewank(x, results, trial, version='numpy'):
     return result
 
 
+def ndlayeb3(x, results, trial, version='numpy'):
+    """
+    Implementation of the n-dimensional Griewank function
+
+    Args:
+    x: A d-dimensional array or tensor
+    version: A string, either 'numpy' or 'pytorch'
+
+    Returns:
+    result: Value of the griewank function
+    """
+    x = x.flatten()
+
+    # X-values
+    xi = x[:-1]
+    xj = x[1:]
+
+    if version == 'numpy':
+        component1 = np.sin(xi)
+        component2 = np.exp(-np.abs(100 - (xi**2 + xj**2) ** 0.5 / np.pi))
+        component3 = np.sin(xj) + 1.0
+        result = -np.sum(np.abs(component1 * component2 + component3 + 1) ** -0.1)
+    elif version == 'pytorch':
+        component1 = torch.sin(xi)
+        component2 = torch.exp(-torch.abs(100 - (xi**2 + xj**2) ** 0.5 / torch.pi))
+        component3 = torch.sin(xj) + 1.0
+        result = -torch.sum(torch.abs(component1 * component2 + component3) ** -0.1)
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
+    return result
+
+
 def ndlevy(x, results, trial, version='numpy'):
     """
     Implemention of the n-dimensional levy function
@@ -6168,6 +6203,63 @@ levy_2500d_config = {
     'bounds': [(-10, 10)],  # Will use a single level bound and then expand
     'max_iterations': 1000,
     'global_minimum': 0.0,
+    'dimensions': 2500,
+}
+
+# Layeb 3
+layeb3_3d_config = {
+    'objective': ndlayeb3,
+    'bounds': [(-10, 10)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': -2.0,
+    'dimensions': 3,
+}
+
+layeb3_5d_config = {
+    'objective': ndlayeb3,
+    'bounds': [(-10, 10)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': -4.0,
+    'dimensions': 5,
+}
+
+layeb3_30d_config = {
+    'objective': ndlayeb3,
+    'bounds': [(-10, 10)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': -29.0,
+    'dimensions': 30,
+}
+
+layeb3_100d_config = {
+    'objective': ndlayeb3,
+    'bounds': [(-10, 10)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': -99.0,
+    'dimensions': 100,
+}
+
+layeb3_500d_config = {
+    'objective': ndlayeb3,
+    'bounds': [(-10, 10)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': -499.0,
+    'dimensions': 500,
+}
+
+layeb3_1000d_config = {
+    'objective': ndlayeb3,
+    'bounds': [(-10, 10)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': -999.0,
+    'dimensions': 1000,
+}
+
+layeb3_2500d_config = {
+    'objective': ndlayeb3,
+    'bounds': [(-10, 10)],  # Will use a single level bound and then expand
+    'max_iterations': 1000,
+    'global_minimum': -2499.0,
     'dimensions': 2500,
 }
 
@@ -8036,6 +8128,14 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'griewank_500d': griewank_500d_config,
     'griewank_1000d': griewank_1000d_config,
     'griewank_2500d': griewank_2500d_config,
+    # Layeb 3 Series - Non-origin solution
+    'layeb3_3d': layeb3_3d_config,
+    'layeb3_5d': layeb3_5d_config,
+    'layeb3_30d': layeb3_30d_config,
+    'layeb3_100d': layeb3_100d_config,
+    'layeb3_500d': layeb3_500d_config,
+    'layeb3_1000d': layeb3_1000d_config,
+    'layeb3_2500d': layeb3_2500d_config,
     # Levy Series - Non-origin solution
     'levy_3d': levy_3d_config,
     'levy_5d': levy_5d_config,
