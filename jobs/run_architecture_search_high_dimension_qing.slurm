@@ -9,4 +9,4 @@
 #SBATCH --gres=gpu:1
 cd /home/jusun/dever120/Deeplifting
 export PATH=/home/jusun/dever120/miniconda3/envs/deeplifting/bin:$PATH
-python -m tasks find-best-deeplifting-architecture --problem_name='shubert_2500d'
+python -m tasks find-best-deeplifting-architecture --problem_name='qing_2500d' --method='pygranso'
