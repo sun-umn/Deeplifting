@@ -5604,7 +5604,7 @@ def layeb8(x, results, trial, version='numpy'):
 # going to refactor some of the high dimensional problems chosen here.
 
 
-def ndackley(x, results, trial, version='numpy'):
+def ndackley(x, version='numpy'):
     """
     Compute the Ackley function.
 
@@ -5640,42 +5640,8 @@ def ndackley(x, results, trial, version='numpy'):
     return result
 
 
-def nd_modified_ackley(x, results, trial, version='numpy'):
-    """
-    Compute the Modified Ackley function.
-
-    Args:
-    x: A d-dimensional array or tensor
-    version: A string, either 'numpy' or 'pytorch'
-
-    Returns:
-    result: Value of the Modified Ackley function
-
-    Note: results will be passed with trial but never
-    used for nd function
-    """
-    x = x.flatten()
-
-    x1 = x[:-1]
-    x2 = x[1:]
-
-    if version == 'numpy':
-        component1 = np.sqrt(x1**2 + x2**2)
-        component2 = 3 * (np.cos(2 * x1) + np.sin(2 * x2))
-        result = np.sum(np.exp(-0.2) * component1 + component2)
-
-    elif version == 'pytorch':
-        component1 = torch.sqrt(x1**2 + x2**2)
-        component2 = 3 * (torch.cos(2 * x1) + torch.sin(2 * x2))
-        result = torch.sum(torch.exp(-0.2) * component1 + component2)
-    else:
-        raise ValueError("Invalid implementation: choose 'numpy' or 'pytorch'")
-
-    return result
-
-
 # nd Alpine1
-def ndalpine1(x, results, trial, version='numpy'):
+def ndalpine1(x, version='numpy'):
     """
     Compute the Alpine1 function.
 
@@ -5700,7 +5666,7 @@ def ndalpine1(x, results, trial, version='numpy'):
 
 
 # nd Chung Reynolds
-def nd_chung_reynolds(x, results, trial, version='numpy'):
+def nd_chung_reynolds(x, version='numpy'):
     x = x.flatten()
     if version == 'numpy':
         result = np.sum(x**2) ** 2
@@ -5714,7 +5680,7 @@ def nd_chung_reynolds(x, results, trial, version='numpy'):
     return result
 
 
-def ndgriewank(x, results, trial, version='numpy'):
+def ndgriewank(x, version='numpy'):
     """
     Implementation of the n-dimensional Griewank function
 
@@ -5744,7 +5710,7 @@ def ndgriewank(x, results, trial, version='numpy'):
     return result
 
 
-def ndlayeb3(x, results, trial, version='numpy'):
+def ndlayeb3(x, version='numpy'):
     """
     Implementation of the n-dimensional Griewank function
 
@@ -5779,7 +5745,7 @@ def ndlayeb3(x, results, trial, version='numpy'):
     return result
 
 
-def ndlevy(x, results, trial, version='numpy'):
+def ndlevy(x, version='numpy'):
     """
     Implemention of the n-dimensional levy function
 
@@ -5818,7 +5784,7 @@ def ndlevy(x, results, trial, version='numpy'):
     return result
 
 
-def ndqing(x, results, trial, version='numpy'):
+def ndqing(x, version='numpy'):
     """
     Implemention of the n-dimensional Qing function
 
@@ -5844,7 +5810,7 @@ def ndqing(x, results, trial, version='numpy'):
     return result
 
 
-def ndschwefel(x, results, trial, version='numpy'):
+def ndschwefel(x, version='numpy'):
     """
     Implemention of the n-dimensional levy function
 
@@ -5869,7 +5835,7 @@ def ndschwefel(x, results, trial, version='numpy'):
     return result
 
 
-def ndstep2(x, results, trial, version='numpy'):
+def ndstep2(x, version='numpy'):
     """
     Implemention of the n-dimensional Step 2 function
 

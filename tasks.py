@@ -13,7 +13,9 @@ from deeplifting.optimization import (
     run_deeplifting,
     run_differential_evolution,
     run_dual_annealing,
+    run_high_dimensional_deeplifting,
     run_ipopt,
+    run_lbfgs_deeplifting,
     run_pygranso,
 )
 from deeplifting.problems import HIGH_DIMENSIONAL_PROBLEMS_BY_NAME, PROBLEMS_BY_NAME
@@ -142,35 +144,36 @@ hidden_size_2048 = (2048,)
 
 # Hidden size combinations
 search_hidden_sizes = [
-    # Hidden sizes of 128
-    hidden_size_128 * 3,
-    hidden_size_128 * 4,
-    hidden_size_128 * 5,
-    # # Hidden sizes of 256
-    # hidden_size_256 * 2,
-    # hidden_size_256 * 3,
-    # hidden_size_256 * 4,
-    # hidden_size_256 * 5,
-    # hidden_size_256 * 10,
-    # Hidden sizes of 512
-    hidden_size_512 * 3,
-    hidden_size_512 * 4,
-    hidden_size_512 * 5,
-    # # Hidden sizes of 768
-    # hidden_size_768 * 2,
-    # hidden_size_768 * 3,
-    # hidden_size_768 * 4,
-    # hidden_size_768 * 5,
-    # hidden_size_768 * 10,
-    # Hidden sizes of 1024
-    hidden_size_1024 * 3,
-    hidden_size_1024 * 4,
-    hidden_size_1024 * 5,
-    hidden_size_1024 * 10,
-    # Hidden sizes of 2048
-    hidden_size_2048 * 3,
-    hidden_size_2048 * 4,
-    hidden_size_2048 * 5,
+    # # Hidden sizes of 128
+    # hidden_size_128 * 3,
+    # hidden_size_128 * 4,
+    # hidden_size_128 * 5,
+    # # # Hidden sizes of 256
+    # # hidden_size_256 * 2,
+    # # hidden_size_256 * 3,
+    # # hidden_size_256 * 4,
+    # # hidden_size_256 * 5,
+    # # hidden_size_256 * 10,
+    # # Hidden sizes of 512
+    # hidden_size_512 * 3,
+    # hidden_size_512 * 4,
+    # hidden_size_512 * 5,
+    # # # Hidden sizes of 768
+    # # hidden_size_768 * 2,
+    # # hidden_size_768 * 3,
+    # # hidden_size_768 * 4,
+    # # hidden_size_768 * 5,
+    # # hidden_size_768 * 10,
+    # # Hidden sizes of 1024
+    # hidden_size_1024 * 3,
+    # hidden_size_1024 * 4,
+    # hidden_size_1024 * 5,
+    # hidden_size_1024 * 10,
+    # # Hidden sizes of 2048
+    # hidden_size_2048 * 3,
+    # hidden_size_2048 * 4,
+    hidden_size_2048
+    * 5,
 ]
 
 # Input sizes
@@ -565,7 +568,8 @@ def run_saved_model_task():
 
 @cli.command('find-best-deeplifting-architecture')
 @click.option('--problem_name', default='ackley_2500d')
-def find_best_architecture_task(problem_name):
+@click.option('--method', default='pygranso')
+def find_best_architecture_task(problem_name, method):
     """
     Function that we will use to find the best architecture over multiple
     "hard" high-dimensional problems. We will aim to tackle a large dimensional
@@ -592,7 +596,6 @@ def find_best_architecture_task(problem_name):
         search_agg_functions,
     )
     configurations = list(product(*combinations))
-    method = 'single-value'
     trials = 1
 
     # List to store performance data
@@ -608,17 +611,30 @@ def find_best_architecture_task(problem_name):
         problem = PROBLEMS[problem_name]
 
         # Get the outputs
-        outputs = run_deeplifting(
-            problem,
-            problem_name=problem_name,
-            trials=trials,
-            input_size=input_size,
-            hidden_sizes=hidden_size,
-            activation=hidden_activation,
-            output_activation=output_activation,
-            agg_function=agg_function,
-            method=method,
-        )
+        if method == 'pygranso':
+            outputs = run_high_dimensional_deeplifting(
+                problem,
+                problem_name=problem_name,
+                trials=trials,
+                input_size=input_size,
+                hidden_sizes=hidden_size,
+                activation=hidden_activation,
+                output_activation=output_activation,
+                agg_function=agg_function,
+            )
+        elif method == 'pytorch-lbfgs':
+            outputs = run_lbfgs_deeplifting(
+                problem,
+                problem_name=problem_name,
+                trials=trials,
+                input_size=input_size,
+                hidden_sizes=hidden_size,
+                activation=hidden_activation,
+                output_activation=output_activation,
+                agg_function=agg_function,
+            )
+        else:
+            raise ValueError('Method is not supported!')
 
         # Get the results of the outputs
         output_size = problem['dimensions']
@@ -642,7 +658,7 @@ def find_best_architecture_task(problem_name):
         units = hidden_size[0]
         results.to_parquet(
             f'./search_results/results-2023-08-{layers}-layer-{units}-{agg_function}'
-            f'-{problem_name}-{index}-{method}-{output_activation}-'
+            f'-{problem_name}-{index}-{output_activation}-'
             f'input-size-{input_size}.parquet'  # noqa
         )
 

@@ -9,6 +9,7 @@ from typing import Dict
 import numpy as np
 import pandas as pd
 import torch
+import torch.optim as optim
 from cyipopt import minimize_ipopt
 from pygranso.private.getNvar import getNvarTorch
 from pygranso.pygranso import pygranso
@@ -495,7 +496,7 @@ def deeplifting_predictions(x, objective, method='particle'):
         x = x.detach().cpu().numpy().flatten()
 
     elif method == 'single-value':
-        x = x.mean(axis=0)
+        # x = x.mean(axis=0)
         f = objective(x)
 
         # Detach and return x
@@ -721,3 +722,231 @@ def run_deeplifting(
         torch.cuda.empty_cache()
 
     return {'results': None, 'final_results': fn_values, 'callbacks': iterim_results}
+
+
+def deeplifting_high_dimension_fn(
+    model,
+    objective,
+):
+    """
+    Combined funtion used for PyGranso
+    """
+    outputs = model(inputs=None)
+    f = objective(outputs, version='pytorch')
+
+    # Inequality constraint
+    ci = None
+
+    # Equality constraing
+    ce = None
+
+    return f, ci, ce
+
+
+def run_high_dimensional_deeplifting(
+    problem: Dict,
+    problem_name: str,
+    trials: int,
+    input_size=512,
+    hidden_sizes=(512, 512, 512),
+    activation='sine',
+    output_activation='sine',
+    agg_function='sum',
+):
+    """
+    Function that runs our preimer method of deeplifting.
+    The idea here is to reparmeterize an optimization objective
+    so we can have better optimization and convergence
+    """
+    # Get the device (CPU for now)
+    dimensions = problem['dimensions']
+    device = torch.device('cuda:0')
+    fn_values = []
+
+    for trial in range(trials):
+        # Objective function
+        objective = problem['objective']
+
+        # Get the bounds of the problem
+        if dimensions <= 2:
+            bounds = problem['bounds']
+        else:
+            bounds = problem['bounds']
+
+            if len(bounds) > 1:
+                bounds = bounds
+
+            else:
+                bounds = bounds * dimensions
+
+        # Deeplifting model with skip connections
+        model = DeepliftingSkipMLP(
+            input_size=input_size,
+            hidden_sizes=hidden_sizes,
+            output_size=dimensions,
+            bounds=bounds,
+            skip_every_n=1,
+            activation=activation,
+            output_activation=output_activation,
+            agg_function=agg_function,
+            seed=trial,
+        )
+
+        model = model.to(device=device, dtype=torch.double)
+        nvar = getNvarTorch(model.parameters())
+
+        # Setup a pygransoStruct for the algorithm
+        # options
+        opts = pygransoStruct()
+
+        # Inital x0
+        x0 = (
+            torch.nn.utils.parameters_to_vector(model.parameters())
+            .detach()
+            .reshape(nvar, 1)
+            .to(device=device, dtype=torch.double)
+        )
+
+        opts.x0 = x0
+        opts.torch_device = device
+        opts.print_frequency = 1
+        opts.limited_mem_size = 5
+        opts.stat_l2_model = False
+        opts.double_precision = True
+        # opts.disable_terminationcode_6 = True
+        # opts.halt_on_linesearch_bracket = False
+        opts.opt_tol = 1e-10
+        opts.maxit = 10000
+
+        # # Combined function
+        comb_fn = lambda model: deeplifting_high_dimension_fn(
+            model,
+            objective,
+        )  # noqa
+
+        # Run the main algorithm
+        start_time = time.time()
+        soln = pygranso(var_spec=model, combined_fn=comb_fn, user_opts=opts)
+        end_time = time.time()
+        total_time = end_time - start_time
+
+        # Get final x we will also need to map
+        # it to the same bounds
+        outputs = model(inputs=None)
+        final_fn = objective(outputs, version='pytorch')
+        f = final_fn.detach().cpu().numpy()
+        xf = outputs.detach().cpu().numpy()
+        data_point = tuple(xf) + (float(f), 'Deeplifting', total_time)
+        fn_values.append(data_point)
+
+        # Collect garbage and empty cache
+        del (model, nvar, x0, opts, soln, outputs, xf, f, data_point, final_fn)
+        gc.collect()
+        torch.cuda.empty_cache()
+
+    return {'results': None, 'final_results': fn_values, 'callbacks': []}
+
+
+def run_lbfgs_deeplifting(
+    problem: Dict,
+    problem_name: str,
+    trials: int,
+    input_size=512,
+    hidden_sizes=(512, 512, 512),
+    activation='sine',
+    output_activation='sine',
+    agg_function='sum',
+):
+    """
+    Function that runs our preimer method of deeplifting.
+    The idea here is to reparmeterize an optimization objective
+    so we can have better optimization and convergence. The difference
+    with this version of deeplifting is we will use
+    pytorch's built in LBFGS algorithm
+    """
+    # Get the device (CPU for now)
+    dimensions = problem['dimensions']
+    device = torch.device('cuda:0')
+    fn_values = []  # noqa
+
+    for trial in range(trials):
+        # Objective function
+        objective = problem['objective']
+
+        # Get the bounds of the problem
+        if dimensions <= 2:
+            bounds = problem['bounds']
+        else:
+            bounds = problem['bounds']
+
+            if len(bounds) > 1:
+                bounds = bounds
+
+            else:
+                bounds = bounds * dimensions
+
+        # Deeplifting model with skip connections
+        model = DeepliftingSkipMLP(
+            input_size=input_size,
+            hidden_sizes=hidden_sizes,
+            output_size=dimensions,
+            bounds=bounds,
+            skip_every_n=1,
+            activation=activation,
+            output_activation=output_activation,
+            agg_function=agg_function,
+            seed=trial,
+        )
+
+        model = model.to(device=device, dtype=torch.double)
+
+        # Set up the optimizer for the problem
+        optimizer = optim.LBFGS(
+            model.parameters(),
+            lr=1.0,
+            history_size=5,
+            max_iter=25,
+            line_search_fn='strong_wolfe',
+        )
+
+        # Set up a training loop
+        start = time.time()
+        for epoch in range(10000):
+
+            def closure():
+                # Zero out the gradients
+                optimizer.zero_grad()
+
+                # The loss is the sum of the compliance
+                outputs = model(inputs=None)
+                loss = objective(outputs, version='pytorch')
+
+                # Go through the backward pass and create the gradients
+                loss.backward()
+
+                return loss
+
+            # Step through the optimzer to update the data with the gradients
+            optimizer.step(closure)
+
+            outputs = model(inputs=None)
+            print(objective(outputs, version='pytorch'))
+
+        end = time.time()
+        total_time = end - start
+
+        # Get final x we will also need to map
+        # it to the same bounds
+        outputs = model(inputs=None)
+        final_fn = objective(outputs, version='pytorch')
+        f = final_fn.detach().cpu().numpy()
+        xf = outputs.detach().cpu().numpy()
+        data_point = tuple(xf) + (float(f), 'Deeplifting-LBFGS', total_time)
+        fn_values.append(data_point)
+
+        # Collect garbage and empty cache
+        del (outputs, xf, f, data_point, final_fn)
+        gc.collect()
+        torch.cuda.empty_cache()
+
+    return {'results': None, 'final_results': fn_values, 'callbacks': []}
