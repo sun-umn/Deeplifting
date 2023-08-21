@@ -159,8 +159,7 @@ search_hidden_sizes = [
     # hidden_size_1024 * 2,
     # hidden_size_1024 * 3,
     # hidden_size_1024 * 4,
-    # hidden_size_1024 * 5,
-    hidden_size_1024 * 10,
+    hidden_size_1024 * 5,
     # # Hidden sizes of 2048
     # hidden_size_2048 * 2,
     # hidden_size_2048 * 3,
