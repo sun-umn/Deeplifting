@@ -5698,7 +5698,9 @@ def ndgriewank(x, version='numpy'):
         sqrt_i = np.sqrt(np.arange(1, d + 1)).flatten()
         result = np.sum(np.square(x) / 4000) - np.prod(np.cos(x / sqrt_i)) + 1
     elif version == 'pytorch':
+        device = x.device
         sqrt_i = torch.sqrt(torch.arange(1, d + 1)).flatten()
+        sqrt_i = sqrt_i.to(device=device)
         result = (
             torch.sum(torch.square(x) / 4000) - torch.prod(torch.cos(x / sqrt_i)) + 1
         )
