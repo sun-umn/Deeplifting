@@ -14,6 +14,7 @@ from cyipopt import minimize_ipopt
 from pygranso.private.getNvar import getNvarTorch
 from pygranso.pygranso import pygranso
 from pygranso.pygransoStruct import pygransoStruct
+from pyomo.environ import ConcreteModel, Objective, SolverFactory, Var, minimize
 from scipy.optimize import differential_evolution, dual_annealing
 
 # first party
@@ -974,3 +975,88 @@ def run_lbfgs_deeplifting(
         torch.cuda.empty_cache()
 
     return {'results': None, 'final_results': fn_values, 'callbacks': []}
+
+
+def run_pyomo(problem, trials, method):
+    """
+    Function to run the pyomo module. We will use this function
+    to execute optimizations methods BARON and SCIP. Pyomo can
+    also handle IPOPT.
+    """
+    # Check methods
+    if method not in ('baron', 'scip'):
+        raise ValueError(f'Method {method} is not supported!')
+
+    # Objective function
+    objective = problem['objective']
+
+    # Get the maximum iterations
+    max_iterations = problem['max_iterations']
+
+    # Get dimensions of the problem
+    dimensions = problem['dimensions']
+
+    # Get the bounds of the problem
+    if dimensions <= 2:
+        bounds = problem['bounds']
+    else:
+        bounds = problem['bounds']
+
+        if len(bounds) > 1:
+            bounds = bounds
+
+        else:
+            bounds = bounds * dimensions
+
+    # Save the results
+    # We will store the optimization steps here
+    results = np.zeros((trials, max_iterations, dimensions + 1)) * np.nan
+    fn_values = []
+
+    for trial in range(trials):
+        # Set the random seed
+        set_seed(trial)
+
+        # Initial guess (starting point for PYOMO methods)
+        # TODO: Need to provide a better starting point here
+        x0 = initialize_vector(size=dimensions, bounds=bounds)
+
+        # Get the objective
+        fn = lambda x: objective(  # noqa
+            x, results=results, trial=trial, version='numpy'
+        )  # noqa
+
+        start_time = time.time()
+
+        # Create the Pyomo model
+        model = ConcreteModel()
+
+        # Define the variables with initialization
+        init_dict = {i: x0[i] for i in range(dimensions)}
+        model.x = Var(range(dimensions), initialize=init_dict)
+
+        # Need to set the bounds here
+        for index, bound in enumerate(bounds):
+            a, b = bound
+            model.x[index].setlb(a)
+            model.x[index].setub(b)
+
+        # Create an objective rule
+        def objective_rule(model):
+            x = np.array([model.x[i] for i in range(dimensions)])
+            return fn(x)
+
+        # Set up model objective and we want to minimize expressions
+        model.obj = Objective(rule=objective_rule, sense=minimize)
+
+        # Solve the model
+        solver = SolverFactory(method)
+        solver.solve(model)
+
+        end_time = time.time()
+        total_time = end_time - start_time
+
+        x_tuple = tuple(model.x.get_values().values())
+        fn_values.append(x_tuple + (model.obj(), method.upper(), total_time))
+
+    return {'results': results, 'final_results': fn_values}
