@@ -14,29 +14,35 @@ Here's a step-by-step guide on how to set it up on Mac and Linux.
 
 ### Mac:
 
-1. First, install Homebrew if you haven't installed it yet. Open Terminal and paste the following command:
+- First, install Homebrew if you haven't installed it yet. Open Terminal and paste the following command:
 
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-2. Install IPOPT via Homebrew:
+- Install IPOPT via Homebrew:
 
 ```bash
 brew install ipopt
+```
+
+- (August 31st, 2023), we added the SCIP algorithm. For mac users to install SCIP
+
+```bash
+brew install scip
 ```
 
 **Note 📝: It's crucial to mention that to successfully install IPOPT on a Mac, I needed to update my operating system to the latest version. As of the time this was written, that version is Ventura 13.4.**
 
 ### Linux:
 
-1. First, update your package list:
+- First, update your package list:
 
 ```bash
 sudo apt-get update
 ```
 
-2. Install the necessary tools and libraries:
+- Install the necessary tools and libraries:
 
 ```bash
 sudo apt-get install gcc g++ gfortran git patch wget pkg-config liblapack-dev libmetis-dev libmumps-seq-dev libblas-dev coinor-libipopt-dev
