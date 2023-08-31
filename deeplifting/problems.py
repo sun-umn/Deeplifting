@@ -5698,7 +5698,9 @@ def ndgriewank(x, version='numpy'):
         sqrt_i = np.sqrt(np.arange(1, d + 1)).flatten()
         result = np.sum(np.square(x) / 4000) - np.prod(np.cos(x / sqrt_i)) + 1
     elif version == 'pytorch':
+        device = x.device
         sqrt_i = torch.sqrt(torch.arange(1, d + 1)).flatten()
+        sqrt_i = sqrt_i.to(device=device)
         result = (
             torch.sum(torch.square(x) / 4000) - torch.prod(torch.cos(x / sqrt_i)) + 1
         )
@@ -5710,7 +5712,7 @@ def ndgriewank(x, version='numpy'):
     return result
 
 
-def ndlayeb3(x, version='numpy'):
+def ndlayeb4(x, version='numpy'):
     """
     Implementation of the n-dimensional Griewank function
 
@@ -5728,15 +5730,13 @@ def ndlayeb3(x, version='numpy'):
     xj = x[1:]
 
     if version == 'numpy':
-        component1 = np.sin(xi)
-        component2 = np.exp(-np.abs(100 - (xi**2 + xj**2) ** 0.5 / np.pi))
-        component3 = np.sin(xj) + 1.0
-        result = -np.sum(np.abs(component1 * component2 + component3 + 1) ** -0.1)
+        component1 = np.log(np.abs(xi * xj) + 1e-3)
+        component2 = np.cos(xi + xj)
+        result = np.sum(component1 + component2)
     elif version == 'pytorch':
-        component1 = torch.sin(xi)
-        component2 = torch.exp(-torch.abs(100 - (xi**2 + xj**2) ** 0.5 / torch.pi))
-        component3 = torch.sin(xj) + 1.0
-        result = -torch.sum(torch.abs(component1 * component2 + component3) ** -0.1)
+        component1 = torch.log(torch.abs(xi * xj) + 1e-3)
+        component2 = torch.cos(xi + xj)
+        result = torch.sum(component1 + component2)
     else:
         raise ValueError(
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
@@ -6175,59 +6175,59 @@ levy_2500d_config = {
 }
 
 # Layeb 3
-layeb3_3d_config = {
-    'objective': ndlayeb3,
+layeb4_3d_config = {
+    'objective': ndlayeb4,
     'bounds': [(-10, 10)],  # Will use a single level bound and then expand
     'max_iterations': 1000,
-    'global_minimum': -2.0,
+    'global_minimum': 2 * (np.log(1e-3) + 1),
     'dimensions': 3,
 }
 
-layeb3_5d_config = {
-    'objective': ndlayeb3,
+layeb4_5d_config = {
+    'objective': ndlayeb4,
     'bounds': [(-10, 10)],  # Will use a single level bound and then expand
     'max_iterations': 1000,
-    'global_minimum': -4.0,
+    'global_minimum': 4 * (np.log(1e-3) + 1),
     'dimensions': 5,
 }
 
-layeb3_30d_config = {
-    'objective': ndlayeb3,
+layeb4_30d_config = {
+    'objective': ndlayeb4,
     'bounds': [(-10, 10)],  # Will use a single level bound and then expand
     'max_iterations': 1000,
-    'global_minimum': -29.0,
+    'global_minimum': 29 * (np.log(1e-3) + 1),
     'dimensions': 30,
 }
 
-layeb3_100d_config = {
-    'objective': ndlayeb3,
+layeb4_100d_config = {
+    'objective': ndlayeb4,
     'bounds': [(-10, 10)],  # Will use a single level bound and then expand
     'max_iterations': 1000,
-    'global_minimum': -99.0,
+    'global_minimum': 99 * (np.log(1e-3) + 1),
     'dimensions': 100,
 }
 
-layeb3_500d_config = {
-    'objective': ndlayeb3,
+layeb4_500d_config = {
+    'objective': ndlayeb4,
     'bounds': [(-10, 10)],  # Will use a single level bound and then expand
     'max_iterations': 1000,
-    'global_minimum': -499.0,
+    'global_minimum': 499 * (np.log(1e-3) + 1),
     'dimensions': 500,
 }
 
-layeb3_1000d_config = {
-    'objective': ndlayeb3,
+layeb4_1000d_config = {
+    'objective': ndlayeb4,
     'bounds': [(-10, 10)],  # Will use a single level bound and then expand
     'max_iterations': 1000,
-    'global_minimum': -999.0,
+    'global_minimum': 999 * (np.log(1e-3) + 1),
     'dimensions': 1000,
 }
 
-layeb3_2500d_config = {
-    'objective': ndlayeb3,
+layeb4_2500d_config = {
+    'objective': ndlayeb4,
     'bounds': [(-10, 10)],  # Will use a single level bound and then expand
     'max_iterations': 1000,
-    'global_minimum': -2499.0,
+    'global_minimum': 2499 * (np.log(1e-3) + 1),
     'dimensions': 2500,
 }
 
@@ -8097,13 +8097,13 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'griewank_1000d': griewank_1000d_config,
     'griewank_2500d': griewank_2500d_config,
     # Layeb 3 Series - Non-origin solution
-    'layeb3_3d': layeb3_3d_config,
-    'layeb3_5d': layeb3_5d_config,
-    'layeb3_30d': layeb3_30d_config,
-    'layeb3_100d': layeb3_100d_config,
-    'layeb3_500d': layeb3_500d_config,
-    'layeb3_1000d': layeb3_1000d_config,
-    'layeb3_2500d': layeb3_2500d_config,
+    'layeb4_3d': layeb4_3d_config,
+    'layeb4_5d': layeb4_5d_config,
+    'layeb4_30d': layeb4_30d_config,
+    'layeb4_100d': layeb4_100d_config,
+    'layeb4_500d': layeb4_500d_config,
+    'layeb4_1000d': layeb4_1000d_config,
+    'layeb4_2500d': layeb4_2500d_config,
     # Levy Series - Non-origin solution
     'levy_3d': levy_3d_config,
     'levy_5d': levy_5d_config,

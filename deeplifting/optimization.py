@@ -618,8 +618,8 @@ def run_deeplifting(
         opts.limited_mem_size = 5
         opts.stat_l2_model = False
         opts.double_precision = True
-        # opts.disable_terminationcode_6 = True
-        # opts.halt_on_linesearch_bracket = False
+        opts.disable_terminationcode_6 = True
+        opts.halt_on_linesearch_bracket = False
         opts.opt_tol = 1e-10
         opts.maxit = 10000
 
@@ -816,7 +816,7 @@ def run_high_dimensional_deeplifting(
         opts.double_precision = True
         # opts.disable_terminationcode_6 = True
         # opts.halt_on_linesearch_bracket = False
-        opts.opt_tol = 1e-7
+        opts.opt_tol = 1e-10
         opts.maxit = 10000
 
         # # Combined function
