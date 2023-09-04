@@ -1023,7 +1023,7 @@ def run_pyomo(problem, trials, method):
 
         # Get the objective
         fn = lambda x: objective(  # noqa
-            x, results=results, trial=trial, version='numpy'
+            x, results=results, trial=trial, version='pyomo'
         )  # noqa
 
         start_time = time.time()

@@ -1,5 +1,6 @@
 # third party
 import numpy as np
+import pyomo.environ as pyo
 import torch
 from scipy.special import factorial, gamma
 
@@ -651,44 +652,6 @@ def rastrigin(x, results, trial, version='numpy'):
 
     else:
         results[trial, iteration, :] = np.array((x1, x2, result))
-
-    return result
-
-
-def ndrastrigin(x, results, trial, version='numpy'):
-    """
-    Implemention of the n-dimensional levy function
-
-    Args:
-    x: A d-dimensional array or tensor
-    version: A string, either 'numpy' or 'pytorch'
-
-    Returns:
-    result: Value of the Rastrigin function
-    """
-    x = x.flatten()
-    d = len(x)
-    if version == 'numpy':
-        result = 10 * d + np.sum(np.square(x) - 10 * np.cos(2 * np.pi * x))
-    elif version == 'pytorch':
-        result = 10 * d + torch.sum(torch.square(x) - 10 * torch.cos(2 * np.pi * x))
-    else:
-        raise ValueError(
-            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
-        )
-
-    # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        x_tuple = tuple(x.detach().cpu().numpy())
-        results[trial, iteration, :] = np.array(
-            x_tuple + (result.detach().cpu().numpy(),)
-        )
-
-    else:
-        x_tuple = tuple(x.flatten())
-        results[trial, iteration, :] = np.array(x_tuple + (result,))
 
     return result
 
@@ -5604,7 +5567,7 @@ def layeb8(x, results, trial, version='numpy'):
 # going to refactor some of the high dimensional problems chosen here.
 
 
-def ndackley(x, version='numpy'):
+def ndackley(x, results=None, trial=None, version='numpy'):
     """
     Compute the Ackley function.
 
@@ -5626,10 +5589,14 @@ def ndackley(x, version='numpy'):
     x = x.flatten()
 
     if version == 'numpy':
-        arg1 = -b * np.sqrt(1.0 / d * np.sum(np.square(x)))
+        arg1 = -b * (1.0 / d * np.sum(np.square(x))) ** 0.5
         arg2 = 1.0 / d * np.sum(np.cos(c * x))
         result = -a * np.exp(arg1) - np.exp(arg2) + a + np.e
-
+    elif version == 'pyomo':
+        arg1 = -b * (1.0 / d * np.sum(x**2)) ** 0.5
+        values = [c * pyo.cos(value) for value in x]
+        arg2 = 1.0 / d * np.sum(values)
+        result = -a * pyo.exp(arg1) - pyo.exp(arg2) + a + np.e
     elif version == 'pytorch':
         arg1 = -b * torch.sqrt(1.0 / d * torch.sum(x**2))
         arg2 = 1.0 / d * torch.sum(torch.cos(c * x))
@@ -5641,7 +5608,7 @@ def ndackley(x, version='numpy'):
 
 
 # nd Alpine1
-def ndalpine1(x, version='numpy'):
+def ndalpine1(x, results=None, trial=None, version='numpy'):
     """
     Compute the Alpine1 function.
 
@@ -5655,6 +5622,9 @@ def ndalpine1(x, version='numpy'):
     x = x.flatten()
     if version == 'numpy':
         result = np.sum(np.abs(x * np.sin(x) + 0.1 * x))
+    elif version == 'pyomo':
+        values = np.array([pyo.sin(value) * x[index] for index, value in enumerate(x)])
+        result = np.sum(np.abs(values) + 0.1 * x)
     elif version == 'pytorch':
         result = torch.sum(torch.abs(x * torch.sin(x) + 0.1 * x))
     else:
@@ -5666,9 +5636,11 @@ def ndalpine1(x, version='numpy'):
 
 
 # nd Chung Reynolds
-def nd_chung_reynolds(x, version='numpy'):
+def nd_chung_reynolds(x, results=None, trial=None, version='numpy'):
     x = x.flatten()
     if version == 'numpy':
+        result = np.sum(x**2) ** 2
+    elif version == 'pyomo':
         result = np.sum(x**2) ** 2
     elif version == 'pytorch':
         result = torch.sum(x**2) ** 2
@@ -5680,7 +5652,7 @@ def nd_chung_reynolds(x, version='numpy'):
     return result
 
 
-def ndgriewank(x, version='numpy'):
+def ndgriewank(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the n-dimensional Griewank function
 
@@ -5697,6 +5669,10 @@ def ndgriewank(x, version='numpy'):
     if version == 'numpy':
         sqrt_i = np.sqrt(np.arange(1, d + 1)).flatten()
         result = np.sum(np.square(x) / 4000) - np.prod(np.cos(x / sqrt_i)) + 1
+    elif version == 'pyomo':
+        sum_term = np.sum(value**2 for value in x) / 4000.0
+        prod_term = pyo.prod(pyo.cos(x[i] / (i + 1) ** 0.5) for i in range(len(x)))
+        result = 1 + sum_term - prod_term
     elif version == 'pytorch':
         device = x.device
         sqrt_i = torch.sqrt(torch.arange(1, d + 1)).flatten()
@@ -5712,7 +5688,7 @@ def ndgriewank(x, version='numpy'):
     return result
 
 
-def ndlayeb4(x, version='numpy'):
+def ndlayeb4(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the n-dimensional Griewank function
 
@@ -5733,6 +5709,12 @@ def ndlayeb4(x, version='numpy'):
         component1 = np.log(np.abs(xi * xj) + 1e-3)
         component2 = np.cos(xi + xj)
         result = np.sum(component1 + component2)
+    elif version == 'pyomo':
+        component1 = np.array(
+            [pyo.log(np.abs(xi[i] * xj[i])) + 1e-3 for i in range(len(x) - 1)]
+        )
+        component2 = np.array([pyo.cos(xi[i] + xj[i]) for i in range(len(x) - 1)])
+        result = np.sum(component1 + component2)
     elif version == 'pytorch':
         component1 = torch.log(torch.abs(xi * xj) + 1e-3)
         component2 = torch.cos(xi + xj)
@@ -5745,7 +5727,7 @@ def ndlayeb4(x, version='numpy'):
     return result
 
 
-def ndlevy(x, version='numpy'):
+def ndlevy(x, results=None, trial=None, version='numpy'):
     """
     Implemention of the n-dimensional levy function
 
@@ -5784,7 +5766,7 @@ def ndlevy(x, version='numpy'):
     return result
 
 
-def ndqing(x, version='numpy'):
+def ndqing(x, results=None, trial=None, version='numpy'):
     """
     Implemention of the n-dimensional Qing function
 
@@ -5799,6 +5781,8 @@ def ndqing(x, version='numpy'):
     if version == 'numpy':
         i = np.arange(1, len(x) + 1)
         result = np.sum((x**2 - i) ** 2)
+    elif version == 'pyomo':
+        result = np.sum((value**2 - i) ** 2 for i, value in enumerate(x))
     elif version == 'pytorch':
         device = x.device
         i = torch.arange(1, len(x) + 1)
@@ -5812,7 +5796,7 @@ def ndqing(x, version='numpy'):
     return result
 
 
-def ndschwefel(x, version='numpy'):
+def ndrastrigin(x, results, trial, version='numpy'):
     """
     Implemention of the n-dimensional levy function
 
@@ -5826,9 +5810,12 @@ def ndschwefel(x, version='numpy'):
     x = x.flatten()
     d = len(x)
     if version == 'numpy':
-        result = 418.9829 * d - np.sum(x * np.sin(np.sqrt(np.abs(x))))
+        result = 10 * d + np.sum(np.square(x) - 10 * np.cos(2 * np.pi * x))
+    elif version == 'pyomo':
+        values = [value**2 - 10 * pyo.cos(2.0 * np.pi * value) for value in x]
+        result = 10 * d + np.sum(values)
     elif version == 'pytorch':
-        result = 418.9829 * d - torch.sum(x * torch.sin(torch.sqrt(torch.abs(x))))
+        result = 10 * d + torch.sum(torch.square(x) - 10 * torch.cos(2 * np.pi * x))
     else:
         raise ValueError(
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
@@ -5837,22 +5824,26 @@ def ndschwefel(x, version='numpy'):
     return result
 
 
-def ndstep2(x, version='numpy'):
+def ndschwefel(x, results=None, trial=None, version='numpy'):
     """
-    Implemention of the n-dimensional Step 2 function
+    Implemention of the n-dimensional levy function
 
     Args:
     x: A d-dimensional array or tensor
     version: A string, either 'numpy' or 'pytorch'
 
     Returns:
-    result: Value of the Step 2 function
+    result: Value of the Schwefel function
     """
     x = x.flatten()
+    d = len(x)
     if version == 'numpy':
-        result = np.sum(np.floor(x + 0.5) ** 2)
+        result = 418.9829 * d - np.sum(x * np.sin(np.sqrt(np.abs(x))))
+    elif version == 'pyomo':
+        values = [value * pyo.sin(pyo.sqrt(np.abs(value))) for value in x]
+        result = 418.9829 * d - np.sum(values)
     elif version == 'pytorch':
-        result = torch.sum(torch.floor(x + 0.5) ** 2)
+        result = 418.9829 * d - torch.sum(x * torch.sin(torch.sqrt(torch.abs(x))))
     else:
         raise ValueError(
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
@@ -6402,63 +6393,6 @@ qing_2500d_config = {
     'dimensions': 2500,
 }
 
-# ND Step 2
-step2_3d_config = {
-    'objective': ndstep2,
-    'bounds': [(-100, 100)],  # Will use a single level bound and then expand
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 3,
-}
-
-step2_5d_config = {
-    'objective': ndstep2,
-    'bounds': [(-100, 100)],  # Will use a single level bound and then expand
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 5,
-}
-
-step2_30d_config = {
-    'objective': ndstep2,
-    'bounds': [(-100, 100)],  # Will use a single level bound and then expand
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 30,
-}
-
-step2_100d_config = {
-    'objective': ndstep2,
-    'bounds': [(-100, 100)],  # Will use a single level bound and then expand
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 100,
-}
-
-step2_500d_config = {
-    'objective': ndstep2,
-    'bounds': [(-100, 100)],  # Will use a single level bound and then expand
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 500,
-}
-
-step2_1000d_config = {
-    'objective': ndstep2,
-    'bounds': [(-100, 100)],  # Will use a single level bound and then expand
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 1000,
-}
-
-step2_2500d_config = {
-    'objective': ndstep2,
-    'bounds': [(-100, 100)],  # Will use a single level bound and then expand
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 2500,
-}
-
 # ex8_6_2 from MINLP
 ex8_6_2_config = {
     'objective': ex8_6_2,
@@ -6749,20 +6683,28 @@ alpine1_config = {
     'dimensions': 2,
 }
 
-alpine1_10d_config = {
+alpine1_3d_config = {
     'objective': ndalpine1,
     'bounds': [(-10, 10)],
     'max_iterations': 1000,
     'global_minimum': 0,
-    'dimensions': 10,
+    'dimensions': 3,
 }
 
-alpine1_50d_config = {
+alpine1_5d_config = {
     'objective': ndalpine1,
     'bounds': [(-10, 10)],
     'max_iterations': 1000,
     'global_minimum': 0,
-    'dimensions': 50,
+    'dimensions': 5,
+}
+
+alpine1_30d_config = {
+    'objective': ndalpine1,
+    'bounds': [(-10, 10)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 30,
 }
 
 alpine1_100d_config = {
@@ -7053,20 +6995,28 @@ chung_reynolds_config = {
     'dimensions': 2,
 }
 
-chung_reynolds_10d_config = {
+chung_reynolds_3d_config = {
     'objective': nd_chung_reynolds,
     'bounds': [(-100, 100)],
     'max_iterations': 1000,
     'global_minimum': 0,
-    'dimensions': 10,
+    'dimensions': 3,
 }
 
-chung_reynolds_50d_config = {
+chung_reynolds_5d_config = {
     'objective': nd_chung_reynolds,
     'bounds': [(-100, 100)],
     'max_iterations': 1000,
     'global_minimum': 0,
-    'dimensions': 50,
+    'dimensions': 5,
+}
+
+chung_reynolds_30d_config = {
+    'objective': nd_chung_reynolds,
+    'bounds': [(-100, 100)],
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 30,
 }
 
 chung_reynolds_100d_config = {
@@ -8075,15 +8025,18 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'ackley_1000d': ackley_1000d_config,
     'ackley_2500d': ackley_2500d_config,
     # Alpine1 Series - Origin Solution
-    'alpine1_10d': alpine1_10d_config,
+    'alpine1_3d': alpine1_3d_config,
+    'alpine1_5d': alpine1_5d_config,
+    'alpine1_30d': alpine1_30d_config,
     'alpine1_100d': alpine1_100d_config,
     'alpine1_500d': alpine1_500d_config,
     'alpine1_1000d': alpine1_1000d_config,
     'alpine1_2500d': alpine1_2500d_config,
     # Chung-Reynolds Series - Origin Solution
     'chung_reynolds': chung_reynolds_config,
-    'chung_reyonlds_10d': chung_reynolds_10d_config,
-    'chung_reynolds_50d': chung_reynolds_50d_config,
+    'chung_reyonlds_3d': chung_reynolds_3d_config,
+    'chung_reynolds_5d': chung_reynolds_5d_config,
+    'chung_reynolds_30d': chung_reynolds_30d_config,
     'chung_reynolds_100d': chung_reynolds_100d_config,
     'chung_reynolds_500d': chung_reynolds_500d_config,
     'chung_reynolds_1000d': chung_reynolds_1000d_config,
@@ -8096,7 +8049,7 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'griewank_500d': griewank_500d_config,
     'griewank_1000d': griewank_1000d_config,
     'griewank_2500d': griewank_2500d_config,
-    # Layeb 3 Series - Non-origin solution
+    # Layeb 4 Series - Non-origin solution
     'layeb4_3d': layeb4_3d_config,
     'layeb4_5d': layeb4_5d_config,
     'layeb4_30d': layeb4_30d_config,
@@ -8120,6 +8073,14 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'qing_500d': qing_500d_config,
     'qing_1000d': qing_1000d_config,
     'qing_2500d': qing_2500d_config,
+    # Rastrigin series - Origin Solution
+    'rastrigin_3d': rastrigin_3d_config,
+    'rastrigin_5d': rastrigin_5d_config,
+    'rastrigin_30d': rastrigin_30d_config,
+    'rastrigin_100d': rastrigin_100d_config,
+    'rastrigin_500d': rastrigin_500d_config,
+    'rastrigin_1000d': rastrigin_1000d_config,
+    'rastrigin_2500d': rastrigin_2500d_config,
     # Schewefel series - Non-origin solution
     'schwefel_3d': schwefel_3d_config,
     'schwefel_5d': schwefel_5d_config,
@@ -8128,12 +8089,4 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'schwefel_500d': schwefel_500d_config,
     'schwefel_1000d': schwefel_1000d_config,
     'schwefel_2500d': schwefel_2500d_config,
-    # Step 2 Series - Non-origin solution
-    'step2_3d': step2_3d_config,
-    'step2_5d': step2_5d_config,
-    'step2_30d': step2_30d_config,
-    'step2_100d': step2_100d_config,
-    'step2_500d': step2_500d_config,
-    'step2_1000d': step2_1000d_config,
-    'step2_2500d': step2_2500d_config,
 }
