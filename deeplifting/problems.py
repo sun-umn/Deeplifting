@@ -5594,7 +5594,7 @@ def ndackley(x, results=None, trial=None, version='numpy'):
         result = -a * np.exp(arg1) - np.exp(arg2) + a + np.e
     elif version == 'pyomo':
         arg1 = -b * (1.0 / d * np.sum(x**2)) ** 0.5
-        values = [c * pyo.cos(value) for value in x]
+        values = [pyo.cos(c * value) for value in x]
         arg2 = 1.0 / d * np.sum(values)
         result = -a * pyo.exp(arg1) - pyo.exp(arg2) + a + np.e
     elif version == 'pytorch':
