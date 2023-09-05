@@ -5624,7 +5624,7 @@ def ndalpine1(x, results=None, trial=None, version='numpy'):
         result = np.sum(np.abs(x * np.sin(x) + 0.1 * x))
     elif version == 'pyomo':
         values = np.array([pyo.sin(value) * x[index] for index, value in enumerate(x)])
-        result = np.sum(np.abs(values) + 0.1 * x)
+        result = np.sum(np.abs(values + 0.1 * x))
     elif version == 'pytorch':
         result = torch.sum(torch.abs(x * torch.sin(x) + 0.1 * x))
     else:
