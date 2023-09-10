@@ -702,14 +702,14 @@ def find_best_architecture_task(problem_name, method, dimensionality):
         units = hidden_size[0]
 
         experiment_date = datetime.today().strftime('%Y-%m-%d-%H-%m')
-        path = f'./search_results/{experiment_date}'
+        path = f'./search_results/{experiment_date}-{problem_name}'
         if not os.path.exists(path):
             os.makedirs(path)
 
         results.to_parquet(
             f'{path}/{dimensionality}-{layers}'
             f'-layer-{units}-{agg_function}'
-            f'-{problem_name}-{index}-{method}-{output_activation}-'
+            f'-{index}-{method}-{output_activation}-'
             f'input-size-{input_size}.parquet'  # noqa
         )
 
