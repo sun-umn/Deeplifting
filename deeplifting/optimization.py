@@ -497,7 +497,7 @@ def deeplifting_predictions(x, objective, method='particle'):
         x = x.detach().cpu().numpy().flatten()
 
     elif method == 'single-value':
-        # x = x.mean(axis=0)
+        x = x.mean(axis=0)
         f = objective(x)
 
         # Detach and return x
@@ -564,7 +564,7 @@ def run_deeplifting(
     """
     # Get the device (CPU for now)
     dimensions = problem['dimensions']
-    device = torch.device('cuda:0')
+    device = torch.device('cpu')
     fn_values = []
     iterim_results = []
 
@@ -762,7 +762,7 @@ def run_high_dimensional_deeplifting(
     """
     # Get the device (CPU for now)
     dimensions = problem['dimensions']
-    device = torch.device('cuda:0')
+    device = torch.device('cpu')
     fn_values = []
 
     for trial in range(trials):

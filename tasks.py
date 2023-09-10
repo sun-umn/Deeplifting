@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # stdlib
+from datetime import datetime
 from itertools import product
 
 # third party
@@ -25,18 +26,18 @@ from deeplifting.utils import create_contour_plot
 # Identify problems to run
 low_dimensional_problem_names = [
     # 'ackley',  # Low
-    # 'bukin_n6',  # High, 2 layer is best so far, takes a while to run
+    'bukin_n6',  # High, 2 layer is best so far, takes a while to run
     # 'cross_in_tray',  # Low, runs quickly
     # 'drop_wave',  # Low, runs quickly
     # 'eggholder',  # Medium, takes time to run
-    # 'griewank',  # Low, (1.0 with 3-layer, 0.95 2-layer)
+    'griewank',  # Low, (1.0 with 3-layer, 0.95 2-layer)
     # 'holder_table',  # Medium
     # 'levy',  # Low, 3-layer
     # 'levy_n13',  # Low, 3-layer
     # 'rastrigin',  # Low, 3-layer
     # 'schaffer_n2',  # Low, 3-layer
     # 'schaffer_n4',  # Low, 3-layer
-    # 'schwefel',  # Takes a while to run, DA is better at 100% but we are at 85%
+    'schwefel',  # Takes a while to run, DA is better at 100% but we are at 85%
     # 'shubert',  # Takes a while to run,
     # 'ex8_1_1',
     # 'kriging_peaks_red010',
@@ -72,16 +73,15 @@ low_dimensional_problem_names = [
     # 'chen_v',  # Having issues
     # 'chichinadze',  # Having issues
     # 'chung_reynolds',
-    # 'cube',  # Correct but paper has wrong x*
-    # 'damavandi',
+    # 'cube',  # Correct but paper has wrong x
     # 'xinsheyang_n2',
     # 'xinsheyang_n3',
     # 'layeb12',
-    'layeb3',
+    # 'layeb3',
     # 'layeb4',
-    'layeb6',
-    'layeb7',
-    'layeb8',
+    # 'layeb6',
+    # 'layeb7',
+    # 'layeb8',
 ]
 
 high_dimensional_problem_names = [
@@ -166,24 +166,32 @@ search_hidden_sizes = [
     hidden_size_128 * 3,
     hidden_size_128 * 4,
     hidden_size_128 * 5,
+    # Hidden sizes of 256
+    hidden_size_256 * 2,
+    hidden_size_256 * 3,
+    hidden_size_256 * 4,
+    hidden_size_256 * 5,
     # Hidden sizes of 512
     hidden_size_512 * 2,
     hidden_size_512 * 3,
     hidden_size_512 * 4,
     hidden_size_512 * 5,
+    # Try an Autoencode Architecture
+    (256, 128, 256),
+    (512, 128, 128),
 ]
 
 # Input sizes
-search_input_sizes = [512]
+search_input_sizes = [128, 512]
 
 # Hidden activations
-search_hidden_activations = ['sine']
+search_hidden_activations = ['sine', 'relu', 'leaky_relu']
 
 # Ouput activations
-search_output_activations = ['leaky_relu']
+search_output_activations = ['leaky_relu', 'sine']
 
 # Aggregate functions - for skip connections
-search_agg_functions = ['sum']
+search_agg_functions = ['sum', 'max']
 
 
 @click.group()
@@ -585,7 +593,8 @@ def run_saved_model_task():
 @cli.command('find-best-deeplifting-architecture')
 @click.option('--problem_name', default='ackley_2500d')
 @click.option('--method', default='pygranso')
-def find_best_architecture_task(problem_name, method):
+@click.option('--dimensionality', default='high-dimensional')
+def find_best_architecture_task(problem_name, method, dimensionality):
     """
     Function that we will use to find the best architecture over multiple
     "hard" high-dimensional problems. We will aim to tackle a large dimensional
@@ -602,7 +611,10 @@ def find_best_architecture_task(problem_name, method):
     run['sys/tags'].add([problem_name, method])
 
     # Get the problem list
-    PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
+    if dimensionality == 'high-dimensional':
+        PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
+    elif dimensionality == 'low-dimensional':
+        PROBLEMS = PROBLEMS_BY_NAME
 
     # Get the available configurations
     combinations = (
@@ -629,16 +641,30 @@ def find_best_architecture_task(problem_name, method):
 
         # Get the outputs
         if method == 'pygranso':
-            outputs = run_high_dimensional_deeplifting(
-                problem,
-                problem_name=problem_name,
-                trials=trials,
-                input_size=input_size,
-                hidden_sizes=hidden_size,
-                activation=hidden_activation,
-                output_activation=output_activation,
-                agg_function=agg_function,
-            )
+            if dimensionality == 'high-dimensional':
+                outputs = run_high_dimensional_deeplifting(
+                    problem,
+                    problem_name=problem_name,
+                    trials=trials,
+                    input_size=input_size,
+                    hidden_sizes=hidden_size,
+                    activation=hidden_activation,
+                    output_activation=output_activation,
+                    agg_function=agg_function,
+                )
+            elif dimensionality == 'low-dimensional':
+                outputs = run_deeplifting(
+                    problem,
+                    problem_name=problem_name,
+                    trials=trials,
+                    input_size=input_size,
+                    hidden_sizes=hidden_size,
+                    activation=hidden_activation,
+                    output_activation=output_activation,
+                    agg_function=agg_function,
+                    method='single-value',
+                )
+
         elif method == 'pytorch-lbfgs':
             outputs = run_lbfgs_deeplifting(
                 problem,
@@ -673,8 +699,11 @@ def find_best_architecture_task(problem_name, method):
         # Save to parquet
         layers = len(hidden_size)
         units = hidden_size[0]
+
+        experiment_date = datetime.today().strftime('%Y-%m-%d-%H-%m')
         results.to_parquet(
-            f'./search_results/results-2023-08-{layers}-layer-{units}-{agg_function}'
+            f'./search_results/{experiment_date}/{dimensionality}-{layers}'
+            f'-layer-{units}-{agg_function}'
             f'-{problem_name}-{index}-{method}-{output_activation}-'
             f'input-size-{input_size}.parquet'  # noqa
         )
