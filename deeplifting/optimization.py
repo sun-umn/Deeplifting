@@ -3,7 +3,7 @@ import gc
 import json
 import os
 import time
-from typing import Dict
+from typing import Any, Dict, List
 
 # third party
 import numpy as np
@@ -566,7 +566,7 @@ def run_deeplifting(
     dimensions = problem['dimensions']
     device = torch.device('cpu')
     fn_values = []
-    iterim_results = []
+    iterim_results: List[Any] = []  # noqa
 
     for trial in range(trials):
         # Objective function
@@ -669,10 +669,10 @@ def run_deeplifting(
             log = get_log_fn()
 
             # Final structure
-            indexes = (pd.Series(log.fn_evals).cumsum() - 1).values.tolist()
+            indexes = (pd.Series(log.fn_evals).cumsum() - 1).values.tolist()  # noqa
 
-            # Append intermediate results
-            iterim_results.append(deeplifting_results[trial, indexes, :dimensions])
+            # # Append intermediate results
+            # iterim_results.append(deeplifting_results[trial, indexes, :dimensions])
 
         # Get final x we will also need to map
         # it to the same bounds
