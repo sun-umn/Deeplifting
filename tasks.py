@@ -373,13 +373,11 @@ def run_algorithm_comparison_task(dimensionality, trials):
         columns = x_columns + ['f', 'algorithm', 'time']
 
         # First run IPOPT
+        print('Running IPOPT')
         outputs_ipopt = run_ipopt(problem, trials=trials)
 
         # Get the final results for all IPOPT runs
-        ipopt_results = pd.DataFrame(
-            outputs_ipopt['final_results'],
-            columns=columns,
-        )
+        ipopt_results = pd.DataFrame(outputs_ipopt['final_results'], columns=columns)
         ipopt_results['problem_name'] = problem_name
         ipopt_results['hits'] = np.where(
             np.abs(ipopt_results['f'] - minimum_value) <= 1e-4, 1, 0
@@ -390,6 +388,7 @@ def run_algorithm_comparison_task(dimensionality, trials):
         problem_performance_list.append(ipopt_results)
 
         # Next add dual annealing
+        print('Running Dual Annealing')
         outputs_dual_annealing = run_dual_annealing(problem, trials=trials)
 
         # Get the final results for all dual annealing runs
@@ -406,6 +405,7 @@ def run_algorithm_comparison_task(dimensionality, trials):
         problem_performance_list.append(dual_annleaing_results)
 
         # Next add differential evolution
+        print('Running Differential Evolution')
         outputs_differential_evolution = run_differential_evolution(
             problem, trials=trials
         )
@@ -424,12 +424,12 @@ def run_algorithm_comparison_task(dimensionality, trials):
         problem_performance_list.append(differential_evolution_results)
 
         # Next add pygranso
+        print('Running PyGranso!')
         outputs_pygranso = run_pygranso(problem, trials=trials)
 
         # Get the final results for all differential evolution runs
         pygranso_results = pd.DataFrame(
-            outputs_pygranso['final_results'],
-            columns=columns,
+            outputs_pygranso['final_results'], columns=columns
         )
         pygranso_results['problem_name'] = problem_name
         pygranso_results['hits'] = np.where(
@@ -441,13 +441,11 @@ def run_algorithm_comparison_task(dimensionality, trials):
         problem_performance_list.append(pygranso_results)
 
         # Next we need to implement the SCIP algorithm
+        print('Running SCIP!')
         outputs_scip = run_pyomo(problem, trials=trials, method='scip')
 
         # Get the final results for all differential evolution runs
-        scip_results = pd.DataFrame(
-            outputs_scip['final_results'],
-            columns=columns,
-        )
+        scip_results = pd.DataFrame(outputs_scip['final_results'], columns=columns)
         scip_results['problem_name'] = problem_name
         scip_results['hits'] = np.where(
             np.abs(scip_results['f'] - minimum_value) <= 1e-4, 1, 0

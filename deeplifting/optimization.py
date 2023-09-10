@@ -725,10 +725,7 @@ def run_deeplifting(
     return {'results': None, 'final_results': fn_values, 'callbacks': iterim_results}
 
 
-def deeplifting_high_dimension_fn(
-    model,
-    objective,
-):
+def deeplifting_high_dimension_fn(model, objective):
     """
     Combined funtion used for PyGranso
     """
@@ -821,10 +818,7 @@ def run_high_dimensional_deeplifting(
         opts.maxit = 10000
 
         # # Combined function
-        comb_fn = lambda model: deeplifting_high_dimension_fn(
-            model,
-            objective,
-        )  # noqa
+        comb_fn = lambda model: deeplifting_high_dimension_fn(model, objective)  # noqa
 
         # Run the main algorithm
         start_time = time.time()

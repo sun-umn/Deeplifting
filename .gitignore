@@ -3,4 +3,5 @@
 __pycache__
 results/
 search_results/
+algorithm_compare_results/
 .neptune
