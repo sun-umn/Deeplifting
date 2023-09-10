@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # stdlib
+import os
 from datetime import datetime
 from itertools import product
 
@@ -701,8 +702,12 @@ def find_best_architecture_task(problem_name, method, dimensionality):
         units = hidden_size[0]
 
         experiment_date = datetime.today().strftime('%Y-%m-%d-%H-%m')
+        path = f'./search_results/{experiment_date}'
+        if not os.path.exists(path):
+            os.makedirs(path)
+
         results.to_parquet(
-            f'./search_results/{experiment_date}/{dimensionality}-{layers}'
+            f'{path}/{dimensionality}-{layers}'
             f'-layer-{units}-{agg_function}'
             f'-{problem_name}-{index}-{method}-{output_activation}-'
             f'input-size-{input_size}.parquet'  # noqa
