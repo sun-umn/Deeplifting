@@ -564,7 +564,7 @@ def run_deeplifting(
     """
     # Get the device (CPU for now)
     dimensions = problem['dimensions']
-    device = torch.device('cuda:0')
+    device = torch.device('cpu')
     fn_values = []
     iterim_results = []
 
@@ -681,7 +681,7 @@ def run_deeplifting(
         final_fn = lambda x: objective(
             x, results=final_results, trial=0, version='pytorch'
         )
-        xf, f = deeplifting_predictions(outputs, final_fn)
+        xf, f = deeplifting_predictions(outputs, final_fn, method='single-value')
         f = f.detach().cpu().numpy()
         data_point = tuple(xf) + (float(f), 'Deeplifting', total_time)
         fn_values.append(data_point)
