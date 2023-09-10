@@ -86,18 +86,18 @@ low_dimensional_problem_names = [
 ]
 
 high_dimensional_problem_names = [
-    # # Ackley Series - Origin Solution
-    # 'ackley_3d',
-    # 'ackley_5d',
-    # 'ackley_30d',
-    # 'ackley_100d',
-    # 'ackley_500d',
-    # 'ackley_1000d',
+    # Ackley Series - Origin Solution
+    'ackley_3d',
+    'ackley_5d',
+    'ackley_30d',
+    'ackley_100d',
+    'ackley_500d',
+    'ackley_1000d',
     # Alpine1 Series - Origin Solution
-    # 'alpine1_3d',
-    # 'alpine1_5d',
-    # 'alpine1_30d',
-    # 'alpine1_100d',
+    'alpine1_3d',
+    'alpine1_5d',
+    'alpine1_30d',
+    'alpine1_100d',
     'alpine1_500d',
     'alpine1_1000d',
     # Chung-Reynolds Series - Origin Solution
@@ -142,13 +142,13 @@ high_dimensional_problem_names = [
     'rastrigin_100d',
     'rastrigin_500d',
     'rastrigin_1000d',
-    # # Schewefel series - Non-origin solution
-    # 'schwefel_3d',
-    # 'schwefel_5d',
-    # 'schwefel_30d',
-    # 'schwefel_100d',
-    # 'schwefel_500d',
-    # 'schwefel_1000d',
+    # Schewefel series - Non-origin solution
+    'schwefel_3d',
+    'schwefel_5d',
+    'schwefel_30d',
+    'schwefel_100d',
+    'schwefel_500d',
+    'schwefel_1000d',
 ]
 
 # Identify available hidden sizes
@@ -179,7 +179,7 @@ search_hidden_sizes = [
     hidden_size_512 * 5,
     # Try an Autoencode Architecture
     (256, 128, 256),
-    (512, 128, 128),
+    (512, 128, 512),
 ]
 
 # Input sizes
@@ -460,9 +460,12 @@ def run_algorithm_comparison_task(dimensionality, trials):
         # Concatenate all of the data at the end of each problem because
         # we can save intermediate results
         problem_performance_df = pd.concat(problem_performance_list, ignore_index=True)
-        problem_performance_df.to_parquet(
-            f'./results/algorithm-comparisons-{problem_name}-{dimensionality}.parquet'
-        )
+        experiment_date = datetime.today().strftime('%Y-%m-%d-%H-%m')
+        path = f'./algorithm_compare_results/{experiment_date}-{problem_name}'
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        problem_performance_df.to_parquet(f'{path}-{dimensionality}.parquet')
 
 
 @cli.command('create-trajectory-plot')
