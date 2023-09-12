@@ -167,10 +167,10 @@ class DeepliftingScalingBlock(nn.Module):
         #     x_values_float.append(x_constr)
 
         # Try: Get the first bound and confine it this way
-        # want to see if this is a memory leak
+        # want to see if this is a memory leak - this was definetly a part of it
         a, b = self.bounds[0]
         if self.output_activation != 'sine':
-            x = a + (b - 1) / 2.0 * (torch.sin(outputs) + 1)
+            x = a + (b - a) / 2.0 * (torch.sin(outputs) + 1)
         else:
             x = a + (b - a) / 2.0 * (outputs + 1)
 
