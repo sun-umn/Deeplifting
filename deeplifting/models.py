@@ -246,15 +246,16 @@ class DeepliftingSkipMLP(nn.Module):
         x = self.x
         for i, layer in enumerate(self.layers):
             x_new = layer(x)
-            if self.agg_function == 'sum':
-                x_skip = x + x_new
+            # if self.agg_function == 'sum':
+            #     x_skip = x + x_new
+            #     x = x_new
+            if (i + 1) % self.skip_every_n == 0 and i != 0:
+                # intermediate_connections.append(x_new)
+                if self.agg_function == 'sum':
+                    x_skip = x + x_new
+                    x = x_new
+            else:
                 x = x_new
-        #     if (i + 1) % self.skip_every_n == 0 and i != 0:
-        #         intermediate_connections.append(x_new)
-        #         x_skip = x + x_new
-        #         x = x_new
-        #     else:
-        #         x = x_new
 
         # # Stack the skipped connections and then sum
         # # We will also make this configurable

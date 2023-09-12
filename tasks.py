@@ -176,9 +176,6 @@ search_hidden_sizes = [
     hidden_size_512 * 3,
     hidden_size_512 * 4,
     hidden_size_512 * 5,
-    # Try an Autoencode Architecture
-    (256, 128, 256),
-    (512, 128, 512),
 ]
 
 # Input sizes
