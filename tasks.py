@@ -727,6 +727,11 @@ def run_pygranso_task(dimensionality, trials):
     1. PyGRANSO
     """
     print('Run Algorithms!')
+    run = neptune.init_run(  # noqa
+        project="dever120/Deeplifting",
+        api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzYmIwMTUyNC05YmZmLTQ1NzctOTEyNS1kZTIxYjU5NjY5YjAifQ==",  # noqa
+    )  # your credentials
+    run['sys/tags'].add(['pygranso', dimensionality])
 
     if dimensionality == 'low-dimensional':
         problem_names = low_dimensional_problem_names
