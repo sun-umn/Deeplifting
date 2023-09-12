@@ -16,10 +16,38 @@ from deeplifting.kriging_peaks.kriging_peaks_red import (
 )
 
 
+def build_2d_intermediate_results(x1, x2, result, version, results, trial):
+    """
+    Global function that will build out the intermediate
+    results of our objective functions.
+    """
+    # Fill in the intermediate results
+    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
+
+    if version == 'pytorch':
+        results[trial, iteration, :] = np.array(
+            (
+                x1.detach().cpu().numpy(),
+                x2.detach().cpu().numpy(),
+                result.detach().cpu().numpy(),
+            )
+        )
+    elif version == 'pyomo':
+        pyomo_result = result()
+        x1 = x1()
+        x2 = x2()
+        results[trial, iteration, :] = np.array((x1, x2, pyomo_result))
+    elif version == 'numpy':
+        results[trial, iteration, :] = np.array((x1, x2, result))
+
+    return results
+
+
 def ackley(x, results, trial, version='numpy'):
     """
     Function that implements the Ackley function in
-    numpy or pytorch. We will use this for our deeplifting experiments.
+    numpy, pytorch or pyomo interface. We will use this
+    for our deeplifting experiments.
     Note, that this version is the 2-D version only.
     """
     a = 20
@@ -33,6 +61,10 @@ def ackley(x, results, trial, version='numpy'):
         sum_sq_term = -a * np.exp(-b * np.sqrt(0.5 * (x1**2 + x2**2)))
         cos_term = -np.exp(0.5 * (np.cos(c * x1) + np.cos(c * x2)))
         result = sum_sq_term + cos_term + a + np.exp(1)
+    elif version == 'pyomo':
+        sum_sq_term = -a * pyo.exp(-b * (0.5 * (x1**2 + x2**2) ** 0.5))
+        cos_term = -pyo.exp(0.5 * (pyo.cos(c * x1) + pyo.cos(c * x2)))
+        result = sum_sq_term + cos_term + a + np.e
     elif version == 'pytorch':
         sum_sq_term = -a * torch.exp(-b * torch.sqrt(0.5 * (x1**2 + x2**2)))
         cos_term = -torch.exp(0.5 * (torch.cos(c * x1) + torch.cos(c * x2)))
@@ -44,19 +76,14 @@ def ackley(x, results, trial, version='numpy'):
         )
 
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
 
     return result
 
@@ -64,12 +91,16 @@ def ackley(x, results, trial, version='numpy'):
 def bukin_n6(x, results, trial, version='numpy'):
     """
     Function that implements the Bukin Function N.6 in both
-    numpy and pytorch.
+    numpy and pytorch and pyomo interface.
     """
     x1, x2 = x.flatten()
     if version == 'numpy':
         term1 = 100 * np.sqrt(np.abs(x2 - 0.01 * x1**2))
         term2 = 0.01 * np.abs(x1 + 10)
+        result = term1 + term2
+    elif version == 'pyomo':
+        term1 = 100 * np.abs(x2 - 0.01 * x1**2) ** 0.5
+        term2 = 0.01 * np.abs(x1 + 10.0)
         result = term1 + term2
     elif version == 'pytorch':
         term1 = 100 * torch.sqrt(torch.abs(x2 - 0.01 * x1**2))
@@ -81,19 +112,14 @@ def bukin_n6(x, results, trial, version='numpy'):
         )
 
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
 
     return result
 
@@ -119,7 +145,7 @@ def cross_in_tray(x, results, trial, version='numpy'):
 
     Raises:
     ValueError
-        If the version is not 'numpy' or 'pytorch'.
+        If the version is not 'numpy' or 'pytorch' or pyomo.
     """
     x1, x2 = x.flatten()
     if version == 'numpy':
@@ -130,6 +156,19 @@ def cross_in_tray(x, results, trial, version='numpy'):
                     np.sin(x1)
                     * np.sin(x2)
                     * np.exp(np.abs(100 - np.sqrt(x1**2 + x2**2) / np.pi))
+                )
+                + 1
+            )
+            ** 0.1
+        )
+    elif version == 'pyomo':
+        result = (
+            -0.0001
+            * (
+                np.abs(
+                    pyo.sin(x1)
+                    * pyo.sin(x2)
+                    * pyo.exp(np.abs(100 - (x1**2 + x2**2) ** 0.5 / np.pi))
                 )
                 + 1
             )
@@ -158,19 +197,14 @@ def cross_in_tray(x, results, trial, version='numpy'):
         )
 
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
 
     return result
 
@@ -203,6 +237,10 @@ def drop_wave(x, results, trial, version='numpy'):
         numerator = 1 + np.cos(12 * np.sqrt(x1**2 + x2**2))
         denominator = 0.5 * (x1**2 + x2**2) + 2
         result = -numerator / denominator
+    elif version == 'pyomo':
+        numerator = 1 + pyo.cos(12 * (x1**2 + x2**2) ** 0.5)
+        denominator = 0.5 * (x1**2 + x2**2) + 2
+        result = -numerator / denominator
     elif version == 'pytorch':
         numerator = 1 + torch.cos(12 * torch.sqrt(x1**2 + x2**2))
         denominator = 0.5 * (x1**2 + x2**2) + 2
@@ -213,19 +251,14 @@ def drop_wave(x, results, trial, version='numpy'):
         )
 
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
 
     return result
 
@@ -258,6 +291,10 @@ def eggholder(x, results, trial, version='numpy'):
         term1 = -(x2 + 47.0) * np.sin(np.sqrt(np.abs(x1 / 2.0 + (x2 + 47.0))))
         term2 = -x1 * np.sin(np.sqrt(np.abs(x1 - (x2 + 47.0))))
         result = term1 + term2
+    elif version == 'pyomo':
+        term1 = -(x2 + 47.0) * pyo.sin(np.abs(x1 / 2.0 + (x2 + 47)) ** 0.5)
+        term2 = -x1 * pyo.sin(np.abs(x1 - (x2 + 47.0)) ** 0.5)
+        result = term1 + term2
     elif version == 'pytorch':
         term1 = -(x2 + 47.0) * torch.sin(torch.sqrt(torch.abs(x1 / 2.0 + (x2 + 47.0))))
         term2 = -x1 * torch.sin(torch.sqrt(torch.abs(x1 - (x2 + 47.0))))
@@ -268,19 +305,14 @@ def eggholder(x, results, trial, version='numpy'):
         )
 
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
 
     return result
 
@@ -311,6 +343,10 @@ def griewank(x, results, trial, version='numpy'):
     x1, x2 = x.flatten()
     if version == 'numpy':
         result = 1 + ((x1**2 + x2**2) / 4000) - np.cos(x1) * np.cos(x2 / np.sqrt(2))
+    elif version == 'pyomo':
+        result = (
+            1 + ((x1**2 + x2**2) / 4000) - pyo.cos(x1) * pyo.cos(x2 / (2) ** 0.5)
+        )
     elif version == 'pytorch':
         result = (
             1
@@ -323,19 +359,14 @@ def griewank(x, results, trial, version='numpy'):
         )
 
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
 
     return result
 
@@ -370,6 +401,12 @@ def holder_table(x, results, trial, version='numpy'):
             * np.cos(x2)
             * np.exp(np.abs(1 - np.sqrt(x1**2 + x2**2) / np.pi))
         )
+    elif version == 'pyomo':
+        result = -np.abs(
+            pyo.sin(x1)
+            * pyo.cos(x2)
+            * pyo.exp(np.abs(1 - (x1**2 + x2**2) ** 0.5 / np.pi))
+        )
     elif version == 'pytorch':
         result = -torch.abs(
             torch.sin(x1)
@@ -382,19 +419,14 @@ def holder_table(x, results, trial, version='numpy'):
         )
 
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
 
     return result
 
@@ -458,19 +490,14 @@ def langermann(x, results, trial, version='numpy'):
         )
 
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
 
     return result
 
@@ -507,6 +534,14 @@ def levy(x, results, trial, version='numpy'):
             + (w2 - 1) ** 2 * (1 + 10 * np.sin(np.pi * w2 + 1) ** 2)
             + (w1 - 1) ** 2 * (1 + np.sin(2 * np.pi * w1) ** 2)
         )
+    elif version == 'pyomo':
+        w1 = 1 + (x1 - 1) / 4
+        w2 = 1 + (x2 - 1) / 4
+        result = (
+            pyo.sin(np.pi * w1) ** 2
+            + (w2 - 1) ** 2 * (1 + 10 * pyo.sin(np.pi * w2 + 1) ** 2)
+            + (w1 - 1) ** 2 * (1 + pyo.sin(2 * np.pi * w1) ** 2)
+        )
     elif version == 'pytorch':
         w1 = 1 + (x1 - 1) / 4
         w2 = 1 + (x2 - 1) / 4
@@ -521,19 +556,14 @@ def levy(x, results, trial, version='numpy'):
         )
 
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
 
     return result
 
@@ -568,6 +598,12 @@ def levy_n13(x, results, trial, version='numpy'):
             + (x1 - 1) ** 2 * (1 + (np.sin(3 * np.pi * x2)) ** 2)
             + (x2 - 1) ** 2 * (1 + (np.sin(2 * np.pi * x2)) ** 2)
         )
+    elif version == 'pyomo':
+        result = (
+            pyo.sin(3 * np.pi * x1) ** 2
+            + (x1 - 1) ** 2 * (1 + (pyo.sin(3 * np.pi * x2)) ** 2)
+            + (x2 - 1) ** 2 * (1 + (pyo.sin(2 * np.pi * x2)) ** 2)
+        )
     elif version == 'pytorch':
         result = (
             torch.sin(3 * torch.tensor(np.pi) * x1) ** 2
@@ -580,19 +616,14 @@ def levy_n13(x, results, trial, version='numpy'):
         )
 
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
 
     return result
 
@@ -627,6 +658,12 @@ def rastrigin(x, results, trial, version='numpy'):
             + (x1**2 - 10 * np.cos(2 * np.pi * x1))
             + (x2**2 - 10 * np.cos(2 * np.pi * x2))
         )
+    elif version == 'pyomo':
+        result = (
+            10 * 2
+            + (x1**2 - 10 * pyo.cos(2 * np.pi * x1))
+            + (x2**2 - 10 * pyo.cos(2 * np.pi * x2))
+        )
     elif version == 'pytorch':
         result = (
             10 * 2
@@ -639,19 +676,14 @@ def rastrigin(x, results, trial, version='numpy'):
         )
 
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
 
     return result
 
@@ -686,6 +718,12 @@ def schaffer_n2(x, results, trial, version='numpy'):
             + (np.sin(x1**2 - x2**2) ** 2 - 0.5)
             / (1 + 0.001 * (x1**2 + x2**2)) ** 2
         )
+    elif version == 'pyomo':
+        result = (
+            0.5
+            + (pyo.sin(x1**2 - x2**2) ** 2 - 0.5)
+            / (1 + 0.001 * (x1**2 + x2**2)) ** 2
+        )
     elif version == 'pytorch':
         result = (
             0.5
@@ -698,19 +736,14 @@ def schaffer_n2(x, results, trial, version='numpy'):
         )
 
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
 
     return result
 
@@ -745,6 +778,12 @@ def schaffer_n4(x, results, trial, version='numpy'):
             + (np.cos(np.sin(np.abs(x1**2 - x2**2))) ** 2 - 0.5)
             / (1 + 0.001 * (x1**2 + x2**2)) ** 2
         )
+    elif version == 'pyomo':
+        result = (
+            0.5
+            + (pyo.cos(pyo.sin(np.abs(x1**2 - x2**2))) ** 2 - 0.5)
+            / (1 + 0.001 * (x1**2 + x2**2)) ** 2
+        )
     elif version == 'pytorch':
         result = (
             0.5
@@ -757,19 +796,14 @@ def schaffer_n4(x, results, trial, version='numpy'):
         )
 
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
 
     return result
 
@@ -804,6 +838,12 @@ def schwefel(x, results, trial, version='numpy'):
             - x1 * np.sin(np.sqrt(np.abs(x1)))
             - x2 * np.sin(np.sqrt(np.abs(x2)))
         )
+    elif version == 'pyomo':
+        result = (
+            418.9829 * 2
+            - x1 * pyo.sin(np.abs(x1) ** 0.5)
+            - x2 * pyo.sin(np.abs(x2) ** 0.5)
+        )
     elif version == 'pytorch':
         result = (
             418.9829 * 2
@@ -816,19 +856,14 @@ def schwefel(x, results, trial, version='numpy'):
         )
 
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
 
     return result
 
@@ -7852,6 +7887,7 @@ PROBLEMS_BY_NAME = {
     'griewank': griewank_config,
     'holder_table': holder_table_config,
     'langermann': langermann_config,
+    'levy': levy_config,
     'levy_n13': levy_n13_config,
     'rastrigin': rastrigin_config,
     'rastrigin_3d': rastrigin_3d_config,

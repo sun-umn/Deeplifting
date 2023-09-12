@@ -26,24 +26,23 @@ from deeplifting.utils import create_contour_plot
 
 # Identify problems to run
 low_dimensional_problem_names = [
-    # 'ackley',  # Low
+    'ackley',  # Low
     'bukin_n6',  # High, 2 layer is best so far, takes a while to run
-    # 'cross_in_tray',  # Low, runs quickly
-    # 'drop_wave',  # Low, runs quickly
-    # 'eggholder',  # Medium, takes time to run
+    'cross_in_tray',  # Low, runs quickly
+    'drop_wave',  # Low, runs quickly
+    'eggholder',  # Medium, takes time to run
     'griewank',  # Low, (1.0 with 3-layer, 0.95 2-layer)
-    # 'holder_table',  # Medium
-    # 'levy',  # Low, 3-layer
-    # 'levy_n13',  # Low, 3-layer
-    # 'rastrigin',  # Low, 3-layer
-    # 'schaffer_n2',  # Low, 3-layer
-    # 'schaffer_n4',  # Low, 3-layer
+    'holder_table',  # Medium
+    'levy',  # Low, 3-layer
+    'levy_n13',  # Low, 3-layer
+    'rastrigin',  # Low, 3-layer
+    'schaffer_n2',  # Low, 3-layer
+    'schaffer_n4',  # Low, 3-layer
     'schwefel',  # Takes a while to run, DA is better at 100% but we are at 85%
     # 'shubert',  # Takes a while to run,
     # 'ex8_1_1',
     # 'kriging_peaks_red010',
     # 'kriging_peaks_red020',
-    # # 'kriging_peaks_red030',
     # 'mathopt6',
     # 'quantum',
     # 'rosenbrock',
@@ -93,7 +92,7 @@ high_dimensional_problem_names = [
     'ackley_100d',
     'ackley_500d',
     'ackley_1000d',
-    # Alpine1 Series - Origin Solution
+    # # Alpine1 Series - Origin Solution
     'alpine1_3d',
     'alpine1_5d',
     'alpine1_30d',
@@ -423,22 +422,22 @@ def run_algorithm_comparison_task(dimensionality, trials):
         # Add differential evolution to the problem_performance_list
         problem_performance_list.append(differential_evolution_results)
 
-        # Next add pygranso
-        print('Running PyGranso!')
-        outputs_pygranso = run_pygranso(problem, trials=trials)
+        # # Next add pygranso
+        # print('Running PyGranso!')
+        # outputs_pygranso = run_pygranso(problem, trials=trials)
 
-        # Get the final results for all differential evolution runs
-        pygranso_results = pd.DataFrame(
-            outputs_pygranso['final_results'], columns=columns
-        )
-        pygranso_results['problem_name'] = problem_name
-        pygranso_results['hits'] = np.where(
-            np.abs(pygranso_results['f'] - minimum_value) <= 1e-4, 1, 0
-        )
-        pygranso_results['dimensions'] = dimensions
+        # # Get the final results for all differential evolution runs
+        # pygranso_results = pd.DataFrame(
+        #     outputs_pygranso['final_results'], columns=columns
+        # )
+        # pygranso_results['problem_name'] = problem_name
+        # pygranso_results['hits'] = np.where(
+        #     np.abs(pygranso_results['f'] - minimum_value) <= 1e-4, 1, 0
+        # )
+        # pygranso_results['dimensions'] = dimensions
 
-        # Add differential evolution to the problem_performance_list
-        problem_performance_list.append(pygranso_results)
+        # # Add differential evolution to the problem_performance_list
+        # problem_performance_list.append(pygranso_results)
 
         # Next we need to implement the SCIP algorithm
         print('Running SCIP!')
@@ -463,7 +462,7 @@ def run_algorithm_comparison_task(dimensionality, trials):
         if not os.path.exists(path):
             os.makedirs(path)
 
-        problem_performance_df.to_parquet(f'{path}-{dimensionality}.parquet')
+        problem_performance_df.to_parquet(f'{path}/{dimensionality}.parquet')
 
 
 @cli.command('create-trajectory-plot')
@@ -716,6 +715,72 @@ def find_best_architecture_task(problem_name, method, dimensionality):
 
         # Append performance
         performance_df_list.append(results)
+
+
+@cli.command('run-pygranso')
+@click.option('--dimensionality', default='low-dimensional')
+@click.option('--trials', default=10)
+def run_pygranso_task(dimensionality, trials):
+    """
+    Function that will run the competing algorithms to Deeplifting.
+    The current competitor models are:
+    1. PyGRANSO
+    """
+    print('Run Algorithms!')
+
+    if dimensionality == 'low-dimensional':
+        problem_names = low_dimensional_problem_names
+        PROBLEMS = PROBLEMS_BY_NAME
+    elif dimensionality == 'high-dimensional':
+        problem_names = high_dimensional_problem_names
+        PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
+    else:
+        raise ValueError('Option for dimensionality does not exist!')
+
+    # Create the experiment date
+    experiment_date = datetime.today().strftime('%Y-%m-%d-%H')
+    for problem_name in problem_names:
+        print(problem_name)
+        problem_performance_list = []
+
+        # Setup the problem
+        problem = PROBLEMS[problem_name]
+
+        # Get the known minimum
+        minimum_value = problem['global_minimum']
+
+        # Get the dimensions
+        dimensions = problem['dimensions']
+
+        # Create column names
+        x_columns = [f'x{i + 1}' for i in range(dimensions)]
+        columns = x_columns + ['f', 'algorithm', 'time']
+
+        # Next add pygranso
+        print('Running PyGranso!')
+        outputs_pygranso = run_pygranso(problem, trials=trials)
+
+        # Get the final results for all differential evolution runs
+        pygranso_results = pd.DataFrame(
+            outputs_pygranso['final_results'], columns=columns
+        )
+        pygranso_results['problem_name'] = problem_name
+        pygranso_results['hits'] = np.where(
+            np.abs(pygranso_results['f'] - minimum_value) <= 1e-4, 1, 0
+        )
+        pygranso_results['dimensions'] = dimensions
+
+        # Add differential evolution to the problem_performance_list
+        problem_performance_list.append(pygranso_results)
+
+        # Concatenate all of the data at the end of each problem because
+        # we can save intermediate results
+        problem_performance_df = pd.concat(problem_performance_list, ignore_index=True)
+        path = f'./algorithm_compare_results/{experiment_date}-pygranso-{problem_name}'
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        problem_performance_df.to_parquet(f'{path}/{dimensionality}.parquet')
 
 
 if __name__ == "__main__":

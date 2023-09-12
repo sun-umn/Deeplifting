@@ -369,7 +369,7 @@ def run_pygranso(problem: Dict, trials: int):
     comparisions
     """
     # Get the device (CPU for now)
-    device = torch.device('cpu')
+    device = torch.device('cuda:0')
     fn_values = []
     interim_results = []
 
@@ -416,7 +416,7 @@ def run_pygranso(problem: Dict, trials: int):
         # Pygranso options
         opts.x0 = x0
         opts.torch_device = device
-        opts.print_frequency = 1
+        opts.print_frequency = 100
         # opts.print_level = 0
         opts.limited_mem_size = 50
         opts.stat_l2_model = False
@@ -1008,6 +1008,7 @@ def run_pyomo(problem, trials, method):
     fn_values = []
 
     for trial in range(trials):
+        print(f'Pyomo trial = {trial + 1}')
         # Set the random seed
         set_seed(trial)
 
