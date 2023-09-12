@@ -179,7 +179,7 @@ search_hidden_sizes = [
 ]
 
 # Input sizes
-search_input_sizes = [512, 1024]
+search_input_sizes = [512]
 
 # Hidden activations
 search_hidden_activations = ['sine', 'relu', 'leaky_relu']
@@ -188,7 +188,7 @@ search_hidden_activations = ['sine', 'relu', 'leaky_relu']
 search_output_activations = ['leaky_relu', 'sine']
 
 # Aggregate functions - for skip connections
-search_agg_functions = ['sum']
+search_agg_functions = ['max']
 
 
 @click.group()

@@ -950,7 +950,7 @@ def run_lbfgs_deeplifting(
 
             print(
                 f'loss = {updated_loss.detach()},'
-                'gradient_norm = flat_grad.abs().max()'
+                f'gradient_norm = {flat_grad.abs().max()}'
             )
 
         end = time.time()
