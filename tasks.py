@@ -166,20 +166,20 @@ search_hidden_sizes = [
     hidden_size_128 * 3,
     hidden_size_128 * 4,
     hidden_size_128 * 5,
-    # Hidden sizes of 256
-    hidden_size_256 * 2,
-    hidden_size_256 * 3,
-    hidden_size_256 * 4,
-    hidden_size_256 * 5,
     # Hidden sizes of 512
     hidden_size_512 * 2,
     hidden_size_512 * 3,
     hidden_size_512 * 4,
     hidden_size_512 * 5,
+    # Hidden sizes of 1024
+    hidden_size_1024 * 2,
+    hidden_size_1024 * 3,
+    hidden_size_1024 * 4,
+    hidden_size_1024 * 5,
 ]
 
 # Input sizes
-search_input_sizes = [512]
+search_input_sizes = [512, 1024]
 
 # Hidden activations
 search_hidden_activations = ['sine', 'relu', 'leaky_relu']
