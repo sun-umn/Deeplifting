@@ -250,6 +250,7 @@ class DeepliftingSkipMLP(nn.Module):
             if (i + 1) % self.skip_every_n == 0 and i != 0:
                 # if self.agg_function == 'sum':
                 #     x_skip = x + x_new
+                intermediate_connections.append(x_new)
                 x = x_new
             else:
                 x = x_new
