@@ -182,7 +182,7 @@ search_hidden_sizes = [
 ]
 
 # Input sizes
-search_input_sizes = [128, 512]
+search_input_sizes = [512]
 
 # Hidden activations
 search_hidden_activations = ['sine', 'relu', 'leaky_relu']
@@ -191,7 +191,7 @@ search_hidden_activations = ['sine', 'relu', 'leaky_relu']
 search_output_activations = ['leaky_relu', 'sine']
 
 # Aggregate functions - for skip connections
-search_agg_functions = ['sum', 'max']
+search_agg_functions = ['sum']
 
 
 @click.group()
@@ -626,7 +626,7 @@ def find_best_architecture_task(problem_name, method, dimensionality):
         search_agg_functions,
     )
     configurations = list(product(*combinations))
-    trials = 10
+    trials = 1
 
     # List to store performance data
     performance_df_list = []

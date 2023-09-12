@@ -808,7 +808,7 @@ def run_high_dimensional_deeplifting(
 
         opts.x0 = x0
         opts.torch_device = device
-        opts.print_frequency = 1
+        opts.print_frequency = 100
         opts.limited_mem_size = 5
         opts.stat_l2_model = False
         opts.double_precision = True
