@@ -639,6 +639,13 @@ def find_best_architecture_task(problem_name, method, dimensionality):
         print(problem_name)
         # Load the problems
         problem = PROBLEMS[problem_name]
+        print(
+            input_size,
+            hidden_size,
+            hidden_activation,
+            output_activation,
+            agg_function,
+        )
 
         # Get the outputs
         if method == 'pygranso':
