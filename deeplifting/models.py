@@ -88,10 +88,12 @@ class DeepliftingMLP(nn.Module):
 
 
 class DeepliftingBlock(nn.Module):
-    def __init__(self, input_size, output_size, activation='sine'):
+    def __init__(self, input_size, output_size, activation='sine', include_bn=False):
         super(DeepliftingBlock, self).__init__()
         # Define the activation
         self.activation = activation
+        self.include_bn = include_bn
+
         if self.activation == 'sine':
             self.activation_layer = SinActivation()
         elif self.activation == 'relu':
@@ -114,8 +116,9 @@ class DeepliftingBlock(nn.Module):
         # Linear layer
         x = self.linear(x)
 
-        # # Batch Normalization
-        # x = self.batch_norm(x)
+        if self.include_bn:
+            # Batch Normalization
+            x = self.batch_norm(x)
 
         # # Dropout
         # x = self.dropout(x)
@@ -127,10 +130,11 @@ class DeepliftingBlock(nn.Module):
 
 
 class DeepliftingScalingBlock(nn.Module):
-    def __init__(self, bounds, output_activation):
+    def __init__(self, bounds, output_activation, dimensions=2):
         super(DeepliftingScalingBlock, self).__init__()
         # Define the bounds for the class
         self.bounds = bounds
+        self.dimensions = dimensions
 
         # Define the scaler based on the final activation layer
         # of the output
@@ -149,38 +153,37 @@ class DeepliftingScalingBlock(nn.Module):
         # c + (d - c) / (2) * (x + 1)
 
         # Try updating the way we define the bounds
-        x_values_float = []
-        for index, cnstr in enumerate(self.bounds):
-            a, b = cnstr
-            if (a is None) and (b is None):
-                x_constr = outputs[index]
-            elif (a is None) or (b is None):
-                x_constr = torch.clamp(outputs[index], min=a, max=b)
+        if self.dimensions > 2:
+            # Try: Get the first bound and confine it this way
+            # want to see if this is a memory leak - this was definetly a part of it
+            a, b = self.bounds[0]
+            if self.output_activation != 'sine':
+                return a + (b - a) / 2.0 * (torch.sin(outputs) + 1)
+            else:
+                return a + (b - a) / 2.0 * (outputs + 1)
 
-            # Being very explicit about this condition just in case
-            # to avoid weird behavior
-            elif (a is not None) and (b is not None):
-                if self.output_activation != 'sine':
-                    x_constr = a + (b - a) / 2.0 * (torch.sin(outputs[:, index]) + 1)
-                else:
-                    x_constr = a + (b - a) / 2.0 * (outputs[:, index] + 1)
-            x_values_float.append(x_constr)
+        else:
+            x_values_float = []
+            for index, cnstr in enumerate(self.bounds):
+                a, b = cnstr
+                if (a is None) and (b is None):
+                    x_constr = outputs[index]
+                elif (a is None) or (b is None):
+                    x_constr = torch.clamp(outputs[index], min=a, max=b)
 
-        x = torch.stack(x_values_float, axis=1)
+                # Being very explicit about this condition just in case
+                # to avoid weird behavior
+                elif (a is not None) and (b is not None):
+                    if self.output_activation != 'sine':
+                        x_constr = a + (b - a) / 2.0 * (
+                            torch.sin(outputs[:, index]) + 1
+                        )
+                    else:
+                        x_constr = a + (b - a) / 2.0 * (outputs[:, index] + 1)
+                x_values_float.append(x_constr)
+            x = torch.stack(x_values_float, axis=1)
 
-        # # Delete the x_values_float
-        # del x_values_float
-        # torch.cuda.empty_cache()
-
-        # # Try: Get the first bound and confine it this way
-        # # want to see if this is a memory leak - this was definetly a part of it
-        # a, b = self.bounds[0]
-        # if self.output_activation != 'sine':
-        #     return a + (b - a) / 2.0 * (torch.sin(outputs) + 1)
-        # else:
-        #     return a + (b - a) / 2.0 * (outputs + 1)
-
-        return x
+            return x
 
 
 # Automating skip connection block
@@ -196,6 +199,7 @@ class DeepliftingSkipMLP(nn.Module):
         activation='sine',
         output_activation='sine',
         agg_function='sum',
+        include_bn=False,
         seed=0,
     ):
         super(DeepliftingSkipMLP, self).__init__()
@@ -205,6 +209,7 @@ class DeepliftingSkipMLP(nn.Module):
         self.layers = nn.ModuleList()
         self.skip_every_n = skip_every_n
         self.agg_function = agg_function
+        self.include_bn = include_bn
         self.first_hidden_Size = 512
 
         # Input layer
@@ -218,7 +223,10 @@ class DeepliftingSkipMLP(nn.Module):
         for i in range(1, len(hidden_sizes)):
             self.layers.append(
                 DeepliftingBlock(
-                    hidden_sizes[i - 1], hidden_sizes[i], activation=activation
+                    hidden_sizes[i - 1],
+                    hidden_sizes[i],
+                    activation=activation,
+                    include_bn=include_bn,
                 )
             )
             if i % skip_every_n == 0:
@@ -227,6 +235,7 @@ class DeepliftingSkipMLP(nn.Module):
                         hidden_sizes[i - skip_every_n],
                         hidden_sizes[i],
                         activation=activation,
+                        include_bn=include_bn,
                     )
                 )
 
@@ -237,7 +246,7 @@ class DeepliftingSkipMLP(nn.Module):
 
         # Final scaling layer
         self.scaling_layer = DeepliftingScalingBlock(
-            bounds=bounds, output_activation=output_activation
+            bounds=bounds, output_activation=output_activation, dimension=output_size
         )
 
         # One of the things that we did with the topology

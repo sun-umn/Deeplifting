@@ -554,6 +554,7 @@ def run_deeplifting(
     activation='sine',
     output_activation='sine',
     agg_function='sum',
+    include_bn=False,
     method='particle',
     save_model_path=None,
 ):
@@ -594,6 +595,7 @@ def run_deeplifting(
             activation=activation,
             output_activation=output_activation,
             agg_function=agg_function,
+            include_bn=include_bn,
             seed=trial,
         )
 
@@ -751,6 +753,7 @@ def run_high_dimensional_deeplifting(
     activation='sine',
     output_activation='sine',
     agg_function='sum',
+    include_bn=False,
 ):
     """
     Function that runs our preimer method of deeplifting.
@@ -788,6 +791,7 @@ def run_high_dimensional_deeplifting(
             activation=activation,
             output_activation=output_activation,
             agg_function=agg_function,
+            include_bn=include_bn,
             seed=trial,
         )
 

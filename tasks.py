@@ -190,6 +190,9 @@ search_output_activations = ['sine']
 # Aggregate functions - for skip connections
 search_agg_functions = ['sum']
 
+# Include BN
+search_include_bn = [True, False]
+
 
 @click.group()
 def cli():
@@ -621,6 +624,7 @@ def find_best_architecture_task(problem_name, method, dimensionality):
         search_hidden_activations,
         search_output_activations,
         search_agg_functions,
+        search_include_bn,
     )
     configurations = list(product(*combinations))
     trials = 1
@@ -632,7 +636,14 @@ def find_best_architecture_task(problem_name, method, dimensionality):
     # Run over the experiments
     for (
         index,
-        (input_size, hidden_size, hidden_activation, output_activation, agg_function),
+        (
+            input_size,
+            hidden_size,
+            hidden_activation,
+            output_activation,
+            agg_function,
+            include_bn,
+        ),
     ) in enumerate(configurations):
         print(problem_name)
         # Load the problems
@@ -643,6 +654,7 @@ def find_best_architecture_task(problem_name, method, dimensionality):
             hidden_activation,
             output_activation,
             agg_function,
+            include_bn,
         )
 
         # Get the outputs
@@ -657,6 +669,7 @@ def find_best_architecture_task(problem_name, method, dimensionality):
                     activation=hidden_activation,
                     output_activation=output_activation,
                     agg_function=agg_function,
+                    include_bn=include_bn,
                 )
             elif dimensionality == 'low-dimensional':
                 outputs = run_deeplifting(
@@ -668,6 +681,7 @@ def find_best_architecture_task(problem_name, method, dimensionality):
                     activation=hidden_activation,
                     output_activation=output_activation,
                     agg_function=agg_function,
+                    include_bn=include_bn,
                     method='single-value',
                 )
 
