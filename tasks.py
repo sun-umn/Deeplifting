@@ -646,7 +646,9 @@ def find_best_architecture_task(problem_series, method, dimensionality):
     # Get the problem list
     if dimensionality == 'high-dimensional':
         PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
-        if problem_series == 'alpine1':
+        if problem_series == 'ackley':
+            problem_names = ackley_series
+        elif problem_series == 'alpine1':
             problem_names = alpine_series
     elif dimensionality == 'low-dimensional':
         PROBLEMS = PROBLEMS_BY_NAME
