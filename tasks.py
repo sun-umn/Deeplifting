@@ -717,12 +717,12 @@ def find_best_architecture_task(problem_name, method, dimensionality):
         layers = len(hidden_size)
         units = hidden_size[0]
 
-        path = f'./search_results/{experiment_date}-{problem_name}'
+        path = f'./high-dimension-search_results/{experiment_date}-{problem_name}'
         if not os.path.exists(path):
             os.makedirs(path)
 
         results.to_parquet(
-            f'{path}/{dimensionality}-{layers}'
+            f'{path}/{layers}'
             f'-layer-{units}-{agg_function}'
             f'-{index}-{method}-{output_activation}-'
             f'input-size-{input_size}.parquet'  # noqa
