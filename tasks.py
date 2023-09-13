@@ -119,6 +119,16 @@ chung_reynolds_series = [
     'chung_reynolds_1000d',
 ]
 
+griewank_series = [
+    # Griewank Series - Origin Solution
+    'griewank_3d',
+    'griewank_5d',
+    'griewank_30d',
+    'griewank_100d',
+    'griewank_500d',
+    'griewank_1000d',
+]
+
 high_dimensional_problem_names: List[str] = [  # noqa
     # Ackley Series - Origin Solution
     'ackley_3d',
@@ -653,6 +663,8 @@ def find_best_architecture_task(problem_series, method, dimensionality):
             problem_names = alpine_series
         elif problem_series == 'chung_reynolds':
             problem_names = chung_reynolds_series
+        elif problem_series == 'griewank':
+            problem_names = griewank_series
     elif dimensionality == 'low-dimensional':
         directory = 'low-dimension-search-results'
         PROBLEMS = PROBLEMS_BY_NAME
