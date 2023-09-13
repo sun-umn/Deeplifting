@@ -248,28 +248,28 @@ class DeepliftingSkipMLP(nn.Module):
         for i, layer in enumerate(self.layers):
             x_new = layer(x)
             if (i + 1) % self.skip_every_n == 0 and i != 0:
-                # if self.agg_function == 'sum':
-                #     x_skip = x + x_new
+                if self.agg_function == 'sum':
+                    x_skip = x + x_new
                 intermediate_connections.append(x_new)
                 x = x_new
             else:
                 x = x_new
 
-        # Stack the skipped connections and then sum
-        # We will also make this configurable
-        x = torch.stack(intermediate_connections)
-        if self.agg_function == 'sum':
-            x = torch.sum(x, axis=0)
-        elif self.agg_function == 'average':
-            x = torch.mean(x, axis=0)
-        elif self.agg_function == 'max':
-            x = torch.amax(x, axis=0)
+        # # Stack the skipped connections and then sum
+        # # We will also make this configurable
+        # x = torch.stack(intermediate_connections)
+        # if self.agg_function == 'sum':
+        #     x = torch.sum(x, axis=0)
+        # elif self.agg_function == 'average':
+        #     x = torch.mean(x, axis=0)
+        # elif self.agg_function == 'max':
+        #     x = torch.amax(x, axis=0)
 
-        # # Set x = x_skip
-        # x = x_skip
+        # # # Set x = x_skip
+        # # x = x_skip
 
         # Final output layer
-        out = self.output_layer(x)
+        out = self.output_layer(x_skip)
 
         # Run through the scaling layer
         out = self.scaling_layer(out)
