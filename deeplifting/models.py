@@ -246,7 +246,7 @@ class DeepliftingSkipMLP(nn.Module):
 
         # Final scaling layer
         self.scaling_layer = DeepliftingScalingBlock(
-            bounds=bounds, output_activation=output_activation, dimension=output_size
+            bounds=bounds, output_activation=output_activation, dimensions=output_size
         )
 
         # One of the things that we did with the topology
