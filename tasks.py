@@ -3,6 +3,7 @@
 import os
 from datetime import datetime
 from itertools import product
+from typing import List
 
 # third party
 import click
@@ -84,70 +85,74 @@ low_dimensional_problem_names = [
     # 'layeb8',
 ]
 
-high_dimensional_problem_names = [
-    # Ackley Series - Origin Solution
-    'ackley_3d',
-    'ackley_5d',
-    'ackley_30d',
-    'ackley_100d',
-    'ackley_500d',
-    'ackley_1000d',
-    # # Alpine1 Series - Origin Solution
+# High dimensional series
+alpine_series = [
+    # Alpine1 Series - Origin Solution
     'alpine1_3d',
     'alpine1_5d',
     'alpine1_30d',
     'alpine1_100d',
     'alpine1_500d',
     'alpine1_1000d',
-    # Chung-Reynolds Series - Origin Solution
-    'chung_reyonlds_3d',
-    'chung_reynolds_5d',
-    'chung_reynolds_30d',
-    'chung_reynolds_100d',
-    'chung_reynolds_500d',
-    'chung_reynolds_1000d',
-    # Griewank Series - Origin Solution
-    'griewank_3d',
-    'griewank_5d',
-    'griewank_30d',
-    'griewank_100d',
-    'griewank_500d',
-    'griewank_1000d',
-    # Layeb 4 Series - Non-origin solution
-    'layeb4_3d',
-    'layeb4_5d',
-    'layeb4_30d',
-    'layeb4_100d',
-    'layeb4_500d',
-    'layeb4_1000d',
-    # Levy Series - Non-origin solution
-    'levy_3d',
-    'levy_5d',
-    'levy_30d',
-    'levy_100d',
-    'levy_500d',
-    'levy_1000d',
-    # Qing Series - Non-origin solution
-    'qing_3d',
-    'qing_5d',
-    'qing_30d',
-    'qing_100d',
-    'qing_500d',
-    'qing_1000d',
-    # Rastrigin series - Origin solution
-    'rastrigin_3d',
-    'rastrigin_5d',
-    'rastrigin_30d',
-    'rastrigin_100d',
-    'rastrigin_500d',
-    'rastrigin_1000d',
-    # Schewefel series - Non-origin solution
-    'schwefel_3d',
-    'schwefel_5d',
-    'schwefel_30d',
-    'schwefel_100d',
-    'schwefel_500d',
-    'schwefel_1000d',
+]
+
+high_dimensional_problem_names: List[str] = [
+    # # Ackley Series - Origin Solution
+    # 'ackley_3d',
+    # 'ackley_5d',
+    # 'ackley_30d',
+    # 'ackley_100d',
+    # 'ackley_500d',
+    # 'ackley_1000d',
+    # # Chung-Reynolds Series - Origin Solution
+    # 'chung_reyonlds_3d',
+    # 'chung_reynolds_5d',
+    # 'chung_reynolds_30d',
+    # 'chung_reynolds_100d',
+    # 'chung_reynolds_500d',
+    # 'chung_reynolds_1000d',
+    # # Griewank Series - Origin Solution
+    # 'griewank_3d',
+    # 'griewank_5d',
+    # 'griewank_30d',
+    # 'griewank_100d',
+    # 'griewank_500d',
+    # 'griewank_1000d',
+    # # Layeb 4 Series - Non-origin solution
+    # 'layeb4_3d',
+    # 'layeb4_5d',
+    # 'layeb4_30d',
+    # 'layeb4_100d',
+    # 'layeb4_500d',
+    # 'layeb4_1000d',
+    # # Levy Series - Non-origin solution
+    # 'levy_3d',
+    # 'levy_5d',
+    # 'levy_30d',
+    # 'levy_100d',
+    # 'levy_500d',
+    # 'levy_1000d',
+    # # Qing Series - Non-origin solution
+    # 'qing_3d',
+    # 'qing_5d',
+    # 'qing_30d',
+    # 'qing_100d',
+    # 'qing_500d',
+    # 'qing_1000d',
+    # # Rastrigin series - Origin solution
+    # 'rastrigin_3d',
+    # 'rastrigin_5d',
+    # 'rastrigin_30d',
+    # 'rastrigin_100d',
+    # 'rastrigin_500d',
+    # 'rastrigin_1000d',
+    # # Schewefel series - Non-origin solution
+    # 'schwefel_3d',
+    # 'schwefel_5d',
+    # 'schwefel_30d',
+    # 'schwefel_100d',
+    # 'schwefel_500d',
+    # 'schwefel_1000d',
 ]
 
 # Identify available hidden sizes
@@ -589,10 +594,10 @@ def run_saved_model_task():
 
 
 @cli.command('find-best-deeplifting-architecture')
-@click.option('--problem_name', default='ackley_2500d')
+@click.option('--problem_series', default='ackley')
 @click.option('--method', default='pygranso')
 @click.option('--dimensionality', default='high-dimensional')
-def find_best_architecture_task(problem_name, method, dimensionality):
+def find_best_architecture_task(problem_series, method, dimensionality):
     """
     Function that we will use to find the best architecture over multiple
     "hard" high-dimensional problems. We will aim to tackle a large dimensional
@@ -606,13 +611,16 @@ def find_best_architecture_task(problem_name, method, dimensionality):
         project="dever120/Deeplifting",
         api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzYmIwMTUyNC05YmZmLTQ1NzctOTEyNS1kZTIxYjU5NjY5YjAifQ==",  # noqa
     )  # your credentials
-    run['sys/tags'].add([problem_name, method])
+    run['sys/tags'].add([problem_series, method])
 
     # Get the problem list
     if dimensionality == 'high-dimensional':
         PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
+        if problem_series == 'alpine1':
+            problem_names = alpine_series
     elif dimensionality == 'low-dimensional':
         PROBLEMS = PROBLEMS_BY_NAME
+        problem_names = low_dimensional_problem_names
 
     # Get the available configurations
     combinations = (
@@ -624,112 +632,112 @@ def find_best_architecture_task(problem_name, method, dimensionality):
         search_include_bn,
     )
     configurations = list(product(*combinations))
-    trials = 1
+    trials = 10
 
     # List to store performance data
     performance_df_list = []
     experiment_date = datetime.today().strftime('%Y-%m-%d-%H')
-
-    # Run over the experiments
-    for (
-        index,
-        (
-            input_size,
-            hidden_size,
-            hidden_activation,
-            output_activation,
-            agg_function,
-            include_bn,
-        ),
-    ) in enumerate(configurations):
-        print(problem_name)
-        # Load the problems
-        problem = PROBLEMS[problem_name]
-        print(
-            input_size,
-            hidden_size,
-            hidden_activation,
-            output_activation,
-            agg_function,
-            include_bn,
-        )
-
-        # Get the outputs
-        if method == 'pygranso':
-            if dimensionality == 'high-dimensional':
-                outputs = run_high_dimensional_deeplifting(
-                    problem,
-                    problem_name=problem_name,
-                    trials=trials,
-                    input_size=input_size,
-                    hidden_sizes=hidden_size,
-                    activation=hidden_activation,
-                    output_activation=output_activation,
-                    agg_function=agg_function,
-                    include_bn=include_bn,
-                )
-            elif dimensionality == 'low-dimensional':
-                outputs = run_deeplifting(
-                    problem,
-                    problem_name=problem_name,
-                    trials=trials,
-                    input_size=input_size,
-                    hidden_sizes=hidden_size,
-                    activation=hidden_activation,
-                    output_activation=output_activation,
-                    agg_function=agg_function,
-                    include_bn=include_bn,
-                    method='single-value',
-                )
-
-        elif method == 'pytorch-lbfgs':
-            outputs = run_lbfgs_deeplifting(
-                problem,
-                problem_name=problem_name,
-                trials=trials,
-                input_size=input_size,
-                hidden_sizes=hidden_size,
-                activation=hidden_activation,
-                output_activation=output_activation,
-                agg_function=agg_function,
+    for problem_name in problem_names:
+        # Run over the experiments
+        for (
+            index,
+            (
+                input_size,
+                hidden_size,
+                hidden_activation,
+                output_activation,
+                agg_function,
+                include_bn,
+            ),
+        ) in enumerate(configurations):
+            print(problem_name)
+            # Load the problems
+            problem = PROBLEMS[problem_name]
+            print(
+                input_size,
+                hidden_size,
+                hidden_activation,
+                output_activation,
+                agg_function,
+                include_bn,
             )
-        else:
-            raise ValueError('Method is not supported!')
 
-        # Get the results of the outputs
-        output_size = problem['dimensions']
-        x_columns = [f'x{i + 1}' for i in range(output_size)]
-        columns = x_columns + ['f', 'algorithm', 'total_time']
+            # Get the outputs
+            if method == 'pygranso':
+                if dimensionality == 'high-dimensional':
+                    outputs = run_high_dimensional_deeplifting(
+                        problem,
+                        problem_name=problem_name,
+                        trials=trials,
+                        input_size=input_size,
+                        hidden_sizes=hidden_size,
+                        activation=hidden_activation,
+                        output_activation=output_activation,
+                        agg_function=agg_function,
+                        include_bn=include_bn,
+                    )
+                elif dimensionality == 'low-dimensional':
+                    outputs = run_deeplifting(
+                        problem,
+                        problem_name=problem_name,
+                        trials=trials,
+                        input_size=input_size,
+                        hidden_sizes=hidden_size,
+                        activation=hidden_activation,
+                        output_activation=output_activation,
+                        agg_function=agg_function,
+                        include_bn=include_bn,
+                        method='single-value',
+                    )
 
-        results = pd.DataFrame(outputs['final_results'], columns=columns)
+            elif method == 'pytorch-lbfgs':
+                outputs = run_lbfgs_deeplifting(
+                    problem,
+                    problem_name=problem_name,
+                    trials=trials,
+                    input_size=input_size,
+                    hidden_sizes=hidden_size,
+                    activation=hidden_activation,
+                    output_activation=output_activation,
+                    agg_function=agg_function,
+                )
+            else:
+                raise ValueError('Method is not supported!')
 
-        # Add meta data to the results
-        results['input_size'] = input_size
-        results['hidden_size'] = '-'.join(map(str, hidden_size))
-        results['hidden_activation'] = hidden_activation
-        results['output_activation'] = output_activation
-        results['agg_function'] = agg_function
-        results['problem_name'] = problem_name
-        results['global_minimum'] = problem['global_minimum']
-        results['dimensions'] = output_size
+            # Get the results of the outputs
+            output_size = problem['dimensions']
+            x_columns = [f'x{i + 1}' for i in range(output_size)]
+            columns = x_columns + ['f', 'algorithm', 'total_time']
 
-        # Save to parquet
-        layers = len(hidden_size)
-        units = hidden_size[0]
+            results = pd.DataFrame(outputs['final_results'], columns=columns)
 
-        path = f'./high-dimension-search_results/{experiment_date}-{problem_name}'
-        if not os.path.exists(path):
-            os.makedirs(path)
+            # Add meta data to the results
+            results['input_size'] = input_size
+            results['hidden_size'] = '-'.join(map(str, hidden_size))
+            results['hidden_activation'] = hidden_activation
+            results['output_activation'] = output_activation
+            results['agg_function'] = agg_function
+            results['problem_name'] = problem_name
+            results['global_minimum'] = problem['global_minimum']
+            results['dimensions'] = output_size
 
-        results.to_parquet(
-            f'{path}/{layers}'
-            f'-layer-{units}-{agg_function}'
-            f'-{index}-{method}-{output_activation}-'
-            f'input-size-{input_size}.parquet'  # noqa
-        )
+            # Save to parquet
+            layers = len(hidden_size)
+            units = hidden_size[0]
 
-        # Append performance
-        performance_df_list.append(results)
+            path = f'./high-dimension-search_results/{experiment_date}-{problem_name}'
+            if not os.path.exists(path):
+                os.makedirs(path)
+
+            results.to_parquet(
+                f'{path}/{layers}'
+                f'-layer-{units}-{agg_function}'
+                f'-{index}-{method}-{output_activation}-'
+                f'input-size-{input_size}.parquet'  # noqa
+            )
+
+            # Append performance
+            performance_df_list.append(results)
 
 
 @cli.command('run-pygranso')
