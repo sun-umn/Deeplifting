@@ -114,8 +114,8 @@ class DeepliftingBlock(nn.Module):
         # Linear layer
         x = self.linear(x)
 
-        # # Batch Normalization
-        # x = self.batch_norm(x)
+        # Batch Normalization
+        x = self.batch_norm(x)
 
         # # Dropout
         # x = self.dropout(x)
