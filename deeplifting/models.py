@@ -148,39 +148,39 @@ class DeepliftingScalingBlock(nn.Module):
         # c + (d - c) / (b - a) * (x - a)
         # c + (d - c) / (2) * (x + 1)
 
-        # # Try updating the way we define the bounds
-        # x_values_float = []
-        # for index, cnstr in enumerate(self.bounds):
-        #     a, b = cnstr
-        #     if (a is None) and (b is None):
-        #         x_constr = outputs[index]
-        #     elif (a is None) or (b is None):
-        #         x_constr = torch.clamp(outputs[index], min=a, max=b)
+        # Try updating the way we define the bounds
+        x_values_float = []
+        for index, cnstr in enumerate(self.bounds):
+            a, b = cnstr
+            if (a is None) and (b is None):
+                x_constr = outputs[index]
+            elif (a is None) or (b is None):
+                x_constr = torch.clamp(outputs[index], min=a, max=b)
 
-        #     # Being very explicit about this condition just in case
-        #     # to avoid weird behavior
-        #     elif (a is not None) and (b is not None):
-        #         if self.output_activation != 'sine':
-        #             x_constr = a + (b - a) / 2.0 * (torch.sin(outputs[:, index]) + 1)
-        #         else:
-        #             x_constr = a + (b - a) / 2.0 * (outputs[:, index] + 1)
-        #     x_values_float.append(x_constr)
+            # Being very explicit about this condition just in case
+            # to avoid weird behavior
+            elif (a is not None) and (b is not None):
+                if self.output_activation != 'sine':
+                    x_constr = a + (b - a) / 2.0 * (torch.sin(outputs[:, index]) + 1)
+                else:
+                    x_constr = a + (b - a) / 2.0 * (outputs[:, index] + 1)
+            x_values_float.append(x_constr)
 
-        # x = torch.stack(x_values_float, axis=1)
+        x = torch.stack(x_values_float, axis=1)
 
         # # Delete the x_values_float
         # del x_values_float
         # torch.cuda.empty_cache()
 
-        # Try: Get the first bound and confine it this way
-        # want to see if this is a memory leak - this was definetly a part of it
-        a, b = self.bounds[0]
-        if self.output_activation != 'sine':
-            return a + (b - a) / 2.0 * (torch.sin(outputs) + 1)
-        else:
-            return a + (b - a) / 2.0 * (outputs + 1)
+        # # Try: Get the first bound and confine it this way
+        # # want to see if this is a memory leak - this was definetly a part of it
+        # a, b = self.bounds[0]
+        # if self.output_activation != 'sine':
+        #     return a + (b - a) / 2.0 * (torch.sin(outputs) + 1)
+        # else:
+        #     return a + (b - a) / 2.0 * (outputs + 1)
 
-        # return x
+        return x
 
 
 # Automating skip connection block
