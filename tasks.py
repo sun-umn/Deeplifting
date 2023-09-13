@@ -164,18 +164,15 @@ search_hidden_sizes = [
     # Hidden sizes of 128
     hidden_size_128 * 2,
     hidden_size_128 * 3,
-    # hidden_size_128 * 4,
-    # hidden_size_128 * 5,
+    # Hidden sizes of 256
+    hidden_size_256 * 2,
+    hidden_size_256 * 3,
     # Hidden sizes of 512
     hidden_size_512 * 2,
     hidden_size_512 * 3,
-    # hidden_size_512 * 4,
-    # hidden_size_512 * 5,
     # Hidden sizes of 1024
-    hidden_size_1024 * 2,
-    hidden_size_1024 * 3,
-    # hidden_size_1024 * 4,
-    # hidden_size_1024 * 5,
+    # hidden_size_1024 * 2,
+    # hidden_size_1024 * 3,
 ]
 
 # Input sizes
