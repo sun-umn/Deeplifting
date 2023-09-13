@@ -645,12 +645,14 @@ def find_best_architecture_task(problem_series, method, dimensionality):
 
     # Get the problem list
     if dimensionality == 'high-dimensional':
+        directory = 'high-dimension-search-results'
         PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
         if problem_series == 'ackley':
             problem_names = ackley_series
         elif problem_series == 'alpine1':
             problem_names = alpine_series
     elif dimensionality == 'low-dimensional':
+        directory = 'low-dimension-search-results'
         PROBLEMS = PROBLEMS_BY_NAME
         problem_names = low_dimensional_problem_names
 
@@ -757,7 +759,7 @@ def find_best_architecture_task(problem_series, method, dimensionality):
             layers = len(hidden_size)
             units = hidden_size[0]
 
-            path = f'./high-dimension-search-results/{experiment_date}-{problem_name}'
+            path = f'./{directory}/{experiment_date}-{problem_name}'
             if not os.path.exists(path):
                 os.makedirs(path)
 
