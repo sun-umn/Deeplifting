@@ -2579,22 +2579,16 @@ def sine_envelope(x, results, trial, version='numpy'):
 
 
 # Problems from the literature survey by Jamil et al.
-# Ackley2
-def ackley2(x, results, trial, version='numpy'):
+def ackley2(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the Ackley2 function.
-    This is a 3-dimensional function with a global minimum of -200 at (0,0)
+    This is a 2-dimensional function with a global minimum of -200 at (0,0)
 
     Parameters:
-        x: (x1, x2) this is a 3D problem
+        x: (x1, x2) this is a 2D problem
     version : str
         The version to use for the function's computation.
         Options are 'numpy' and 'pytorch'.
-
-    Returns:
-    result : np.ndarray or torch.Tensor
-        The computed Damavandi function values
-        corresponding to the inputs (x1, x2).
 
     Raises:
     ValueError
@@ -2612,21 +2606,22 @@ def ackley2(x, results, trial, version='numpy'):
             "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    build_2d_intermediate_results(
-        x1=x1,
-        x2=x2,
-        result=result,
-        version=version,
-        results=results,
-        trial=trial,
-    )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
+        )
 
     return result
 
 
-# Ackley3
-def ackley3(x, results, trial, version='numpy'):
+def ackley3(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the Ackley3 function.
     This is a 2-dimensional function with a global minimum of
@@ -2670,20 +2665,21 @@ def ackley3(x, results, trial, version='numpy'):
             "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    build_2d_intermediate_results(
-        x1=x1,
-        x2=x2,
-        result=result,
-        version=version,
-        results=results,
-        trial=trial,
-    )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
+        )
 
     return result
 
 
-# nd Ackley4
 def ndackley4(x, results, trial, version='numpy'):
     """
     Compute the Ackley4 function.
@@ -2729,12 +2725,13 @@ def ndackley4(x, results, trial, version='numpy'):
     return result
 
 
-# Adjiman
-def adjiman(x, results, trial, version='numpy'):
+def adjiman(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the Adjiman function.
-    This is a 3-dimensional function with a global minimum of
+    This is a 2-dimensional function with a global minimum of
     -2.02181 at (2,0.10578)
+
+    Adjiman is also the EX 8-1-1 from MINLP lib
 
     Parameters:
         x: (x1, x2) this is a 3D problem
@@ -2763,24 +2760,25 @@ def adjiman(x, results, trial, version='numpy'):
             "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    build_2d_intermediate_results(
-        x1=x1,
-        x2=x2,
-        result=result,
-        version=version,
-        results=results,
-        trial=trial,
-    )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
+        )
 
     return result
 
 
-# Alpine1 in 2d
-def alpine1(x, results, trial, version='numpy'):
+def alpine1(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the Alpine1 function.
-    This is a 3-dimensional function with a global minimum of 0 at (0,0)
+    This is a 2-dimensional function with a global minimum of 0 at (0,0)
 
     Parameters:
         x: (x1, x2) this is a 3D problem
@@ -2813,27 +2811,29 @@ def alpine1(x, results, trial, version='numpy'):
             "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    build_2d_intermediate_results(
-        x1=x1,
-        x2=x2,
-        result=result,
-        version=version,
-        results=results,
-        trial=trial,
-    )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
+        )
 
     return result
 
 
-# Alpine2 in 2d
-def alpine2(x, results, trial, version='numpy'):
+def alpine2(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the Alpine2 function.
-    This is a 3-dimensional function with a global minimum of 2.8^2 at (7.917,7.917)
+    This is a 2-dimensional function with a global minimum of 2.808^2
+    at (7.917,7.917)
 
     Parameters:
-        x: (x1, x2) this is a 3D problem
+        x: (x1, x2) this is a 2D problem
     version : str
         The version to use for the function's computation.
         Options are 'numpy' and 'pytorch'.
@@ -2859,20 +2859,21 @@ def alpine2(x, results, trial, version='numpy'):
             "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    build_2d_intermediate_results(
-        x1=x1,
-        x2=x2,
-        result=result,
-        version=version,
-        results=results,
-        trial=trial,
-    )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
+        )
 
     return result
 
 
-# nd Alpine2
 def ndalpine2(x, results, trial, version='numpy'):
     """
     Compute the Alpine2 function.
@@ -2910,7 +2911,6 @@ def ndalpine2(x, results, trial, version='numpy'):
     return result
 
 
-# Brad in 3d
 def brad(x, results, trial, version='numpy'):
     x1, x2, x3 = x.flatten()
     if version == 'numpy':
@@ -2985,8 +2985,7 @@ def brad(x, results, trial, version='numpy'):
     return result
 
 
-# Bartels Conn in 2d
-def bartels_conn(x, results, trial, version='numpy'):
+def bartels_conn(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the Bartels Conn function.
     This is a 3-dimensional function with a global minimum of 1 at (0,0)
@@ -3013,6 +3012,12 @@ def bartels_conn(x, results, trial, version='numpy'):
             + np.abs(np.sin(x1))
             + np.abs(np.cos(x2))
         )
+    elif version == 'pyomo':
+        result = (
+            np.abs(x1**2 + x2**2 + x1 * x2)
+            + np.abs(pyo.sin(x1))
+            + np.abs(pyo.cos(x2))
+        )
     elif version == 'pytorch':
         result = (
             torch.abs(torch.square(x1) + torch.square(x2) + x1 * x2)
@@ -3024,20 +3029,17 @@ def bartels_conn(x, results, trial, version='numpy'):
             "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
         )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
 
     return result
 
@@ -6815,7 +6817,7 @@ alpine2_config = {
     'objective': alpine2,
     'bounds': [(0, 10), (0, 10)],
     'max_iterations': 1000,
-    'global_minimum': -6.1295,
+    'global_minimum': 2.808**2,
     'dimensions': 2,
 }
 

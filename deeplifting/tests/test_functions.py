@@ -8,7 +8,19 @@ import torch
 # first party
 from deeplifting.problems import (
     ackley,
+    ackley2,
+    ackley2_config,
+    ackley3,
+    ackley3_config,
     ackley_config,
+    adjiman,
+    adjiman_config,
+    alpine1,
+    alpine1_config,
+    alpine2,
+    alpine2_config,
+    bartels_conn,
+    bartels_conn_config,
     bukin_n6,
     bukin_n6_config,
     cross_in_tray,
@@ -508,3 +520,163 @@ def test_rosenbrock_has_correct_global_minimum():
     x = torch.tensor([0.99999, 0.99999], dtype=torch.float64)
     torch_result = rosenbrock(x, version='pytorch').numpy()
     assert math.isclose(torch_result, global_minimum, abs_tol=1e-4)
+
+
+def test_ackley2_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Ex Ackley 2 function has the correct global minimum.
+
+    The function has many global minimum values: Here is
+    one example
+    x*=(0.0, 0.0)
+    f(x*) = -200.0
+    """
+    global_minimum = ackley2_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([0.0, 0.0])
+    result = ackley2(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-4)
+
+    result = ackley2(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-4)
+
+    # Test the torch version
+    x = torch.tensor([0.0, 0.0], dtype=torch.float64)
+    torch_result = ackley2(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-4)
+
+
+def test_ackley3_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Ex Ackley 3 function has the correct global minimum.
+
+    The function has many global minimum values: Here is
+    one example
+    x*=(0.682584587365898, -0.36075325513719)
+    f(x*) = -195.629028238419
+    """
+    global_minimum = ackley3_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([0.682584587365898, -0.36075325513719])
+    result = ackley3(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-4)
+
+    result = ackley3(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-4)
+
+    # Test the torch version
+    x = torch.tensor([0.682584587365898, -0.36075325513719], dtype=torch.float64)
+    torch_result = ackley3(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-4)
+
+
+def test_adjiman_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Ex Adjiman function has the correct global minimum.
+    This problem comes from the MINLP library
+
+    The function has many global minimum values: Here is
+    one example
+    x*=(2.0, 0.1057835)
+    f(x*) = -2.021807
+    """
+    global_minimum = adjiman_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([2.0, 0.1057835])
+    result = adjiman(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-4)
+
+    result = adjiman(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-4)
+
+    # Test the torch version
+    x = torch.tensor([2.0, 0.1057835], dtype=torch.float64)
+    torch_result = adjiman(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-4)
+
+
+def test_alpine1_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Ex Alpine 1 function has the correct global minimum.
+    This problem comes from the MINLP library
+
+    The function has many global minimum values: Here is
+    one example
+    x*=(0.0, 0.0)
+    f(x*) = 0.0
+    """
+    global_minimum = alpine1_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([0.0, 0.0])
+    result = alpine1(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-4)
+
+    result = alpine1(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-4)
+
+    # Test the torch version
+    x = torch.tensor([0.0, 0.0], dtype=torch.float64)
+    torch_result = alpine1(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-4)
+
+
+def test_alpine2_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Ex Alpine 2 function has the correct global minimum.
+    This problem comes from the MINLP library
+
+    The function has many global minimum values: Here is
+    one example
+    x*=(7.917, 7.917)
+    f(x*) = -2.808 ** 2 for 2D
+    """
+    global_minimum = alpine2_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([7.917, 7.917])
+    result = alpine2(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    result = alpine2(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    # Test the torch version
+    x = torch.tensor([7.917, 7.917], dtype=torch.float64)
+    torch_result = alpine2(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-2)
+
+
+def test_bartels_conn_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Ex Bartels Conn function has the correct global minimum.
+    This problem comes from the MINLP library
+
+    The function has many global minimum values: Here is
+    one example
+    x*=(0.0, 0.0)
+    f(x*) = 1.0
+    """
+    global_minimum = bartels_conn_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([0.0, 0.0])
+    result = bartels_conn(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    result = bartels_conn(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    # Test the torch version
+    x = torch.tensor([0.0, 0.0], dtype=torch.float64)
+    torch_result = bartels_conn(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-2)
