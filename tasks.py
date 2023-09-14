@@ -27,17 +27,18 @@ from deeplifting.utils import create_contour_plot
 
 # Identify problems to run
 low_dimensional_problem_names = [
-    'ackley',  # Low
-    'ackley2',
-    'ackley3',
-    'adjiman',
-    'alpine1',
-    'alpine2',
-    'bartels_conn',
-    'beale',
+    # 'ackley',  # Low
+    # 'ackley2',
+    # 'ackley3',
+    # 'adjiman',
+    # 'alpine1',
+    # 'alpine2',
+    # 'bartels_conn',
+    # 'beale',
     'bird',
     'bohachevsky1',
     'bohachevsky2',
+    'bohachevsky3',
     'booth',
     'branin_rcos',
     'bukin_n6',  # High, 2 layer is best so far, takes a while to run
@@ -811,6 +812,7 @@ def find_best_architecture_task(problem_series, method, dimensionality):
             results['hidden_activation'] = hidden_activation
             results['output_activation'] = output_activation
             results['agg_function'] = agg_function
+            results['include_bn'] = include_bn
             results['problem_name'] = problem_name
             results['global_minimum'] = problem['global_minimum']
             results['dimensions'] = output_size
@@ -827,7 +829,7 @@ def find_best_architecture_task(problem_series, method, dimensionality):
                 f'{path}/{layers}'
                 f'-layer-{units}-{agg_function}'
                 f'-{index}-{method}-{hidden_activation}'
-                f'-{output_activation}-'
+                f'-{output_activation}-{include_bn}-'
                 f'input-size-{input_size}.parquet'  # noqa
             )
 
