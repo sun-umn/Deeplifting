@@ -31,6 +31,7 @@ low_dimensional_problem_names = [
     'ackley2',
     'ackley3',
     'adjiman',
+    'alpine1',
     # 'bukin_n6',  # High, 2 layer is best so far, takes a while to run
     # 'cross_in_tray',  # Low, runs quickly
     'cross_leg_table',
@@ -49,9 +50,8 @@ low_dimensional_problem_names = [
     # 'mathopt6',
     # 'quantum',  # Quantum is not something we can calulate with SCIP
     'rosenbrock',
-    'kriging_peaks_red010',
+    # 'kriging_peaks_red010',
     # 'kriging_peaks_red020',
-    # 'alpine1',
     # 'alpine2',
     # 'bartels_conn',
     # 'beale',

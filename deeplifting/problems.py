@@ -2616,8 +2616,8 @@ def ackley3(x, results, trial, version='numpy'):
             np.cos(3 * x1) + np.sin(3 * x2)
         )
     elif version == 'pyomo':
-        result = -200 * np.exp(-0.02 * np.sqrt(x1**2 + x2**2)) + 5 * np.exp(
-            np.cos(3 * x1) + np.sin(3 * x2)
+        result = -200 * pyo.exp(-0.02 * (x1**2 + x2**2) ** 0.5) + 5 * pyo.exp(
+            pyo.cos(3 * x1) + pyo.sin(3 * x2)
         )
     elif version == 'pytorch':
         result = -200 * torch.exp(
