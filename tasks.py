@@ -43,6 +43,10 @@ low_dimensional_problem_names = [
     'branin_rcos',
     'brent',
     'bukin_n6',  # High, 2 layer is best so far, takes a while to run
+    'bukin_n2',
+    'bukin_n4',
+    'camel_3hump',
+    'camel_6hump',
     'cross_in_tray',  # Low, runs quickly
     'cross_leg_table',
     'drop_wave',  # Low, runs quickly
@@ -62,10 +66,6 @@ low_dimensional_problem_names = [
     # 'kriging_peaks_red010',
     # 'kriging_peaks_red020',
     # 'brown',
-    # 'bukin_n2',
-    # 'bukin_n4',
-    # 'camel_3hump',
-    # 'camel_6hump',
     # 'chung_reynolds',
     # 'cube',  # Correct but paper has wrong x*
     # 'xinsheyang_n2',

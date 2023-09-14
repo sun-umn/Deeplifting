@@ -47,10 +47,14 @@ from deeplifting.problems import (
     camel_3hump_config,
     camel_6hump,
     camel_6hump_config,
+    chung_reynolds,
+    chung_reynolds_config,
     cross_in_tray,
     cross_in_tray_config,
     cross_leg_table,
     cross_leg_table_config,
+    cube,
+    cube_config,
     drop_wave,
     drop_wave_config,
     eggholder,
@@ -1017,4 +1021,60 @@ def test_camel_6hump_has_correct_global_minimum():
     # Test the torch version
     x = torch.tensor([0.0898, -0.7126], dtype=torch.float64)
     torch_result = camel_6hump(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-2)
+
+
+def test_chung_reynolds_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Ex Chung Reynolds function has the correct global minimum.
+
+    The function has many global minimum values: Here is
+    one example
+    x*=(0.0, 0.0)
+    f(x*) = 0.0
+    """
+    global_minimum = chung_reynolds_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([0.0, 0.0])
+    result = chung_reynolds(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    result = chung_reynolds(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    # Test the torch version
+    x = torch.tensor([0.0, 0.0], dtype=torch.float64)
+    torch_result = chung_reynolds(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-2)
+
+
+def test_cube_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Ex Cube function has the correct global minimum.
+
+    The function has many global minimum values: Here is
+    one example
+    x*=(1.0, 1.0)
+    f(x*) = 0.0
+
+    x* given here:
+    https://arxiv.org/pdf/1308.4008.pdf
+    is incorrect
+    """
+    global_minimum = cube_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([1.0, 1.0])
+    result = cube(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    result = cube(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    # Test the torch version
+    x = torch.tensor([1.0, 1.0], dtype=torch.float64)
+    torch_result = cube(x, version='pytorch').numpy()
     assert math.isclose(torch_result, global_minimum, abs_tol=1e-2)

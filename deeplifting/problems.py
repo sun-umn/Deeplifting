@@ -2912,6 +2912,9 @@ def ndalpine2(x, results, trial, version='numpy'):
 
 
 def brad(x, results, trial, version='numpy'):
+    """
+    Brad function in 3D
+    """
     x1, x2, x3 = x.flatten()
     if version == 'numpy':
         u = np.arange(1, 16)
@@ -3583,6 +3586,9 @@ def bohachevsky3(x, results=None, trial=None, version='numpy'):
 
 
 def booth(x, results=None, trial=None, version='numpy'):
+    """
+    Booth function in 2D - test optimization function
+    """
     x1, x2 = x.flatten()
     if version == 'numpy':
         result = np.square(x1 + 2 * x2 - 7) + np.square(2 * x1 + x2 - 5)
@@ -3842,8 +3848,10 @@ def camel_6hump(x, results=None, trial=None, version='numpy'):
     return result
 
 
-# Chen Bird in 2d
-def chen_bird(x, results, trial, version='numpy'):
+def chen_bird(x, results=None, trial=None, version='numpy'):
+    """
+    Chen Bird in 2D
+    """
     x1, x2 = x.flatten()
     if version == 'numpy':
         result = -(0.001 / np.floor(0.001**2 + (x1 - 0.4 * x2 - 0.1) ** 2)) - (
@@ -3858,26 +3866,26 @@ def chen_bird(x, results, trial, version='numpy'):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
         )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
 
     return result
 
 
 # Chen V in 2d
-def chen_v(x, results, trial, version='numpy'):
+def chen_v(x, results=None, trial=None, version='numpy'):
+    """
+    Chen V in 2D
+    """
     x1, x2 = x.flatten()
     if version == 'numpy':
         result = (
@@ -3896,26 +3904,25 @@ def chen_v(x, results, trial, version='numpy'):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
         )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
 
     return result
 
 
-# Chichinadze in 2d
-def chichinadze(x, results, trial, version='numpy'):
+def chichinadze(x, results=None, trial=None, version='numpy'):
+    """
+    Chichinadze function in 2D
+    """
     x1, x2 = x.flatten()
     if version == 'numpy':
         result = (
@@ -3940,54 +3947,52 @@ def chichinadze(x, results, trial, version='numpy'):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
         )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
 
     return result
 
 
-# nd Chung Reynolds
-def chung_reynolds(x, results, trial, version='numpy'):
-    x = x.flatten()
-    if version == 'numpy':
-        result = np.square(np.sum(np.square(x)))
-    elif version == 'pytorch':
-        result = torch.square(torch.sum(torch.square(x)))
+def chung_reynolds(x, results=None, trial=None, version='numpy'):
+    """
+    Chung Reynolds function in 2D
+    """
+    x1, x2 = x.flatten()
+    if version == 'numpy' or version == 'pyomo' or version == 'pytorch':
+        result = (x1**2 + x2**2) ** 2
     else:
         raise ValueError(
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        x_tuple = tuple(x.detach().cpu().numpy())
-        results[trial, iteration, :] = np.array(
-            x_tuple + (result.detach().cpu().numpy(),)
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
         )
-
-    else:
-        x_tuple = tuple(x.flatten())
-        results[trial, iteration, :] = np.array(x_tuple + (result,))
 
     return result
 
 
-# Colville in 4d
 def colville(x, results, trial, version='numpy'):
+    """
+    Colville in 4D
+    """
     x1, x2, x3, x4 = x.flatten()
     if version == 'numpy' or version == 'pytorch':
         result = (
@@ -4023,8 +4028,10 @@ def colville(x, results, trial, version='numpy'):
     return result
 
 
-# Cosine Mixture in 4d
 def cosine_mixture(x, results, trial, version='numpy'):
+    """
+    Cosine Mixture in 4D
+    """
     x = x.flatten()
     if version == 'numpy':
         result = -0.1 * np.sum(np.cos(5 * np.pi * x)) - np.sum(np.square(x))
@@ -4051,8 +4058,10 @@ def cosine_mixture(x, results, trial, version='numpy'):
     return result
 
 
-# nd Csendes fn
 def csendes(x, results, trial, version='numpy'):
+    """
+    ND Csendes Function
+    """
     x = x.flatten()
     if version == 'numpy':
         result = np.sum(np.power(x, 6) * (2 + np.sin(1 / x)))
@@ -4079,30 +4088,29 @@ def csendes(x, results, trial, version='numpy'):
     return result
 
 
-# Cube in 2d
-def cube(x, results, trial, version='numpy'):
+def cube(x, results=None, trial=None, version='numpy'):
+    """
+    Cube in 2D
+    """
     x1, x2 = x.flatten()
-    if version == 'numpy' or version == 'pytorch':
+    if version == 'numpy' or version == 'pyomo' or version == 'pytorch':
         result = 100 * (x2 - x1**3) ** 2 + (1 - x1) ** 2
     else:
         raise ValueError(
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
         )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
 
     return result
 
@@ -8124,7 +8132,6 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'alpine1_1000d': alpine1_1000d_config,
     'alpine1_2500d': alpine1_2500d_config,
     # Chung-Reynolds Series - Origin Solution
-    'chung_reynolds': chung_reynolds_config,
     'chung_reyonlds_3d': chung_reynolds_3d_config,
     'chung_reynolds_5d': chung_reynolds_5d_config,
     'chung_reynolds_30d': chung_reynolds_30d_config,
