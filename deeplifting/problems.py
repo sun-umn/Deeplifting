@@ -43,7 +43,7 @@ def build_2d_intermediate_results(x1, x2, result, version, results, trial):
     return results
 
 
-def ackley(x, results, trial, version='numpy'):
+def ackley(x, results=None, trial=None, version='numpy'):
     """
     Function that implements the Ackley function in
     numpy, pytorch or pyomo interface. We will use this
@@ -75,20 +75,22 @@ def ackley(x, results, trial, version='numpy'):
             "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    build_2d_intermediate_results(
-        x1=x1,
-        x2=x2,
-        result=result,
-        version=version,
-        results=results,
-        trial=trial,
-    )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
+        )
 
     return result
 
 
-def bukin_n6(x, results, trial, version='numpy'):
+def bukin_n6(x, results=None, trial=None, version='numpy'):
     """
     Function that implements the Bukin Function N.6 in both
     numpy and pytorch and pyomo interface.
@@ -111,20 +113,22 @@ def bukin_n6(x, results, trial, version='numpy'):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    build_2d_intermediate_results(
-        x1=x1,
-        x2=x2,
-        result=result,
-        version=version,
-        results=results,
-        trial=trial,
-    )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
+        )
 
     return result
 
 
-def cross_in_tray(x, results, trial, version='numpy'):
+def cross_in_tray(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the 2D Cross-in-Tray function.
     This function has four identical global minima.
@@ -196,20 +200,22 @@ def cross_in_tray(x, results, trial, version='numpy'):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    build_2d_intermediate_results(
-        x1=x1,
-        x2=x2,
-        result=result,
-        version=version,
-        results=results,
-        trial=trial,
-    )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
+        )
 
     return result
 
 
-def cross_leg_table(x, results, trial, version='numpy'):
+def cross_leg_table(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the CrossLegTable problem from the infinity77 list.
     This is a 3-dimensional function with a global minimum of -1.0 at (0,0)
@@ -281,20 +287,23 @@ def cross_leg_table(x, results, trial, version='numpy'):
         raise ValueError(
             "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
         )
-    # Fill in the intermediate results
-    build_2d_intermediate_results(
-        x1=x1,
-        x2=x2,
-        result=result,
-        version=version,
-        results=results,
-        trial=trial,
-    )
+
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
+        )
 
     return result
 
 
-def drop_wave(x, results, trial, version='numpy'):
+def drop_wave(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the 2D Drop-Wave function. This
     function has a global minimum at (x, y) = (0, 0).
@@ -335,20 +344,22 @@ def drop_wave(x, results, trial, version='numpy'):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    build_2d_intermediate_results(
-        x1=x1,
-        x2=x2,
-        result=result,
-        version=version,
-        results=results,
-        trial=trial,
-    )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
+        )
 
     return result
 
 
-def eggholder(x, results, trial, version='numpy'):
+def eggholder(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the 2D Eggholder function.
     This function has numerous local minima and a global minimu
@@ -389,15 +400,17 @@ def eggholder(x, results, trial, version='numpy'):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    build_2d_intermediate_results(
-        x1=x1,
-        x2=x2,
-        result=result,
-        version=version,
-        results=results,
-        trial=trial,
-    )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
+        )
 
     return result
 
@@ -2808,6 +2821,8 @@ def alpine2(x, results, trial, version='numpy'):
     x1, x2 = x.flatten()
     if version == 'numpy':
         result = (np.sqrt(x1) * np.sin(x1)) * (np.sqrt(x2) * np.sin(x2))
+    elif version == 'pyomo':
+        result = (x1**0.5 * pyo.sin(x1)) * (x2**0.5 * pyo.sin(x2))
     elif version == 'pytorch':
         result = (torch.sqrt(x1) * torch.sin(x1)) * (torch.sqrt(x2) * torch.sin(x2))
     else:
@@ -2816,19 +2831,14 @@ def alpine2(x, results, trial, version='numpy'):
         )
 
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
 
     return result
 
