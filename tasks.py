@@ -27,20 +27,21 @@ from deeplifting.utils import create_contour_plot
 
 # Identify problems to run
 low_dimensional_problem_names = [
-    # 'ackley',  # Low
-    # 'ackley2',
-    # 'ackley3',
-    # 'adjiman',
-    # 'alpine1',
-    # 'alpine2',
-    # 'bartels_conn',
-    # 'beale',
+    'ackley',  # Low
+    'ackley2',
+    'ackley3',
+    'adjiman',
+    'alpine1',
+    'alpine2',
+    'bartels_conn',
+    'beale',
     'bird',
     'bohachevsky1',
     'bohachevsky2',
     'bohachevsky3',
     'booth',
     'branin_rcos',
+    'brent',
     'bukin_n6',  # High, 2 layer is best so far, takes a while to run
     'cross_in_tray',  # Low, runs quickly
     'cross_leg_table',
@@ -60,7 +61,6 @@ low_dimensional_problem_names = [
     'rosenbrock',
     # 'kriging_peaks_red010',
     # 'kriging_peaks_red020',
-    # 'brent',
     # 'brown',
     # 'bukin_n2',
     # 'bukin_n4',
