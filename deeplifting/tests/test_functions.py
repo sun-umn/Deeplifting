@@ -37,6 +37,10 @@ from deeplifting.problems import (
     branin_rcos_config,
     brent,
     brent_config,
+    bukin_n2,
+    bukin_n2_config,
+    bukin_n4,
+    bukin_n4_config,
     bukin_n6,
     bukin_n6_config,
     cross_in_tray,
@@ -904,4 +908,56 @@ def test_brent_has_correct_global_minimum():
     # Test the torch version
     x = torch.tensor([-10.0, -10.0], dtype=torch.float64)
     torch_result = brent(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-2)
+
+
+def test_bukin_n2_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Ex Bukin N2 function has the correct global minimum.
+
+    The function has many global minimum values: Here is
+    one example
+    x*=(-10.0, 0.0)
+    f(x*) = 0.0
+    """
+    global_minimum = bukin_n2_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([-10.0, 0.0])
+    result = bukin_n2(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    result = bukin_n2(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    # Test the torch version
+    x = torch.tensor([-10.0, 0.0], dtype=torch.float64)
+    torch_result = bukin_n2(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-2)
+
+
+def test_bukin_n4_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Ex Bukin N4 function has the correct global minimum.
+
+    The function has many global minimum values: Here is
+    one example
+    x*=(-10.0, 0.0)
+    f(x*) = 0.0
+    """
+    global_minimum = bukin_n4_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([-10.0, 0.0])
+    result = bukin_n4(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    result = bukin_n4(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    # Test the torch version
+    x = torch.tensor([-10.0, 0.0], dtype=torch.float64)
+    torch_result = bukin_n4(x, version='pytorch').numpy()
     assert math.isclose(torch_result, global_minimum, abs_tol=1e-2)

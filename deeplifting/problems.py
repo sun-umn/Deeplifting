@@ -3684,8 +3684,10 @@ def brent(x, results=None, trial=None, version='numpy'):
     return result
 
 
-# nd Brown function
-def brown(x, results, trial, version='numpy'):
+def brown(x, results=None, trial=None, version='numpy'):
+    """
+    ND Brown function
+    """
     x = x.flatten()
     shifted_x = x[1:]
     x = x[:-1]
@@ -3720,11 +3722,15 @@ def brown(x, results, trial, version='numpy'):
     return result
 
 
-# Bukin n2 in 2d
-def bukin_n2(x, results, trial, version='numpy'):
+def bukin_n2(x, results=None, trial=None, version='numpy'):
+    """
+    Bukin N2 function in 2D
+    """
     x1, x2 = x.flatten()
     if version == 'numpy':
         result = 100 * (x2 - 0.01 * np.square(x1) + 1) + 0.01 * np.square(x1 + 10)
+    elif version == 'pyomo':
+        result = 100 * (x2 - 0.01 * x1**2 + 1) + 0.01 * (x1 + 10) ** 2
     elif version == 'pytorch':
         result = 100 * (x2 - 0.01 * torch.square(x1) + 1) + 0.01 * torch.square(x1 + 10)
     else:
@@ -3732,29 +3738,30 @@ def bukin_n2(x, results, trial, version='numpy'):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
         )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
 
     return result
 
 
-# Bukin n4 in 2d
-def bukin_n4(x, results, trial, version):
+def bukin_n4(x, results=None, trial=None, version='numpy'):
+    """
+    Bukin N4 function in 2D
+    """
     x1, x2 = x.flatten()
     if version == 'numpy':
         result = 100 * np.square(x2) + 0.01 * np.abs(x1 + 10)
+    elif version == 'pyomo':
+        result = 100 * x2**2 + 0.01 * np.abs(x1 + 10)
     elif version == 'pytorch':
         result = 100 * torch.square(x2) + 0.01 * torch.abs(x1 + 10)
     else:
@@ -3762,20 +3769,17 @@ def bukin_n4(x, results, trial, version):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
         )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
 
     return result
 
