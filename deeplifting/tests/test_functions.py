@@ -33,6 +33,8 @@ from deeplifting.problems import (
     bohachevsky3_config,
     booth,
     booth_config,
+    branin_rcos,
+    branin_rcos_config,
     bukin_n6,
     bukin_n6_config,
     cross_in_tray,
@@ -844,4 +846,31 @@ def test_booth_has_correct_global_minimum():
     # Test the torch version
     x = torch.tensor([1.0, 3.0], dtype=torch.float64)
     torch_result = booth(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-2)
+
+
+def test_branin_rcos_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Ex Branin RCOS function has the correct global minimum.
+
+    The function has many global minimum values: Here is
+    one example
+    x*=(-pi, 12.275)
+    x*=(3 * pi, 2.425)
+    f(x*) = 0.3978873
+    """
+    global_minimum = branin_rcos_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([-np.pi, 12.275])
+    result = branin_rcos(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    result = branin_rcos(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    # Test the torch version
+    x = torch.tensor([3 * torch.pi, 2.425], dtype=torch.float64)
+    torch_result = branin_rcos(x, version='pytorch').numpy()
     assert math.isclose(torch_result, global_minimum, abs_tol=1e-2)

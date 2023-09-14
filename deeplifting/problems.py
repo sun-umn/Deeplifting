@@ -3412,7 +3412,7 @@ def bird(x, results=None, trial=None, version='numpy'):
         )
     elif version == 'pyomo':
         result = (
-            pyo.sin(x1) * pyo.exp((1 - np.cos(x2)) ** 2)
+            pyo.sin(x1) * pyo.exp((1 - pyo.cos(x2)) ** 2)
             + pyo.cos(x2) * pyo.exp((1 - pyo.sin(x1)) ** 2)
             + (x1 - x2) ** 2
         )
@@ -3610,27 +3610,27 @@ def booth(x, results=None, trial=None, version='numpy'):
     return result
 
 
-# Branin RCOS in 2d
-def branin_rcos(x, results, trial, version='numpy'):
+def branin_rcos(x, results=None, trial=None, version='numpy'):
+    """
+    Branin RCOS function in 2D
+    """
     x1, x2 = x.flatten()
     if version == 'numpy':
         result = (
-            np.square(x2 - ((5.1 * np.square(x1)) / (4 * np.square(np.pi))) - 6)
+            (x2 - ((5.1 * x1**2) / (4 * np.pi**2)) + 5 * x1 / np.pi - 6) ** 2
+            + 10 * (1 - (1 / (8 * np.pi))) * np.cos(x1)
             + 10
-            * (1 - (1 / (8 * np.pi)))
-            * np.cos(x1)
-            * np.cos(x2)
-            * np.log(np.square(x1) + np.square(x2) + 1)
+        )
+    elif version == 'pyomo':
+        result = (
+            (x2 - ((5.1 * x1**2) / (4 * np.pi**2)) + 5 * x1 / np.pi - 6) ** 2
+            + 10 * (1 - (1 / (8 * np.pi))) * pyo.cos(x1)
             + 10
         )
     elif version == 'pytorch':
         result = (
-            torch.square(x2 - ((5.1 * torch.square(x1)) / (4 * torch.pi**2)) - 6)
-            + 10
-            * (1 - (1 / (8 * np.pi)))
-            * torch.cos(x1)
-            * torch.cos(x2)
-            * torch.log(torch.square(x1) + torch.square(x2) + 1)
+            (x2 - ((5.1 * x1**2) / (4 * torch.pi**2)) + 5 * x1 / torch.pi - 6) ** 2
+            + 10 * (1 - (1 / (8 * np.pi))) * torch.cos(x1)
             + 10
         )
     else:
@@ -3638,20 +3638,17 @@ def branin_rcos(x, results, trial, version='numpy'):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
         )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
 
     return result
 
@@ -6951,9 +6948,9 @@ booth_config = {
 
 branin_rcos_config = {
     'objective': branin_rcos,
-    'bounds': [(-5, 15), (-5, 15)],
+    'bounds': [(-5, 10), (0, 15)],
     'max_iterations': 1000,
-    'global_minimum': 5.559037,
+    'global_minimum': 0.3978873,
     'dimensions': 2,
 }
 
