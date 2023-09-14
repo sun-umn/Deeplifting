@@ -824,7 +824,8 @@ def find_best_architecture_task(problem_series, method, dimensionality):
             results.to_parquet(
                 f'{path}/{layers}'
                 f'-layer-{units}-{agg_function}'
-                f'-{index}-{method}-{output_activation}-'
+                f'-{index}-{method}-{hidden_activation}'
+                f'-{output_activation}-'
                 f'input-size-{input_size}.parquet'  # noqa
             )
 
