@@ -674,7 +674,7 @@ def levy(x, results=None, trial=None, version='numpy'):
     return result
 
 
-def levy_n13(x, results, trial, version='numpy'):
+def levy_n13(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the 2D Levy N.13 function.
     This function has a global minimum at x1 = x2 = 1.
@@ -721,20 +721,22 @@ def levy_n13(x, results, trial, version='numpy'):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    build_2d_intermediate_results(
-        x1=x1,
-        x2=x2,
-        result=result,
-        version=version,
-        results=results,
-        trial=trial,
-    )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
+        )
 
     return result
 
 
-def rastrigin(x, results, trial, version='numpy'):
+def rastrigin(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the 2D Rastrigin function.
     This function has a global minimum at x1 = x2 = 0.
@@ -781,20 +783,22 @@ def rastrigin(x, results, trial, version='numpy'):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    build_2d_intermediate_results(
-        x1=x1,
-        x2=x2,
-        result=result,
-        version=version,
-        results=results,
-        trial=trial,
-    )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
+        )
 
     return result
 
 
-def schaffer_n2(x, results, trial, version='numpy'):
+def schaffer_n2(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the 2D Schaffer function N.2.
     This function has a global minimum at x1 = x2 = 0.
@@ -841,20 +845,22 @@ def schaffer_n2(x, results, trial, version='numpy'):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    build_2d_intermediate_results(
-        x1=x1,
-        x2=x2,
-        result=result,
-        version=version,
-        results=results,
-        trial=trial,
-    )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
+        )
 
     return result
 
 
-def schaffer_n4(x, results, trial, version='numpy'):
+def schaffer_n4(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the 2D Schaffer function N.4.
     This function has a global minimum at x1 = x2 = 0.
@@ -901,20 +907,22 @@ def schaffer_n4(x, results, trial, version='numpy'):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    build_2d_intermediate_results(
-        x1=x1,
-        x2=x2,
-        result=result,
-        version=version,
-        results=results,
-        trial=trial,
-    )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
+        )
 
     return result
 
 
-def schwefel(x, results, trial, version='numpy'):
+def schwefel(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the 2D Schwefel function.
     This function has a global minimum at x1 = x2 = 420.9687.
@@ -961,20 +969,22 @@ def schwefel(x, results, trial, version='numpy'):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    build_2d_intermediate_results(
-        x1=x1,
-        x2=x2,
-        result=result,
-        version=version,
-        results=results,
-        trial=trial,
-    )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
+        )
 
     return result
 
 
-def shubert(x, results, trial, version='numpy'):
+def shubert(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the 2D Shubert function.
     This function has several local minima and multiple global minima.
@@ -999,12 +1009,12 @@ def shubert(x, results, trial, version='numpy'):
     """
     x1, x2 = x.flatten()
     if version == 'numpy':
-        term1 = np.sum([i * np.cos((i + 1) * x1 + i) for i in range(1, 6)], axis=0)
-        term2 = np.sum([i * np.cos((i + 1) * x2 + i) for i in range(1, 6)], axis=0)
+        term1 = np.sum([i * np.cos((i + 1) * x1 + i) for i in range(1, 6)])
+        term2 = np.sum([i * np.cos((i + 1) * x2 + i) for i in range(1, 6)])
         result = term1 * term2
-    if version == 'pyomo':
-        term1 = np.sum([i * pyo.cos(i + 1 * x1 + i) for i in range(1, 6)])
-        term2 = np.sum([i * pyo.cos(i + 1 * x2 + i) for i in range(1, 6)])
+    elif version == 'pyomo':
+        term1 = np.sum([i * pyo.cos((i + 1) * x1 + i) for i in range(1, 6)])
+        term2 = np.sum([i * pyo.cos((i + 1) * x2 + i) for i in range(1, 6)])
         result = term1 + term2
     elif version == 'pytorch':
         term1 = sum([i * torch.cos((i + 1) * x1 + i) for i in range(1, 6)])
@@ -1015,15 +1025,17 @@ def shubert(x, results, trial, version='numpy'):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    build_2d_intermediate_results(
-        x1=x1,
-        x2=x2,
-        result=result,
-        version=version,
-        results=results,
-        trial=trial,
-    )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
+        )
 
     return result
 

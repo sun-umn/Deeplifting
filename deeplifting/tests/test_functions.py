@@ -3,6 +3,7 @@ import math
 
 # third party
 import numpy as np
+import pytest
 import torch
 
 # first party
@@ -25,6 +26,18 @@ from deeplifting.problems import (
     holder_table_config,
     levy,
     levy_config,
+    levy_n13,
+    levy_n13_config,
+    rastrigin,
+    rastrigin_config,
+    schaffer_n2,
+    schaffer_n2_config,
+    schaffer_n4,
+    schaffer_n4_config,
+    schwefel,
+    schwefel_config,
+    shubert,
+    shubert_config,
 )
 
 
@@ -256,4 +269,157 @@ def test_levy_has_correct_global_minimum():
     # Test the torch version
     x = torch.tensor([1.0, 1.0], dtype=torch.float64)
     torch_result = levy(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-4)
+
+
+def test_levy_n13_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Levy N13 function has the correct global minimum.
+
+    The global minimum exits
+    x*=(1.0, 1.0)
+    f(x*) = 0
+    """
+    global_minimum = levy_n13_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([1.0, 1.0])
+    result = levy_n13(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-4)
+
+    result = levy_n13(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-4)
+
+    # Test the torch version
+    x = torch.tensor([1.0, 1.0], dtype=torch.float64)
+    torch_result = levy_n13(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-4)
+
+
+def test_rastrigin_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Rastrigin function has the correct global minimum.
+
+    The global minimum exits
+    x*=(0.0, 0.0)
+    f(x*) = 0
+    """
+    global_minimum = rastrigin_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([0.0, 0.0])
+    result = rastrigin(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-4)
+
+    result = rastrigin(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-4)
+
+    # Test the torch version
+    x = torch.tensor([0.0, 0.0], dtype=torch.float64)
+    torch_result = rastrigin(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-4)
+
+
+def test_schaffer_n2_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Schaffer N2 function has the correct global minimum.
+
+    The global minimum exits
+    x*=(0.0, 0.0)
+    f(x*) = 0
+    """
+    global_minimum = schaffer_n2_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([0.0, 0.0])
+    result = schaffer_n2(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-4)
+
+    result = schaffer_n2(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-4)
+
+    # Test the torch version
+    x = torch.tensor([0.0, 0.0], dtype=torch.float64)
+    torch_result = schaffer_n2(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-4)
+
+
+def test_schaffer_n4_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Schaffer N4 function has the correct global minimum.
+
+    The global minimum exits
+    x*=(0.0, 1.253115)
+    f(x*) = 0.292579
+    """
+    global_minimum = schaffer_n4_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([0.0, 1.253115])
+    result = schaffer_n4(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-4)
+
+    result = schaffer_n4(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-4)
+
+    # Test the torch version
+    x = torch.tensor([0.0, 1.253115], dtype=torch.float64)
+    torch_result = schaffer_n4(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-4)
+
+
+def test_schwefel_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Schwefel function has the correct global minimum.
+
+    The global minimum exits
+    x*=(420.9687, 420.9687)
+    f(x*) = 0.0
+    """
+    global_minimum = schwefel_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([420.9687, 420.9687])
+    result = schwefel(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-4)
+
+    result = schwefel(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-4)
+
+    # Test the torch version
+    x = torch.tensor([420.9687, 420.9687], dtype=torch.float64)
+    torch_result = schwefel(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-4)
+
+
+@pytest.mark.skip(reason='Cannot currently verify a global minium value')
+def test_schubert_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Shubert function has the correct global minimum.
+
+    The function has many global minimum values: Here is
+    one example
+    x*=(-7.0835, 4.8580)
+    x*=(5.4828, 4.8580)
+    f(x*) = -186.7309
+    """
+    global_minimum = shubert_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([-1.4251, -7.0835])
+    result = shubert(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-4)
+
+    result = shubert(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-4)
+
+    # Test the torch version
+    x = torch.tensor([5.4828, 4.8580], dtype=torch.float64)
+    torch_result = shubert(x, version='pytorch').numpy()
     assert math.isclose(torch_result, global_minimum, abs_tol=1e-4)
