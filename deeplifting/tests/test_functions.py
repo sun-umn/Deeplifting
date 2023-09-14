@@ -29,6 +29,10 @@ from deeplifting.problems import (
     bohachevsky1_config,
     bohachevsky2,
     bohachevsky2_config,
+    bohachevsky3,
+    bohachevsky3_config,
+    booth,
+    booth_config,
     bukin_n6,
     bukin_n6_config,
     cross_in_tray,
@@ -788,4 +792,56 @@ def test_bohachevsky2_has_correct_global_minimum():
     # Test the torch version
     x = torch.tensor([0.0, 0.0], dtype=torch.float64)
     torch_result = bohachevsky2(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-2)
+
+
+def test_bohachevsky3_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Ex Bohachevsky 3 function has the correct global minimum.
+
+    The function has many global minimum values: Here is
+    one example
+    x*=(0.0, 0.0)
+    f(x*) = 0.0
+    """
+    global_minimum = bohachevsky3_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([0.0, 0.0])
+    result = bohachevsky3(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    result = bohachevsky3(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    # Test the torch version
+    x = torch.tensor([0.0, 0.0], dtype=torch.float64)
+    torch_result = bohachevsky3(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-2)
+
+
+def test_booth_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Ex Booth function has the correct global minimum.
+
+    The function has many global minimum values: Here is
+    one example
+    x*=(1.0, 3.0)
+    f(x*) = 0.0
+    """
+    global_minimum = booth_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([1.0, 3.0])
+    result = booth(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    result = booth(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    # Test the torch version
+    x = torch.tensor([1.0, 3.0], dtype=torch.float64)
+    torch_result = booth(x, version='pytorch').numpy()
     assert math.isclose(torch_result, global_minimum, abs_tol=1e-2)

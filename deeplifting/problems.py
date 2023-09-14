@@ -3539,8 +3539,10 @@ def bohachevsky2(x, results=None, trial=None, version='numpy'):
     return result
 
 
-# Bohachevsky3 in 2d
-def bohachevsky3(x, results, trial, version='numpy'):
+def bohachevsky3(x, results=None, trial=None, version='numpy'):
+    """
+    Bohachevsky 3 in 2D
+    """
     x1, x2 = x.flatten()
     if version == 'numpy':
         result = (
@@ -3548,6 +3550,10 @@ def bohachevsky3(x, results, trial, version='numpy'):
             + 2 * np.square(x2)
             - 0.3 * np.cos(3 * np.pi * x1 + 4 * np.pi * x2)
             + 0.3
+        )
+    elif version == 'pyomo':
+        result = (
+            x1**2 + 2 * x2**2 - 0.3 * pyo.cos(3 * np.pi * x1 + 4 * np.pi * x2) + 0.3
         )
     elif version == 'pytorch':
         result = (
@@ -3561,29 +3567,27 @@ def bohachevsky3(x, results, trial, version='numpy'):
             "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
         )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
 
     return result
 
 
-# Booth in 2d
-def booth(x, results, trial, version='numpy'):
+def booth(x, results=None, trial=None, version='numpy'):
     x1, x2 = x.flatten()
     if version == 'numpy':
         result = np.square(x1 + 2 * x2 - 7) + np.square(2 * x1 + x2 - 5)
+    elif version == 'pyomo':
+        result = (x1 + 2 * x2 - 7) ** 2 + (2 * x1 + x2 - 5) ** 2
     elif version == 'pytorch':
         result = torch.square(x1 + 2 * x2 - 7) + torch.square(2 * x1 + x2 - 5)
     else:
@@ -3591,20 +3595,17 @@ def booth(x, results, trial, version='numpy'):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
         )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
 
     return result
 
