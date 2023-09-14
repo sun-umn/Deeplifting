@@ -19,6 +19,8 @@ from deeplifting.problems import (
     drop_wave_config,
     eggholder,
     eggholder_config,
+    ex8_1_1,
+    ex8_1_1_config,
     griewank,
     griewank_config,
     holder_table,
@@ -27,8 +29,12 @@ from deeplifting.problems import (
     levy_config,
     levy_n13,
     levy_n13_config,
+    mathopt6,
+    mathopt6_config,
     rastrigin,
     rastrigin_config,
+    rosenbrock,
+    rosenbrock_config,
     schaffer_n2,
     schaffer_n2_config,
     schaffer_n4,
@@ -420,4 +426,85 @@ def test_schubert_has_correct_global_minimum():
     # Test the torch version
     x = torch.tensor([-7.083506, -1.425128], dtype=torch.float64)
     torch_result = shubert(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-4)
+
+
+def test_ex8_1_1_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Ex 8-1-1 function has the correct global minimum.
+    This problem comes from the MINLP library
+
+    The function has many global minimum values: Here is
+    one example
+    x*=(2.0, 0.1057835)
+    f(x*) = -2.021807
+    """
+    global_minimum = ex8_1_1_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([2.0, 0.1057835])
+    result = ex8_1_1(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-4)
+
+    result = ex8_1_1(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-4)
+
+    # Test the torch version
+    x = torch.tensor([2.0, 0.1057835], dtype=torch.float64)
+    torch_result = ex8_1_1(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-4)
+
+
+def test_mathopt6_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Ex mathopt6 function has the correct global minimum.
+    This problem comes from the MINLP library
+
+    The function has many global minimum values: Here is
+    one example
+    x*=(-0.024399, 0.210612)
+    f(x*) = -3.306869
+    """
+    global_minimum = mathopt6_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([-0.024399, 0.210612])
+    result = mathopt6(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-4)
+
+    result = mathopt6(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-4)
+
+    # Test the torch version
+    x = torch.tensor([-0.024399, 0.210612], dtype=torch.float64)
+    torch_result = mathopt6(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-4)
+
+
+def test_rosenbrock_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Ex Rosenbrock function has the correct global minimum.
+    This problem comes from the MINLP library
+
+    The function has many global minimum values: Here is
+    one example
+    x*=(0.9999, 0.9999)
+    f(x*) = 0.0
+    """
+    global_minimum = rosenbrock_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([0.99999, 0.99999])
+    result = rosenbrock(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-4)
+
+    result = rosenbrock(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-4)
+
+    # Test the torch version
+    x = torch.tensor([0.99999, 0.99999], dtype=torch.float64)
+    torch_result = rosenbrock(x, version='pytorch').numpy()
     assert math.isclose(torch_result, global_minimum, abs_tol=1e-4)

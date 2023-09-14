@@ -2040,7 +2040,7 @@ def ex8_1_3(x, results, trial, version='numpy'):
     return result
 
 
-def ex8_1_1(x, results, trial, version='numpy'):
+def ex8_1_1(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the example 8-1-1 function from the MINLP library.
     This function has a global minimum of -2.0218.
@@ -2064,7 +2064,7 @@ def ex8_1_1(x, results, trial, version='numpy'):
     if version == 'numpy':
         result = np.cos(x1) * np.sin(x2) - x1 / (x2**2 + 1)
     elif version == 'pyomo':
-        result = pyo.cos(x1) * pyo.cos(x2) - x1 / (x2**2 + 1)
+        result = pyo.cos(x1) * pyo.sin(x2) - x1 / (x2**2 + 1)
     elif version == 'pytorch':
         result = torch.cos(x1) * torch.sin(x2) - x1 / (x2**2 + 1)
     else:
@@ -2072,15 +2072,17 @@ def ex8_1_1(x, results, trial, version='numpy'):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    build_2d_intermediate_results(
-        x1=x1,
-        x2=x2,
-        result=result,
-        version=version,
-        results=results,
-        trial=trial,
-    )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
+        )
 
     return result
 
@@ -2288,7 +2290,7 @@ def ex8_1_6(x, results, trial, version='numpy'):
     return result
 
 
-def mathopt6(x, results, trial, version='numpy'):
+def mathopt6(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the mathopt6 function from the MINLP library.
     This function has a global minimum of -3.306868. This
@@ -2342,20 +2344,22 @@ def mathopt6(x, results, trial, version='numpy'):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    build_2d_intermediate_results(
-        x1=x1,
-        x2=x2,
-        result=result,
-        version=version,
-        results=results,
-        trial=trial,
-    )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
+        )
 
     return result
 
 
-def quantum(x, results, trial, version='numpy'):
+def quantum(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the quantum function from the MINLP library.
     This function has a global minimum of 0.8049. This
@@ -2409,20 +2413,22 @@ def quantum(x, results, trial, version='numpy'):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    build_2d_intermediate_results(
-        x1=x1,
-        x2=x2,
-        result=result,
-        version=version,
-        results=results,
-        trial=trial,
-    )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
+        )
 
     return result
 
 
-def rosenbrock(x, results, trial, version='numpy'):
+def rosenbrock(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the rosenbrock function from the MINLP library.
     This function has a global minimum of 0.0. This
@@ -2454,15 +2460,18 @@ def rosenbrock(x, results, trial, version='numpy'):
         raise ValueError(
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
-    # Fill in the intermediate results
-    build_2d_intermediate_results(
-        x1=x1,
-        x2=x2,
-        result=result,
-        version=version,
-        results=results,
-        trial=trial,
-    )
+
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
+        )
 
     return result
 
