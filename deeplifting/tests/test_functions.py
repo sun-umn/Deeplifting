@@ -23,6 +23,12 @@ from deeplifting.problems import (
     bartels_conn_config,
     beale,
     beale_config,
+    bird,
+    bird_config,
+    bohachevsky1,
+    bohachevsky1_config,
+    bohachevsky2,
+    bohachevsky2_config,
     bukin_n6,
     bukin_n6_config,
     cross_in_tray,
@@ -580,7 +586,6 @@ def test_adjiman_has_correct_global_minimum():
     """
     Function that tests if our implementation of the
     Ex Adjiman function has the correct global minimum.
-    This problem comes from the MINLP library
 
     The function has many global minimum values: Here is
     one example
@@ -607,7 +612,6 @@ def test_alpine1_has_correct_global_minimum():
     """
     Function that tests if our implementation of the
     Ex Alpine 1 function has the correct global minimum.
-    This problem comes from the MINLP library
 
     The function has many global minimum values: Here is
     one example
@@ -634,7 +638,6 @@ def test_alpine2_has_correct_global_minimum():
     """
     Function that tests if our implementation of the
     Ex Alpine 2 function has the correct global minimum.
-    This problem comes from the MINLP library
 
     The function has many global minimum values: Here is
     one example
@@ -661,7 +664,6 @@ def test_bartels_conn_has_correct_global_minimum():
     """
     Function that tests if our implementation of the
     Ex Bartels Conn function has the correct global minimum.
-    This problem comes from the MINLP library
 
     The function has many global minimum values: Here is
     one example
@@ -688,7 +690,6 @@ def test_beale_has_correct_global_minimum():
     """
     Function that tests if our implementation of the
     Ex Beale function has the correct global minimum.
-    This problem comes from the MINLP library
 
     The function has many global minimum values: Here is
     one example
@@ -708,4 +709,83 @@ def test_beale_has_correct_global_minimum():
     # Test the torch version
     x = torch.tensor([3.0, 0.5], dtype=torch.float64)
     torch_result = beale(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-2)
+
+
+def test_bird_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Ex Bird function has the correct global minimum.
+
+    The function has many global minimum values: Here is
+    one example
+    x*=(4.70104, 3.15294)
+    x*=(-1.58214, -3.13024)
+    f(x*) = -106.764537
+    """
+    global_minimum = bird_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([4.70104, 3.15294])
+    result = bird(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    result = bird(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    # Test the torch version
+    x = torch.tensor([-1.58214, -3.13024], dtype=torch.float64)
+    torch_result = bird(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-2)
+
+
+def test_bohachevsky1_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Ex Bohachevsky 1 function has the correct global minimum.
+
+    The function has many global minimum values: Here is
+    one example
+    x*=(0.0, 0.0)
+    f(x*) = 0.0
+    """
+    global_minimum = bohachevsky1_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([0.0, 0.0])
+    result = bohachevsky1(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    result = bohachevsky1(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    # Test the torch version
+    x = torch.tensor([0.0, 0.0], dtype=torch.float64)
+    torch_result = bohachevsky1(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-2)
+
+
+def test_bohachevsky2_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Ex Bohachevsky 2 function has the correct global minimum.
+
+    The function has many global minimum values: Here is
+    one example
+    x*=(0.0, 0.0)
+    f(x*) = 0.0
+    """
+    global_minimum = bohachevsky2_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([0.0, 0.0])
+    result = bohachevsky2(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    result = bohachevsky2(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    # Test the torch version
+    x = torch.tensor([0.0, 0.0], dtype=torch.float64)
+    torch_result = bohachevsky2(x, version='pytorch').numpy()
     assert math.isclose(torch_result, global_minimum, abs_tol=1e-2)

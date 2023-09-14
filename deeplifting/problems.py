@@ -3104,7 +3104,7 @@ def beale(x, results=None, trial=None, version='numpy'):
     return result
 
 
-def biggs_exp2(x, results, trial, version='numpy'):
+def biggs_exp2(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the Biggs EXP2 function.
     This is a 3-dimensional function with a global minimum of 0 at (1,10)
@@ -3140,25 +3140,21 @@ def biggs_exp2(x, results, trial, version='numpy'):
             "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
         )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
 
     return result
 
 
-# Biggs EXP3 in 3d
 def biggs_exp3(x, results, trial, version='numpy'):
     """
     Implementation of the Biggs EXP3 function.
@@ -3214,7 +3210,6 @@ def biggs_exp3(x, results, trial, version='numpy'):
     return result
 
 
-# Biggs EXP4 in 4d
 def biggs_exp4(x, results, trial, version='numpy'):
     """
     Implementation of the Biggs EXP4 function.
@@ -3271,7 +3266,6 @@ def biggs_exp4(x, results, trial, version='numpy'):
     return result
 
 
-# Biggs EXP5
 def biggs_exp5(x, results, trial, version='numpy'):
     """
     Implementation of the Biggs EXP5 function.
@@ -3338,7 +3332,6 @@ def biggs_exp5(x, results, trial, version='numpy'):
     return result
 
 
-# Biggs EXP6
 def biggs_exp6(x, results, trial, version='numpy'):
     """
     Implementation of the Biggs EXP5 function.
@@ -3406,14 +3399,22 @@ def biggs_exp6(x, results, trial, version='numpy'):
     return result
 
 
-# Bird in 2d
-def bird(x, results, trial, version='numpy'):
+def bird(x, results=None, trial=None, version='numpy'):
+    """
+    Bird function in 2D.
+    """
     x1, x2 = x.flatten()
     if version == 'numpy':
         result = (
             np.sin(x1) * np.exp(np.square(1 - np.cos(x2)))
             + np.cos(x2) * np.exp(np.square(1 - np.sin(x1)))
             + np.square(x1 - x2)
+        )
+    elif version == 'pyomo':
+        result = (
+            pyo.sin(x1) * pyo.exp((1 - np.cos(x2)) ** 2)
+            + pyo.cos(x2) * pyo.exp((1 - pyo.sin(x1)) ** 2)
+            + (x1 - x2) ** 2
         )
     elif version == 'pytorch':
         result = (
@@ -3426,26 +3427,25 @@ def bird(x, results, trial, version='numpy'):
             "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
         )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
 
     return result
 
 
-# Bohachevsky1 in 2d
-def bohachevsky1(x, results, trial, version='numpy'):
+def bohachevsky1(x, results=None, trial=None, version='numpy'):
+    """
+    Bohachevsky 1 in 2D
+    """
     x1, x2 = x.flatten()
     if version == 'numpy':
         result = (
@@ -3453,6 +3453,14 @@ def bohachevsky1(x, results, trial, version='numpy'):
             + 2 * np.square(x2)
             - 0.3 * np.cos(3 * np.pi * x1)
             - 0.4 * np.cos(4 * np.pi * x2)
+            + 0.7
+        )
+    elif version == 'pyomo':
+        result = (
+            x1**2
+            + 2 * x2**2
+            - 0.3 * pyo.cos(3 * np.pi * x1)
+            - 0.4 * pyo.cos(4 * np.pi * x2)
             + 0.7
         )
     elif version == 'pytorch':
@@ -3468,39 +3476,47 @@ def bohachevsky1(x, results, trial, version='numpy'):
             "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
         )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
 
     return result
 
 
-# Bohachevsky2 in 2d
-def bohachevsky2(x, results, trial, version='numpy'):
+def bohachevsky2(x, results=None, trial=None, version='numpy'):
+    """
+    Bohachevsky 2 in 2D.
+    Problem was verified from this source:
+    https://towardsdatascience.com/optimization-eye-pleasure-78-benchmark-test-functions-for-single-objective-optimization-92e7ed1d1f12  # noqa
+    """
     x1, x2 = x.flatten()
     if version == 'numpy':
         result = (
             np.square(x1)
             + 2 * np.square(x2)
-            - 0.3 * np.cos(3 * np.pi * x1) * 0.4 * np.cos(4 * np.pi * x2)
+            - 0.3 * np.cos(3 * np.pi * x1) * np.cos(4 * np.pi * x2)
+            + 0.3
+        )
+    elif version == 'pyomo':
+        result = (
+            x1**2
+            + 2 * x2**2
+            - 0.3 * pyo.cos(3 * np.pi * x1) * pyo.cos(4 * np.pi * x2)
             + 0.3
         )
     elif version == 'pytorch':
         result = (
             torch.square(x1)
             + 2 * torch.square(x2)
-            - 0.3 * torch.cos(3 * np.pi * x1) * 0.4 * torch.cos(4 * np.pi * x2)
+            - 0.3 * torch.cos(3 * np.pi * x1) * torch.cos(4 * np.pi * x2)
             + 0.3
         )
     else:
@@ -3508,20 +3524,17 @@ def bohachevsky2(x, results, trial, version='numpy'):
             "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
         )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
 
     return result
 

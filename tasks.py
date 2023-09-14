@@ -34,6 +34,10 @@ low_dimensional_problem_names = [
     'alpine1',
     'alpine2',
     'bartels_conn',
+    'beale',
+    'bird',
+    'bohachevsky1',
+    'bohachevsky2',
     # 'bukin_n6',  # High, 2 layer is best so far, takes a while to run
     # 'cross_in_tray',  # Low, runs quickly
     # 'cross_leg_table',
