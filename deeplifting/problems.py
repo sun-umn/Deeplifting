@@ -3784,38 +3784,39 @@ def bukin_n4(x, results=None, trial=None, version='numpy'):
     return result
 
 
-# Camel 3 hump in 2d
-def camel_3hump(x, results, trial, version='numpy'):
+def camel_3hump(x, results=None, trial=None, version='numpy'):
+    """
+    Camel 3 Hump in 2D
+    """
     x1, x2 = x.flatten()
-    if version == 'numpy' or version == 'pytorch':
+    if version == 'numpy' or version == 'pyomo' or version == 'pytorch':
         result = 2 * x1**2 - 1.05 * x1**4 + (1 / 6) * x1**6 + x1 * x2 + x2**2
     else:
         raise ValueError(
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
         )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
 
     return result
 
 
-# Camel 6 hump in 2d
-def camel_6hump(x, results, trial, version='numpy'):
+def camel_6hump(x, results=None, trial=None, version='numpy'):
+    """
+    Camel 6 Hump in 2D
+    """
     x1, x2 = x.flatten()
-    if version == 'numpy' or version == 'pytorch':
+    if version == 'numpy' or version == 'pyomo' or version == 'pytorch':
         result = (
             (4 - 2.1 * x1**2 + (1 / 3) * x1**4) * x1**2
             + x1 * x2
@@ -3826,20 +3827,17 @@ def camel_6hump(x, results, trial, version='numpy'):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
         )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
 
     return result
 

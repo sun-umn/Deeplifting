@@ -43,6 +43,10 @@ from deeplifting.problems import (
     bukin_n4_config,
     bukin_n6,
     bukin_n6_config,
+    camel_3hump,
+    camel_3hump_config,
+    camel_6hump,
+    camel_6hump_config,
     cross_in_tray,
     cross_in_tray_config,
     cross_leg_table,
@@ -960,4 +964,57 @@ def test_bukin_n4_has_correct_global_minimum():
     # Test the torch version
     x = torch.tensor([-10.0, 0.0], dtype=torch.float64)
     torch_result = bukin_n4(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-2)
+
+
+def test_camel_3hump_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Ex Camel 3 Hump function has the correct global minimum.
+
+    The function has many global minimum values: Here is
+    one example
+    x*=(0, 0)
+    f(x*) = 0.0
+    """
+    global_minimum = camel_3hump_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([0.0, 0.0])
+    result = camel_3hump(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    result = camel_3hump(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    # Test the torch version
+    x = torch.tensor([0.0, 0.0], dtype=torch.float64)
+    torch_result = camel_3hump(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-2)
+
+
+def test_camel_6hump_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Ex Camel 6 Hump function has the correct global minimum.
+
+    The function has many global minimum values: Here is
+    one example
+    x*=(-0.0898, 0.7126)
+    x*=(0.0898, -0.7126)
+    f(x*) = -1.0316
+    """
+    global_minimum = camel_6hump_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([-0.0898, 0.7126])
+    result = camel_6hump(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    result = camel_6hump(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    # Test the torch version
+    x = torch.tensor([0.0898, -0.7126], dtype=torch.float64)
+    torch_result = camel_6hump(x, version='pytorch').numpy()
     assert math.isclose(torch_result, global_minimum, abs_tol=1e-2)
