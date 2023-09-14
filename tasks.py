@@ -123,11 +123,11 @@ griewank_series = [
 levy_series = [
     # Levy Series - Non-origin solution
     'levy_3d',
-    # 'levy_5d',
-    # 'levy_30d',
-    # 'levy_100d',
-    # 'levy_500d',
-    # 'levy_1000d',
+    'levy_5d',
+    'levy_30d',
+    'levy_100d',
+    'levy_500d',
+    'levy_1000d',
 ]
 
 qing_series = [
@@ -138,6 +138,16 @@ qing_series = [
     'qing_100d',
     'qing_500d',
     'qing_1000d',
+]
+
+rastrigin_series = [
+    # Rastrigin series - Origin solution
+    'rastrigin_3d',
+    'rastrigin_5d',
+    'rastrigin_30d',
+    'rastrigin_100d',
+    'rastrigin_500d',
+    'rastrigin_1000d',
 ]
 
 schwefel_series = [
@@ -692,6 +702,10 @@ def find_best_architecture_task(problem_series, method, dimensionality):
             problem_names = levy_series
         elif problem_series == 'qing':
             problem_names = qing_series
+        elif problem_series == 'rastrigin':
+            problem_names = rastrigin_series
+        elif problem_series == 'schwefel':
+            problem_names = schwefel_series
     elif dimensionality == 'low-dimensional':
         directory = 'low-dimension-search-results'
         PROBLEMS = PROBLEMS_BY_NAME
