@@ -27,54 +27,45 @@ from deeplifting.utils import create_contour_plot
 
 # Identify problems to run
 low_dimensional_problem_names = [
-    'ackley',  # Low
-    'bukin_n6',  # High, 2 layer is best so far, takes a while to run
-    'cross_in_tray',  # Low, runs quickly
-    'drop_wave',  # Low, runs quickly
-    'eggholder',  # Medium, takes time to run
-    'griewank',  # Low, (1.0 with 3-layer, 0.95 2-layer)
-    'holder_table',  # Medium
-    'levy',  # Low, 3-layer
-    'levy_n13',  # Low, 3-layer
-    'rastrigin',  # Low, 3-layer
-    'schaffer_n2',  # Low, 3-layer
-    'schaffer_n4',  # Low, 3-layer
-    'schwefel',  # Takes a while to run, DA is better at 100% but we are at 85%
-    # 'shubert',  # Takes a while to run,
+    # 'ackley',  # Low
+    'ackley2',
+    'ackley3',
+    'adjiman',
+    # 'bukin_n6',  # High, 2 layer is best so far, takes a while to run
+    # 'cross_in_tray',  # Low, runs quickly
+    'cross_leg_table',
+    # 'drop_wave',  # Low, runs quickly
+    # 'eggholder',  # Medium, takes time to run
+    # 'griewank',  # Low, (1.0 with 3-layer, 0.95 2-layer)
+    # 'holder_table',  # Medium
+    # 'levy',  # Low, 3-layer
+    # 'levy_n13',  # Low, 3-layer
+    # 'rastrigin',  # Low, 3-layer
+    # 'schaffer_n2',  # Low, 3-layer
+    # 'schaffer_n4',  # Low, 3-layer
+    # 'schwefel',  # Takes a while to run, DA is better at 100% but we are at 85%
+    # 'shubert',  # Takes a while to run
     # 'ex8_1_1',
-    # 'kriging_peaks_red010',
-    # 'kriging_peaks_red020',
     # 'mathopt6',
-    # 'quantum',
-    # 'rosenbrock',
-    # 'cross_leg_table',
-    # 'sine_envelope',  # Having issues
-    # 'ackley2',
-    # 'ackley3',  # Having issues
-    # 'ackley4',  # Having issues
-    # 'adjiman',
+    # 'quantum',  # Quantum is not something we can calulate with SCIP
+    'rosenbrock',
+    'kriging_peaks_red010',
+    # 'kriging_peaks_red020',
     # 'alpine1',
     # 'alpine2',
     # 'bartels_conn',
     # 'beale',
-    # # 'biggs_exp2',  # Having issues
     # 'bird',
-    # 'bohachevsky1',
-    # 'bohachevsky2',  # Having issues
     # 'bohachevsky3',
     # 'booth',
-    # 'branin_rcos',  # Having issues
     # 'brent',
     # 'brown',
     # 'bukin_n2',
     # 'bukin_n4',
     # 'camel_3hump',
     # 'camel_6hump',
-    # 'chen_bird',  # Having issues
-    # 'chen_v',  # Having issues
-    # 'chichinadze',  # Having issues
     # 'chung_reynolds',
-    # 'cube',  # Correct but paper has wrong x
+    # 'cube',  # Correct but paper has wrong x*
     # 'xinsheyang_n2',
     # 'xinsheyang_n3',
     # 'layeb12',
@@ -215,9 +206,6 @@ search_hidden_sizes = [
     # Hidden sizes of 512
     hidden_size_512 * 2,
     hidden_size_512 * 3,
-    # Hidden sizes of 1024
-    # hidden_size_1024 * 2,
-    # hidden_size_1024 * 3,
 ]
 
 # Input sizes
@@ -413,73 +401,78 @@ def run_algorithm_comparison_task(dimensionality, trials):
         x_columns = [f'x{i + 1}' for i in range(dimensions)]
         columns = x_columns + ['f', 'algorithm', 'time']
 
-        # First run IPOPT
-        print('Running IPOPT')
-        outputs_ipopt = run_ipopt(problem, trials=trials)
+        # # First run IPOPT
+        # print('Running IPOPT')
+        # outputs_ipopt = run_ipopt(problem, trials=trials)
 
-        # Get the final results for all IPOPT runs
-        ipopt_results = pd.DataFrame(outputs_ipopt['final_results'], columns=columns)
-        ipopt_results['problem_name'] = problem_name
-        ipopt_results['hits'] = np.where(
-            np.abs(ipopt_results['f'] - minimum_value) <= 1e-4, 1, 0
-        )
-        ipopt_results['dimensions'] = dimensions
+        # # Get the final results for all IPOPT runs
+        # ipopt_results = pd.DataFrame(outputs_ipopt['final_results'], columns=columns)
+        # ipopt_results['problem_name'] = problem_name
+        # ipopt_results['hits'] = np.where(
+        #     np.abs(ipopt_results['f'] - minimum_value) <= 1e-4, 1, 0
+        # )
+        # ipopt_results['dimensions'] = dimensions
 
-        # Add IPOPT to the problem_performance_list
-        problem_performance_list.append(ipopt_results)
+        # # Add IPOPT to the problem_performance_list
+        # problem_performance_list.append(ipopt_results)
 
-        # Next add dual annealing
-        print('Running Dual Annealing')
-        outputs_dual_annealing = run_dual_annealing(problem, trials=trials)
+        # # Next add dual annealing
+        # print('Running Dual Annealing')
+        # outputs_dual_annealing = run_dual_annealing(problem, trials=trials)
 
-        # Get the final results for all dual annealing runs
-        dual_annleaing_results = pd.DataFrame(
-            outputs_dual_annealing['final_results'], columns=columns
-        )
-        dual_annleaing_results['problem_name'] = problem_name
-        dual_annleaing_results['hits'] = np.where(
-            np.abs(dual_annleaing_results['f'] - minimum_value) <= 1e-4, 1, 0
-        )
-        dual_annleaing_results['dimensions'] = dimensions
+        # # Get the final results for all dual annealing runs
+        # dual_annleaing_results = pd.DataFrame(
+        #     outputs_dual_annealing['final_results'], columns=columns
+        # )
+        # dual_annleaing_results['problem_name'] = problem_name
+        # dual_annleaing_results['hits'] = np.where(
+        #     np.abs(dual_annleaing_results['f'] - minimum_value) <= 1e-4, 1, 0
+        # )
+        # dual_annleaing_results['dimensions'] = dimensions
 
-        # Add dual annealing to the problem_performance_list
-        problem_performance_list.append(dual_annleaing_results)
+        # # Add dual annealing to the problem_performance_list
+        # problem_performance_list.append(dual_annleaing_results)
 
-        # Next add differential evolution
-        print('Running Differential Evolution')
-        outputs_differential_evolution = run_differential_evolution(
-            problem, trials=trials
-        )
-
-        # Get the final results for all differential evolution runs
-        differential_evolution_results = pd.DataFrame(
-            outputs_differential_evolution['final_results'], columns=columns
-        )
-        differential_evolution_results['problem_name'] = problem_name
-        differential_evolution_results['hits'] = np.where(
-            np.abs(differential_evolution_results['f'] - minimum_value) <= 1e-4, 1, 0
-        )
-        differential_evolution_results['dimensions'] = dimensions
-
-        # Add differential evolution to the problem_performance_list
-        problem_performance_list.append(differential_evolution_results)
-
-        # # Next add pygranso
-        # print('Running PyGranso!')
-        # outputs_pygranso = run_pygranso(problem, trials=trials)
+        # # Next add differential evolution
+        # print('Running Differential Evolution')
+        # outputs_differential_evolution = run_differential_evolution(
+        #     problem, trials=trials
+        # )
 
         # # Get the final results for all differential evolution runs
-        # pygranso_results = pd.DataFrame(
-        #     outputs_pygranso['final_results'], columns=columns
+        # differential_evolution_results = pd.DataFrame(
+        #     outputs_differential_evolution['final_results'], columns=columns
         # )
-        # pygranso_results['problem_name'] = problem_name
-        # pygranso_results['hits'] = np.where(
-        #     np.abs(pygranso_results['f'] - minimum_value) <= 1e-4, 1, 0
+        # differential_evolution_results['problem_name'] = problem_name
+        # differential_evolution_results['hits'] = np.where(
+        #     np.abs(differential_evolution_results['f'] - minimum_value) <= 1e-4, 1, 0
         # )
-        # pygranso_results['dimensions'] = dimensions
+        # differential_evolution_results['dimensions'] = dimensions
 
         # # Add differential evolution to the problem_performance_list
-        # problem_performance_list.append(pygranso_results)
+        # problem_performance_list.append(differential_evolution_results)
+
+        # if dimensionality == 'low-dimension':
+        #     # NOTE: PyGranso takes a lot of power to run locally
+        #     # and was not sustainable on my computer should be run
+        #     # on MSI. Low dimensions should be okay though.
+
+        #     # Next add pygranso
+        #     print('Running PyGranso!')
+        #     outputs_pygranso = run_pygranso(problem, trials=trials)
+
+        #     # Get the final results for all differential evolution runs
+        #     pygranso_results = pd.DataFrame(
+        #         outputs_pygranso['final_results'], columns=columns
+        #     )
+        #     pygranso_results['problem_name'] = problem_name
+        #     pygranso_results['hits'] = np.where(
+        #         np.abs(pygranso_results['f'] - minimum_value) <= 1e-4, 1, 0
+        #     )
+        #     pygranso_results['dimensions'] = dimensions
+
+        #     # Add differential evolution to the problem_performance_list
+        #     problem_performance_list.append(pygranso_results)
 
         # Next we need to implement the SCIP algorithm
         print('Running SCIP!')

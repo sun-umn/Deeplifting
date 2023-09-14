@@ -209,6 +209,91 @@ def cross_in_tray(x, results, trial, version='numpy'):
     return result
 
 
+def cross_leg_table(x, results, trial, version='numpy'):
+    """
+    Implementation of the CrossLegTable problem from the infinity77 list.
+    This is a 3-dimensional function with a global minimum of -1.0 at (0,0)
+
+    Parameters:
+        x: (x1, x2) this is a 3D problem
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Damavandi function values
+        corresponding to the inputs (x1, x2).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+    """
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = -(
+            1
+            / (
+                (
+                    np.abs(
+                        np.exp(np.abs(100 - (((x1**2 + x2**2) ** 0.5) / (np.pi))))
+                        * np.sin(x1)
+                        * np.sin(x2)
+                    )
+                    + 1
+                )
+                ** 0.1
+            )
+        )
+    elif version == 'pyomo':
+        result = -(
+            1
+            / (
+                (
+                    np.abs(
+                        pyo.exp(np.abs(100 - (((x1**2 + x2**2) ** 0.5) / (np.pi))))
+                        * pyo.sin(x1)
+                        * pyo.sin(x2)
+                    )
+                    + 1
+                )
+                ** 0.1
+            )
+        )
+    elif version == 'pytorch':
+        result = -(
+            1
+            / (
+                (
+                    torch.abs(
+                        torch.exp(
+                            torch.abs(100 - (((x1**2 + x2**2) ** 0.5) / (np.pi)))
+                        )
+                        * torch.sin(x1)
+                        * torch.sin(x2)
+                    )
+                    + 1
+                )
+                ** 0.1
+            )
+        )
+    else:
+        raise ValueError(
+            "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
+        )
+    # Fill in the intermediate results
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
+
+    return result
+
+
 def drop_wave(x, results, trial, version='numpy'):
     """
     Implementation of the 2D Drop-Wave function. This
@@ -896,6 +981,10 @@ def shubert(x, results, trial, version='numpy'):
         term1 = np.sum([i * np.cos((i + 1) * x1 + i) for i in range(1, 6)], axis=0)
         term2 = np.sum([i * np.cos((i + 1) * x2 + i) for i in range(1, 6)], axis=0)
         result = term1 * term2
+    if version == 'pyomo':
+        term1 = np.sum([i * pyo.cos(i + 1 * x1 + i) for i in range(1, 6)])
+        term2 = np.sum([i * pyo.cos(i + 1 * x2 + i) for i in range(1, 6)])
+        result = term1 + term2
     elif version == 'pytorch':
         term1 = sum([i * torch.cos((i + 1) * x1 + i) for i in range(1, 6)])
         term2 = sum([i * torch.cos((i + 1) * x2 + i) for i in range(1, 6)])
@@ -906,19 +995,14 @@ def shubert(x, results, trial, version='numpy'):
         )
 
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
 
     return result
 
@@ -1880,6 +1964,9 @@ def ex8_1_3(x, results, trial, version='numpy'):
     Raises:
     ValueError
         If the version is not 'numpy' or 'pytorch'.
+
+    NOTE: This problem did not have a box constraint so we
+    have not utilized it so far
     """
     x1, x2 = x.flatten()
     if version == 'numpy':
@@ -1908,19 +1995,14 @@ def ex8_1_3(x, results, trial, version='numpy'):
         )
 
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
 
     return result
 
@@ -1948,6 +2030,8 @@ def ex8_1_1(x, results, trial, version='numpy'):
     x1, x2 = x.flatten()
     if version == 'numpy':
         result = np.cos(x1) * np.sin(x2) - x1 / (x2**2 + 1)
+    elif version == 'pyomo':
+        result = pyo.cos(x1) * pyo.cos(x2) - x1 / (x2**2 + 1)
     elif version == 'pytorch':
         result = torch.cos(x1) * torch.sin(x2) - x1 / (x2**2 + 1)
     else:
@@ -1956,19 +2040,14 @@ def ex8_1_1(x, results, trial, version='numpy'):
         )
 
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
 
     return result
 
@@ -1992,6 +2071,8 @@ def ex4_1_5(x, results, trial, version='numpy'):
     Raises:
     ValueError
         If the version is not 'numpy' or 'pytorch'.
+
+    NOTE: No box constraints
     """
     x1, x2 = x.flatten()
     if version == 'numpy':
@@ -2004,19 +2085,14 @@ def ex4_1_5(x, results, trial, version='numpy'):
         )
 
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
 
     return result
 
@@ -2040,6 +2116,8 @@ def ex8_1_5(x, results, trial, version='numpy'):
     Raises:
     ValueError
         If the version is not 'numpy' or 'pytorch'.
+
+    NOTE: No box constraints
     """
     x1, x2 = x.flatten()
     if version == 'numpy':
@@ -2066,19 +2144,14 @@ def ex8_1_5(x, results, trial, version='numpy'):
         )
 
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
 
     return result
 
@@ -2102,6 +2175,8 @@ def ex8_1_4(x, results, trial, version='numpy'):
     Raises:
     ValueError
         If the version is not 'numpy' or 'pytorch'.
+
+    NOTE: No box constaints
     """
     x1, x2 = x.flatten()
     if version == 'numpy':
@@ -2114,19 +2189,14 @@ def ex8_1_4(x, results, trial, version='numpy'):
         )
 
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
 
     return result
 
@@ -2151,6 +2221,8 @@ def ex8_1_6(x, results, trial, version='numpy'):
     Raises:
     ValueError
         If the version is not 'numpy' or 'pytorch'.
+
+    NOTE: No box constraints
     """
     x1, x2 = x.flatten()
     if version == 'numpy':
@@ -2171,19 +2243,14 @@ def ex8_1_6(x, results, trial, version='numpy'):
         )
 
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
 
     return result
 
@@ -2219,6 +2286,15 @@ def mathopt6(x, results, trial, version='numpy'):
             - np.sin(10 * x1 + 10 * x2)
             + 0.25 * (x1**2 + x2**2)
         )
+    elif version == 'pyomo':
+        result = (
+            pyo.exp(pyo.sin(50 * x1))
+            + pyo.sin(60 * pyo.exp(x2))
+            + pyo.sin(70 * pyo.sin(x1))
+            + pyo.sin(pyo.sin(80 * x2))
+            - pyo.sin(10 * x1 + 10 * x2)
+            + 0.25 * (x1**2 + x2**2)
+        )
     elif version == 'pytorch':
         result = (
             torch.exp(torch.sin(50 * x1))
@@ -2234,19 +2310,14 @@ def mathopt6(x, results, trial, version='numpy'):
         )
 
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
 
     return result
 
@@ -2279,6 +2350,12 @@ def quantum(x, results, trial, version='numpy'):
             + 0.5 * gamma(1.5 / x2) / gamma(0.5 / x2) * x1 ** (-1 / x2)
             + gamma(2.5 / x2) / gamma(0.5 / x2) * x1 ** (-2 / x2)
         )
+    elif version == 'pyomo':
+        result = (
+            0.5 * x2**2 * gamma(2 - 0.5 / x2) / gamma(0.5 / x2) * x1 ** (1 / x2)
+            + 0.5 * gamma(1.5 / x2) / gamma(0.5 / x2) * x1 ** (-1 / x2)
+            + gamma(2.5 / x2) / gamma(0.5 / x2) * x1 ** (-2 / x2)
+        )
     elif version == 'pytorch':
         result = (
             0.5
@@ -2300,19 +2377,14 @@ def quantum(x, results, trial, version='numpy'):
         )
 
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
 
     return result
 
@@ -2341,31 +2413,29 @@ def rosenbrock(x, results, trial, version='numpy'):
     x1, x2 = x.flatten()
     if version == 'numpy':
         result = 100 * (-(x1**2) + x2) ** 2 + (1 - x1) ** 2
+    elif version == 'pyomo':
+        result = 100 * (-(x1**2) + x2) ** 2 + (1 - x1) ** 2
     elif version == 'pytorch':
         result = 100 * (-(x1**2) + x2) ** 2 + (1 - x1) ** 2
     else:
         raise ValueError(
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
-
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
 
     return result
 
 
+# This section starts some of the "hard" optimization
+# problems that we had identified.
 def damavandi(x, results, trial, version='numpy'):
     """
     Implementation of the Damavandi problem from the infinity77 list.
@@ -2385,6 +2455,8 @@ def damavandi(x, results, trial, version='numpy'):
     Raises:
     ValueError
         If the version is not 'numpy' or 'pytorch'.
+
+    NOTE: Can not get this to work properly
     """
     x1, x2 = x.flatten()
     if version == 'numpy':
@@ -2401,95 +2473,16 @@ def damavandi(x, results, trial, version='numpy'):
         raise ValueError(
             "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
         )
+
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
-
-    return result
-
-
-def cross_leg_table(x, results, trial, version='numpy'):
-    """
-    Implementation of the CrossLegTable problem from the infinity77 list.
-    This is a 3-dimensional function with a global minimum of -1.0 at (0,0)
-
-    Parameters:
-        x: (x1, x2) this is a 3D problem
-    version : str
-        The version to use for the function's computation.
-        Options are 'numpy' and 'pytorch'.
-
-    Returns:
-    result : np.ndarray or torch.Tensor
-        The computed Damavandi function values
-        corresponding to the inputs (x1, x2).
-
-    Raises:
-    ValueError
-        If the version is not 'numpy' or 'pytorch'.
-    """
-    x1, x2 = x.flatten()
-    if version == 'numpy':
-        result = -(
-            1
-            / (
-                (
-                    np.abs(
-                        np.exp(np.abs(100 - (((x1**2 + x2**2) ** 0.5) / (np.pi))))
-                        * np.sin(x1)
-                        * np.sin(x2)
-                    )
-                    + 1
-                )
-                ** 0.1
-            )
-        )
-    elif version == 'pytorch':
-        result = -(
-            1
-            / (
-                (
-                    torch.abs(
-                        torch.exp(
-                            torch.abs(100 - (((x1**2 + x2**2) ** 0.5) / (np.pi)))
-                        )
-                        * torch.sin(x1)
-                        * torch.sin(x2)
-                    )
-                    + 1
-                )
-                ** 0.1
-            )
-        )
-    else:
-        raise ValueError(
-            "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
-        )
-    # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
 
     return result
 
@@ -2529,20 +2522,16 @@ def sine_envelope(x, results, trial, version='numpy'):
         raise ValueError(
             "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
         )
+
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
 
     return result
 
@@ -2572,6 +2561,8 @@ def ackley2(x, results, trial, version='numpy'):
     x1, x2 = x.flatten()
     if version == 'numpy':
         result = -200 * np.exp(-0.02 * np.sqrt(x1**2 + x2**2))
+    elif version == 'pyomo':
+        result = -200 * pyo.exp(-0.02 * (x1**2 + x2**2) ** 0.5)
     elif version == 'pytorch':
         result = -200 * torch.exp(-0.02 * torch.sqrt(x1**2 + x2**2))
     else:
@@ -2580,19 +2571,14 @@ def ackley2(x, results, trial, version='numpy'):
         )
 
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
 
     return result
 
@@ -2601,7 +2587,13 @@ def ackley2(x, results, trial, version='numpy'):
 def ackley3(x, results, trial, version='numpy'):
     """
     Implementation of the Ackley3 function.
-    This is a 3-dimensional function with a global minimum of -219.1418 at (0,~-0.4)
+    This is a 2-dimensional function with a global minimum of
+    -195.62902823841935 at
+    (0.682584587365898, -0.36075325513719)
+    (-0.682584587365898, -0.36075325513719)
+
+    We were able to verify here:
+    https://towardsdatascience.com/optimization-eye-pleasure-78-benchmark-test-functions-for-single-objective-optimization-92e7ed1d1f12  # noqa
 
     Parameters:
         x: (x1, x2) this is a 3D problem
@@ -2620,32 +2612,31 @@ def ackley3(x, results, trial, version='numpy'):
     """
     x1, x2 = x.flatten()
     if version == 'numpy':
-        result = 200 * np.exp(-0.02 * np.sqrt(x1**2 + x2**2)) + 5 * np.exp(
+        result = -200 * np.exp(-0.02 * np.sqrt(x1**2 + x2**2)) + 5 * np.exp(
+            np.cos(3 * x1) + np.sin(3 * x2)
+        )
+    elif version == 'pyomo':
+        result = -200 * np.exp(-0.02 * np.sqrt(x1**2 + x2**2)) + 5 * np.exp(
             np.cos(3 * x1) + np.sin(3 * x2)
         )
     elif version == 'pytorch':
-        result = 200 * torch.exp(-0.02 * torch.sqrt(x1**2 + x2**2)) + 5 * torch.exp(
-            torch.cos(3 * x1) + torch.sin(3 * x2)
-        )
+        result = -200 * torch.exp(
+            -0.02 * torch.sqrt(x1**2 + x2**2)
+        ) + 5 * torch.exp(torch.cos(3 * x1) + torch.sin(3 * x2))
     else:
         raise ValueError(
             "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
         )
 
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
 
     return result
 
@@ -2700,7 +2691,8 @@ def ndackley4(x, results, trial, version='numpy'):
 def adjiman(x, results, trial, version='numpy'):
     """
     Implementation of the Adjiman function.
-    This is a 3-dimensional function with a global minimum of -2.02181 at (2,0.10578)
+    This is a 3-dimensional function with a global minimum of
+    -2.02181 at (2,0.10578)
 
     Parameters:
         x: (x1, x2) this is a 3D problem
@@ -2720,6 +2712,8 @@ def adjiman(x, results, trial, version='numpy'):
     x1, x2 = x.flatten()
     if version == 'numpy':
         result = np.cos(x1) * np.sin(x2) - (x1 / (x2**2 + 1))
+    elif version == 'pyomo':
+        result = pyo.cos(x1) * pyo.sin(x2) - (x1 / (x2**2 + 1))
     elif version == 'pytorch':
         result = torch.cos(x1) * torch.sin(x2) - (x1 / (x2**2 + 1))
     else:
@@ -2728,19 +2722,14 @@ def adjiman(x, results, trial, version='numpy'):
         )
 
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
 
     return result
 
@@ -2768,7 +2757,11 @@ def alpine1(x, results, trial, version='numpy'):
     """
     x1, x2 = x.flatten()
     if version == 'numpy':
-        result = np.abs(x1 * np.sin(x1) + 0.1 * x1) + np.abs(x2 * np.sin(x2) + 0.1 * x1)
+        result = np.abs(x1 * np.sin(x1) + 0.1 * x1) + np.abs(x2 * np.sin(x2) + 0.1 * x2)
+    elif version == 'pyomo':
+        result = np.abs(x1 * pyo.sin(x1) + 0.1 * x1) + np.abs(
+            x2 * pyo.sin(x2) + 0.1 * x2
+        )
     elif version == 'pytorch':
         result = torch.abs(x1 * torch.sin(x1) + 0.1 * x1) + torch.abs(
             x2 * torch.sin(x2) + 0.1 * x2
@@ -2779,19 +2772,14 @@ def alpine1(x, results, trial, version='numpy'):
         )
 
     # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
-        )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
+    build_2d_intermediate_results(
+        x1=x1,
+        x2=x2,
+        result=result,
+        version=version,
+        results=results,
+        trial=trial,
+    )
 
     return result
 
@@ -6642,7 +6630,7 @@ ackley3_config = {
     'objective': ackley3,
     'bounds': [(-32, 32), (-32, 32)],
     'max_iterations': 1000,
-    'global_minimum': -219.1418,
+    'global_minimum': -195.62902823841935,
     'dimensions': 2,
 }
 
