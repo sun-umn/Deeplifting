@@ -415,7 +415,7 @@ def eggholder(x, results=None, trial=None, version='numpy'):
     return result
 
 
-def griewank(x, results, trial, version='numpy'):
+def griewank(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the 2D Griewank function.
     This function has a global minimum at (x, y) = (0, 0).
@@ -456,20 +456,22 @@ def griewank(x, results, trial, version='numpy'):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    build_2d_intermediate_results(
-        x1=x1,
-        x2=x2,
-        result=result,
-        version=version,
-        results=results,
-        trial=trial,
-    )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
+        )
 
     return result
 
 
-def holder_table(x, results, trial, version='numpy'):
+def holder_table(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the 2D Holder Table function.
     This function has four identical local minima.
@@ -516,20 +518,22 @@ def holder_table(x, results, trial, version='numpy'):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    build_2d_intermediate_results(
-        x1=x1,
-        x2=x2,
-        result=result,
-        version=version,
-        results=results,
-        trial=trial,
-    )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
+        )
 
     return result
 
 
-def langermann(x, results, trial, version='numpy'):
+def langermann(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the 2D Langermann function.
 
@@ -587,20 +591,22 @@ def langermann(x, results, trial, version='numpy'):
             * torch.cos(np.pi * (torch.square(x1 - 7) + torch.square(x2 - 9)))
         )
 
-    # Fill in the intermediate results
-    build_2d_intermediate_results(
-        x1=x1,
-        x2=x2,
-        result=result,
-        version=version,
-        results=results,
-        trial=trial,
-    )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
+        )
 
     return result
 
 
-def levy(x, results, trial, version='numpy'):
+def levy(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the 2D Levy function.
     This function has a global minimum at x1 = x2 = 1.
@@ -653,15 +659,17 @@ def levy(x, results, trial, version='numpy'):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    build_2d_intermediate_results(
-        x1=x1,
-        x2=x2,
-        result=result,
-        version=version,
-        results=results,
-        trial=trial,
-    )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
+        )
 
     return result
 

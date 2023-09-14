@@ -19,6 +19,12 @@ from deeplifting.problems import (
     drop_wave_config,
     eggholder,
     eggholder_config,
+    griewank,
+    griewank_config,
+    holder_table,
+    holder_table_config,
+    levy,
+    levy_config,
 )
 
 
@@ -35,16 +41,16 @@ def test_ackley_has_correct_global_minimum():
     # Test the numpy version
     x = np.array([0.0, 0.0])
     result = ackley(x, version='numpy')
-    math.isclose(result, global_minimum, abs_tol=1e-15)
+    assert math.isclose(result, global_minimum, abs_tol=1e-7)
 
     # Test the pyomo version
     result = ackley(x, version='pyomo')
-    math.isclose(result, global_minimum, abs_tol=1e-15)
+    assert math.isclose(result, global_minimum, abs_tol=1e-7)
 
     # Test the torch version
-    x = torch.tensor([0.0, 0.0])
+    x = torch.tensor([0.0, 0.0], dtype=torch.float64)
     torch_result = ackley(x, version='pytorch').numpy()
-    math.isclose(torch_result, global_minimum, abs_tol=1e-7)
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-7)
 
 
 def test_bukin_n6_has_correct_global_minimum():
@@ -60,16 +66,16 @@ def test_bukin_n6_has_correct_global_minimum():
     # Test the numpy version
     x = np.array([-10.0, 1.0])
     result = bukin_n6(x, version='numpy')
-    math.isclose(result, global_minimum, abs_tol=1e-7)
+    assert math.isclose(result, global_minimum, abs_tol=1e-5)
 
     # Test pyomo version
     result = bukin_n6(x, version='pyomo')
-    math.isclose(result, global_minimum, abs_tol=1e-7)
+    assert math.isclose(result, global_minimum, abs_tol=1e-5)
 
     # Test the torch version
-    x = torch.tensor([-10.0, 1.0])
+    x = torch.tensor([-10.0, 1.0], dtype=torch.float64)
     torch_result = bukin_n6(x, version='pytorch').numpy()
-    math.isclose(torch_result, global_minimum, abs_tol=1e-7)
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-5)
 
 
 def test_cross_in_tray_has_correct_global_minimum():
@@ -89,24 +95,24 @@ def test_cross_in_tray_has_correct_global_minimum():
     global_minimum = cross_in_tray_config['global_minimum']
 
     # Test the numpy version
-    x = np.array([-10.0, 1.0])
+    x = np.array([1.3491, 1.3491])
     result = cross_in_tray(x, version='numpy')
-    math.isclose(result, global_minimum, abs_tol=1e-7)
+    assert math.isclose(result, global_minimum, abs_tol=1e-5)
 
     # Test pyomo version
     result = cross_in_tray(x, version='pyomo')
-    math.isclose(result, global_minimum, abs_tol=1e-7)
+    assert math.isclose(result, global_minimum, abs_tol=1e-5)
 
     # Test the torch version
-    x = torch.tensor([-10.0, 1.0])
+    x = torch.tensor([-1.3491, 1.3491], dtype=torch.float64)
     torch_result = cross_in_tray(x, version='pytorch').numpy()
-    math.isclose(torch_result, global_minimum, abs_tol=1e-7)
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-5)
 
 
 def test_cross_leg_table_has_correct_global_minimum():
     """
     Function that tests if our implementation of the
-    Bukin N.6 function has the correct global minimum.
+    Cross Leg Table function has the correct global minimum.
 
     The global minimum exits as point x*=(0.0, 0.0) and
     f(x*) = 0
@@ -116,16 +122,16 @@ def test_cross_leg_table_has_correct_global_minimum():
     # Test the numpy version
     x = np.array([0.0, 0.0])
     result = cross_leg_table(x, version='numpy')
-    math.isclose(result, global_minimum, abs_tol=1e-7)
+    assert math.isclose(result, global_minimum, abs_tol=1e-5)
 
     # Test pyomo version
     result = cross_leg_table(x, version='pyomo')
-    math.isclose(result, global_minimum, abs_tol=1e-7)
+    assert math.isclose(result, global_minimum, abs_tol=1e-5)
 
     # Test the torch version
-    x = torch.tensor([0.0, 0.0])
+    x = torch.tensor([0.0, 0.0], dtype=torch.float64)
     torch_result = cross_leg_table(x, version='pytorch').numpy()
-    math.isclose(torch_result, global_minimum, abs_tol=1e-7)
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-5)
 
 
 def test_drop_wave_has_correct_global_minimum():
@@ -141,15 +147,15 @@ def test_drop_wave_has_correct_global_minimum():
     # Test the numpy version
     x = np.array([0.0, 0.0])
     result = drop_wave(x, version='numpy')
-    math.isclose(result, global_minimum, abs_tol=1e-7)
+    assert math.isclose(result, global_minimum, abs_tol=1e-5)
 
     result = drop_wave(x, version='pyomo')
-    math.isclose(result, global_minimum, abs_tol=1e-7)
+    assert math.isclose(result, global_minimum, abs_tol=1e-5)
 
     # Test the torch version
-    x = torch.tensor([0.0, 0.0])
+    x = torch.tensor([0.0, 0.0], dtype=torch.float64)
     torch_result = drop_wave(x, version='pytorch').numpy()
-    math.isclose(torch_result, global_minimum, abs_tol=1e-7)
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-5)
 
 
 def test_eggholder_has_correct_global_minimum():
@@ -165,12 +171,89 @@ def test_eggholder_has_correct_global_minimum():
     # Test the numpy version
     x = np.array([512.0, 404.2319])
     result = eggholder(x, version='numpy')
-    math.isclose(result, global_minimum, abs_tol=1e-3)
+    assert math.isclose(result, global_minimum, abs_tol=1e-4)
 
     result = eggholder(x, version='pyomo')
-    math.isclose(result, global_minimum, abs_tol=1e-3)
+    assert math.isclose(result, global_minimum, abs_tol=1e-4)
 
     # Test the torch version
-    x = torch.tensor([512.0, 404.2319])
+    x = torch.tensor([512.0, 404.2319], dtype=torch.float64)
     torch_result = eggholder(x, version='pytorch').numpy()
-    math.isclose(torch_result, global_minimum, abs_tol=1e-3)
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-4)
+
+
+def test_griewank_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Griewank function has the correct global minimum.
+
+    The global minimum exits as point x*=(0.0, 0.0) and
+    f(x*) = 0.0
+    """
+    global_minimum = griewank_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([0.0, 0.0])
+    result = griewank(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-5)
+
+    result = griewank(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-5)
+
+    # Test the torch version
+    x = torch.tensor([0.0, 0.0], dtype=torch.float64)
+    torch_result = griewank(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-5)
+
+
+def test_holder_table_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Holder Table function has the correct global minimum.
+
+    The global minimum exits
+    x*=(8.05502, 9.66459)
+    x*=(-8.05502, 9.66459)
+    x*=(8.05502, -9.66459)
+    x*=(-8.05502, -9.66459)
+    and f(x*) = -19.2085
+    """
+    global_minimum = holder_table_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([-8.05502, -9.66459])
+    result = holder_table(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-5)
+
+    result = holder_table(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-5)
+
+    # Test the torch version
+    x = torch.tensor([8.05502, -9.66459], dtype=torch.float64)
+    torch_result = holder_table(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-5)
+
+
+def test_levy_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Levy function has the correct global minimum.
+
+    The global minimum exits
+    x*=(1.0, 1.0)
+    f(x*) = 0
+    """
+    global_minimum = levy_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([1.0, 1.0])
+    result = levy(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-4)
+
+    result = levy(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-4)
+
+    # Test the torch version
+    x = torch.tensor([1.0, 1.0], dtype=torch.float64)
+    torch_result = levy(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-4)
