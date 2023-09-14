@@ -5773,6 +5773,16 @@ def ndlevy(x, results=None, trial=None, version='numpy'):
             + np.sum(np.square(w - 1) * (1 + 10 * np.square(np.sin(np.pi * w + 1))))
             + np.square(wd - 1) * (1 + np.square(np.sin(2 * np.pi * wd)))
         )
+    elif version == 'pyomo':
+        component1 = pyo.sin(np.pi * w1) ** 0.5
+        component2 = np.sum(
+            [
+                (value - 1) ** 0.5 * (1 + 10 * pyo.sin(np.pi * value + 1) ** 0.5)
+                for value in w
+            ]
+        )
+        component3 = (wd - 1) ** 0.5 * (1 + pyo.sin(2 * np.pi * wd) ** 0.5)
+        result = component1 + component2 + component3
     elif version == 'pytorch':
         result = (
             torch.square(torch.sin(np.pi * w1))
