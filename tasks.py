@@ -27,29 +27,29 @@ from deeplifting.utils import create_contour_plot
 
 # Identify problems to run
 low_dimensional_problem_names = [
-    'ackley',  # Low
+    # 'ackley',  # Low
     # 'ackley2',
     # 'ackley3',
     # 'adjiman',
     # 'alpine1',
-    'bukin_n6',  # High, 2 layer is best so far, takes a while to run
-    'cross_in_tray',  # Low, runs quickly
-    'cross_leg_table',
-    'drop_wave',  # Low, runs quickly
-    'eggholder',  # Medium, takes time to run
-    'griewank',  # Low, (1.0 with 3-layer, 0.95 2-layer)
-    'holder_table',  # Medium
-    'levy',  # Low, 3-layer
-    'levy_n13',  # Low, 3-layer
-    'rastrigin',  # Low, 3-layer
-    'schaffer_n2',  # Low, 3-layer
-    'schaffer_n4',  # Low, 3-layer
-    'schwefel',  # Takes a while to run, DA is better at 100% but we are at 85%
-    'shubert',  # Takes a while to run
-    # 'ex8_1_1',
-    # 'mathopt6',
+    # 'bukin_n6',  # High, 2 layer is best so far, takes a while to run
+    # 'cross_in_tray',  # Low, runs quickly
+    # 'cross_leg_table',
+    # 'drop_wave',  # Low, runs quickly
+    # 'eggholder',  # Medium, takes time to run
+    # 'griewank',  # Low, (1.0 with 3-layer, 0.95 2-layer)
+    # 'holder_table',  # Medium
+    # 'levy',  # Low, 3-layer
+    # 'levy_n13',  # Low, 3-layer
+    # 'rastrigin',  # Low, 3-layer
+    # 'schaffer_n2',  # Low, 3-layer
+    # 'schaffer_n4',  # Low, 3-layer
+    # 'schwefel',  # Takes a while to run, DA is better at 100% but we are at 85%
+    # 'shubert',  # Takes a while to run
+    'ex8_1_1',
+    'mathopt6',
     # 'quantum',  # Quantum is not something we can calulate with SCIP
-    # 'rosenbrock',
+    'rosenbrock',
     # 'kriging_peaks_red010',
     # 'kriging_peaks_red020',
     # 'alpine2',
