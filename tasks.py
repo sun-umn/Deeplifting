@@ -120,6 +120,26 @@ griewank_series = [
     'griewank_1000d',
 ]
 
+qing_series = [
+    # Qing Series - Non-origin solution
+    'qing_3d',
+    'qing_5d',
+    'qing_30d',
+    'qing_100d',
+    'qing_500d',
+    'qing_1000d',
+]
+
+schwefel_series = [
+    # Schewefel series - Non-origin solution
+    'schwefel_3d',
+    'schwefel_5d',
+    'schwefel_30d',
+    'schwefel_100d',
+    'schwefel_500d',
+    'schwefel_1000d',
+]
+
 high_dimensional_problem_names: List[str] = [  # noqa
     # Ackley Series - Origin Solution
     'ackley_3d',
@@ -128,41 +148,41 @@ high_dimensional_problem_names: List[str] = [  # noqa
     'ackley_100d',
     'ackley_500d',
     'ackley_1000d',
-    # Alpine1 Series - Origin Solution
-    'alpine1_3d',
-    'alpine1_5d',
-    'alpine1_30d',
-    'alpine1_100d',
-    'alpine1_500d',
-    'alpine1_1000d',
-    # Chung-Reynolds Series - Origin Solution
-    'chung_reyonlds_3d',
-    'chung_reynolds_5d',
-    'chung_reynolds_30d',
-    'chung_reynolds_100d',
-    'chung_reynolds_500d',
-    'chung_reynolds_1000d',
-    # Griewank Series - Origin Solution
-    'griewank_3d',
-    'griewank_5d',
-    'griewank_30d',
-    'griewank_100d',
-    'griewank_500d',
+    # # Alpine1 Series - Origin Solution
+    # 'alpine1_3d',
+    # 'alpine1_5d',
+    # 'alpine1_30d',
+    # 'alpine1_100d',
+    # 'alpine1_500d',
+    # 'alpine1_1000d',
+    # # Chung-Reynolds Series - Origin Solution
+    # 'chung_reyonlds_3d',
+    # 'chung_reynolds_5d',
+    # 'chung_reynolds_30d',
+    # 'chung_reynolds_100d',
+    # 'chung_reynolds_500d',
+    # 'chung_reynolds_1000d',
+    # # Griewank Series - Origin Solution
+    # 'griewank_3d',
+    # 'griewank_5d',
+    # 'griewank_30d',
+    # 'griewank_100d',
+    # 'griewank_500d',
     'griewank_1000d',
-    # Layeb 4 Series - Non-origin solution
-    'layeb4_3d',
-    'layeb4_5d',
-    'layeb4_30d',
-    'layeb4_100d',
-    'layeb4_500d',
-    'layeb4_1000d',
-    # Levy Series - Non-origin solution
-    'levy_3d',
-    'levy_5d',
-    'levy_30d',
-    'levy_100d',
-    'levy_500d',
-    'levy_1000d',
+    # # Layeb 4 Series - Non-origin solution
+    # 'layeb4_3d',
+    # 'layeb4_5d',
+    # 'layeb4_30d',
+    # 'layeb4_100d',
+    # 'layeb4_500d',
+    # 'layeb4_1000d',
+    # # Levy Series - Non-origin solution
+    # 'levy_3d',
+    # 'levy_5d',
+    # 'levy_30d',
+    # 'levy_100d',
+    # 'levy_500d',
+    # 'levy_1000d',
     # Qing Series - Non-origin solution
     'qing_3d',
     'qing_5d',
@@ -170,20 +190,20 @@ high_dimensional_problem_names: List[str] = [  # noqa
     'qing_100d',
     'qing_500d',
     'qing_1000d',
-    # Rastrigin series - Origin solution
-    'rastrigin_3d',
-    'rastrigin_5d',
-    'rastrigin_30d',
-    'rastrigin_100d',
-    'rastrigin_500d',
-    'rastrigin_1000d',
-    # Schewefel series - Non-origin solution
-    'schwefel_3d',
-    'schwefel_5d',
-    'schwefel_30d',
-    'schwefel_100d',
-    'schwefel_500d',
-    'schwefel_1000d',
+    # # Rastrigin series - Origin solution
+    # 'rastrigin_3d',
+    # 'rastrigin_5d',
+    # 'rastrigin_30d',
+    # 'rastrigin_100d',
+    # 'rastrigin_500d',
+    # 'rastrigin_1000d',
+    # # Schewefel series - Non-origin solution
+    # 'schwefel_3d',
+    # 'schwefel_5d',
+    # 'schwefel_30d',
+    # 'schwefel_100d',
+    # 'schwefel_500d',
+    # 'schwefel_1000d',
 ]
 
 # Identify available hidden sizes
@@ -401,78 +421,78 @@ def run_algorithm_comparison_task(dimensionality, trials):
         x_columns = [f'x{i + 1}' for i in range(dimensions)]
         columns = x_columns + ['f', 'algorithm', 'time']
 
-        # # First run IPOPT
-        # print('Running IPOPT')
-        # outputs_ipopt = run_ipopt(problem, trials=trials)
+        # First run IPOPT
+        print('Running IPOPT')
+        outputs_ipopt = run_ipopt(problem, trials=trials)
 
-        # # Get the final results for all IPOPT runs
-        # ipopt_results = pd.DataFrame(outputs_ipopt['final_results'], columns=columns)
-        # ipopt_results['problem_name'] = problem_name
-        # ipopt_results['hits'] = np.where(
-        #     np.abs(ipopt_results['f'] - minimum_value) <= 1e-4, 1, 0
-        # )
-        # ipopt_results['dimensions'] = dimensions
+        # Get the final results for all IPOPT runs
+        ipopt_results = pd.DataFrame(outputs_ipopt['final_results'], columns=columns)
+        ipopt_results['problem_name'] = problem_name
+        ipopt_results['hits'] = np.where(
+            np.abs(ipopt_results['f'] - minimum_value) <= 1e-4, 1, 0
+        )
+        ipopt_results['dimensions'] = dimensions
 
-        # # Add IPOPT to the problem_performance_list
-        # problem_performance_list.append(ipopt_results)
+        # Add IPOPT to the problem_performance_list
+        problem_performance_list.append(ipopt_results)
 
-        # # Next add dual annealing
-        # print('Running Dual Annealing')
-        # outputs_dual_annealing = run_dual_annealing(problem, trials=trials)
+        # Next add dual annealing
+        print('Running Dual Annealing')
+        outputs_dual_annealing = run_dual_annealing(problem, trials=trials)
 
-        # # Get the final results for all dual annealing runs
-        # dual_annleaing_results = pd.DataFrame(
-        #     outputs_dual_annealing['final_results'], columns=columns
-        # )
-        # dual_annleaing_results['problem_name'] = problem_name
-        # dual_annleaing_results['hits'] = np.where(
-        #     np.abs(dual_annleaing_results['f'] - minimum_value) <= 1e-4, 1, 0
-        # )
-        # dual_annleaing_results['dimensions'] = dimensions
+        # Get the final results for all dual annealing runs
+        dual_annleaing_results = pd.DataFrame(
+            outputs_dual_annealing['final_results'], columns=columns
+        )
+        dual_annleaing_results['problem_name'] = problem_name
+        dual_annleaing_results['hits'] = np.where(
+            np.abs(dual_annleaing_results['f'] - minimum_value) <= 1e-4, 1, 0
+        )
+        dual_annleaing_results['dimensions'] = dimensions
 
-        # # Add dual annealing to the problem_performance_list
-        # problem_performance_list.append(dual_annleaing_results)
+        # Add dual annealing to the problem_performance_list
+        problem_performance_list.append(dual_annleaing_results)
 
-        # # Next add differential evolution
-        # print('Running Differential Evolution')
-        # outputs_differential_evolution = run_differential_evolution(
-        #     problem, trials=trials
-        # )
+        # Next add differential evolution
+        print('Running Differential Evolution')
+        outputs_differential_evolution = run_differential_evolution(
+            problem, trials=trials
+        )
 
-        # # Get the final results for all differential evolution runs
-        # differential_evolution_results = pd.DataFrame(
-        #     outputs_differential_evolution['final_results'], columns=columns
-        # )
-        # differential_evolution_results['problem_name'] = problem_name
-        # differential_evolution_results['hits'] = np.where(
-        #     np.abs(differential_evolution_results['f'] - minimum_value) <= 1e-4, 1, 0
-        # )
-        # differential_evolution_results['dimensions'] = dimensions
+        # Get the final results for all differential evolution runs
+        differential_evolution_results = pd.DataFrame(
+            outputs_differential_evolution['final_results'], columns=columns
+        )
+        differential_evolution_results['problem_name'] = problem_name
+        differential_evolution_results['hits'] = np.where(
+            np.abs(differential_evolution_results['f'] - minimum_value) <= 1e-4, 1, 0
+        )
+        differential_evolution_results['dimensions'] = dimensions
 
-        # # Add differential evolution to the problem_performance_list
-        # problem_performance_list.append(differential_evolution_results)
+        # Add differential evolution to the problem_performance_list
+        problem_performance_list.append(differential_evolution_results)
 
-        # if dimensionality == 'low-dimension':
-        #     # NOTE: PyGranso takes a lot of power to run locally
-        #     # and was not sustainable on my computer should be run
-        #     # on MSI. Low dimensions should be okay though.
+        if dimensionality == 'low-dimension':
+            # NOTE: PyGranso takes a lot of power to run locally
+            # and was not sustainable on my computer should be run
+            # on MSI. Low dimensions should be okay though.
 
-        #     # Next add pygranso
-        #     print('Running PyGranso!')
-        #     outputs_pygranso = run_pygranso(problem, trials=trials)
+            # Next add pygranso
+            print('Running PyGranso!')
+            outputs_pygranso = run_pygranso(problem, trials=trials)
 
-        #     # Get the final results for all differential evolution runs
-        #     pygranso_results = pd.DataFrame(
-        #         outputs_pygranso['final_results'], columns=columns
-        #     )
-        #     pygranso_results['problem_name'] = problem_name
-        #     pygranso_results['hits'] = np.where(
-        #         np.abs(pygranso_results['f'] - minimum_value) <= 1e-4, 1, 0
-        #     )
-        #     pygranso_results['dimensions'] = dimensions
+            # Get the final results for all differential evolution runs
+            pygranso_results = pd.DataFrame(
+                outputs_pygranso['final_results'], columns=columns
+            )
+            pygranso_results['problem_name'] = problem_name
+            pygranso_results['hits'] = np.where(
+                np.abs(pygranso_results['f'] - minimum_value) <= 1e-4, 1, 0
+            )
+            pygranso_results['dimensions'] = dimensions
 
-        #     # Add differential evolution to the problem_performance_list
-        #     problem_performance_list.append(pygranso_results)
+            # Add differential evolution to the problem_performance_list
+            problem_performance_list.append(pygranso_results)
 
         # Next we need to implement the SCIP algorithm
         print('Running SCIP!')
@@ -658,6 +678,8 @@ def find_best_architecture_task(problem_series, method, dimensionality):
             problem_names = chung_reynolds_series
         elif problem_series == 'griewank':
             problem_names = griewank_series
+        elif problem_series == 'qing':
+            problem_names = qing_series
     elif dimensionality == 'low-dimensional':
         directory = 'low-dimension-search-results'
         PROBLEMS = PROBLEMS_BY_NAME
