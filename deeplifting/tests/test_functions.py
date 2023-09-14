@@ -35,6 +35,8 @@ from deeplifting.problems import (
     booth_config,
     branin_rcos,
     branin_rcos_config,
+    brent,
+    brent_config,
     bukin_n6,
     bukin_n6_config,
     cross_in_tray,
@@ -873,4 +875,33 @@ def test_branin_rcos_has_correct_global_minimum():
     # Test the torch version
     x = torch.tensor([3 * torch.pi, 2.425], dtype=torch.float64)
     torch_result = branin_rcos(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-2)
+
+
+def test_brent_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Ex Brent function has the correct global minimum.
+
+    The function has many global minimum values: Here is
+    one example
+    x*=(-10.0, -10.0)
+    f(x*) = 0.0
+
+    x* verified from here:
+    https://towardsdatascience.com/optimization-eye-pleasure-78-benchmark-test-functions-for-single-objective-optimization-92e7ed1d1f12  # noqa
+    """
+    global_minimum = brent_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([-10.0, -10.0])
+    result = brent(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    result = brent(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    # Test the torch version
+    x = torch.tensor([-10.0, -10.0], dtype=torch.float64)
+    torch_result = brent(x, version='pytorch').numpy()
     assert math.isclose(torch_result, global_minimum, abs_tol=1e-2)

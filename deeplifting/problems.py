@@ -3653,11 +3653,15 @@ def branin_rcos(x, results=None, trial=None, version='numpy'):
     return result
 
 
-# Brent function in 2d
-def brent(x, results, trial, version='numpy'):
+def brent(x, results=None, trial=None, version='numpy'):
+    """
+    Brent function in 2D
+    """
     x1, x2 = x.flatten()
     if version == 'numpy':
         result = (x1 + 10) ** 2 + (x2 + 10) ** 2 + np.exp(-(x1**2) - (x2**2))
+    elif version == 'pyomo':
+        result = (x1 + 10) ** 2 + (x2 + 10) ** 2 + pyo.exp(-(x1**2) - (x2**2))
     elif version == 'pytorch':
         result = (x1 + 10) ** 2 + (x2 + 10) ** 2 + torch.exp(-(x1**2) - (x2**2))
     else:
@@ -3665,20 +3669,17 @@ def brent(x, results, trial, version='numpy'):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
         )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
 
     return result
 
