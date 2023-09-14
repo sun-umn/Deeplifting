@@ -3,7 +3,6 @@ import math
 
 # third party
 import numpy as np
-import pytest
 import torch
 
 # first party
@@ -397,7 +396,6 @@ def test_schwefel_has_correct_global_minimum():
     assert math.isclose(torch_result, global_minimum, abs_tol=1e-4)
 
 
-@pytest.mark.skip(reason='Cannot currently verify a global minium value')
 def test_schubert_has_correct_global_minimum():
     """
     Function that tests if our implementation of the
@@ -412,7 +410,7 @@ def test_schubert_has_correct_global_minimum():
     global_minimum = shubert_config['global_minimum']
 
     # Test the numpy version
-    x = np.array([-1.4251, -7.0835])
+    x = np.array([-7.083506, -1.425128])
     result = shubert(x, version='numpy')
     assert math.isclose(result, global_minimum, abs_tol=1e-4)
 
@@ -420,6 +418,6 @@ def test_schubert_has_correct_global_minimum():
     assert math.isclose(result, global_minimum, abs_tol=1e-4)
 
     # Test the torch version
-    x = torch.tensor([5.4828, 4.8580], dtype=torch.float64)
+    x = torch.tensor([-7.083506, -1.425128], dtype=torch.float64)
     torch_result = shubert(x, version='pytorch').numpy()
     assert math.isclose(torch_result, global_minimum, abs_tol=1e-4)

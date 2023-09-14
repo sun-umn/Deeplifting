@@ -369,7 +369,7 @@ def run_pygranso(problem: Dict, trials: int):
     comparisions
     """
     # Get the device (CPU for now)
-    device = torch.device('cuda:0')
+    device = torch.device('cpu')
     fn_values = []
     interim_results = []
 

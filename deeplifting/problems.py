@@ -1015,7 +1015,7 @@ def shubert(x, results=None, trial=None, version='numpy'):
     elif version == 'pyomo':
         term1 = np.sum([i * pyo.cos((i + 1) * x1 + i) for i in range(1, 6)])
         term2 = np.sum([i * pyo.cos((i + 1) * x2 + i) for i in range(1, 6)])
-        result = term1 + term2
+        result = term1 * term2
     elif version == 'pytorch':
         term1 = sum([i * torch.cos((i + 1) * x1 + i) for i in range(1, 6)])
         term2 = sum([i * torch.cos((i + 1) * x2 + i) for i in range(1, 6)])
