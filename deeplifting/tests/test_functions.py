@@ -21,6 +21,8 @@ from deeplifting.problems import (
     alpine2_config,
     bartels_conn,
     bartels_conn_config,
+    beale,
+    beale_config,
     bukin_n6,
     bukin_n6_config,
     cross_in_tray,
@@ -679,4 +681,31 @@ def test_bartels_conn_has_correct_global_minimum():
     # Test the torch version
     x = torch.tensor([0.0, 0.0], dtype=torch.float64)
     torch_result = bartels_conn(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-2)
+
+
+def test_beale_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Ex Beale function has the correct global minimum.
+    This problem comes from the MINLP library
+
+    The function has many global minimum values: Here is
+    one example
+    x*=(3.0, 0.5)
+    f(x*) = 0.0
+    """
+    global_minimum = beale_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([3.0, 0.5])
+    result = beale(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    result = beale(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    # Test the torch version
+    x = torch.tensor([3.0, 0.5], dtype=torch.float64)
+    torch_result = beale(x, version='pytorch').numpy()
     assert math.isclose(torch_result, global_minimum, abs_tol=1e-2)

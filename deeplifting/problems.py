@@ -3044,11 +3044,11 @@ def bartels_conn(x, results=None, trial=None, version='numpy'):
     return result
 
 
-# Beale in 2d
-def beale(x, results, trial, version='numpy'):
+def beale(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the Beale function.
-    This is a 3-dimensional function with a global minimum of 0 at (3,0.5)
+    This is a 2-dimensional function with a global minimum
+    of 0 at (3, 0.5)
 
     Parameters:
         x: (x1, x2) this is a 3D problem
@@ -3072,6 +3072,12 @@ def beale(x, results, trial, version='numpy'):
             + np.square((2.25 - x1 + x1 * np.square(x2)))
             + np.square(2.625 - x1 + x1 * np.power(x2, 3))
         )
+    elif version == 'pyomo':
+        result = (
+            (1.5 - x1 + x1 * x2) ** 2
+            + ((2.25 - x1 + x1 * (x2) ** 2)) ** 2
+            + (2.625 - x1 + x1 * (x2) ** 3) ** 2
+        )
     elif version == 'pytorch':
         result = (
             torch.square(1.5 - x1 + x1 * x2)
@@ -3083,25 +3089,21 @@ def beale(x, results, trial, version='numpy'):
             "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
         )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
 
     return result
 
 
-# Biggs EXP2 in 2d
 def biggs_exp2(x, results, trial, version='numpy'):
     """
     Implementation of the Biggs EXP2 function.
