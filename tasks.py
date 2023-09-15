@@ -35,7 +35,7 @@ low_dimensional_problem_names = [
     'alpine2',
     'bartels_conn',
     'beale',
-    'bird',
+    # 'bird',
     'bohachevsky1',
     'bohachevsky2',
     'bohachevsky3',
@@ -53,28 +53,29 @@ low_dimensional_problem_names = [
     'cube',  # Correct but paper has wrong x*
     'drop_wave',  # Low, runs quickly
     'eggholder',  # Medium, takes time to run
+    'ex8_1_1',
     'griewank',  # Low, (1.0 with 3-layer, 0.95 2-layer)
     'holder_table',  # Medium
     'levy',  # Low, 3-layer
     'levy_n13',  # Low, 3-layer
+    'mathopt6',
     'rastrigin',  # Low, 3-layer
+    'rosenbrock',
     'schaffer_n2',  # Low, 3-layer
     'schaffer_n4',  # Low, 3-layer
     'schwefel',  # Takes a while to run, DA is better at 100% but we are at 85%
     'shubert',  # Takes a while to run
-    'ex8_1_1',
-    'mathopt6',
     'rosenbrock',
-    # 'kriging_peaks_red010',
-    # 'kriging_peaks_red020',
-    # 'xinsheyang_n2',
-    # 'xinsheyang_n3',
+    'xinsheyang_n2',
+    'xinsheyang_n3',
     # 'layeb12',
     # 'layeb3',
     # 'layeb4',
     # 'layeb6',
     # 'layeb7',
     # 'layeb8',
+    # 'kriging_peaks_red010',
+    # 'kriging_peaks_red020',
 ]
 
 # High dimensional series - used to run

@@ -2846,14 +2846,19 @@ def alpine2(x, results=None, trial=None, version='numpy'):
     Raises:
     ValueError
         If the version is not 'numpy' or 'pytorch'.
+
+    This is the correct version:
+    https://towardsdatascience.com/optimization-eye-pleasure-78-benchmark-test-functions-for-single-objective-optimization-92e7ed1d1f12  # noqa
     """
     x1, x2 = x.flatten()
     if version == 'numpy':
-        result = (np.sqrt(x1) * np.sin(x1)) * (np.sqrt(x2) * np.sin(x2))
+        result = -1.0 * (np.sqrt(x1) * np.sin(x1)) * (np.sqrt(x2) * np.sin(x2))
     elif version == 'pyomo':
-        result = (x1**0.5 * pyo.sin(x1)) * (x2**0.5 * pyo.sin(x2))
+        result = -1.0 * (x1**0.5 * pyo.sin(x1)) * (x2**0.5 * pyo.sin(x2))
     elif version == 'pytorch':
-        result = (torch.sqrt(x1) * torch.sin(x1)) * (torch.sqrt(x2) * torch.sin(x2))
+        result = (
+            -1.0 * (torch.sqrt(x1) * torch.sin(x1)) * (torch.sqrt(x2) * torch.sin(x2))
+        )
     else:
         raise ValueError(
             "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
@@ -6841,7 +6846,7 @@ alpine2_config = {
     'objective': alpine2,
     'bounds': [(0, 10), (0, 10)],
     'max_iterations': 1000,
-    'global_minimum': 2.808**2,
+    'global_minimum': -1.0 * 2.808**2,
     'dimensions': 2,
 }
 
