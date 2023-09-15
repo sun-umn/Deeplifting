@@ -3881,7 +3881,6 @@ def chen_bird(x, results=None, trial=None, version='numpy'):
     return result
 
 
-# Chen V in 2d
 def chen_v(x, results=None, trial=None, version='numpy'):
     """
     Chen V in 2D
@@ -4115,8 +4114,10 @@ def cube(x, results=None, trial=None, version='numpy'):
     return result
 
 
-# nd Deb 1 fn
-def deb1(x, results, trial, version='numpy'):
+def nd_deb1(x, results=None, trial=None, version='numpy'):
+    """
+    ND Deb1 function
+    """
     x = x.flatten()
     d = len(x)
     if version == 'numpy':
@@ -4127,19 +4128,6 @@ def deb1(x, results, trial, version='numpy'):
         raise ValueError(
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
-
-    # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        x_tuple = tuple(x.detach().cpu().numpy())
-        results[trial, iteration, :] = np.array(
-            x_tuple + (result.detach().cpu().numpy(),)
-        )
-
-    else:
-        x_tuple = tuple(x.flatten())
-        results[trial, iteration, :] = np.array(x_tuple + (result,))
 
     return result
 
@@ -5372,11 +5360,19 @@ def mishra11(x, results, trial, version='numpy'):
 # Adding the XinSheYang 2 & 3 functions
 # researched that they are very difficult to find
 # the minima
-def xinsheyang_n2(x, results, trial, version='numpy'):
+def xinsheyang_n2(x, results=None, trial=None, version='numpy'):
+    """
+    Xin-She Yang N.2 found here:
+    https://towardsdatascience.com/optimization-eye-pleasure-78-benchmark-test-functions-for-single-objective-optimization-92e7ed1d1f12  # noqa
+    """
     x1, x2 = x.flatten()
     if version == 'numpy':
         component1 = np.abs(x1) + np.abs(x2)
         component2 = np.exp(-(np.sin(x1**2) + np.sin(x2**2)))
+        result = component1 * component2
+    elif version == 'pyomo':
+        component1 = np.abs(x1) + np.abs(x2)
+        component2 = pyo.exp(-(pyo.sin(x1**2) + pyo.sin(x2**2)))
         result = component1 * component2
     elif version == 'pytorch':
         component1 = torch.abs(x1) + torch.abs(x2)
@@ -5387,25 +5383,26 @@ def xinsheyang_n2(x, results, trial, version='numpy'):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
         )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
 
     return result
 
 
-def xinsheyang_n3(x, results, trial, version='numpy'):
+def xinsheyang_n3(x, results=None, trial=None, version='numpy'):
+    """
+    Xin-She Yang N.3 found here:
+    https://towardsdatascience.com/optimization-eye-pleasure-78-benchmark-test-functions-for-single-objective-optimization-92e7ed1d1f12  # noqa
+    """
     x1, x2 = x.flatten()
     beta = 15
     m = 5
@@ -5413,6 +5410,12 @@ def xinsheyang_n3(x, results, trial, version='numpy'):
         component1 = np.exp(-((x1 / beta) ** (2 * m) + (x2 / beta) ** (2 * m)))
         component2 = (
             2 * np.exp(-(x1**2 + x2**2)) * np.cos(x1) ** 2 * np.cos(x2) ** 2
+        )
+        result = component1 - component2
+    elif version == 'pyomo':
+        component1 = pyo.exp(-((x1 / beta) ** (2 * m) + (x2 / beta) ** (2 * m)))
+        component2 = (
+            2 * pyo.exp(-(x1**2 + x2**2)) * pyo.cos(x1) ** 2 * pyo.cos(x2) ** 2
         )
         result = component1 - component2
     elif version == 'pytorch':
@@ -5429,20 +5432,17 @@ def xinsheyang_n3(x, results, trial, version='numpy'):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        results[trial, iteration, :] = np.array(
-            (
-                x1.detach().cpu().numpy(),
-                x2.detach().cpu().numpy(),
-                result.detach().cpu().numpy(),
-            )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
         )
-
-    else:
-        results[trial, iteration, :] = np.array((x1, x2, result))
 
     return result
 
@@ -7222,7 +7222,7 @@ cube_config = {
 }
 
 deb1_config = {
-    'objective': deb1,
+    'objective': nd_deb1,
     'bounds': [(-1, 1)],
     'max_iterations': 1000,
     'global_minimum': None,
@@ -7230,7 +7230,7 @@ deb1_config = {
 }
 
 deb1_10d_config = {
-    'objective': deb1,
+    'objective': nd_deb1,
     'bounds': [(-1, 1)],
     'max_iterations': 1000,
     'global_minimum': None,
@@ -7238,7 +7238,7 @@ deb1_10d_config = {
 }
 
 deb1_50d_config = {
-    'objective': deb1,
+    'objective': nd_deb1,
     'bounds': [(-1, 1)],
     'max_iterations': 1000,
     'global_minimum': None,
@@ -7246,7 +7246,7 @@ deb1_50d_config = {
 }
 
 deb1_100d_config = {
-    'objective': deb1,
+    'objective': nd_deb1,
     'bounds': [(-1, 1)],
     'max_iterations': 1000,
     'global_minimum': None,
@@ -7254,7 +7254,7 @@ deb1_100d_config = {
 }
 
 deb1_500d_config = {
-    'objective': deb1,
+    'objective': nd_deb1,
     'bounds': [(-1, 1)],
     'max_iterations': 1000,
     'global_minimum': None,
@@ -7262,19 +7262,19 @@ deb1_500d_config = {
 }
 
 deb1_1000d_config = {
-    'objective': deb1,
+    'objective': nd_deb1,
     'bounds': [(-1, 1)],
     'max_iterations': 1000,
     'global_minimum': None,
     'dimensions': 1000,
 }
 
-deb1_5000d_config = {
-    'objective': deb1,
+deb1_2500d_config = {
+    'objective': nd_deb1,
     'bounds': [(-1, 1)],
     'max_iterations': 1000,
     'global_minimum': None,
-    'dimensions': 5000,
+    'dimensions': 2500,
 }
 
 deb3_config = {
@@ -8040,7 +8040,7 @@ PROBLEMS_BY_NAME = {
     'deb1_100d': deb1_100d_config,
     'deb1_500d': deb1_500d_config,
     'deb1_1000d': deb1_1000d_config,
-    'deb1_5000d': deb1_5000d_config,
+    'deb1_2500d': deb1_2500d_config,
     'deb3': deb3_config,
     'deb3_10d': deb3_10d_config,
     'deb3_50d': deb3_50d_config,

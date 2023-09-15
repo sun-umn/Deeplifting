@@ -47,8 +47,10 @@ low_dimensional_problem_names = [
     'bukin_n4',
     'camel_3hump',
     'camel_6hump',
+    'chung_reynolds',
     'cross_in_tray',  # Low, runs quickly
     'cross_leg_table',
+    'cube',  # Correct but paper has wrong x*
     'drop_wave',  # Low, runs quickly
     'eggholder',  # Medium, takes time to run
     'griewank',  # Low, (1.0 with 3-layer, 0.95 2-layer)
@@ -65,9 +67,6 @@ low_dimensional_problem_names = [
     'rosenbrock',
     # 'kriging_peaks_red010',
     # 'kriging_peaks_red020',
-    # 'brown',
-    # 'chung_reynolds',
-    # 'cube',  # Correct but paper has wrong x*
     # 'xinsheyang_n2',
     # 'xinsheyang_n3',
     # 'layeb12',
