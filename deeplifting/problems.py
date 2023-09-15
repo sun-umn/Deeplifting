@@ -7036,7 +7036,7 @@ brown_5000d_config = {
 
 bukin_n2_config = {
     'objective': bukin_n2,
-    'bounds': [(-15, -5), (-3, 3)],
+    'bounds': [(-10, -5), (0, 3)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2,
@@ -8030,6 +8030,7 @@ PROBLEMS_BY_NAME = {
     'chen_bird': chen_bird_config,
     'chen_v': chen_v_config,
     'chichinadze': chichinadze_config,
+    'chung_reynolds': chung_reynolds_config,
     'cosine_mixture': cosine_mixture_config,
     'csendes': csendes_config,
     'csendes_10d': csendes_10d_config,

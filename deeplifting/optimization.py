@@ -417,7 +417,6 @@ def run_pygranso(problem: Dict, trials: int):
         opts.x0 = x0
         opts.torch_device = device
         opts.print_frequency = 100
-        # opts.print_level = 0
         opts.limited_mem_size = 50
         opts.stat_l2_model = False
         opts.double_precision = True
@@ -624,7 +623,7 @@ def run_deeplifting(
         # opts.disable_terminationcode_6 = True
         # opts.halt_on_linesearch_bracket = False
         opts.opt_tol = 1e-10
-        opts.maxit = 10000
+        opts.maxit = 5000
 
         # Get the maximum iterations
         max_iterations = problem['max_iterations']
