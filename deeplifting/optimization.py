@@ -527,13 +527,13 @@ def deeplifting_nd_fn(
     # x = outputs.mean(axis=0)
     # print(f'Output x {x}')
     x, f = deeplifting_predictions(outputs, objective, method=method)
-    f_copy = f.detach().cpu().numpy()
+    # f_copy = f.detach().cpu().numpy()
 
-    # Fill in the intermediate results
-    if problem_name not in EXCLUDE_PROBLEMS:
-        iteration = np.argmin(~np.any(np.isnan(deeplifting_results[trial]), axis=1))
-        deeplifting_results[trial, iteration, :dimensions] = x
-        deeplifting_results[trial, iteration, -1] = f_copy
+    # # Fill in the intermediate results
+    # if problem_name not in EXCLUDE_PROBLEMS:
+    #     iteration = np.argmin(~np.any(np.isnan(deeplifting_results[trial]), axis=1))
+    #     deeplifting_results[trial, iteration, :dimensions] = x
+    #     deeplifting_results[trial, iteration, -1] = f_copy
 
     # Inequality constraint
     ci = None
@@ -626,13 +626,15 @@ def run_deeplifting(
         opts.maxit = 5000
 
         # Get the maximum iterations
-        max_iterations = problem['max_iterations']
+        max_iterations = problem['max_iterations']  # noqa
 
-        # results
-        results = np.zeros((trials, max_iterations * 10, dimensions + 1)) * np.nan
-        deeplifting_results = (
-            np.zeros((trials, max_iterations * 10, dimensions + 1)) * np.nan
-        )
+        # # results - turn off saving itermediate results for now
+        # results = np.zeros((trials, max_iterations * 10, dimensions + 1)) * np.nan
+        # deeplifting_results = (
+        #     np.zeros((trials, max_iterations * 10, dimensions + 1)) * np.nan
+        # )
+        results = None
+        deeplifting_results = None
 
         # Set up the function with the results
         fn = lambda x: objective(  # noqa
@@ -650,12 +652,12 @@ def run_deeplifting(
             method=method,
         )  # noqa
 
-        #  Set PyGRANSO's logging function in opts
-        if problem_name not in EXCLUDE_PROBLEMS:
-            # Initiate halt log
-            mHLF_obj = HaltLog()
-            halt_log_fn, get_log_fn = mHLF_obj.makeHaltLogFunctions(opts.maxit)
-            opts.halt_log_fn = halt_log_fn
+        # #  Set PyGRANSO's logging function in opts
+        # if problem_name not in EXCLUDE_PROBLEMS:
+        #     # Initiate halt log
+        #     mHLF_obj = HaltLog()
+        #     halt_log_fn, get_log_fn = mHLF_obj.makeHaltLogFunctions(opts.maxit)
+        #     opts.halt_log_fn = halt_log_fn
 
         # Run the main algorithm
         start_time = time.time()
@@ -663,17 +665,17 @@ def run_deeplifting(
         end_time = time.time()
         total_time = end_time - start_time
 
-        # GET THE HISTORY OF ITERATES
-        # Even if an error is thrown, the log generated until the error can be
-        # obtained by calling get_log_fn()
-        if problem_name not in EXCLUDE_PROBLEMS:
-            log = get_log_fn()
+        # # GET THE HISTORY OF ITERATES
+        # # Even if an error is thrown, the log generated until the error can be
+        # # obtained by calling get_log_fn()
+        # if problem_name not in EXCLUDE_PROBLEMS:
+        #     log = get_log_fn()
 
-            # Final structure
-            indexes = (pd.Series(log.fn_evals).cumsum() - 1).values.tolist()  # noqa
+        #     # Final structure
+        #     indexes = (pd.Series(log.fn_evals).cumsum() - 1).values.tolist()  # noqa
 
-            # # Append intermediate results
-            # iterim_results.append(deeplifting_results[trial, indexes, :dimensions])
+        #     # # Append intermediate results
+        #     # iterim_results.append(deeplifting_results[trial, indexes, :dimensions])
 
         # Get final x we will also need to map
         # it to the same bounds

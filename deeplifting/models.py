@@ -183,6 +183,10 @@ class DeepliftingScalingBlock(nn.Module):
                 x_values_float.append(x_constr)
             x = torch.stack(x_values_float, axis=1)
 
+            # Clean
+            del x_values_float
+            torch.cuda.empty_cache()
+
             return x
 
 
