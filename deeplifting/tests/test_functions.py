@@ -85,6 +85,8 @@ from deeplifting.problems import (
     shubert_config,
     xinsheyang_n2,
     xinsheyang_n2_config,
+    xinsheyang_n3,
+    xinsheyang_n3_config,
 )
 
 
@@ -1089,7 +1091,7 @@ def test_xinsheyang_n2_has_correct_global_minimum():
 
     The function has many global minimum values: Here is
     one example
-    x*=(1.0, 1.0)
+    x*=(0.0, 0.0)
     f(x*) = 0.0
 
     x* given here:
@@ -1109,4 +1111,34 @@ def test_xinsheyang_n2_has_correct_global_minimum():
     # Test the torch version
     x = torch.tensor([0.0, 0.0], dtype=torch.float64)
     torch_result = xinsheyang_n2(x, version='pytorch').numpy()
+    assert math.isclose(torch_result, global_minimum, abs_tol=1e-2)
+
+
+def test_xinsheyang_n3_has_correct_global_minimum():
+    """
+    Function that tests if our implementation of the
+    Ex Xin-She Yang N.3 function has the correct global minimum.
+
+    The function has many global minimum values: Here is
+    one example
+    x*=(0.0, 0.0)
+    f(x*) = 0.0
+
+    x* given here:
+    https://arxiv.org/pdf/1308.4008.pdf
+    is incorrect
+    """
+    global_minimum = xinsheyang_n3_config['global_minimum']
+
+    # Test the numpy version
+    x = np.array([0.0, 0.0])
+    result = xinsheyang_n3(x, version='numpy')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    result = xinsheyang_n3(x, version='pyomo')
+    assert math.isclose(result, global_minimum, abs_tol=1e-2)
+
+    # Test the torch version
+    x = torch.tensor([0.0, 0.0], dtype=torch.float64)
+    torch_result = xinsheyang_n3(x, version='pytorch').numpy()
     assert math.isclose(torch_result, global_minimum, abs_tol=1e-2)
