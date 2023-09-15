@@ -35,7 +35,7 @@ low_dimensional_problem_names = [
     'alpine2',
     'bartels_conn',
     'beale',
-    # 'bird',
+    # 'bird',  # Takes a long time with SCIP
     'bohachevsky1',
     'bohachevsky2',
     'bohachevsky3',
