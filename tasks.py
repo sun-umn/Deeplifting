@@ -163,13 +163,13 @@ schwefel_series = [
 ]
 
 high_dimensional_problem_names: List[str] = [  # noqa
-    # Ackley Series - Origin Solution
-    'ackley_3d',
-    'ackley_5d',
-    'ackley_30d',
-    'ackley_100d',
-    'ackley_500d',
-    'ackley_1000d',
+    # # Ackley Series - Origin Solution
+    # 'ackley_3d',
+    # 'ackley_5d',
+    # 'ackley_30d',
+    # 'ackley_100d',
+    # 'ackley_500d',
+    # 'ackley_1000d',
     # # Alpine1 Series - Origin Solution
     # 'alpine1_3d',
     # 'alpine1_5d',
@@ -177,20 +177,20 @@ high_dimensional_problem_names: List[str] = [  # noqa
     # 'alpine1_100d',
     # 'alpine1_500d',
     # 'alpine1_1000d',
-    # # Chung-Reynolds Series - Origin Solution
-    # 'chung_reyonlds_3d',
-    # 'chung_reynolds_5d',
-    # 'chung_reynolds_30d',
-    # 'chung_reynolds_100d',
-    # 'chung_reynolds_500d',
-    # 'chung_reynolds_1000d',
+    # Chung-Reynolds Series - Origin Solution
+    'chung_reyonlds_3d',
+    'chung_reynolds_5d',
+    'chung_reynolds_30d',
+    'chung_reynolds_100d',
+    'chung_reynolds_500d',
+    'chung_reynolds_1000d',
     # # Griewank Series - Origin Solution
     # 'griewank_3d',
     # 'griewank_5d',
     # 'griewank_30d',
     # 'griewank_100d',
-    'griewank_500d',
-    'griewank_1000d',
+    # 'griewank_500d',
+    # 'griewank_1000d',
     # # Layeb 4 Series - Non-origin solution
     # 'layeb4_3d',
     # 'layeb4_5d',
@@ -198,13 +198,13 @@ high_dimensional_problem_names: List[str] = [  # noqa
     # 'layeb4_100d',
     # 'layeb4_500d',
     # 'layeb4_1000d',
-    # Levy Series - Non-origin solution
-    'levy_3d',
-    'levy_5d',
-    'levy_30d',
-    'levy_100d',
-    'levy_500d',
-    'levy_1000d',
+    # # Levy Series - Non-origin solution
+    # 'levy_3d',
+    # 'levy_5d',
+    # 'levy_30d',
+    # 'levy_100d',
+    # 'levy_500d',
+    # 'levy_1000d',
     # # Qing Series - Non-origin solution
     # 'qing_3d',
     # 'qing_5d',
