@@ -155,11 +155,11 @@ rastrigin_series = [
 schwefel_series = [
     # Schewefel series - Non-origin solution
     'schwefel_3d',
-    'schwefel_5d',
-    'schwefel_30d',
-    'schwefel_100d',
-    'schwefel_500d',
-    'schwefel_1000d',
+    #     'schwefel_5d',
+    #     'schwefel_30d',
+    #     'schwefel_100d',
+    #     'schwefel_500d',
+    #     'schwefel_1000d',
 ]
 
 high_dimensional_problem_names: List[str] = [  # noqa
