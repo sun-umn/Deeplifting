@@ -6,4 +6,5 @@ search_results/
 algorithm_compare_results/
 high-dimension-search-results/
 high-dimension-paper-results/
+*data*
 .neptune
