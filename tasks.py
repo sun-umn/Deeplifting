@@ -93,13 +93,13 @@ ackley_series = [
 ]
 
 alpine_series = [
-    # Alpine1 Series - Origin Solution
-    'alpine1_3d',
-    'alpine1_5d',
-    'alpine1_30d',
-    'alpine1_100d',
+    # # Alpine1 Series - Origin Solution
+    # 'alpine1_3d',
+    # 'alpine1_5d',
+    # 'alpine1_30d',
+    # 'alpine1_100d',
     'alpine1_500d',
-    'alpine1_1000d',
+    # 'alpine1_1000d',
 ]
 
 chung_reynolds_series = [
