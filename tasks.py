@@ -251,7 +251,7 @@ search_hidden_sizes = [
 ]
 
 # Input sizes
-search_input_sizes = [128]
+search_input_sizes = [512]
 
 # Hidden activations
 search_hidden_activations = ['sine', 'leaky_relu']
@@ -260,7 +260,7 @@ search_hidden_activations = ['sine', 'leaky_relu']
 search_output_activations = ['sine', 'leaky_relu']
 
 # Aggregate functions - for skip connections
-search_agg_functions = ['sum']
+search_agg_functions = ['sum', 'max']
 
 # Include BN
 search_include_bn = [True, False]
