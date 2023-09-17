@@ -123,13 +123,13 @@ griewank_series = [
 ]
 
 levy_series = [
-    # Levy Series - Non-origin solution
-    'levy_3d',
-    'levy_5d',
-    'levy_30d',
+    # # Levy Series - Non-origin solution
+    # 'levy_3d',
+    # 'levy_5d',
+    # 'levy_30d',
     'levy_100d',
-    'levy_500d',
-    'levy_1000d',
+    # 'levy_500d',
+    # 'levy_1000d',
 ]
 
 qing_series = [
@@ -251,7 +251,7 @@ search_hidden_sizes = [
 ]
 
 # Input sizes
-search_input_sizes = [512]
+search_input_sizes = [128]
 
 # Hidden activations
 search_hidden_activations = ['sine', 'leaky_relu']
