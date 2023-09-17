@@ -175,7 +175,7 @@ high_dimensional_problem_names: List[str] = [  # noqa
     # 'alpine1_5d',
     # 'alpine1_30d',
     # 'alpine1_100d',
-    # 'alpine1_500d',
+    'alpine1_500d',
     # 'alpine1_1000d',
     # # Chung-Reynolds Series - Origin Solution
     # 'chung_reyonlds_3d',
@@ -199,12 +199,12 @@ high_dimensional_problem_names: List[str] = [  # noqa
     # 'layeb4_500d',
     # 'layeb4_1000d',
     # Levy Series - Non-origin solution
-    'levy_3d',
-    'levy_5d',
-    'levy_30d',
-    'levy_100d',
-    'levy_500d',
-    'levy_1000d',
+    # 'levy_3d',
+    # 'levy_5d',
+    # 'levy_30d',
+    # 'levy_100d',
+    # 'levy_500d',
+    # 'levy_1000d',
     # # Qing Series - Non-origin solution
     # 'qing_3d',
     # 'qing_5d',
@@ -251,13 +251,13 @@ search_hidden_sizes = [
 ]
 
 # Input sizes
-search_input_sizes = [512]
+search_input_sizes = [128]
 
 # Hidden activations
-search_hidden_activations = ['sine', 'relu', 'leaky_relu']
+search_hidden_activations = ['sine', 'leaky_relu']
 
 # Ouput activations
-search_output_activations = ['sine']
+search_output_activations = ['sine', 'leaky_relu']
 
 # Aggregate functions - for skip connections
 search_agg_functions = ['sum']
