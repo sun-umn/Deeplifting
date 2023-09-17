@@ -251,7 +251,7 @@ search_hidden_sizes = [
 ]
 
 # Input sizes
-search_input_sizes = [128]
+search_input_sizes = [64]
 
 # Hidden activations
 search_hidden_activations = ['sine', 'leaky_relu']
