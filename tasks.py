@@ -113,12 +113,12 @@ chung_reynolds_series = [
 ]
 
 griewank_series = [
-    # Griewank Series - Origin Solution
-    'griewank_3d',
-    'griewank_5d',
-    'griewank_30d',
-    'griewank_100d',
-    'griewank_500d',
+    # # Griewank Series - Origin Solution
+    # 'griewank_3d',
+    # 'griewank_5d',
+    # 'griewank_30d',
+    # 'griewank_100d',
+    # 'griewank_500d',
     'griewank_1000d',
 ]
 
