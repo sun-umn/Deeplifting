@@ -127,8 +127,8 @@ levy_series = [
     # 'levy_3d',
     # 'levy_5d',
     # 'levy_30d',
-    'levy_100d',
-    # 'levy_500d',
+    # 'levy_100d',
+    'levy_500d',
     # 'levy_1000d',
 ]
 
