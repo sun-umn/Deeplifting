@@ -84,12 +84,12 @@ low_dimensional_problem_names = [
 # refactor a lot of this code
 ackley_series = [
     # Ackley Series - Origin Solution
-    'ackley_3d',
+    # 'ackley_3d',
     'ackley_5d',
-    'ackley_30d',
-    'ackley_100d',
-    'ackley_500d',
-    'ackley_1000d',
+    # 'ackley_30d',
+    # 'ackley_100d',
+    # 'ackley_500d',
+    # 'ackley_1000d',
 ]
 
 alpine_series = [
@@ -175,7 +175,7 @@ high_dimensional_problem_names: List[str] = [  # noqa
     # 'alpine1_5d',
     # 'alpine1_30d',
     # 'alpine1_100d',
-    'alpine1_500d',
+    # 'alpine1_500d',
     # 'alpine1_1000d',
     # # Chung-Reynolds Series - Origin Solution
     # 'chung_reyonlds_3d',
@@ -201,17 +201,17 @@ high_dimensional_problem_names: List[str] = [  # noqa
     # Levy Series - Non-origin solution
     # 'levy_3d',
     # 'levy_5d',
-    # 'levy_30d',
-    # 'levy_100d',
-    # 'levy_500d',
-    # 'levy_1000d',
-    # # Qing Series - Non-origin solution
-    # 'qing_3d',
-    # 'qing_5d',
-    # 'qing_30d',
-    # 'qing_100d',
-    # 'qing_500d',
-    # 'qing_1000d',
+    'levy_30d',
+    'levy_100d',
+    'levy_500d',
+    'levy_1000d',
+    # Qing Series - Non-origin solution
+    'qing_3d',
+    'qing_5d',
+    'qing_30d',
+    'qing_100d',
+    'qing_500d',
+    'qing_1000d',
     # # Rastrigin series - Origin solution
     # 'rastrigin_3d',
     # 'rastrigin_5d',
@@ -219,13 +219,13 @@ high_dimensional_problem_names: List[str] = [  # noqa
     # 'rastrigin_100d',
     # 'rastrigin_500d',
     # 'rastrigin_1000d',
-    # # Schewefel series - Non-origin solution
-    # 'schwefel_3d',
-    # 'schwefel_5d',
-    # 'schwefel_30d',
-    # 'schwefel_100d',
-    # 'schwefel_500d',
-    # 'schwefel_1000d',
+    # Schewefel series - Non-origin solution
+    'schwefel_3d',
+    'schwefel_5d',
+    'schwefel_30d',
+    'schwefel_100d',
+    'schwefel_500d',
+    'schwefel_1000d',
 ]
 
 # Identify available hidden sizes
@@ -497,27 +497,27 @@ def run_algorithm_comparison_task(dimensionality, trials):
         # Add differential evolution to the problem_performance_list
         problem_performance_list.append(differential_evolution_results)
 
-        if dimensionality == 'low-dimensional':
-            # NOTE: PyGranso takes a lot of power to run locally
-            # and was not sustainable on my computer should be run
-            # on MSI. Low dimensions should be okay though.
+        # if dimensionality == 'low-dimensional':
+        #     # NOTE: PyGranso takes a lot of power to run locally
+        #     # and was not sustainable on my computer should be run
+        #     # on MSI. Low dimensions should be okay though.
 
-            # Next add pygranso
-            print('Running PyGranso!')
-            outputs_pygranso = run_pygranso(problem, trials=trials)
+        #     # Next add pygranso
+        #     print('Running PyGranso!')
+        #     outputs_pygranso = run_pygranso(problem, trials=trials)
 
-            # Get the final results for all differential evolution runs
-            pygranso_results = pd.DataFrame(
-                outputs_pygranso['final_results'], columns=columns
-            )
-            pygranso_results['problem_name'] = problem_name
-            pygranso_results['hits'] = np.where(
-                np.abs(pygranso_results['f'] - minimum_value) <= 1e-4, 1, 0
-            )
-            pygranso_results['dimensions'] = dimensions
+        #     # Get the final results for all differential evolution runs
+        #     pygranso_results = pd.DataFrame(
+        #         outputs_pygranso['final_results'], columns=columns
+        #     )
+        #     pygranso_results['problem_name'] = problem_name
+        #     pygranso_results['hits'] = np.where(
+        #         np.abs(pygranso_results['f'] - minimum_value) <= 1e-4, 1, 0
+        #     )
+        #     pygranso_results['dimensions'] = dimensions
 
-            # Add differential evolution to the problem_performance_list
-            problem_performance_list.append(pygranso_results)
+        #     # Add differential evolution to the problem_performance_list
+        #     problem_performance_list.append(pygranso_results)
 
         # Next we need to implement the SCIP algorithm
         print('Running SCIP!')

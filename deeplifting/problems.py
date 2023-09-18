@@ -948,19 +948,19 @@ def schwefel(x, results=None, trial=None, version='numpy'):
     x1, x2 = x.flatten()
     if version == 'numpy':
         result = (
-            418.9829 * 2
+            418.982887 * 2
             - x1 * np.sin(np.sqrt(np.abs(x1)))
             - x2 * np.sin(np.sqrt(np.abs(x2)))
         )
     elif version == 'pyomo':
         result = (
-            418.9829 * 2
+            418.982887 * 2
             - x1 * pyo.sin(np.abs(x1) ** 0.5)
             - x2 * pyo.sin(np.abs(x2) ** 0.5)
         )
     elif version == 'pytorch':
         result = (
-            418.9829 * 2
+            418.982887 * 2
             - x1 * torch.sin(torch.sqrt(torch.abs(x1)))
             - x2 * torch.sin(torch.sqrt(torch.abs(x2)))
         )
@@ -5941,12 +5941,12 @@ def ndschwefel(x, results=None, trial=None, version='numpy'):
     x = x.flatten()
     d = len(x)
     if version == 'numpy':
-        result = 418.9829 * d - np.sum(x * np.sin(np.sqrt(np.abs(x))))
+        result = 418.982887 * d - np.sum(x * np.sin(np.sqrt(np.abs(x))))
     elif version == 'pyomo':
-        values = [value * pyo.sin(pyo.sqrt(np.abs(value))) for value in x]
-        result = 418.9829 * d - np.sum(values)
+        values = [value * pyo.sin(np.abs(value) ** 0.5) for value in x]
+        result = 418.982887 * d - np.sum(values)
     elif version == 'pytorch':
-        result = 418.9829 * d - torch.sum(x * torch.sin(torch.sqrt(torch.abs(x))))
+        result = 418.982887 * d - torch.sum(x * torch.sin(torch.abs(x) ** 0.5))
     else:
         raise ValueError(
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."

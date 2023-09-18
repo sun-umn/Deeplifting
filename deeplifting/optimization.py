@@ -1015,6 +1015,11 @@ def run_pyomo(problem, trials, method):
     results = np.zeros((trials, max_iterations, dimensions + 1)) * np.nan
     fn_values = []
 
+    # Initial time limit
+    # If the initial time limit is exceeded
+    # then we will reduce it within the loop
+    time_limit = 60 * 60 * 8
+
     for trial in range(trials):
         print(f'Pyomo trial = {trial + 1}')
         # Set the random seed
@@ -1054,12 +1059,24 @@ def run_pyomo(problem, trials, method):
 
         # Solve the model
         solver = SolverFactory(method)
-        solver.solve(model)
+
+        # Set an 8 hour time limit
+        solver.options['limits/time'] = time_limit
+        solver_result = solver.solve(model)
+        fn_objective = model.obj()
+
+        # Message
+        termination_condition = solver_result['Solver'][0]['Message']
+        if termination_condition == 'time limit reached':
+            # If the first trial takes 8 hours then reset
+            # the limit to 1 minute to get through the rest
+            # of the trials
+            time_limit = 60
 
         end_time = time.time()
         total_time = end_time - start_time
 
         x_tuple = tuple(model.x.get_values().values())
-        fn_values.append(x_tuple + (model.obj(), method.upper(), total_time))
+        fn_values.append(x_tuple + (fn_objective, method.upper(), total_time))
 
     return {'results': results, 'final_results': fn_values}
