@@ -41,18 +41,18 @@ low_dimensional_problem_names = [
     # 'bohachevsky3',
     # 'booth',
     # 'branin_rcos',
-    'brent',
-    'bukin_n2',
-    'bukin_n4',
-    'bukin_n6',  # High, 2 layer is best so far, takes a while to run
-    'camel_3hump',
-    'camel_6hump',
-    'chung_reynolds',
-    'cross_in_tray',  # Low, runs quickly
-    'cross_leg_table',
-    'cube',  # Correct but paper has wrong x*
-    'drop_wave',  # Low, runs quickly
-    'eggholder',  # Medium, takes time to run
+    # 'brent',
+    # 'bukin_n2',
+    # 'bukin_n4',
+    # 'bukin_n6',  # High, 2 layer is best so far, takes a while to run
+    # 'camel_3hump',
+    # 'camel_6hump',
+    # 'chung_reynolds',
+    # 'cross_in_tray',  # Low, runs quickly
+    # 'cross_leg_table',
+    # 'cube',  # Correct but paper has wrong x*
+    # 'drop_wave',  # Low, runs quickly
+    # 'eggholder',  # Medium, takes time to run
     # 'ex8_1_1',
     # 'griewank',  # Low, (1.0 with 3-layer, 0.95 2-layer)
     # 'holder_table',  # Medium
@@ -64,8 +64,8 @@ low_dimensional_problem_names = [
     # 'schaffer_n2',  # Low, 3-layer
     # 'schaffer_n4',  # Low, 3-layer
     # 'schwefel',  # Takes a while to run, DA is better at 100% but we are at 85%
-    # 'shubert',  # Takes a while to run
-    # 'rosenbrock',
+    'shubert',  # Takes a while to run
+    # # 'rosenbrock',
     # 'xinsheyang_n2',
     # 'xinsheyang_n3',
     # 'layeb12',
@@ -129,7 +129,7 @@ levy_series = [
     # 'levy_30d',
     # 'levy_100d',
     'levy_500d',
-    # 'levy_1000d',
+    'levy_1000d',
 ]
 
 qing_series = [
@@ -154,12 +154,12 @@ rastrigin_series = [
 
 schwefel_series = [
     # Schewefel series - Non-origin solution
-    'schwefel_3d',
-    #     'schwefel_5d',
-    #     'schwefel_30d',
-    #     'schwefel_100d',
-    #     'schwefel_500d',
-    #     'schwefel_1000d',
+    'schwefel_3d',  # Found a solution
+    # 'schwefel_5d',  #
+    # 'schwefel_30d',  # Did not find a solution yet
+    # 'schwefel_100d',
+    # 'schwefel_500d',
+    # 'schwefel_1000d',  #
 ]
 
 high_dimensional_problem_names: List[str] = [  # noqa
@@ -220,11 +220,11 @@ high_dimensional_problem_names: List[str] = [  # noqa
     # 'rastrigin_500d',
     # 'rastrigin_1000d',
     # Schewefel series - Non-origin solution
-    'schwefel_3d',
-    'schwefel_5d',
-    'schwefel_30d',
-    'schwefel_100d',
-    'schwefel_500d',
+    # 'schwefel_3d',
+    # 'schwefel_5d',
+    # 'schwefel_30d',
+    # 'schwefel_100d',
+    # 'schwefel_500d',
     'schwefel_1000d',
 ]
 
@@ -239,31 +239,36 @@ hidden_size_2048 = (2048,)
 
 # Hidden size combinations
 search_hidden_sizes = [
+    # hidden_size_64 * 10,
+    # hidden_size_64 * 3,
     # # Hidden sizes of 128
-    # hidden_size_128 * 2,
-    # hidden_size_128 * 3,
+    hidden_size_128 * 2,
+    hidden_size_128 * 3,
+    # hidden_size_128 * 4,
+    # hidden_size_128 * 5,
     # # Hidden sizes of 256
-    # hidden_size_256 * 2,
-    # hidden_size_256 * 3,
-    # Hidden sizes of 512
+    hidden_size_256 * 2,
+    hidden_size_256 * 3,
+    # # Hidden sizes of 512
     hidden_size_512 * 2,
-    hidden_size_512 * 4,
+    hidden_size_512 * 3,
+    # hidden_size_2048 * 2
 ]
 
 # Input sizes
-search_input_sizes = [128]
+search_input_sizes = [1]
 
 # Hidden activations
-search_hidden_activations = ['sine', 'relu', 'leaky_relu']
+search_hidden_activations = ['sine']
 
 # Ouput activations
-search_output_activations = ['sine', 'relu', 'leaky_relu']
+search_output_activations = ['sine']
 
 # Aggregate functions - for skip connections
-search_agg_functions = ['sum', 'max']
+search_agg_functions = ['sum']
 
 # Include BN
-search_include_bn = [True, False]
+search_include_bn = [False]
 
 
 @click.group()

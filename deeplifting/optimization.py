@@ -516,17 +516,19 @@ def deeplifting_nd_fn(
     deeplifting_results,
     problem_name,
     method='particle',
+    inputs=None,
 ):
     """
     Combined funtion used for PyGranso
     """
-    outputs = model(inputs=None)
+    outputs = model(inputs=inputs)
 
     # Get x1 and x2 so we can add the bounds
     # outputs = torch.sigmoid(outputs)
     # x = outputs.mean(axis=0)
     # print(f'Output x {x}')
     x, f = deeplifting_predictions(outputs, objective, method=method)
+    # print(x)
     # f_copy = f.detach().cpu().numpy()
 
     # # Fill in the intermediate results
@@ -564,7 +566,7 @@ def run_deeplifting(
     """
     # Get the device (CPU for now)
     dimensions = problem['dimensions']
-    device = torch.device('cuda:0')
+    device = torch.device('cpu')
     fn_values = []
     iterim_results: List[Any] = []  # noqa
 
@@ -615,15 +617,14 @@ def run_deeplifting(
 
         opts.x0 = x0
         opts.torch_device = device
-        opts.print_frequency = 100
-        # opts.print_level = 0
+        opts.print_frequency = 1
         opts.limited_mem_size = 5
         opts.stat_l2_model = False
         opts.double_precision = True
         # opts.disable_terminationcode_6 = True
         # opts.halt_on_linesearch_bracket = False
         opts.opt_tol = 1e-10
-        opts.maxit = 5000
+        opts.maxit = 500
 
         # Get the maximum iterations
         max_iterations = problem['max_iterations']  # noqa
@@ -650,6 +651,7 @@ def run_deeplifting(
             deeplifting_results,
             problem_name=problem_name,
             method=method,
+            inputs=None,
         )  # noqa
 
         # #  Set PyGRANSO's logging function in opts
@@ -728,11 +730,11 @@ def run_deeplifting(
     return {'results': None, 'final_results': fn_values, 'callbacks': iterim_results}
 
 
-def deeplifting_high_dimension_fn(model, objective):
+def deeplifting_high_dimension_fn(model, objective, inputs=None):
     """
     Combined funtion used for PyGranso
     """
-    outputs = model(inputs=None)
+    outputs = model(inputs=inputs)
     outputs = outputs.mean(axis=0)
     f = objective(outputs, version='pytorch')
 
@@ -763,7 +765,7 @@ def run_high_dimensional_deeplifting(
     """
     # Get the device (CPU for now)
     dimensions = problem['dimensions']
-    device = torch.device('cuda:0')
+    device = torch.device('cpu')
     fn_values = []
 
     for trial in range(trials):
@@ -813,17 +815,20 @@ def run_high_dimensional_deeplifting(
 
         opts.x0 = x0
         opts.torch_device = device
-        opts.print_frequency = 100
-        opts.limited_mem_size = 100
+        opts.print_frequency = 10
+        opts.limited_mem_size = 5
         opts.stat_l2_model = False
         opts.double_precision = True
-        # opts.disable_terminationcode_6 = True
-        # opts.halt_on_linesearch_bracket = False
+        opts.disable_terminationcode_6 = True
+        opts.halt_on_linesearch_bracket = False
         opts.opt_tol = 1e-10
-        opts.maxit = 5000
+        opts.maxit = 2000
 
         # # Combined function
-        comb_fn = lambda model: deeplifting_high_dimension_fn(model, objective)  # noqa
+        xi = torch.randn(128, 512).to(dtype=torch.double)
+        comb_fn = lambda model: deeplifting_high_dimension_fn(
+            model, objective, xi
+        )  # noqa
 
         # Run the main algorithm
         start_time = time.time()
@@ -833,11 +838,13 @@ def run_high_dimensional_deeplifting(
 
         # Get final x we will also need to map
         # it to the same bounds
-        outputs = model(inputs=None)
+        outputs = model(inputs=xi)
+        # outputs = model(inputs=None)
         outputs = outputs.mean(axis=0)
         final_fn = objective(outputs, version='pytorch')
         f = final_fn.detach().cpu().numpy()
         xf = outputs.detach().cpu().numpy()
+
         data_point = tuple(xf) + (float(f), 'Deeplifting', total_time)
         fn_values.append(data_point)
 

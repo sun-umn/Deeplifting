@@ -79,7 +79,7 @@ class DeepliftingMLP(nn.Module):
         # optimization is also let the input be variable. Some
         # of the problems we have looked at so far also are
         # between bounds
-        self.x = nn.Parameter(torch.randn(input_size, input_size))
+        # self.x = nn.Parameter(torch.randn(input_size, input_size))
 
     def forward(self, inputs=None):  # noqa
         output = self.layers(self.x)
@@ -262,6 +262,7 @@ class DeepliftingSkipMLP(nn.Module):
     def forward(self, inputs=None):
         intermediate_connections = []
         x = self.x
+        # x = inputs
         for i, layer in enumerate(self.layers):
             x_new = layer(x)
             if (i + 1) % self.skip_every_n == 0 and i != 0:
@@ -272,19 +273,27 @@ class DeepliftingSkipMLP(nn.Module):
 
         # Stack the skipped connections and then sum
         # We will also make this configurable
-        x = torch.stack(intermediate_connections)
+        if self.agg_function == 'identity':
+            # Final output layer
+            out = self.output_layer(x)
+        elif self.agg_function == 'sum':
+            x = torch.stack(intermediate_connections)
+            x = torch.sum(x, axis=0)
+            # Final output layer
+            out = self.output_layer(x)
+        elif self.agg_function == 'average':
+            x = torch.stack(intermediate_connections)
+            x = torch.mean(x, axis=0)
+            # Final output layer
+            out = self.output_layer(x)
+        elif self.agg_function == 'max':
+            x = torch.stack(intermediate_connections)
+            x = torch.amax(x, axis=0)
+            # Final output layer
+            out = self.output_layer(x)
+
         del intermediate_connections
         torch.cuda.empty_cache()
-
-        if self.agg_function == 'sum':
-            x = torch.sum(x, axis=0)
-        elif self.agg_function == 'average':
-            x = torch.mean(x, axis=0)
-        elif self.agg_function == 'max':
-            x = torch.amax(x, axis=0)
-
-        # Final output layer
-        out = self.output_layer(x)
 
         # Run through the scaling layer
         out = self.scaling_layer(out)

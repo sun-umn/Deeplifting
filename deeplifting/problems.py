@@ -6846,7 +6846,7 @@ alpine2_config = {
     'objective': alpine2,
     'bounds': [(0, 10), (0, 10)],
     'max_iterations': 1000,
-    'global_minimum': -7.885601,
+    'global_minimum': -7.885600,
     'dimensions': 2,
 }
 
