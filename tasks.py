@@ -155,11 +155,11 @@ rastrigin_series = [
 schwefel_series = [
     # Schewefel series - Non-origin solution
     'schwefel_3d',  # Found a solution
-    # 'schwefel_5d',  #
-    # 'schwefel_30d',  # Did not find a solution yet
-    # 'schwefel_100d',
-    # 'schwefel_500d',
-    # 'schwefel_1000d',  #
+    'schwefel_5d',  #
+    'schwefel_30d',  # Did not find a solution yet
+    'schwefel_100d',
+    'schwefel_500d',
+    'schwefel_1000d',  #
 ]
 
 high_dimensional_problem_names: List[str] = [  # noqa
@@ -201,10 +201,10 @@ high_dimensional_problem_names: List[str] = [  # noqa
     # Levy Series - Non-origin solution
     # 'levy_3d',
     # 'levy_5d',
-    'levy_30d',
-    'levy_100d',
-    'levy_500d',
-    'levy_1000d',
+    # 'levy_30d',
+    # 'levy_100d',
+    # 'levy_500d',
+    # 'levy_1000d',
     # Qing Series - Non-origin solution
     'qing_3d',
     'qing_5d',
@@ -220,11 +220,11 @@ high_dimensional_problem_names: List[str] = [  # noqa
     # 'rastrigin_500d',
     # 'rastrigin_1000d',
     # Schewefel series - Non-origin solution
-    # 'schwefel_3d',
-    # 'schwefel_5d',
-    # 'schwefel_30d',
-    # 'schwefel_100d',
-    # 'schwefel_500d',
+    'schwefel_3d',
+    'schwefel_5d',
+    'schwefel_30d',
+    'schwefel_100d',
+    'schwefel_500d',
     'schwefel_1000d',
 ]
 
