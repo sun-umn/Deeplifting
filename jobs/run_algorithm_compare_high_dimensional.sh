@@ -9,4 +9,4 @@
 #SBATCH --gres=gpu:1
 cd /home/jusun/dever120/Deeplifting
 export PATH=/home/jusun/dever120/miniconda3/envs/deeplifting/bin:$PATH
-python -m tasks run-algorithm-comparisons-scip --dimensionality='high-dimensional' --trials=10
+python -m tasks run-algorithm-comparisons --dimensionality='high-dimensional' --trials=10
