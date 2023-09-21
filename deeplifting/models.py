@@ -130,11 +130,12 @@ class DeepliftingBlock(nn.Module):
 
 
 class DeepliftingScalingBlock(nn.Module):
-    def __init__(self, bounds, output_activation, dimensions=2):
+    def __init__(self, bounds, output_activation, dimensions=2, scale=1):
         super(DeepliftingScalingBlock, self).__init__()
         # Define the bounds for the class
         self.bounds = bounds
         self.dimensions = dimensions
+        self.scale = scale
 
         # Define the scaler based on the final activation layer
         # of the output
@@ -160,7 +161,7 @@ class DeepliftingScalingBlock(nn.Module):
             if self.output_activation != 'sine':
                 return a + (b - a) / 2.0 * (torch.sin(outputs) + 1)
             else:
-                return a + (b - a) / 2.0 * (outputs + 1)
+                return a + (b - a) / 2.0 * ((self.scale * outputs) + 1)
 
         else:
             x_values_float = []
@@ -215,6 +216,7 @@ class DeepliftingSkipMLP(nn.Module):
         self.agg_function = agg_function
         self.include_bn = include_bn
         self.first_hidden_Size = 512
+        self.scale = torch.randn(1) * 2 * torch.pi
 
         # Input layer
         self.layers.append(
@@ -252,7 +254,10 @@ class DeepliftingSkipMLP(nn.Module):
 
         # Final scaling layer
         self.scaling_layer = DeepliftingScalingBlock(
-            bounds=bounds, output_activation=output_activation, dimensions=output_size
+            bounds=bounds,
+            output_activation=output_activation,
+            dimensions=output_size,
+            scale=self.scale,
         )
 
         # One of the things that we did with the topology

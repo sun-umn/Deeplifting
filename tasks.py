@@ -32,7 +32,7 @@ low_dimensional_problem_names = [
     # 'ackley3',
     # 'adjiman',
     # 'alpine1',
-    # 'alpine2',
+    'alpine2',
     # 'bartels_conn',
     # 'beale',
     # 'bird',  # Takes a long time with SCIP
@@ -64,7 +64,7 @@ low_dimensional_problem_names = [
     # 'schaffer_n2',  # Low, 3-layer
     # 'schaffer_n4',  # Low, 3-layer
     # 'schwefel',  # Takes a while to run, DA is better at 100% but we are at 85%
-    'shubert',  # Takes a while to run
+    # 'shubert',  # Takes a while to run
     # # 'rosenbrock',
     # 'xinsheyang_n2',
     # 'xinsheyang_n3',
@@ -907,6 +907,79 @@ def run_pygranso_task(dimensionality, trials):
         # we can save intermediate results
         problem_performance_df = pd.concat(problem_performance_list, ignore_index=True)
         path = f'./algorithm_compare_results/{experiment_date}-pygranso-{problem_name}'
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        problem_performance_df.to_parquet(f'{path}/{dimensionality}.parquet')
+
+
+@cli.command('run-algorithm-comparisons-scip')
+@click.option('--dimensionality', default='low-dimensional')
+@click.option('--trials', default=10)
+def run_scip_task(dimensionality, trials):
+    """
+    Function that will run the competing algorithms to Deeplifting.
+    The current competitor models are:
+    1. SCIP
+    SCIP in general is fairly quick but it started to run slowly for some
+    problems so I am making it its own command
+    """
+    print('Run Algorithms!')
+    run = neptune.init_run(  # noqa
+        project="dever120/Deeplifting",
+        api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzYmIwMTUyNC05YmZmLTQ1NzctOTEyNS1kZTIxYjU5NjY5YjAifQ==",  # noqa
+    )  # your credentials
+    run['sys/tags'].add(['scip', dimensionality])
+
+    print('Run Algorithms!')
+    if dimensionality == 'low-dimensional':
+        problem_names = low_dimensional_problem_names
+        PROBLEMS = PROBLEMS_BY_NAME
+    elif dimensionality == 'high-dimensional':
+        problem_names = high_dimensional_problem_names
+        PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
+    else:
+        raise ValueError('Option for dimensionality does not exist!')
+
+    # One experiment date
+    experiment_date = datetime.today().strftime('%Y-%m-%d-%H')
+
+    for problem_name in problem_names:
+        print(problem_name)
+        problem_performance_list = []
+
+        # Setup the problem
+        problem = PROBLEMS[problem_name]
+
+        # Get the known minimum
+        minimum_value = problem['global_minimum']
+
+        # Get the dimensions
+        dimensions = problem['dimensions']
+
+        # Create column names
+        x_columns = [f'x{i + 1}' for i in range(dimensions)]
+        columns = x_columns + ['f', 'algorithm', 'time']
+
+        # Next we need to implement the SCIP algorithm
+        print('Running SCIP!')
+        outputs_scip = run_pyomo(problem, trials=trials, method='scip')
+
+        # Get the final results for all differential evolution runs
+        scip_results = pd.DataFrame(outputs_scip['final_results'], columns=columns)
+        scip_results['problem_name'] = problem_name
+        scip_results['hits'] = np.where(
+            np.abs(scip_results['f'] - minimum_value) <= 1e-5, 1, 0
+        )
+        scip_results['dimensions'] = dimensions
+
+        # Add differential evolution to the problem_performance_list
+        problem_performance_list.append(scip_results)
+
+        # Concatenate all of the data at the end of each problem because
+        # we can save intermediate results
+        problem_performance_df = pd.concat(problem_performance_list, ignore_index=True)
+        path = f'./algorithm_compare_results/{dimensionality}/{experiment_date}-{problem_name}-scip'  # noqa
         if not os.path.exists(path):
             os.makedirs(path)
 
