@@ -617,14 +617,15 @@ def run_deeplifting(
 
         opts.x0 = x0
         opts.torch_device = device
-        opts.print_frequency = 1
+        # opts.print_frequency = 1
+        opts.print_level = 0
         opts.limited_mem_size = 5
         opts.stat_l2_model = False
         opts.double_precision = True
         # opts.disable_terminationcode_6 = True
         # opts.halt_on_linesearch_bracket = False
         opts.opt_tol = 1e-10
-        opts.maxit = 500
+        opts.maxit = 1000
 
         # Get the maximum iterations
         max_iterations = problem['max_iterations']  # noqa
@@ -765,7 +766,7 @@ def run_high_dimensional_deeplifting(
     """
     # Get the device (CPU for now)
     dimensions = problem['dimensions']
-    device = torch.device('cuda:0')
+    device = torch.device('cpu')
     fn_values = []
 
     for trial in range(trials):
@@ -815,7 +816,7 @@ def run_high_dimensional_deeplifting(
 
         opts.x0 = x0
         opts.torch_device = device
-        opts.print_frequency = 10
+        opts.print_level = 0
         opts.limited_mem_size = 5
         opts.stat_l2_model = False
         opts.double_precision = True

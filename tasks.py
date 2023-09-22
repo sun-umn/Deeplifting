@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # stdlib
 import os
+import warnings
 from datetime import datetime
 from itertools import product
 from typing import List
@@ -25,6 +26,9 @@ from deeplifting.optimization import (
 from deeplifting.problems import HIGH_DIMENSIONAL_PROBLEMS_BY_NAME, PROBLEMS_BY_NAME
 from deeplifting.utils import create_contour_plot
 
+# Filter warnings
+warnings.filterwarnings('ignore')
+
 # Identify problems to run
 low_dimensional_problem_names = [
     # 'ackley',
@@ -32,7 +36,7 @@ low_dimensional_problem_names = [
     # 'ackley3',
     # 'adjiman',
     # 'alpine1',
-    'alpine2',
+    # 'alpine2',
     # 'bartels_conn',
     # 'beale',
     # 'bird',  # Takes a long time with SCIP
@@ -52,7 +56,7 @@ low_dimensional_problem_names = [
     # 'cross_leg_table',
     # 'cube',  # Correct but paper has wrong x*
     # 'drop_wave',  # Low, runs quickly
-    # 'eggholder',  # Medium, takes time to run
+    'eggholder',  # Medium, takes time to run
     # 'ex8_1_1',
     # 'griewank',  # Low, (1.0 with 3-layer, 0.95 2-layer)
     # 'holder_table',  # Medium
@@ -84,22 +88,22 @@ low_dimensional_problem_names = [
 # refactor a lot of this code
 ackley_series = [
     # Ackley Series - Origin Solution
-    # 'ackley_3d',
+    'ackley_3d',
     'ackley_5d',
-    # 'ackley_30d',
-    # 'ackley_100d',
-    # 'ackley_500d',
-    # 'ackley_1000d',
+    'ackley_30d',
+    'ackley_100d',
+    'ackley_500d',
+    'ackley_1000d',
 ]
 
 alpine_series = [
-    # # Alpine1 Series - Origin Solution
-    # 'alpine1_3d',
-    # 'alpine1_5d',
-    # 'alpine1_30d',
+    # Alpine1 Series - Origin Solution
+    'alpine1_3d',
+    'alpine1_5d',
+    'alpine1_30d',
     'alpine1_100d',
-    # 'alpine1_500d',
-    # 'alpine1_1000d',
+    'alpine1_500d',
+    'alpine1_1000d',
 ]
 
 chung_reynolds_series = [
@@ -244,15 +248,12 @@ search_hidden_sizes = [
     # # Hidden sizes of 128
     hidden_size_128 * 2,
     hidden_size_128 * 3,
-    # hidden_size_128 * 4,
-    # hidden_size_128 * 5,
-    # # Hidden sizes of 256
+    # Hidden sizes of 256
     hidden_size_256 * 2,
     hidden_size_256 * 3,
-    # # Hidden sizes of 512
+    # Hidden sizes of 512
     hidden_size_512 * 2,
     hidden_size_512 * 3,
-    # hidden_size_2048 * 2
 ]
 
 # Input sizes
@@ -262,13 +263,13 @@ search_input_sizes = [1]
 search_hidden_activations = ['sine']
 
 # Ouput activations
-search_output_activations = ['sine']
+search_output_activations = ['dual_relu', 'sine']
 
 # Aggregate functions - for skip connections
-search_agg_functions = ['sum']
+search_agg_functions = ['identity', 'sum']
 
 # Include BN
-search_include_bn = [False]
+search_include_bn = [False, True]
 
 
 @click.group()
@@ -828,6 +829,13 @@ def find_best_architecture_task(problem_series, method, dimensionality):
             results['problem_name'] = problem_name
             results['global_minimum'] = problem['global_minimum']
             results['dimensions'] = output_size
+            results['hits'] = np.abs(results['f'] - results['global_minimum']) <= 1e-4
+
+            # Print the results
+            hits = results['hits'].mean()
+            run_time = results['total_time'].mean()
+            print(f'Success Rate = {hits}')
+            print(f'Average run time = {run_time}')
 
             # Save to parquet
             layers = len(hidden_size)

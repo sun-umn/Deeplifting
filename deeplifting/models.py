@@ -28,11 +28,21 @@ class SinActivation(nn.Module):
 
     def __init__(self):  # noqa
         super(SinActivation, self).__init__()
+        self.amplitude = nn.Parameter(torch.ones(1), requires_grad=True)
         self.scale = nn.Parameter(torch.ones(1), requires_grad=True)
         self.shift = nn.Parameter(torch.zeros(1), requires_grad=True)
+        self.y_shift = nn.Parameter(torch.zeros(1), requires_grad=True)
 
     def forward(self, x):  # noqa
-        return torch.sin((x - self.shift) * self.scale)
+        return self.amplitude * torch.sin((x - self.shift) * self.scale)
+
+
+class DualReLU(nn.Module):
+    def __init__(self):
+        super(DualReLU, self).__init__()
+
+    def forward(self, x):
+        return -nn.ReLU()(-x) + nn.ReLU()(x)
 
 
 class AddOffset(nn.Module):
@@ -100,6 +110,8 @@ class DeepliftingBlock(nn.Module):
             self.activation_layer = nn.ReLU()
         elif self.activation == 'leaky_relu':
             self.activation_layer = nn.LeakyReLU()
+        elif self.activation == 'dual_relu':
+            self.activation_layer = DualReLU()
         else:
             self.activation_layer = nn.Identity()
 
@@ -107,7 +119,8 @@ class DeepliftingBlock(nn.Module):
         self.linear = nn.Linear(input_size, output_size)
 
         # Define the Batch Normalization layer
-        self.batch_norm = nn.BatchNorm1d(output_size)
+        # self.batch_norm = nn.BatchNorm1d(output_size)
+        self.batch_norm = nn.LayerNorm(output_size)
 
         # Dropout
         self.dropout = nn.Dropout(p=0.01)
@@ -161,7 +174,7 @@ class DeepliftingScalingBlock(nn.Module):
             if self.output_activation != 'sine':
                 return a + (b - a) / 2.0 * (torch.sin(outputs) + 1)
             else:
-                return a + (b - a) / 2.0 * ((self.scale * outputs) + 1)
+                return a + (b - a) / 2.0 * (torch.sin(outputs) + 1)
 
         else:
             x_values_float = []
@@ -180,7 +193,9 @@ class DeepliftingScalingBlock(nn.Module):
                             torch.sin(outputs[:, index]) + 1
                         )
                     else:
-                        x_constr = a + (b - a) / 2.0 * (outputs[:, index] + 1)
+                        x_constr = a + (b - a) / 2.0 * (
+                            torch.sin(outputs[:, index]) + 1
+                        )
                 x_values_float.append(x_constr)
             x = torch.stack(x_values_float, axis=1)
 
@@ -215,7 +230,7 @@ class DeepliftingSkipMLP(nn.Module):
         self.skip_every_n = skip_every_n
         self.agg_function = agg_function
         self.include_bn = include_bn
-        self.first_hidden_Size = 512
+        self.first_hidden_Size = hidden_sizes[0] // 2
         self.scale = torch.randn(1) * 2 * torch.pi
 
         # Input layer
