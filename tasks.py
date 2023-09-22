@@ -198,13 +198,13 @@ high_dimensional_problem_names: List[str] = [  # noqa
     # 'layeb4_100d',
     # 'layeb4_500d',
     # 'layeb4_1000d',
-    # Levy Series - Non-origin solution
-    'levy_3d',
-    'levy_5d',
-    'levy_30d',
-    'levy_100d',
-    'levy_500d',
-    'levy_1000d',
+    # # Levy Series - Non-origin solution
+    # 'levy_3d',
+    # 'levy_5d',
+    # 'levy_30d',
+    # 'levy_100d',
+    # 'levy_500d',
+    # 'levy_1000d',
     # Qing Series - Non-origin solution
     'qing_3d',
     'qing_5d',
