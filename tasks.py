@@ -257,13 +257,13 @@ search_hidden_sizes = [
 ]
 
 # Input sizes
-search_input_sizes = [8, 16]
+search_input_sizes = [1, 8, 16]
 
 # Hidden activations
 search_hidden_activations = ['sine']
 
 # Ouput activations
-search_output_activations = ['sine']
+search_output_activations = ['dual_relu', 'sine']
 
 # Aggregate functions - for skip connections
 search_agg_functions = ['sum', 'max']

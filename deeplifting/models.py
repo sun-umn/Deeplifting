@@ -40,9 +40,10 @@ class SinActivation(nn.Module):
 class DualReLU(nn.Module):
     def __init__(self):
         super(DualReLU, self).__init__()
+        self.scale = nn.Parameter(torch.ones(1), requires_grad=True)
 
     def forward(self, x):
-        return -nn.ReLU()(-x) + nn.ReLU()(x)
+        return self.scale * (-nn.ReLU()(-x) + nn.ReLU()(x))
 
 
 class AddOffset(nn.Module):
