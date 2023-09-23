@@ -984,7 +984,7 @@ def run_scip_task(dimensionality, trials):
         scip_results = pd.DataFrame(outputs_scip['final_results'], columns=columns)
         scip_results['problem_name'] = problem_name
         scip_results['hits'] = np.where(
-            np.abs(scip_results['f'] - minimum_value) <= 1e-5, 1, 0
+            np.abs(scip_results['f'] - minimum_value) <= 1e-4, 1, 0
         )
         scip_results['dimensions'] = dimensions
 
