@@ -528,7 +528,7 @@ def deeplifting_nd_fn(
     # x = outputs.mean(axis=0)
     # print(f'Output x {x}')
     x, f = deeplifting_predictions(outputs, objective, method=method)
-    # print(x)
+    # print(x, f)
     # f_copy = f.detach().cpu().numpy()
 
     # # Fill in the intermediate results
@@ -566,7 +566,7 @@ def run_deeplifting(
     """
     # Get the device (CPU for now)
     dimensions = problem['dimensions']
-    device = torch.device('cuda:0')
+    device = torch.device('cpu')
     fn_values = []
     iterim_results: List[Any] = []  # noqa
 
@@ -691,6 +691,7 @@ def run_deeplifting(
         f = f.detach().cpu().numpy()
         data_point = tuple(xf) + (float(f), 'Deeplifting', total_time)
         fn_values.append(data_point)
+        print(xf, f)
 
         # If save model then we need to save the configuration of the
         # model and the model weights

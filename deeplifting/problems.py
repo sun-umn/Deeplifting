@@ -2478,7 +2478,7 @@ def rosenbrock(x, results=None, trial=None, version='numpy'):
 
 # This section starts some of the "hard" optimization
 # problems that we had identified.
-def damavandi(x, results, trial, version='numpy'):
+def damavandi(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the Damavandi problem from the infinity77 list.
     This is a 3-dimensional function with a global minimum of 0.0 at (2,2)
@@ -2506,30 +2506,39 @@ def damavandi(x, results, trial, version='numpy'):
         theta = np.arctan(x2 / x1)
         component1 = (r - 10) / (5**0.5 * np.cos(theta))
         result = (1 - np.abs(component1) ** 5) * (2 + component1) + 1e-4
+    elif version == 'pyomo':
+        numerator = pyo.sin(np.pi * (x1 - 2.0)) * pyo.sin(np.pi * (x2 - 2.0))
+        denumerator = (np.pi**2) * (x1 - 2.0) * (x2 - 2.0)
+        factor1 = 1.0 - (np.abs(numerator / denumerator)) ** 5.0
+        factor2 = 2 + (x1 - 7.0) ** 2.0 + 2 * (x2 - 7.0) ** 2.0
+        result = factor1 * factor2
     elif version == 'pytorch':
-        r = x1**2 + x2**2
-        theta = torch.arctan(x2 / x1)
-        component1 = (r - 10) / (5**0.5 * torch.cos(theta))
-        result = (1 - torch.abs(component1) ** 5) * (2 + component1) + 1e-4
+        numerator = torch.sin(torch.pi * (x1 - 2.0)) * pyo.sin(torch.pi * (x2 - 2.0))
+        denumerator = (np.pi**2) * (x1 - 2.0) * (x2 - 2.0)
+        factor1 = 1.0 - (torch.abs(numerator / denumerator)) ** 5.0
+        factor2 = 2 + (x1 - 7.0) ** 2.0 + 2 * (x2 - 7.0) ** 2.0
+        result = factor1 * factor2
     else:
         raise ValueError(
             "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    build_2d_intermediate_results(
-        x1=x1,
-        x2=x2,
-        result=result,
-        version=version,
-        results=results,
-        trial=trial,
-    )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
+        )
 
     return result
 
 
-def sine_envelope(x, results, trial, version='numpy'):
+def sine_envelope(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the SineEnvelope problem from the infinity77 list.
     This is a 3-dimensional function with a global minimum of -0.72984 at (0,0)
@@ -2555,6 +2564,10 @@ def sine_envelope(x, results, trial, version='numpy'):
         numerator = np.sin(r) ** 2 - 0.5
         denominator = (0.001 * r**2 + 1.0) ** 2
         result = -(numerator / denominator + 0.5)
+    elif version == 'pyomo':
+        component1 = pyo.sin((x1**2 + x2**2) ** 0.5) ** 2
+        component2 = x1**2 + x2**2
+        result = (component1 - 0.5) / (1 + 0.001 * component2) ** 2 + 0.5
     elif version == 'pytorch':
         r = torch.sqrt(x2**2 + x1**2)
         numerator = torch.sin(r) ** 2 - 0.5
@@ -2565,15 +2578,17 @@ def sine_envelope(x, results, trial, version='numpy'):
             "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results
-    build_2d_intermediate_results(
-        x1=x1,
-        x2=x2,
-        result=result,
-        version=version,
-        results=results,
-        trial=trial,
-    )
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
+        )
 
     return result
 
