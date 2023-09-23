@@ -218,11 +218,11 @@ high_dimensional_problem_names: List[str] = [  # noqa
     # 'qing_1000d',
     # # Rastrigin series - Origin solution
     'rastrigin_3d',
-    # 'rastrigin_5d',
-    # 'rastrigin_30d',
-    # 'rastrigin_100d',
-    # 'rastrigin_500d',
-    # 'rastrigin_1000d',
+    'rastrigin_5d',
+    'rastrigin_30d',
+    'rastrigin_100d',
+    'rastrigin_500d',
+    'rastrigin_1000d',
     # Schewefel series - Non-origin solution
     # 'schwefel_3d',
     # 'schwefel_5d',
