@@ -28,7 +28,7 @@ class SinActivation(nn.Module):
 
     def __init__(self):  # noqa
         super(SinActivation, self).__init__()
-        self.amplitude = 2 * torch.pi * nn.Parameter(torch.ones(1), requires_grad=True)
+        self.amplitude = nn.Parameter(torch.ones(1), requires_grad=True)
         self.scale = nn.Parameter(torch.ones(1), requires_grad=True)
         self.shift = nn.Parameter(torch.zeros(1), requires_grad=True)
         self.y_shift = nn.Parameter(torch.zeros(1), requires_grad=True)
