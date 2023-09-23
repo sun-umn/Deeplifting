@@ -220,7 +220,7 @@ class DeepliftingSkipMLP(nn.Module):
         activation='sine',
         output_activation='sine',
         agg_function='sum',
-        include_bn=False,
+        include_bn=True,
         seed=0,
     ):
         super(DeepliftingSkipMLP, self).__init__()

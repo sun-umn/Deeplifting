@@ -55,11 +55,11 @@ low_dimensional_problem_names = [
     # 'cross_in_tray',  # Low, runs quickly
     # 'cross_leg_table',
     # 'cube',  # Correct but paper has wrong x*
-    'damavandi',
+    # 'damavandi',
     # 'drop_wave',  # Low, runs quickly
     # 'eggholder',  # Medium, takes time to run
     # 'ex8_1_1',
-    # 'griewank',  # Low, (1.0 with 3-layer, 0.95 2-layer)
+    'griewank',  # Low, (1.0 with 3-layer, 0.95 2-layer)
     # 'holder_table',  # Medium
     # 'levy',  # Low, 3-layer
     # 'levy_n13',  # Low, 3-layer
@@ -264,7 +264,7 @@ search_input_sizes = [1]
 search_hidden_activations = ['relu', 'sine']
 
 # Ouput activations
-search_output_activations = ['relu', 'sine']
+search_output_activations = ['sine']
 
 # Aggregate functions - for skip connections
 search_agg_functions = ['identity', 'sum', 'max']
