@@ -228,6 +228,7 @@ high_dimensional_problem_names: List[str] = [  # noqa
 hidden_size_64 = (64,)
 hidden_size_128 = (128,)
 hidden_size_256 = (256,)
+hidden_size_384 = (382,)
 hidden_size_512 = (512,)
 hidden_size_768 = (768,)
 hidden_size_1024 = (1024,)
@@ -243,13 +244,16 @@ search_hidden_sizes = [
     # Hidden sizes of 256
     hidden_size_256 * 2,
     hidden_size_256 * 3,
+    # Hidden sizes of 382
+    hidden_size_384 * 2,
+    hidden_size_384 * 3,
     # Hidden sizes of 512
     hidden_size_512 * 2,
     hidden_size_512 * 3,
 ]
 
 # Input sizes
-search_input_sizes = [1, 8, 16]
+search_input_sizes = [1]
 
 # Hidden activations
 search_hidden_activations = ['sine']
