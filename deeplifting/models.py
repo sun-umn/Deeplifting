@@ -281,10 +281,12 @@ class DeepliftingSkipMLP(nn.Module):
         # of the problems we have looked at so far also are
         # between bounds
         self.x = nn.Parameter(torch.randn(input_size, self.first_hidden_Size))
+        self.input_norm = nn.LayerNorm(self.first_hidden_Size)
 
     def forward(self, inputs=None):
         intermediate_connections = []
         x = self.x
+        x = self.input_norm(x)
         # x = inputs
         for i, layer in enumerate(self.layers):
             x_new = layer(x)
