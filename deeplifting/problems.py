@@ -5899,7 +5899,7 @@ def ndqing(x, results=None, trial=None, version='numpy'):
     return result
 
 
-def ndrastrigin(x, results, trial, version='numpy'):
+def ndrastrigin(x, results=None, trial=None, version='numpy'):
     """
     Implemention of the n-dimensional levy function
 

@@ -149,11 +149,11 @@ qing_series = [
 rastrigin_series = [
     # Rastrigin series - Origin solution
     'rastrigin_3d',
-    'rastrigin_5d',
-    'rastrigin_30d',
-    'rastrigin_100d',
-    'rastrigin_500d',
-    'rastrigin_1000d',
+    # 'rastrigin_5d',
+    # 'rastrigin_30d',
+    # 'rastrigin_100d',
+    # 'rastrigin_500d',
+    # 'rastrigin_1000d',
 ]
 
 schwefel_series = [
@@ -210,26 +210,26 @@ high_dimensional_problem_names: List[str] = [  # noqa
     # 'levy_500d',
     # 'levy_1000d',
     # Qing Series - Non-origin solution
-    'qing_3d',
-    'qing_5d',
-    'qing_30d',
-    'qing_100d',
-    'qing_500d',
-    'qing_1000d',
+    # 'qing_3d',
+    # 'qing_5d',
+    # 'qing_30d',
+    # 'qing_100d',
+    # 'qing_500d',
+    # 'qing_1000d',
     # # Rastrigin series - Origin solution
-    # 'rastrigin_3d',
+    'rastrigin_3d',
     # 'rastrigin_5d',
     # 'rastrigin_30d',
     # 'rastrigin_100d',
     # 'rastrigin_500d',
     # 'rastrigin_1000d',
     # Schewefel series - Non-origin solution
-    'schwefel_3d',
-    'schwefel_5d',
-    'schwefel_30d',
-    'schwefel_100d',
-    'schwefel_500d',
-    'schwefel_1000d',
+    # 'schwefel_3d',
+    # 'schwefel_5d',
+    # 'schwefel_30d',
+    # 'schwefel_100d',
+    # 'schwefel_500d',
+    # 'schwefel_1000d',
 ]
 
 # Identify available hidden sizes
@@ -266,7 +266,7 @@ search_hidden_activations = ['sine']
 search_output_activations = ['dual_relu', 'sine']
 
 # Aggregate functions - for skip connections
-search_agg_functions = ['identity', 'sum']
+search_agg_functions = ['sum', 'max']
 
 # Include BN
 search_include_bn = [False, True]
@@ -987,6 +987,12 @@ def run_scip_task(dimensionality, trials):
             np.abs(scip_results['f'] - minimum_value) <= 1e-5, 1, 0
         )
         scip_results['dimensions'] = dimensions
+
+        # Print the results
+        hits = scip_results['hits'].mean()
+        average_time = scip_results['time'].mean()
+        print(f'Success Rate = {hits}')
+        print(f'Average time = {average_time}')
 
         # Add differential evolution to the problem_performance_list
         problem_performance_list.append(scip_results)
