@@ -117,31 +117,31 @@ chung_reynolds_series = [
 ]
 
 griewank_series = [
-    # # Griewank Series - Origin Solution
-    # 'griewank_3d',
-    # 'griewank_5d',
-    # 'griewank_30d',
-    # 'griewank_100d',
-    # 'griewank_500d',
+    # Griewank Series - Origin Solution
+    'griewank_3d',
+    'griewank_5d',
+    'griewank_30d',
+    'griewank_100d',
+    'griewank_500d',
     'griewank_1000d',
 ]
 
 levy_series = [
-    # # Levy Series - Non-origin solution
-    # 'levy_3d',
-    # 'levy_5d',
-    # 'levy_30d',
-    # 'levy_100d',
+    # Levy Series - Non-origin solution
+    'levy_3d',
+    'levy_5d',
+    'levy_30d',
+    'levy_100d',
     'levy_500d',
-    # 'levy_1000d',
+    'levy_1000d',
 ]
 
 qing_series = [
     # Qing Series - Non-origin solution
-    # 'qing_3d',
-    # 'qing_5d',
-    # 'qing_30d',
-    # 'qing_100d',
+    'qing_3d',
+    'qing_5d',
+    'qing_30d',
+    'qing_100d',
     'qing_500d',
     'qing_1000d',
 ]
@@ -149,11 +149,11 @@ qing_series = [
 rastrigin_series = [
     # Rastrigin series - Origin solution
     'rastrigin_3d',
-    # 'rastrigin_5d',
-    # 'rastrigin_30d',
-    # 'rastrigin_100d',
-    # 'rastrigin_500d',
-    # 'rastrigin_1000d',
+    'rastrigin_5d',
+    'rastrigin_30d',
+    'rastrigin_100d',
+    'rastrigin_500d',
+    'rastrigin_1000d',
 ]
 
 schwefel_series = [
