@@ -72,14 +72,6 @@ low_dimensional_problem_names = [
     'rosenbrock',
     'xinsheyang_n2',
     'xinsheyang_n3',
-    # 'layeb12',
-    # 'layeb3',
-    # 'layeb4',
-    # 'layeb6',
-    # 'layeb7',
-    # 'layeb8',
-    # 'kriging_peaks_red010',
-    # 'kriging_peaks_red020',
 ]
 
 # High dimensional series - used to run
@@ -263,10 +255,10 @@ search_input_sizes = [1, 8, 16]
 search_hidden_activations = ['sine']
 
 # Ouput activations
-search_output_activations = ['dual_relu', 'sine']
+search_output_activations = ['sine']
 
 # Aggregate functions - for skip connections
-search_agg_functions = ['sum', 'max']
+search_agg_functions = ['identity', 'sum', 'max']
 
 # Include BN
 search_include_bn = [False, True]
