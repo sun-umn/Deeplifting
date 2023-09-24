@@ -287,7 +287,7 @@ class DeepliftingSkipMLP(nn.Module):
         intermediate_connections = []
         x = self.x
         x = self.input_norm(x)
-        # x = inputs
+
         for i, layer in enumerate(self.layers):
             x_new = layer(x)
             if (i + 1) % self.skip_every_n == 0 and i != 0:
@@ -320,6 +320,6 @@ class DeepliftingSkipMLP(nn.Module):
         del intermediate_connections
         torch.cuda.empty_cache()
 
-        # # Run through the scaling layer
-        # out = self.scaling_layer(out)
+        # Run through the scaling layer
+        out = self.scaling_layer(out)
         return out

@@ -48,7 +48,7 @@ low_dimensional_problem_names = [
     # 'brent',
     'bukin_n2',
     'bukin_n4',
-    'bukin_n6',  # High, 2 layer is best so far, takes a while to run
+    # 'bukin_n6',  # High, 2 layer is best so far, takes a while to run
     'camel_3hump',
     'camel_6hump',
     'chung_reynolds',
@@ -219,12 +219,12 @@ high_dimensional_problem_names: List[str] = [  # noqa
     # 'rastrigin_500d',
     # 'rastrigin_1000d',
     # Schewefel series - Non-origin solution
-    'schwefel_3d',
-    'schwefel_5d',
-    'schwefel_30d',
-    'schwefel_100d',
-    'schwefel_500d',
-    'schwefel_1000d',
+    # 'schwefel_3d',
+    # 'schwefel_5d',
+    # 'schwefel_30d',
+    # 'schwefel_100d',
+    # 'schwefel_500d',
+    # 'schwefel_1000d',
 ]
 
 # Identify available hidden sizes
