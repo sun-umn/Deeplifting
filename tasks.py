@@ -111,11 +111,11 @@ chung_reynolds_series = [
 ]
 
 griewank_series = [
-    # Griewank Series - Origin Solution
-    'griewank_3d',
-    'griewank_5d',
-    'griewank_30d',
-    'griewank_100d',
+    # # Griewank Series - Origin Solution
+    # 'griewank_3d',
+    # 'griewank_5d',
+    # 'griewank_30d',
+    # 'griewank_100d',
     'griewank_500d',
     'griewank_1000d',
 ]
@@ -142,7 +142,7 @@ qing_series = [
 
 rastrigin_series = [
     # Rastrigin series - Origin solution
-    'rastrigin_3d',
+    # 'rastrigin_3d',
     'rastrigin_5d',
     'rastrigin_30d',
     'rastrigin_100d',
@@ -151,12 +151,12 @@ rastrigin_series = [
 ]
 
 schwefel_series = [
-    # Schewefel series - Non-origin solution
-    'schwefel_3d',  # Found a solution
-    'schwefel_5d',  #
-    'schwefel_30d',  # Did not find a solution yet
-    'schwefel_100d',
-    'schwefel_500d',
+    # # Schewefel series - Non-origin solution
+    # 'schwefel_3d',  # Found a solution
+    # 'schwefel_5d',  #
+    # 'schwefel_30d',  # Did not find a solution yet
+    # 'schwefel_100d',
+    # 'schwefel_500d',
     'schwefel_1000d',  #
 ]
 
