@@ -6011,6 +6011,47 @@ def lennard_jones(x, results=None, trial=None, version='numpy'):
     else:
         raise ValueError('Unknown specified version')
 
+
+# Lennard-Jones Potential
+def lennard_jones_v2(x, results=None, trial=None, version='numpy'):
+    """
+    Implemention of the n-dimensional Lennard Jones Potential function
+
+    Args:
+    x: A d-dimensional array or tensor
+    version: A string, either 'numpy' or 'pytorch'
+
+    Returns:
+    result: Value of the LJ potential function
+    """
+    x = x.flatten()
+    n = len(x)
+    # Assume n is divisible by 3
+    k = n / 3
+    result = 0
+    if version == 'numpy':
+        x_r = x.reshape(-1, 3)
+        for i in range(k - 1):
+            for j in range(i + 1, k):
+                rij = np.sqrt(np.sum((x_r[i] - x_r[j]) ** 2))
+                t1 = 1 / (rij**12)
+                t2 = 1 / (rij**6)
+                result += t1 - t2
+    elif version == 'pytorch':
+        x_r = x.reshape(-1, 3)
+        for i in range(k - 1):
+            for j in range(i + 1, k):
+                rij = torch.sqrt(torch.sum((x_r[i] - x_r[j]) ** 2))
+                t1 = 1 / (rij**12)
+                t2 = 1 / (rij**6)
+                result += t1 - t2
+    # elif version == 'pyomo':
+
+    else:
+        raise ValueError(
+            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+        )
+
     return result
 
 
