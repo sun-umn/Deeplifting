@@ -167,57 +167,57 @@ lennard_jones_series = [
 ]
 
 high_dimensional_problem_names: List[str] = [  # noqa
-    # # Ackley Series - Origin Solution
-    # 'ackley_3d',
-    # 'ackley_5d',
-    # 'ackley_30d',
-    # 'ackley_100d',
-    # 'ackley_500d',
-    # 'ackley_1000d',
-    # # Alpine1 Series - Origin Solution
-    # 'alpine1_3d',
-    # 'alpine1_5d',
-    # 'alpine1_30d',
-    # 'alpine1_100d',
-    # 'alpine1_500d',
-    # 'alpine1_1000d',
-    # # Chung-Reynolds Series - Origin Solution
-    # 'chung_reyonlds_3d',
-    # 'chung_reynolds_5d',
-    # 'chung_reynolds_30d',
-    # 'chung_reynolds_100d',
-    # 'chung_reynolds_500d',
-    # 'chung_reynolds_1000d',
-    # # Griewank Series - Origin Solution
-    # 'griewank_3d',
-    # 'griewank_5d',
-    # 'griewank_30d',
-    # 'griewank_100d',
-    # 'griewank_500d',
-    # 'griewank_1000d',
-    # Lennard Jones
+    # Ackley Series - Origin Solution
+    'ackley_3d',
+    'ackley_5d',
+    'ackley_30d',
+    'ackley_100d',
+    'ackley_500d',
+    'ackley_1000d',
+    # Alpine1 Series - Origin Solution
+    'alpine1_3d',
+    'alpine1_5d',
+    'alpine1_30d',
+    'alpine1_100d',
+    'alpine1_500d',
+    'alpine1_1000d',
+    # Chung-Reynolds Series - Origin Solution
+    'chung_reyonlds_3d',
+    'chung_reynolds_5d',
+    'chung_reynolds_30d',
+    'chung_reynolds_100d',
+    'chung_reynolds_500d',
+    'chung_reynolds_1000d',
+    # Griewank Series - Origin Solution
+    'griewank_3d',
+    'griewank_5d',
+    'griewank_30d',
+    'griewank_100d',
+    'griewank_500d',
+    'griewank_1000d',
+    # # Lennard Jones
     # 'lennard_jones_6d',
-    # # Levy Series - Non-origin solution
-    # 'levy_3d',
-    # 'levy_5d',
-    # 'levy_30d',
-    # 'levy_100d',
-    # 'levy_500d',
-    # 'levy_1000d',
+    # Levy Series - Non-origin solution
+    'levy_3d',
+    'levy_5d',
+    'levy_30d',
+    'levy_100d',
+    'levy_500d',
+    'levy_1000d',
     # Qing Series - Non-origin solution
-    # 'qing_3d',
-    # 'qing_5d',
-    # 'qing_30d',
-    # 'qing_100d',
-    # 'qing_500d',
-    # 'qing_1000d',
-    # # Rastrigin series - Origin solution
-    # 'rastrigin_3d',
-    # 'rastrigin_5d',
-    # 'rastrigin_30d',
-    # 'rastrigin_100d',
-    # 'rastrigin_500d',
-    # 'rastrigin_1000d',
+    'qing_3d',
+    'qing_5d',
+    'qing_30d',
+    'qing_100d',
+    'qing_500d',
+    'qing_1000d',
+    # Rastrigin series - Origin solution
+    'rastrigin_3d',
+    'rastrigin_5d',
+    'rastrigin_30d',
+    'rastrigin_100d',
+    'rastrigin_500d',
+    'rastrigin_1000d',
     # Schewefel series - Non-origin solution
     'schwefel_3d',
     'schwefel_5d',
@@ -924,6 +924,12 @@ def run_pygranso_task(dimensionality, trials):
 
         # Add differential evolution to the problem_performance_list
         problem_performance_list.append(pygranso_results)
+
+        # Print the results
+        hits = pygranso_results['hits'].mean()
+        average_time = pygranso_results['time'].mean()
+        print(f'Success Rate = {hits}')
+        print(f'Average time = {average_time}')
 
         # Concatenate all of the data at the end of each problem because
         # we can save intermediate results
