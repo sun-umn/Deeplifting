@@ -323,13 +323,18 @@ def pygranso_nd_fn(X_struct, objective, bounds):
     x = torch.stack(x_values)
 
     # Box constraints
-    unscaled_x_values = []
-    for index, constr in enumerate(bounds):
-        a, b = constr
-        x_constr = a + (b - a) / 2.0 * (torch.sin(x[index]) + 1)
-        unscaled_x_values.append(x_constr)
-    x = torch.stack(unscaled_x_values)
-    f = objective(x)
+    if len(bounds) > 2:
+        a, b = bounds[0]
+        x_scaled = a + (b - a) / 2.0 * (torch.sin(x) + 1)
+    else:
+        scaled_x_values = []
+        for index, constr in enumerate(bounds):
+            a, b = constr
+            x_constr = a + (b - a) / 2.0 * (torch.sin(x[index]) + 1)
+            scaled_x_values.append(x_constr)
+        x_scaled = torch.stack(scaled_x_values)
+
+    f = objective(x_scaled)
 
     # # Setup the bounds for the inequality
     # # a <= x <= b
