@@ -5970,6 +5970,50 @@ def ndschwefel(x, results=None, trial=None, version='numpy'):
     return result
 
 
+# Let's place the Lennard-Jones problem here
+def lennard_jones(x, results=None, trial=None, version='numpy'):
+    """
+    Implemention of the Lennard Jones Function
+    """
+    x = x.flatten()
+    d = len(x)
+    k = int(d / 3)
+    result = 0.0
+
+    if version == 'numpy' or version == 'pytorch':
+        for i in range(k - 1):
+            for j in range(i + 1, k):
+                a = 3 * i
+                b = 3 * j
+                xd = x[a] - x[b]
+                yd = x[a + 1] - x[b + 1]
+                zd = x[a + 2] - x[b + 2]
+                ed = xd * xd + yd * yd + zd * zd
+                ud = ed * ed * ed
+
+                if ed > 0.0:
+                    result += (1.0 / ud - 2.0) / ud
+
+    elif version == 'pyomo':
+        for i in range(k - 1):
+            for j in range(i + 1, k):
+                a = 3 * i
+                b = 3 * j
+                xd = x[a] - x[b]
+                yd = x[a + 1] - x[b + 1]
+                zd = x[a + 2] - x[b + 2]
+                ed = xd * xd + yd * yd + zd * zd
+                ud = ed * ed * ed
+
+                if pyo.value(ed) > 0.0:
+                    result += (1.0 / ud - 2.0) / ud
+
+    else:
+        raise ValueError('Unknown specified version')
+
+    return result
+
+
 # Problem configurations
 # Ackley
 ackley_config = {
@@ -7961,6 +8005,33 @@ layeb8_config = {
     'dimensions': 2,
 }
 
+# Lennard Jones Setup
+lennard_jones_6d_config = {
+    'objective': lennard_jones,
+    'bounds': [(-4.0, 4.0)],
+    'max_iterations': 1000,
+    'global_minimum': -1.0,
+    'dimensions': 6,
+}
+
+# Lennard Jones Setup
+lennard_jones_9d_config = {
+    'objective': lennard_jones,
+    'bounds': [(-4.0, 4.0)],
+    'max_iterations': 1000,
+    'global_minimum': -3.0,
+    'dimensions': 9,
+}
+
+# Lennard Jones Setup
+lennard_jones_12d_config = {
+    'objective': lennard_jones,
+    'bounds': [(-4.0, 4.0)],
+    'max_iterations': 1000,
+    'global_minimum': -6.0,
+    'dimensions': 12,
+}
+
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
     'bukin_n6': bukin_n6_config,
@@ -8208,4 +8279,8 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'schwefel_500d': schwefel_500d_config,
     'schwefel_1000d': schwefel_1000d_config,
     'schwefel_2500d': schwefel_2500d_config,
+    # Lennard Jones
+    'lennard_jones_6d': lennard_jones_6d_config,
+    'lennard_jones_9d': lennard_jones_9d_config,
+    'lennard_jones_12d': lennard_jones_12d_config,
 }

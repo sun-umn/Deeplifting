@@ -767,7 +767,7 @@ def run_high_dimensional_deeplifting(
     """
     # Get the device (CPU for now)
     dimensions = problem['dimensions']
-    device = torch.device('cuda:0')
+    device = torch.device('cpu')
     fn_values = []
 
     for trial in range(trials):
@@ -817,7 +817,8 @@ def run_high_dimensional_deeplifting(
 
         opts.x0 = x0
         opts.torch_device = device
-        opts.print_level = 0
+        # opts.print_level = 0
+        opts.print_frequency = 1
         opts.limited_mem_size = 5
         opts.stat_l2_model = False
         opts.double_precision = True

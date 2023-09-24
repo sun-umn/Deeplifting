@@ -8,6 +8,6 @@ high-dimension-search-results/
 high-dimension-search_results/
 high-dimension-paper-results/
 low-dimension-search-results/
-data-queue/
+data-queue*/
 .neptune
 .virtual_documents/

@@ -320,6 +320,6 @@ class DeepliftingSkipMLP(nn.Module):
         del intermediate_connections
         torch.cuda.empty_cache()
 
-        # Run through the scaling layer
-        out = self.scaling_layer(out)
+        # # Run through the scaling layer
+        # out = self.scaling_layer(out)
         return out

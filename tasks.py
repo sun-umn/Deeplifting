@@ -46,34 +46,34 @@ low_dimensional_problem_names = [
     # 'booth',
     # 'branin_rcos',
     # 'brent',
-    # 'bukin_n2',
-    # 'bukin_n4',
-    # 'bukin_n6',  # High, 2 layer is best so far, takes a while to run
-    # 'camel_3hump',
-    # 'camel_6hump',
-    # 'chung_reynolds',
-    # 'cross_in_tray',  # Low, runs quickly
-    # 'cross_leg_table',
-    # 'cube',  # Correct but paper has wrong x*
-    # 'damavandi',
-    # 'drop_wave',  # Low, runs quickly
-    # 'eggholder',  # Medium, takes time to run
-    # 'ex8_1_1',
+    'bukin_n2',
+    'bukin_n4',
+    'bukin_n6',  # High, 2 layer is best so far, takes a while to run
+    'camel_3hump',
+    'camel_6hump',
+    'chung_reynolds',
+    'cross_in_tray',  # Low, runs quickly
+    'cross_leg_table',
+    'cube',  # Correct but paper has wrong x*
+    'damavandi',
+    'drop_wave',  # Low, runs quickly
+    'eggholder',  # Medium, takes time to run
+    'ex8_1_1',
     'griewank',  # Low, (1.0 with 3-layer, 0.95 2-layer)
-    # 'holder_table',  # Medium
-    # 'levy',  # Low, 3-layer
-    # 'levy_n13',  # Low, 3-layer
-    # 'mathopt6',
-    # 'rastrigin',  # Low, 3-layer
-    # 'rosenbrock',
-    # 'schaffer_n2',  # Low, 3-layer
-    # 'schaffer_n4',  # Low, 3-layer
-    # 'schwefel',  # Takes a while to run, DA is better at 100% but we are at 85%
-    # 'shubert',  # Takes a while to run
-    # 'sine_envelope',
-    # 'rosenbrock',
-    # 'xinsheyang_n2',
-    # 'xinsheyang_n3',
+    'holder_table',  # Medium
+    'levy',  # Low, 3-layer
+    'levy_n13',  # Low, 3-layer
+    'mathopt6',
+    'rastrigin',  # Low, 3-layer
+    'rosenbrock',
+    'schaffer_n2',  # Low, 3-layer
+    'schaffer_n4',  # Low, 3-layer
+    'schwefel',  # Takes a while to run, DA is better at 100% but we are at 85%
+    'shubert',  # Takes a while to run
+    'sine_envelope',
+    'rosenbrock',
+    'xinsheyang_n2',
+    'xinsheyang_n3',
 ]
 
 # High dimensional series - used to run
@@ -94,10 +94,10 @@ alpine_series = [
     # Alpine1 Series - Origin Solution
     'alpine1_3d',
     'alpine1_5d',
-    'alpine1_30d',
-    'alpine1_100d',
-    'alpine1_500d',
-    'alpine1_1000d',
+    # 'alpine1_30d',
+    # 'alpine1_100d',
+    # 'alpine1_500d',
+    # 'alpine1_1000d',
 ]
 
 chung_reynolds_series = [
@@ -160,42 +160,43 @@ schwefel_series = [
     'schwefel_1000d',  #
 ]
 
+lennard_jones_series = [
+    # 'lennard_jones_6d',
+    # 'lennard_jones_9d',
+    'lennard_jones_12d'
+]
+
 high_dimensional_problem_names: List[str] = [  # noqa
     # # Ackley Series - Origin Solution
-    # 'ackley_3d',
-    # 'ackley_5d',
-    # 'ackley_30d',
-    # 'ackley_100d',
-    # 'ackley_500d',
-    # 'ackley_1000d',
+    'ackley_3d',
+    'ackley_5d',
+    'ackley_30d',
+    'ackley_100d',
+    'ackley_500d',
+    'ackley_1000d',
     # # Alpine1 Series - Origin Solution
     # 'alpine1_3d',
     # 'alpine1_5d',
-    # 'alpine1_30d',
-    # 'alpine1_100d',
-    # 'alpine1_500d',
-    # 'alpine1_1000d',
+    'alpine1_30d',
+    'alpine1_100d',
+    'alpine1_500d',
+    'alpine1_1000d',
     # # Chung-Reynolds Series - Origin Solution
-    # 'chung_reyonlds_3d',
-    # 'chung_reynolds_5d',
-    # 'chung_reynolds_30d',
-    # 'chung_reynolds_100d',
-    # 'chung_reynolds_500d',
-    # 'chung_reynolds_1000d',
+    'chung_reyonlds_3d',
+    'chung_reynolds_5d',
+    'chung_reynolds_30d',
+    'chung_reynolds_100d',
+    'chung_reynolds_500d',
+    'chung_reynolds_1000d',
     # # Griewank Series - Origin Solution
-    # 'griewank_3d',
-    # 'griewank_5d',
-    # 'griewank_30d',
-    # 'griewank_100d',
-    # 'griewank_500d',
-    # 'griewank_1000d',
-    # # Layeb 4 Series - Non-origin solution
-    # 'layeb4_3d',
-    # 'layeb4_5d',
-    # 'layeb4_30d',
-    # 'layeb4_100d',
-    # 'layeb4_500d',
-    # 'layeb4_1000d',
+    'griewank_3d',
+    'griewank_5d',
+    'griewank_30d',
+    'griewank_100d',
+    'griewank_500d',
+    'griewank_1000d',
+    # Lennard Jones
+    # 'lennard_jones_6d',
     # # Levy Series - Non-origin solution
     # 'levy_3d',
     # 'levy_5d',
@@ -211,19 +212,19 @@ high_dimensional_problem_names: List[str] = [  # noqa
     # 'qing_500d',
     # 'qing_1000d',
     # # Rastrigin series - Origin solution
-    'rastrigin_3d',
-    'rastrigin_5d',
-    'rastrigin_30d',
-    'rastrigin_100d',
-    'rastrigin_500d',
-    'rastrigin_1000d',
+    # 'rastrigin_3d',
+    # 'rastrigin_5d',
+    # 'rastrigin_30d',
+    # 'rastrigin_100d',
+    # 'rastrigin_500d',
+    # 'rastrigin_1000d',
     # Schewefel series - Non-origin solution
-    # 'schwefel_3d',
-    # 'schwefel_5d',
-    # 'schwefel_30d',
-    # 'schwefel_100d',
-    # 'schwefel_500d',
-    # 'schwefel_1000d',
+    'schwefel_3d',
+    'schwefel_5d',
+    'schwefel_30d',
+    'schwefel_100d',
+    'schwefel_500d',
+    'schwefel_1000d',
 ]
 
 # Identify available hidden sizes
@@ -241,17 +242,20 @@ search_hidden_sizes = [
     # # hidden_size_64 * 10,
     # # hidden_size_64 * 3,
     # # # Hidden sizes of 128
-    hidden_size_128 * 20,
+    hidden_size_128 * 2,
+    hidden_size_128 * 3,
     # hidden_size_128 * 3,
     # # Hidden sizes of 256
-    hidden_size_256 * 20,
+    hidden_size_256 * 3,
+    hidden_size_256 * 3,
     # hidden_size_256 * 3,
     # # Hidden sizes of 382
-    hidden_size_384 * 20,
+    hidden_size_384 * 2,
+    hidden_size_384 * 3,
     # hidden_size_384 * 3,
     # # Hidden sizes of 512
-    # hidden_size_512 * 2,
-    # hidden_size_512 * 3,
+    hidden_size_512 * 2,
+    hidden_size_512 * 3,
     # Hidden sizes of 2048
     # hidden_size_2048 * 2,
     # hidden_size_2048 * 3,
@@ -716,6 +720,8 @@ def find_best_architecture_task(problem_series, method, dimensionality):
             problem_names = chung_reynolds_series
         elif problem_series == 'griewank':
             problem_names = griewank_series
+        elif problem_series == 'lennard_jones':
+            problem_names = lennard_jones_series
         elif problem_series == 'levy':
             problem_names = levy_series
         elif problem_series == 'qing':
