@@ -5978,9 +5978,9 @@ def lennard_jones(x, results=None, trial=None, version='numpy'):
     x = x.flatten()
     d = len(x)
     k = int(d / 3)
-    result = 0.0
 
-    if version == 'numpy' or version == 'pytorch':
+    if version == 'numpy':
+        result = 0.0
         for i in range(k - 1):
             for j in range(i + 1, k):
                 a = 3 * i
@@ -5995,6 +5995,7 @@ def lennard_jones(x, results=None, trial=None, version='numpy'):
                     result += (1.0 / ud - 2.0) / ud
 
     elif version == 'pyomo':
+        result = 0.0
         for i in range(k - 1):
             for j in range(i + 1, k):
                 a = 3 * i
@@ -6008,51 +6009,68 @@ def lennard_jones(x, results=None, trial=None, version='numpy'):
                 if pyo.value(ed) > 0.0:
                     result += (1.0 / ud - 2.0) / ud
 
+    elif version == 'pytorch':
+        result = torch.tensor(0.0)
+        for i in range(k - 1):
+            for j in range(i + 1, k):
+                a = 3 * i
+                b = 3 * j
+                xd = x[a] - x[b]
+                yd = x[a + 1] - x[b + 1]
+                zd = x[a + 2] - x[b + 2]
+                ed = xd * xd + yd * yd + zd * zd
+                ud = ed * ed * ed
+
+                if ed > 0.0:
+                    result += (1.0 / ud - 2.0) / ud
+
     else:
         raise ValueError('Unknown specified version')
 
-
-# Lennard-Jones Potential
-def lennard_jones_v2(x, results=None, trial=None, version='numpy'):
-    """
-    Implemention of the n-dimensional Lennard Jones Potential function
-
-    Args:
-    x: A d-dimensional array or tensor
-    version: A string, either 'numpy' or 'pytorch'
-
-    Returns:
-    result: Value of the LJ potential function
-    """
-    x = x.flatten()
-    n = len(x)
-    # Assume n is divisible by 3
-    k = n / 3
-    result = 0
-    if version == 'numpy':
-        x_r = x.reshape(-1, 3)
-        for i in range(k - 1):
-            for j in range(i + 1, k):
-                rij = np.sqrt(np.sum((x_r[i] - x_r[j]) ** 2))
-                t1 = 1 / (rij**12)
-                t2 = 1 / (rij**6)
-                result += t1 - t2
-    elif version == 'pytorch':
-        x_r = x.reshape(-1, 3)
-        for i in range(k - 1):
-            for j in range(i + 1, k):
-                rij = torch.sqrt(torch.sum((x_r[i] - x_r[j]) ** 2))
-                t1 = 1 / (rij**12)
-                t2 = 1 / (rij**6)
-                result += t1 - t2
-    # elif version == 'pyomo':
-
-    else:
-        raise ValueError(
-            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
-        )
-
     return result
+
+
+# # Lennard-Jones Potential
+# def lennard_jones_v2(x, results=None, trial=None, version='numpy'):
+#     """
+#     Implemention of the n-dimensional Lennard Jones Potential function
+
+#     Args:
+#     x: A d-dimensional array or tensor
+#     version: A string, either 'numpy' or 'pytorch'
+
+#     Returns:
+#     result: Value of the LJ potential function
+#     """
+#     x = x.flatten()
+#     n = len(x)
+#     # Assume n is divisible by 3
+#     k = n / 3
+#     result = 0
+#     if version == 'numpy':
+#         x_r = x.reshape(-1, 3)
+#         for i in range(k - 1):
+#             for j in range(i + 1, k):
+#                 rij = np.sqrt(np.sum((x_r[i] - x_r[j]) ** 2))
+#                 t1 = 1 / (rij**12)
+#                 t2 = 1 / (rij**6)
+#                 result += t1 - t2
+#     elif version == 'pytorch':
+#         x_r = x.reshape(-1, 3)
+#         for i in range(k - 1):
+#             for j in range(i + 1, k):
+#                 rij = torch.sqrt(torch.sum((x_r[i] - x_r[j]) ** 2))
+#                 t1 = 1 / (rij**12)
+#                 t2 = 1 / (rij**6)
+#                 result += t1 - t2
+#     # elif version == 'pyomo':
+
+#     else:
+#         raise ValueError(
+#             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
+#         )
+
+#     return result
 
 
 # Problem configurations

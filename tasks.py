@@ -262,13 +262,13 @@ search_hidden_sizes = [
 search_input_sizes = [1]
 
 # Hidden activations
-search_hidden_activations = ['relu', 'sine']
+search_hidden_activations = ['sine']
 
 # Ouput activations
-search_output_activations = ['relu', 'sine']
+search_output_activations = ['sine']
 
 # Aggregate functions - for skip connections
-search_agg_functions = ['identity', 'sum', 'max']
+search_agg_functions = ['sum', 'max']
 
 # Include BN
 search_include_bn = [False, True]
@@ -840,6 +840,9 @@ def find_best_architecture_task(problem_series, method, dimensionality):
             run_time = results['total_time'].mean()
             print(f'Success Rate = {hits}')
             print(f'Average run time = {run_time}')
+
+            if hits == 1:
+                break
 
             # Save to parquet
             layers = len(hidden_size)
