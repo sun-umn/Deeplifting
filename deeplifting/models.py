@@ -28,7 +28,7 @@ class SinActivation(nn.Module):
 
     def __init__(self):  # noqa
         super(SinActivation, self).__init__()
-        self.amplitude = nn.Parameter(torch.ones(1), requires_grad=True)
+        self.amplitude = nn.Parameter(2 * torch.pi * torch.ones(1), requires_grad=True)
         self.scale = nn.Parameter(torch.ones(1), requires_grad=True)
         self.shift = nn.Parameter(torch.zeros(1), requires_grad=True)
         self.y_shift = nn.Parameter(torch.zeros(1), requires_grad=True)
@@ -233,6 +233,7 @@ class DeepliftingSkipMLP(nn.Module):
         self.include_bn = include_bn
         self.first_hidden_Size = hidden_sizes[0] * 2  # hidden_sizes[0] // 2
         self.scale = torch.randn(1) * 2 * torch.pi
+        self.bounds = bounds
 
         # Input layer
         self.layers.append(
@@ -321,5 +322,6 @@ class DeepliftingSkipMLP(nn.Module):
         torch.cuda.empty_cache()
 
         # Run through the scaling layer
-        out = self.scaling_layer(out)
+        if self.bounds is not None:
+            out = self.scaling_layer(out)
         return out

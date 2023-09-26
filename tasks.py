@@ -48,7 +48,7 @@ low_dimensional_problem_names = [
     # 'brent',
     # 'bukin_n2',
     # 'bukin_n4',
-    # 'bukin_n6',  # High, 2 layer is best so far, takes a while to run
+    'bukin_n6',  # High, 2 layer is best so far, takes a while to run
     # 'camel_3hump',
     # 'camel_6hump',
     # 'chung_reynolds',
@@ -56,20 +56,20 @@ low_dimensional_problem_names = [
     # 'cross_leg_table',
     # 'cube',  # Correct but paper has wrong x*
     # 'damavandi',
-    'drop_wave',  # Low, runs quickly
-    'eggholder',  # Medium, takes time to run
-    # 'ex8_1_1',
-    'griewank',  # Low, (1.0 with 3-layer, 0.95 2-layer)
-    # 'holder_table',  # Medium
-    # 'levy',  # Low, 3-layer
-    'levy_n13',  # Low, 3-layer
-    'mathopt6',
-    'rastrigin',  # Low, 3-layer
-    # 'rosenbrock',
-    'schaffer_n2',  # Low, 3-layer
-    'schaffer_n4',  # Low, 3-layer
-    # 'schwefel',  # Takes a while to run, DA is better at 100% but we are at 85%
-    'shubert',  # Takes a while to run
+    # 'drop_wave',  # Low, runs quickly
+    # 'eggholder',  # Medium, takes time to run
+    # # 'ex8_1_1',
+    # 'griewank',  # Low, (1.0 with 3-layer, 0.95 2-layer)
+    # # 'holder_table',  # Medium
+    # # 'levy',  # Low, 3-layer
+    # 'levy_n13',  # Low, 3-layer
+    # 'mathopt6',
+    # 'rastrigin',  # Low, 3-layer
+    # # 'rosenbrock',
+    # 'schaffer_n2',  # Low, 3-layer
+    # 'schaffer_n4',  # Low, 3-layer
+    # # 'schwefel',  # Takes a while to run, DA is better at 100% but we are at 85%
+    # 'shubert',  # Takes a while to run
     # 'sine_envelope',
     # 'rosenbrock',
     # 'xinsheyang_n2',
@@ -160,11 +160,7 @@ schwefel_series = [
     'schwefel_1000d',  #
 ]
 
-lennard_jones_series = [
-    # 'lennard_jones_6d',
-    # 'lennard_jones_9d',
-    'lennard_jones_12d'
-]
+lennard_jones_series = ['lennard_jones_6d', 'lennard_jones_9d', 'lennard_jones_12d']
 
 high_dimensional_problem_names: List[str] = [  # noqa
     # # Ackley Series - Origin Solution
@@ -244,12 +240,11 @@ search_hidden_sizes = [
     # # # Hidden sizes of 128
     hidden_size_128 * 2,
     hidden_size_128 * 3,
-    hidden_size_128 * 20,
-    # hidden_size_128 * 3,
+    # hidden_size_128 * 20,
     # # Hidden sizes of 256
+    hidden_size_256 * 2,
     hidden_size_256 * 3,
-    hidden_size_256 * 3,
-    hidden_size_256 * 20,
+    # hidden_size_256 * 20,
     # hidden_size_256 * 3,
     # # Hidden sizes of 382
     hidden_size_384 * 2,
@@ -264,13 +259,13 @@ search_hidden_sizes = [
 ]
 
 # Input sizes
-search_input_sizes = [16, 128]
+search_input_sizes = [1]
 
 # Hidden activations
 search_hidden_activations = ['relu', 'sine']
 
 # Ouput activations
-search_output_activations = ['sine']
+search_output_activations = ['relu', 'sine']
 
 # Aggregate functions - for skip connections
 search_agg_functions = ['identity', 'sum', 'max']
