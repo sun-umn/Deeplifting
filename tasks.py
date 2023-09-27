@@ -15,6 +15,7 @@ import pandas as pd
 # first party
 from deeplifting.optimization import run_pyomo  # noqa
 from deeplifting.optimization import (
+    run_basinhopping,
     run_deeplifting,
     run_differential_evolution,
     run_dual_annealing,
@@ -191,8 +192,10 @@ high_dimensional_problem_names: List[str] = [  # noqa
     # 'griewank_100d',
     # 'griewank_500d',
     # 'griewank_1000d',
-    # # # Lennard Jones
-    # # 'lennard_jones_6d',
+    # Lennard Jones
+    'lennard_jones_6d',
+    'lennard_jones_9d',
+    'lennard_jones_12d',
     # # Levy Series - Non-origin solution
     # 'levy_3d',
     # 'levy_5d',
@@ -208,13 +211,13 @@ high_dimensional_problem_names: List[str] = [  # noqa
     # 'qing_500d',
     # 'qing_1000d',
     # # Rastrigin series - Origin solution
-    'rastrigin_3d',
-    'rastrigin_5d',
-    'rastrigin_30d',
-    'rastrigin_100d',
-    'rastrigin_500d',
-    'rastrigin_1000d',
-    # Schewefel series - Non-origin solution
+    # 'rastrigin_3d',
+    # 'rastrigin_5d',
+    # 'rastrigin_30d',
+    # 'rastrigin_100d',
+    # 'rastrigin_500d',
+    # 'rastrigin_1000d',
+    # # Schewefel series - Non-origin solution
     # 'schwefel_3d',
     # 'schwefel_5d',
     # 'schwefel_30d',
@@ -534,20 +537,20 @@ def run_algorithm_comparison_task(dimensionality, trials):
             # Add differential evolution to the problem_performance_list
             problem_performance_list.append(pygranso_results)
 
-        # # Next we need to implement the SCIP algorithm
-        # print('Running SCIP!')
-        # outputs_scip = run_pyomo(problem, trials=trials, method='scip')
+        # Next add basin hopping
+        print('Running Basin Hopping')
+        outputs_bh = run_basinhopping(problem, trials=trials)
 
-        # # Get the final results for all differential evolution runs
-        # scip_results = pd.DataFrame(outputs_scip['final_results'], columns=columns)
-        # scip_results['problem_name'] = problem_name
-        # scip_results['hits'] = np.where(
-        #     np.abs(scip_results['f'] - minimum_value) <= 1e-5, 1, 0
-        # )
-        # scip_results['dimensions'] = dimensions
+        # Get the final results for all basinhoppin runs
+        bh_results = pd.DataFrame(outputs_bh['final_results'], columns=columns)
+        bh_results['problem_name'] = problem_name
+        bh_results['hits'] = np.where(
+            np.abs(bh_results['f'] - minimum_value) <= 1e-4, 1, 0
+        )
+        bh_results['dimensions'] = dimensions
 
-        # # Add differential evolution to the problem_performance_list
-        # problem_performance_list.append(scip_results)
+        # Add differential evolution to the problem_performance_list
+        problem_performance_list.append(bh_results)
 
         # Concatenate all of the data at the end of each problem because
         # we can save intermediate results
