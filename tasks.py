@@ -161,7 +161,12 @@ schwefel_series = [
     'schwefel_1000d',  #
 ]
 
-lennard_jones_series = ['lennard_jones_6d', 'lennard_jones_9d', 'lennard_jones_12d']
+lennard_jones_series = [
+    'lennard_jones_6d',
+    'lennard_jones_9d',
+    'lennard_jones_12d',
+    'lennard_jones_15d',
+]
 
 high_dimensional_problem_names: List[str] = [  # noqa
     # Ackley Series - Origin Solution
@@ -198,6 +203,7 @@ high_dimensional_problem_names: List[str] = [  # noqa
     'lennard_jones_12d',
     'lennard_jones_15d',
     'lennard_jones_30d',
+    'lennard_jones_39d'
     # # Levy Series - Non-origin solution
     # 'levy_3d',
     # 'levy_5d',
@@ -557,6 +563,7 @@ def run_algorithm_comparison_task(dimensionality, trials):
         # Concatenate all of the data at the end of each problem because
         # we can save intermediate results
         problem_performance_df = pd.concat(problem_performance_list, ignore_index=True)
+        problem_performance_df['global_minimum'] = minimum_value
         path = f'./algorithm_compare_results/{dimensionality}/{experiment_date}-{problem_name}'  # noqa
         if not os.path.exists(path):
             os.makedirs(path)
