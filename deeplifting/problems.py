@@ -4077,6 +4077,40 @@ def cosine_mixture(x, results, trial, version='numpy'):
     return result
 
 
+def crowned_cross(x, results, trial, version='numpy'):
+    """
+    Crowned cross in 2D
+    """
+    x1, x2 = x.flatten()
+    if version == 'pyomo':
+        result = (
+            0.0001
+            * (
+                np.abs(
+                    pyo.sin(x1)
+                    * pyo.sin(x2)
+                    * pyo.exp(np.abs(100 - (x1**2 + x2**2) ** 0.5 / np.pi))
+                )
+                + 1
+            )
+            ** 0.1
+        )
+
+    # Fill in the intermediate results if results and trial
+    # are provided
+    if results is not None and trial is not None:
+        build_2d_intermediate_results(
+            x1=x1,
+            x2=x2,
+            result=result,
+            version=version,
+            results=results,
+            trial=trial,
+        )
+
+    return result
+
+
 def csendes(x, results, trial, version='numpy'):
     """
     ND Csendes Function
