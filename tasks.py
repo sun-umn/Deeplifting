@@ -143,9 +143,9 @@ qing_series = [
 rastrigin_series = [
     # Rastrigin series - Origin solution
     # 'rastrigin_3d',
-    'rastrigin_5d',
-    'rastrigin_30d',
-    'rastrigin_100d',
+    # 'rastrigin_5d',
+    # 'rastrigin_30d',
+    # 'rastrigin_100d',
     'rastrigin_500d',
     'rastrigin_1000d',
 ]
@@ -262,10 +262,10 @@ search_hidden_sizes = [
 search_input_sizes = [1]
 
 # Hidden activations
-search_hidden_activations = ['sine']
+search_hidden_activations = ['relu', 'sine']
 
 # Ouput activations
-search_output_activations = ['sine']
+search_output_activations = ['relu', 'sine']
 
 # Aggregate functions - for skip connections
 search_agg_functions = ['sum', 'max']
@@ -841,9 +841,6 @@ def find_best_architecture_task(problem_series, method, dimensionality):
             print(f'Success Rate = {hits}')
             print(f'Average run time = {run_time}')
 
-            if hits == 1:
-                break
-
             # Save to parquet
             layers = len(hidden_size)
             units = hidden_size[0]
@@ -862,6 +859,9 @@ def find_best_architecture_task(problem_series, method, dimensionality):
 
             # Append performance
             performance_df_list.append(results)
+
+            if hits == 1:
+                break
 
 
 @cli.command('run-pygranso')
