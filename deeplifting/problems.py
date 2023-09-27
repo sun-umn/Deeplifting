@@ -8091,6 +8091,22 @@ lennard_jones_12d_config = {
     'dimensions': 12,
 }
 
+lennard_jones_15d_config = {
+    'objective': lennard_jones,
+    'bounds': [(-4.0, 4.0)],
+    'max_iterations': 1000,
+    'global_minimum': -12.712062,
+    'dimensions': 15,
+}
+
+lennard_jones_30d_config = {
+    'objective': lennard_jones,
+    'bounds': [(-4.0, 4.0)],
+    'max_iterations': 1000,
+    'global_minimum': -32.765970,
+    'dimensions': 30,
+}
+
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
     'bukin_n6': bukin_n6_config,
@@ -8342,4 +8358,6 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'lennard_jones_6d': lennard_jones_6d_config,
     'lennard_jones_9d': lennard_jones_9d_config,
     'lennard_jones_12d': lennard_jones_12d_config,
+    'lennard_jones_15d': lennard_jones_15d_config,
+    'lennard_jones_30d': lennard_jones_30d_config,
 }

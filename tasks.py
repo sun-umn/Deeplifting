@@ -165,12 +165,12 @@ lennard_jones_series = ['lennard_jones_6d', 'lennard_jones_9d', 'lennard_jones_1
 
 high_dimensional_problem_names: List[str] = [  # noqa
     # Ackley Series - Origin Solution
-    'ackley_3d',
-    'ackley_5d',
-    'ackley_30d',
-    'ackley_100d',
-    'ackley_500d',
-    'ackley_1000d',
+    # 'ackley_3d',
+    # 'ackley_5d',
+    # 'ackley_30d',
+    # 'ackley_100d',
+    # 'ackley_500d',
+    # 'ackley_1000d',
     # # Alpine1 Series - Origin Solution
     # 'alpine1_3d',
     # 'alpine1_5d',
@@ -196,6 +196,8 @@ high_dimensional_problem_names: List[str] = [  # noqa
     'lennard_jones_6d',
     'lennard_jones_9d',
     'lennard_jones_12d',
+    'lennard_jones_15d',
+    'lennard_jones_30d',
     # # Levy Series - Non-origin solution
     # 'levy_3d',
     # 'levy_5d',
