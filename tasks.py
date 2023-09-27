@@ -57,18 +57,18 @@ low_dimensional_problem_names = [
     # 'cube',  # Correct but paper has wrong x*
     # 'damavandi',
     # 'drop_wave',  # Low, runs quickly
-    # 'eggholder',  # Medium, takes time to run
-    # # 'ex8_1_1',
-    # 'griewank',  # Low, (1.0 with 3-layer, 0.95 2-layer)
-    # # 'holder_table',  # Medium
-    # # 'levy',  # Low, 3-layer
+    'eggholder',  # Medium, takes time to run
+    # 'ex8_1_1',
+    'griewank',  # Low, (1.0 with 3-layer, 0.95 2-layer)
+    # 'holder_table',  # Medium
+    # 'levy',  # Low, 3-layer
     # 'levy_n13',  # Low, 3-layer
-    # 'mathopt6',
+    'mathopt6',
     # 'rastrigin',  # Low, 3-layer
-    # # 'rosenbrock',
+    # 'rosenbrock',
     # 'schaffer_n2',  # Low, 3-layer
     # 'schaffer_n4',  # Low, 3-layer
-    # # 'schwefel',  # Takes a while to run, DA is better at 100% but we are at 85%
+    # 'schwefel',  # Takes a while to run, DA is better at 100% but we are at 85%
     # 'shubert',  # Takes a while to run
     # 'sine_envelope',
     # 'rosenbrock',
