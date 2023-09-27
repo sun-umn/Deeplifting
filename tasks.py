@@ -164,13 +164,13 @@ schwefel_series = [
 lennard_jones_series = ['lennard_jones_6d', 'lennard_jones_9d', 'lennard_jones_12d']
 
 high_dimensional_problem_names: List[str] = [  # noqa
-    # # Ackley Series - Origin Solution
-    # 'ackley_3d',
-    # 'ackley_5d',
-    # 'ackley_30d',
-    # 'ackley_100d',
-    # 'ackley_500d',
-    # 'ackley_1000d',
+    # Ackley Series - Origin Solution
+    'ackley_3d',
+    'ackley_5d',
+    'ackley_30d',
+    'ackley_100d',
+    'ackley_500d',
+    'ackley_1000d',
     # # Alpine1 Series - Origin Solution
     # 'alpine1_3d',
     # 'alpine1_5d',
