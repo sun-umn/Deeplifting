@@ -259,7 +259,7 @@ search_hidden_sizes = [
 ]
 
 # Input sizes
-search_input_sizes = [1]
+search_input_sizes = [1, 16, 32]
 
 # Hidden activations
 search_hidden_activations = ['relu', 'sine']
