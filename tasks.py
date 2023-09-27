@@ -268,7 +268,7 @@ search_input_sizes = [1, 16, 32]
 search_hidden_activations = ['relu', 'sine']
 
 # Ouput activations
-search_output_activations = ['relu', 'sine']
+search_output_activations = ['sine']
 
 # Aggregate functions - for skip connections
 search_agg_functions = ['sum', 'max']
