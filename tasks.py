@@ -163,8 +163,8 @@ schwefel_series = [
 ]
 
 lennard_jones_series = [
-    'lennard_jones_6d',
-    'lennard_jones_9d',
+    # 'lennard_jones_6d',
+    # 'lennard_jones_9d',
     'lennard_jones_12d',
     'lennard_jones_15d',
     'lennard_jones_30d',
