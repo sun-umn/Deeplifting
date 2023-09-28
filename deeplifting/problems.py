@@ -6044,7 +6044,8 @@ def lennard_jones(x, results=None, trial=None, version='numpy'):
                     result += (1.0 / ud - 2.0) / ud
 
     elif version == 'pytorch':
-        result = torch.tensor(0.0)
+        device = torch.device('cuda:0')
+        result = torch.tensor(0.0, device=device, dtype=torch.double)
         for i in range(k - 1):
             for j in range(i + 1, k):
                 a = 3 * i
