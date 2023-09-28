@@ -55,9 +55,9 @@ low_dimensional_problem_names = [
     # 'chung_reynolds',
     # 'cross_in_tray',  # Low, runs quickly
     # 'cross_leg_table',
-    'crowned_cross',
+    # 'crowned_cross',
     # 'cube',  # Correct but paper has wrong x*
-    # 'damavandi',
+    'damavandi',
     # 'drop_wave',  # Low, runs quickly
     # 'eggholder',  # Medium, takes time to run
     # 'ex8_1_1',
@@ -252,13 +252,13 @@ search_hidden_sizes = [
     # # hidden_size_64 * 10,
     # # hidden_size_64 * 3,
     # # # Hidden sizes of 128
-    hidden_size_128 * 2,
-    hidden_size_128 * 3,
-    # hidden_size_128 * 20,
+    hidden_size_128 * 20,
+    hidden_size_128 * 30,
+    hidden_size_128 * 40,
     # # Hidden sizes of 256
-    hidden_size_256 * 2,
-    hidden_size_256 * 3,
-    # hidden_size_256 * 20,
+    hidden_size_256 * 20,
+    hidden_size_256 * 30,
+    hidden_size_256 * 40,
     # hidden_size_256 * 3,
     # # Hidden sizes of 382
     # hidden_size_384 * 2,
@@ -273,16 +273,16 @@ search_hidden_sizes = [
 ]
 
 # Input sizes
-search_input_sizes = [1, 16, 32]
+search_input_sizes = [1, 16, 32, 64]
 
 # Hidden activations
-search_hidden_activations = ['relu', 'sine']
+search_hidden_activations = ['sine']
 
 # Ouput activations
 search_output_activations = ['sine']
 
 # Aggregate functions - for skip connections
-search_agg_functions = ['sum', 'max']
+search_agg_functions = ['identity', 'sum', 'max']
 
 # Include BN
 search_include_bn = [False, True]

@@ -4089,7 +4089,7 @@ def crowned_cross(x, results, trial, version='numpy'):
                 np.abs(
                     pyo.sin(x1)
                     * pyo.sin(x2)
-                    * pyo.exp(np.abs(100 - (x1**2 + x2**2) ** 0.5 / np.pi))
+                    * pyo.exp(np.abs(50 - (x1**2 + x2**2) ** 0.5 / np.pi))
                 )
                 + 1
             )
@@ -4102,7 +4102,7 @@ def crowned_cross(x, results, trial, version='numpy'):
                 torch.abs(
                     torch.sin(x1)
                     * torch.sin(x2)
-                    * torch.exp(torch.abs(100 - (x1**2 + x2**2) ** 0.5 / torch.pi))
+                    * torch.exp(torch.abs(50 - (x1**2 + x2**2) ** 0.5 / torch.pi))
                 )
                 + 1
             )
