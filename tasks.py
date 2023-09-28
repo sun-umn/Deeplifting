@@ -49,22 +49,23 @@ low_dimensional_problem_names = [
     # 'brent',
     # 'bukin_n2',
     # 'bukin_n4',
-    'bukin_n6',  # High, 2 layer is best so far, takes a while to run
+    # 'bukin_n6',  # High, 2 layer is best so far, takes a while to run
     # 'camel_3hump',
     # 'camel_6hump',
     # 'chung_reynolds',
     # 'cross_in_tray',  # Low, runs quickly
     # 'cross_leg_table',
+    'crowned_cross',
     # 'cube',  # Correct but paper has wrong x*
     # 'damavandi',
     # 'drop_wave',  # Low, runs quickly
-    'eggholder',  # Medium, takes time to run
+    # 'eggholder',  # Medium, takes time to run
     # 'ex8_1_1',
-    'griewank',  # Low, (1.0 with 3-layer, 0.95 2-layer)
+    # 'griewank',  # Low, (1.0 with 3-layer, 0.95 2-layer)
     # 'holder_table',  # Medium
     # 'levy',  # Low, 3-layer
     # 'levy_n13',  # Low, 3-layer
-    'mathopt6',
+    # 'mathopt6',
     # 'rastrigin',  # Low, 3-layer
     # 'rosenbrock',
     # 'schaffer_n2',  # Low, 3-layer

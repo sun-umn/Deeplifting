@@ -6842,6 +6842,14 @@ cross_leg_table_config = {
     'dimensions': 2,
 }
 
+crowned_cross_config = {
+    'objective': crowned_cross,
+    'bounds': [(-10, 10), (-10, 10)],
+    'max_iterations': 1000,
+    'global_minimum': 0.0001,
+    'dimensions': 2,
+}
+
 sine_envelope_config = {
     'objective': sine_envelope,
     'bounds': [(-100, 100), (-100, 100)],
@@ -8141,7 +8149,7 @@ lennard_jones_30d_config = {
     'dimensions': 30,
 }
 
-lennard_jones_30d_config = {
+lennard_jones_39d_config = {
     'objective': lennard_jones,
     'bounds': [(-4.0, 4.0)],
     'max_iterations': 1000,
@@ -8191,6 +8199,7 @@ PROBLEMS_BY_NAME = {
     'rosenbrock': rosenbrock_config,
     'damavandi': damavandi_config,
     'cross_leg_table': cross_leg_table_config,
+    'crowned_cross': crowned_cross_config,
     'sine_envelope': sine_envelope_config,
     'ackley2': ackley2_config,
     'ackley3': ackley3_config,
@@ -8402,5 +8411,5 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'lennard_jones_12d': lennard_jones_12d_config,
     'lennard_jones_15d': lennard_jones_15d_config,
     'lennard_jones_30d': lennard_jones_30d_config,
-    'lennard_jones_39d': lennard_jones_30d_config,
+    'lennard_jones_39d': lennard_jones_39d_config,
 }
