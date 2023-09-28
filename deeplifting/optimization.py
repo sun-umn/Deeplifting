@@ -905,7 +905,7 @@ def run_high_dimensional_deeplifting(
         # opts.disable_terminationcode_6 = True
         # opts.halt_on_linesearch_bracket = False
         opts.opt_tol = 1e-10
-        opts.maxit = 1000
+        opts.maxit = 5000
 
         # # Combined function
         comb_fn = lambda model: deeplifting_high_dimension_fn(model, objective)  # noqa
