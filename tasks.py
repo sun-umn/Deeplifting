@@ -167,6 +167,8 @@ lennard_jones_series = [
     'lennard_jones_9d',
     'lennard_jones_12d',
     'lennard_jones_15d',
+    'lennard_jones_30d',
+    'lennard_jones_39d',
 ]
 
 high_dimensional_problem_names: List[str] = [  # noqa
