@@ -646,7 +646,7 @@ def run_deeplifting(
     """
     # Get the device (CPU for now)
     dimensions = problem['dimensions']
-    device = torch.device('cuda:0')
+    device = torch.device('cpu')
     fn_values = []
     iterim_results: List[Any] = []  # noqa
 
@@ -767,7 +767,7 @@ def run_deeplifting(
         final_fn = lambda x: objective(
             x, results=final_results, trial=0, version='pytorch'
         )
-        xf, f = deeplifting_predictions(outputs, final_fn, method='single-value')
+        xf, f = deeplifting_predictions(outputs, final_fn, method=method)
         f = f.detach().cpu().numpy()
         data_point = tuple(xf) + (float(f), 'Deeplifting', total_time)
         fn_values.append(data_point)
@@ -897,15 +897,15 @@ def run_high_dimensional_deeplifting(
 
         opts.x0 = x0
         opts.torch_device = device
-        opts.print_level = 0
-        # opts.print_frequency = 1
+        # opts.print_level = 0
+        opts.print_frequency = 10
         opts.limited_mem_size = 5
         opts.stat_l2_model = False
         opts.double_precision = True
         # opts.disable_terminationcode_6 = True
         # opts.halt_on_linesearch_bracket = False
         opts.opt_tol = 1e-10
-        opts.maxit = 2000
+        opts.maxit = 1000
 
         # # Combined function
         comb_fn = lambda model: deeplifting_high_dimension_fn(model, objective)  # noqa

@@ -165,8 +165,8 @@ schwefel_series = [
 lennard_jones_series = [
     # 'lennard_jones_6d',
     # 'lennard_jones_9d',
-    'lennard_jones_12d',
-    'lennard_jones_15d',
+    # 'lennard_jones_12d',
+    # 'lennard_jones_15d',
     'lennard_jones_30d',
     'lennard_jones_39d',
 ]
@@ -252,31 +252,32 @@ search_hidden_sizes = [
     # # hidden_size_64 * 10,
     # # hidden_size_64 * 3,
     # # # Hidden sizes of 128
+    hidden_size_128 * 2,
+    hidden_size_128 * 3,
+    hidden_size_128 * 4,
     hidden_size_128 * 20,
-    hidden_size_128 * 30,
-    hidden_size_128 * 40,
     # # Hidden sizes of 256
-    hidden_size_256 * 20,
-    hidden_size_256 * 30,
-    hidden_size_256 * 40,
+    hidden_size_256 * 2,
+    hidden_size_256 * 3,
+    hidden_size_256 * 4,
     # hidden_size_256 * 3,
     # # Hidden sizes of 382
     # hidden_size_384 * 2,
     # hidden_size_384 * 3,
     # # hidden_size_384 * 3,
     # # # Hidden sizes of 512
-    # hidden_size_512 * 2,
-    # hidden_size_512 * 3,
+    hidden_size_512 * 2,
+    hidden_size_512 * 3,
     # Hidden sizes of 2048
     # hidden_size_2048 * 2,
     # hidden_size_2048 * 3,
 ]
 
 # Input sizes
-search_input_sizes = [1, 16, 32, 64]
+search_input_sizes = [1, 16, 32]
 
 # Hidden activations
-search_hidden_activations = ['sine']
+search_hidden_activations = ['leaky_relu', 'sine']
 
 # Ouput activations
 search_output_activations = ['sine']
@@ -759,7 +760,7 @@ def find_best_architecture_task(problem_series, method, dimensionality):
         search_include_bn,
     )
     configurations = list(product(*combinations))
-    trials = 10
+    trials = 1
 
     # List to store performance data
     performance_df_list = []
@@ -814,7 +815,7 @@ def find_best_architecture_task(problem_series, method, dimensionality):
                         output_activation=output_activation,
                         agg_function=agg_function,
                         include_bn=include_bn,
-                        method='single-value',
+                        method='particle',
                     )
 
             elif method == 'pytorch-lbfgs':
