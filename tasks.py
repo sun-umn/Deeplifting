@@ -252,22 +252,22 @@ search_hidden_sizes = [
     # # hidden_size_64 * 10,
     # # hidden_size_64 * 3,
     # # # Hidden sizes of 128
-    hidden_size_128 * 2,
-    hidden_size_128 * 3,
-    hidden_size_128 * 4,
+    hidden_size_128 * 5,
+    hidden_size_128 * 10,
+    hidden_size_128 * 15,
     hidden_size_128 * 20,
-    # # Hidden sizes of 256
-    hidden_size_256 * 2,
-    hidden_size_256 * 3,
-    hidden_size_256 * 4,
+    # # # Hidden sizes of 256
+    # hidden_size_256 * 2,
     # hidden_size_256 * 3,
-    # # Hidden sizes of 382
-    # hidden_size_384 * 2,
-    # hidden_size_384 * 3,
+    # hidden_size_256 * 4,
+    # # hidden_size_256 * 3,
+    # # # Hidden sizes of 382
+    # # hidden_size_384 * 2,
     # # hidden_size_384 * 3,
-    # # # Hidden sizes of 512
-    hidden_size_512 * 2,
-    hidden_size_512 * 3,
+    # # # hidden_size_384 * 3,
+    # # # # Hidden sizes of 512
+    # hidden_size_512 * 2,
+    # hidden_size_512 * 3,
     # Hidden sizes of 2048
     # hidden_size_2048 * 2,
     # hidden_size_2048 * 3,
