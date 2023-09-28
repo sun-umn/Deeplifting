@@ -4095,6 +4095,19 @@ def crowned_cross(x, results, trial, version='numpy'):
             )
             ** 0.1
         )
+    elif version == 'pytorch':
+        result = (
+            0.0001
+            * (
+                torch.abs(
+                    torch.sin(x1)
+                    * torch.sin(x2)
+                    * torch.exp(torch.abs(100 - (x1**2 + x2**2) ** 0.5 / torch.pi))
+                )
+                + 1
+            )
+            ** 0.1
+        )
 
     # Fill in the intermediate results if results and trial
     # are provided
