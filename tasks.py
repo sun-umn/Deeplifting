@@ -72,7 +72,7 @@ low_dimensional_problem_names = [
     # 'schaffer_n4',  # Low, 3-layer
     # 'schwefel',  # Takes a while to run, DA is better at 100% but we are at 85%
     # 'shubert',  # Takes a while to run
-    # 'sine_envelope',
+    'sine_envelope',
     # 'rosenbrock',
     # 'xinsheyang_n2',
     # 'xinsheyang_n3',
