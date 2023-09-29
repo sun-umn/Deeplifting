@@ -712,15 +712,15 @@ def find_best_architecture_task(problem_series, method, dimensionality):
     "hard" high-dimensional problems. We will aim to tackle a large dimensional
     space with this function, 2500+
     """
-    # # Enable the neptune run
-    # # Get api token
-    # # TODO: If api token is not present log a warning
-    # # and default to saving files locally
-    # run = neptune.init_run(  # noqa
-    #     project="dever120/Deeplifting",
-    #     api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzYmIwMTUyNC05YmZmLTQ1NzctOTEyNS1kZTIxYjU5NjY5YjAifQ==",  # noqa
-    # )  # your credentials
-    # run['sys/tags'].add([problem_series, method])
+    # Enable the neptune run
+    # Get api token
+    # TODO: If api token is not present log a warning
+    # and default to saving files locally
+    run = neptune.init_run(  # noqa
+        project="dever120/Deeplifting",
+        api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzYmIwMTUyNC05YmZmLTQ1NzctOTEyNS1kZTIxYjU5NjY5YjAifQ==",  # noqa
+    )  # your credentials
+    run['sys/tags'].add([problem_series, method])
 
     # Get the problem list
     if dimensionality == 'high-dimensional':
