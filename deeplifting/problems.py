@@ -6057,20 +6057,28 @@ def lennard_jones(x, results=None, trial=None, version='numpy'):
                     result += (1.0 / ud - 2.0) / ud
 
     elif version == 'pytorch':
-        device = torch.device('cuda:0')
-        result = torch.tensor(0.0, device=device, dtype=torch.double)
-        for i in range(k - 1):
-            for j in range(i + 1, k):
-                a = 3 * i
-                b = 3 * j
-                xd = x[a] - x[b]
-                yd = x[a + 1] - x[b + 1]
-                zd = x[a + 2] - x[b + 2]
-                ed = xd * xd + yd * yd + zd * zd
-                ud = ed * ed * ed
+        # Assume positions has shape [B, 3N] where B is the batch size and N
+        # is the number of atoms
+        # Reshaping to get individual atoms' positions of shape [B, N, 3]
+        x = x.reshape(1, -1)
+        positions = x.view(x.shape[0], -1, 3)
 
-                if ed > 0.0:
-                    result += (1.0 / ud - 2.0) / ud
+        # Compute the pairwise differences
+        # Subtracting [B, 1, N, 3] from [B, N, 1, 3] gives [B, N, N, 3]
+        deltas = positions.unsqueeze(2) - positions.unsqueeze(1)
+
+        # Norm the differences gives [B, N, N]
+        distances = torch.norm(deltas, dim=-1)
+
+        # Get the upper triangle matrix (ignoring the diagonal)
+        distances = torch.triu(distances, diagonal=1)
+
+        # Provide a mask to eliminate divisions from zero
+        mask = distances > 0
+
+        # Compute the pairwise cost (1 / dist)^12 - (1 / dist)^ 6
+        result = 1.0 / distances[mask] ** 12 - 2.0 / distances[mask] ** 6
+        result = result.sum()
 
     else:
         raise ValueError('Unknown specified version')

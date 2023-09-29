@@ -49,7 +49,7 @@ low_dimensional_problem_names = [
     # 'brent',
     # 'bukin_n2',
     # 'bukin_n4',
-    # 'bukin_n6',  # High, 2 layer is best so far, takes a while to run
+    'bukin_n6',  # High, 2 layer is best so far, takes a while to run
     # 'camel_3hump',
     # 'camel_6hump',
     # 'chung_reynolds',
@@ -252,12 +252,13 @@ search_hidden_sizes = [
     # # hidden_size_64 * 10,
     # # hidden_size_64 * 3,
     # # # Hidden sizes of 128
+    hidden_size_128 * 2,
     hidden_size_128 * 5,
     hidden_size_128 * 10,
     hidden_size_128 * 15,
     hidden_size_128 * 20,
     # # # Hidden sizes of 256
-    # hidden_size_256 * 2,
+    hidden_size_256 * 2,
     # hidden_size_256 * 3,
     # hidden_size_256 * 4,
     # # hidden_size_256 * 3,
@@ -274,10 +275,10 @@ search_hidden_sizes = [
 ]
 
 # Input sizes
-search_input_sizes = [1, 16, 32]
+search_input_sizes = [1, 128]
 
 # Hidden activations
-search_hidden_activations = ['leaky_relu', 'sine']
+search_hidden_activations = ['sine']
 
 # Ouput activations
 search_output_activations = ['sine']
@@ -711,15 +712,15 @@ def find_best_architecture_task(problem_series, method, dimensionality):
     "hard" high-dimensional problems. We will aim to tackle a large dimensional
     space with this function, 2500+
     """
-    # Enable the neptune run
-    # Get api token
-    # TODO: If api token is not present log a warning
-    # and default to saving files locally
-    run = neptune.init_run(  # noqa
-        project="dever120/Deeplifting",
-        api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzYmIwMTUyNC05YmZmLTQ1NzctOTEyNS1kZTIxYjU5NjY5YjAifQ==",  # noqa
-    )  # your credentials
-    run['sys/tags'].add([problem_series, method])
+    # # Enable the neptune run
+    # # Get api token
+    # # TODO: If api token is not present log a warning
+    # # and default to saving files locally
+    # run = neptune.init_run(  # noqa
+    #     project="dever120/Deeplifting",
+    #     api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzYmIwMTUyNC05YmZmLTQ1NzctOTEyNS1kZTIxYjU5NjY5YjAifQ==",  # noqa
+    # )  # your credentials
+    # run['sys/tags'].add([problem_series, method])
 
     # Get the problem list
     if dimensionality == 'high-dimensional':
