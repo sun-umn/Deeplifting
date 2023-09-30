@@ -901,13 +901,14 @@ def run_high_dimensional_deeplifting(
 
         opts.x0 = x0
         opts.torch_device = device
-        opts.print_level = 0
-        # opts.print_frequency = 10
-        opts.limited_mem_size = 5
+        # opts.print_level = 0
+        opts.print_frequency = 1
+        opts.limited_mem_size = 100
         opts.stat_l2_model = False
         opts.double_precision = True
         opts.disable_terminationcode_6 = True
         opts.halt_on_linesearch_bracket = False
+        opts.linesearch_maxit = 50
         opts.opt_tol = 1e-10
         opts.maxit = 2000
 
@@ -959,7 +960,7 @@ def run_lbfgs_deeplifting(
     """
     # Get the device (CPU for now)
     dimensions = problem['dimensions']
-    device = torch.device('cpu')
+    device = get_devices()
     fn_values = []  # noqa
 
     for trial in range(trials):
@@ -998,7 +999,7 @@ def run_lbfgs_deeplifting(
             model.parameters(),
             lr=1.0,
             history_size=100,
-            max_iter=50,
+            max_iter=25,
             line_search_fn='strong_wolfe',
         )
 
@@ -1009,6 +1010,7 @@ def run_lbfgs_deeplifting(
         outputs = model(inputs=None)
         outputs = outputs.mean(axis=0)
         current_loss = objective(outputs, version='pytorch')
+        print(f'Initial loss = {current_loss}')
 
         count = 0
         for epoch in range(50000):

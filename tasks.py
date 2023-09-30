@@ -163,17 +163,17 @@ schwefel_series = [
 ]
 
 lennard_jones_series = [
-    'lennard_jones_6d',
-    'lennard_jones_9d',
-    'lennard_jones_12d',
-    'lennard_jones_15d',
+    # 'lennard_jones_6d',
+    # 'lennard_jones_9d',
+    # 'lennard_jones_12d',
+    # 'lennard_jones_15d',
     'lennard_jones_18d',
     'lennard_jones_21d',
     'lennard_jones_24d',
     'lennard_jones_27d',
-    # 'lennard_jones_30d',
-    # 'lennard_jones_39d',
-    # 'lennard_jones_225d',
+    'lennard_jones_30d',
+    'lennard_jones_39d',
+    'lennard_jones_225d',
 ]
 
 high_dimensional_problem_names: List[str] = [  # noqa
@@ -254,7 +254,7 @@ hidden_size_2048 = (2048,)
 
 # Hidden size combinations
 search_hidden_sizes = [
-    # hidden_size_64 * 10,
+    # hidden_size_64 * 2,
     # hidden_size_64 * 3,
     # # Hidden sizes of 128
     hidden_size_128 * 2,
@@ -265,28 +265,28 @@ search_hidden_sizes = [
     # hidden_size_256 * 4,
     # hidden_size_256 * 3,
     # Hidden sizes of 382
-    hidden_size_384 * 2,
-    hidden_size_384 * 3,
+    # hidden_size_384 * 2,
+    # hidden_size_384 * 3,
     # hidden_size_384 * 3,
     # # Hidden sizes of 512
-    hidden_size_512 * 2,
-    hidden_size_512 * 3,
+    # hidden_size_512 * 2,
+    # hidden_size_512 * 3,
     # Hidden sizes of 2048
     # hidden_size_2048 * 2,
     # hidden_size_2048 * 3,
 ]
 
 # Input sizes
-search_input_sizes = [1, 4, 16]
+search_input_sizes = [128]
 
 # Hidden activations
-search_hidden_activations = ['leaky_relu', 'sine']
+search_hidden_activations = ['sine']
 
 # Ouput activations
 search_output_activations = ['sine']
 
 # Aggregate functions - for skip connections
-search_agg_functions = ['identity', 'sum', 'average']
+search_agg_functions = ['sum', 'average']
 
 # Include BN
 search_include_bn = [False, True]
@@ -763,7 +763,7 @@ def find_best_architecture_task(problem_series, method, dimensionality):
         search_include_bn,
     )
     configurations = list(product(*combinations))
-    trials = 1
+    trials = 5
 
     # List to store performance data
     performance_df_list = []
@@ -855,7 +855,7 @@ def find_best_architecture_task(problem_series, method, dimensionality):
             results['hits'] = np.abs(results['f'] - results['global_minimum']) <= 1e-4
 
             # Print the results
-            hits = results['hits'].mean()
+            hits = results['hits'].sum()
             run_time = results['total_time'].mean()
             print(f'Success Rate = {hits}')
             print(f'Average run time = {run_time}')
@@ -879,7 +879,8 @@ def find_best_architecture_task(problem_series, method, dimensionality):
             # Append performance
             performance_df_list.append(results)
 
-            if hits == 1:
+            # We hit at least once
+            if hits > 1:
                 break
 
 

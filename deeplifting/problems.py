@@ -6083,7 +6083,7 @@ def lennard_jones(x, results=None, trial=None, version='numpy'):
         deltas = positions.unsqueeze(2) - positions.unsqueeze(1)
 
         # Norm the differences gives [B, N, N]
-        distances = torch.norm(deltas, dim=-1)
+        distances = torch.norm(deltas, dim=-1) ** 2
 
         # Get the upper triangle matrix (ignoring the diagonal)
         distances = torch.triu(distances, diagonal=1)
@@ -6092,9 +6092,8 @@ def lennard_jones(x, results=None, trial=None, version='numpy'):
         mask = distances > 0
 
         # Compute the pairwise cost (1 / dist)^12 - (1 / dist)^ 6
-        result = 1.0 / distances[mask] ** 12 - 1.0 / distances[mask] ** 6
+        result = 1.0 / distances[mask] ** 6 - 1.0 / distances[mask] ** 3
         result = 4 * result.sum()
-        # result = result.sum()
 
     else:
         raise ValueError('Unknown specified version')
