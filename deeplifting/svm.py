@@ -280,7 +280,7 @@ def run_dual_annealing_svm(X, labels):
 
 
 def run_pygranso(X, labels):
-    device = torch.device('cpu')
+    device = get_devices()
     w0 = torch.randn(
         (X.shape[0], 1),
     ).to(device, dtype=torch.double)
@@ -339,7 +339,7 @@ def run_deeplifting(model, X, labels):
     opts.stat_l2_model = False
     opts.double_precision = True
     opts.opt_tol = 1e-5
-    opts.maxit = 5000
+    opts.maxit = 10000
 
     # Combined function
     comb_fn = lambda model: deeplifting_svm(model, X, labels)  # noqa
@@ -384,6 +384,22 @@ if __name__ == "__main__":
     yt_train = yt_train.to(device=device, dtype=torch.double)
     Xt_test = Xt_test.to(device=device, dtype=torch.double)
     yt_test = yt_test.to(device=device, dtype=torch.double)
+
+    # Get the PyGRANSO result
+    pygranso_result = run_pygranso(Xt_train.T, yt_train)
+    pg_weights = pygranso_result.best.x
+    pg_weights = pg_weights.detach().cpu().numpy().reshape(1, -1)
+
+    # Train accuracy
+    preds_train = build_predictions(pg_weights, X_train.T)
+
+    # Test accuracy
+    preds_test = build_predictions(pg_weights, X_test.T)
+
+    print(
+        accuracy_score(y_train, preds_train.flatten()),
+        accuracy_score(y_test, preds_test.flatten()),
+    )
 
     # Initialize the deeplifting model
     model = DeepliftingSkipMLP(

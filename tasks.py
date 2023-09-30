@@ -163,10 +163,10 @@ schwefel_series = [
 ]
 
 lennard_jones_series = [
-    'lennard_jones_6d',
-    'lennard_jones_9d',
-    'lennard_jones_12d',
-    'lennard_jones_15d',
+    # 'lennard_jones_6d',
+    # 'lennard_jones_9d',
+    # 'lennard_jones_12d',
+    # 'lennard_jones_15d',
     'lennard_jones_30d',
     'lennard_jones_39d',
 ]
@@ -275,7 +275,7 @@ search_hidden_sizes = [
 ]
 
 # Input sizes
-search_input_sizes = [1, 32, 64]
+search_input_sizes = [16, 32, 64]
 
 # Hidden activations
 search_hidden_activations = ['leaky_relu', 'sine']
