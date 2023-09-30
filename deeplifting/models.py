@@ -231,7 +231,7 @@ class DeepliftingSkipMLP(nn.Module):
         self.skip_every_n = skip_every_n
         self.agg_function = agg_function
         self.include_bn = include_bn
-        self.first_hidden_Size = hidden_sizes[0] * 5  # hidden_sizes[0] // 2
+        self.first_hidden_Size = hidden_sizes[0] * 2  # hidden_sizes[0] // 2
         self.scale = torch.randn(1) * 2 * torch.pi
         self.bounds = bounds
 

@@ -85,11 +85,11 @@ low_dimensional_problem_names = [
 ackley_series = [
     # Ackley Series - Origin Solution
     'ackley_3d',
-    'ackley_5d',
-    'ackley_30d',
-    'ackley_100d',
-    'ackley_500d',
-    'ackley_1000d',
+    # 'ackley_5d',
+    # 'ackley_30d',
+    # 'ackley_100d',
+    # 'ackley_500d',
+    # 'ackley_1000d',
 ]
 
 alpine_series = [
@@ -275,7 +275,7 @@ search_hidden_sizes = [
 ]
 
 # Input sizes
-search_input_sizes = [128, 512]
+search_input_sizes = [32, 64]
 
 # Hidden activations
 search_hidden_activations = ['sine']
@@ -284,7 +284,7 @@ search_hidden_activations = ['sine']
 search_output_activations = ['sine']
 
 # Aggregate functions - for skip connections
-search_agg_functions = ['identity', 'sum', 'max']
+search_agg_functions = ['sum', 'max']
 
 # Include BN
 search_include_bn = [False, True]

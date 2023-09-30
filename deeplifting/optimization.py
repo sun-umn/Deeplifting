@@ -901,14 +901,14 @@ def run_high_dimensional_deeplifting(
 
         opts.x0 = x0
         opts.torch_device = device
-        opts.print_level = 0
-        # opts.print_frequency = 10
-        # opts.limited_mem_size = 5
+        # opts.print_level = 0
+        opts.print_frequency = 10
+        opts.limited_mem_size = 100
         opts.stat_l2_model = False
         opts.double_precision = True
         opts.disable_terminationcode_6 = True
         opts.halt_on_linesearch_bracket = False
-        opts.opt_tol = 1e-10
+        opts.opt_tol = 1e-8
         opts.maxit = 5000
 
         # # Combined function
