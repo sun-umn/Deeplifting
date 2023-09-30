@@ -9,4 +9,4 @@
 #SBATCH --gres=gpu:1
 cd /home/jusun/dever120/Deeplifting
 export PATH=/home/jusun/dever120/miniconda3/envs/deeplifting/bin:$PATH
-python -m tasks find-best-deeplifting-architecture --problem_name='lennard_jones' --method='pytorch-lbfgs' --trials=10
+python -m tasks find-best-deeplifting-architecture --problem_series='lennard_jones' --method='pytorch-lbfgs' --dimensionality='high-dimensional'
