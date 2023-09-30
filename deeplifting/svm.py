@@ -338,7 +338,7 @@ def run_deeplifting(model, X, labels):
     opts.stat_l2_model = False
     opts.double_precision = True
     opts.opt_tol = 1e-5
-    opts.maxit = 6000
+    opts.maxit = 5000
 
     # Combined function
     comb_fn = lambda model: deeplifting_svm(model, X, labels)  # noqa
@@ -373,9 +373,9 @@ if __name__ == "__main__":
     # Need to put the torch data on the same device
     device = get_devices()
     Xt_train = Xt_train.to(device=device, dtype=torch.double)
-    y_train = y_train.to(device=device, dtype=torch.double)
+    yt_train = yt_train.to(device=device, dtype=torch.double)
     Xt_test = Xt_test.to(device=device, dtype=torch.double)
-    y_test = y_test.to(device=device, dtype=torch.double)
+    yt_test = yt_test.to(device=device, dtype=torch.double)
 
     # Initialize the deeplifting model
     model = DeepliftingSkipMLP(
