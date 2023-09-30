@@ -880,7 +880,7 @@ def find_best_architecture_task(problem_series, method, dimensionality):
             performance_df_list.append(results)
 
             # We hit at least once
-            if hits > 1:
+            if hits > 0:
                 break
 
 
