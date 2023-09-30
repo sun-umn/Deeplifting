@@ -6094,6 +6094,7 @@ def lennard_jones(x, results=None, trial=None, version='numpy'):
         # Compute the pairwise cost (1 / dist)^12 - (1 / dist)^ 6
         result = 1.0 / distances[mask] ** 12 - 1.0 / distances[mask] ** 6
         result = 4 * result.sum()
+        # result = result.sum()
 
     else:
         raise ValueError('Unknown specified version')
@@ -8194,6 +8195,14 @@ lennard_jones_39d_config = {
     'dimensions': 3 * 13,
 }
 
+lennard_jones_225d_config = {
+    'objective': lennard_jones,
+    'bounds': [(-4.0, 4.0)],
+    'max_iterations': 1000,
+    'global_minimum': -397.492331,
+    'dimensions': 3 * 75,
+}
+
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
     'bukin_n6': bukin_n6_config,
@@ -8449,4 +8458,5 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'lennard_jones_15d': lennard_jones_15d_config,
     'lennard_jones_30d': lennard_jones_30d_config,
     'lennard_jones_39d': lennard_jones_39d_config,
+    'lennard_jones_225d': lennard_jones_225d_config,
 }

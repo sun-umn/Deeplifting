@@ -901,8 +901,8 @@ def run_high_dimensional_deeplifting(
 
         opts.x0 = x0
         opts.torch_device = device
-        # opts.print_level = 0
-        opts.print_frequency = 10
+        opts.print_level = 0
+        # opts.print_frequency = 10
         opts.limited_mem_size = 5
         opts.stat_l2_model = False
         opts.double_precision = True
@@ -927,6 +927,7 @@ def run_high_dimensional_deeplifting(
         final_fn = objective(outputs, version='pytorch')
         f = final_fn.detach().cpu().numpy()
         xf = outputs.detach().cpu().numpy()
+        print(f'Final value = {f}')
 
         data_point = tuple(xf) + (float(f), 'Deeplifting', total_time)
         fn_values.append(data_point)
