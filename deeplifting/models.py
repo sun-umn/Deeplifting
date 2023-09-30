@@ -175,7 +175,7 @@ class DeepliftingScalingBlock(nn.Module):
             if self.output_activation != 'sine':
                 return a + (b - a) / 2.0 * (torch.sin(outputs) + 1)
             else:
-                return a + (b - a) / 2.0 * (torch.sin(self.scale * outputs) + 1)
+                return a + (b - a) / 2.0 * (torch.sin(outputs) + 1)
 
         else:
             x_values_float = []
