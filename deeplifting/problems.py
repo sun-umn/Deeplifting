@@ -6069,7 +6069,7 @@ def lennard_jones(x, results=None, trial=None, version='numpy'):
         #         ud = ed * ed * ed
 
         #         if ed > 0.0:
-        #             result += 1.0 / ed ** 12 - 1.0 / ed ** 6
+        #             result += 1.0 / ed ** 6 - 1.0 / ed ** 3
         # result = 4 * result
 
         # Assume positions has shape [B, 3N] where B is the batch size and N
