@@ -1,4 +1,5 @@
 # third party
+import neptune
 import numpy as np
 import pandas as pd
 import torch
@@ -355,6 +356,13 @@ def build_predictions(w, X):
 
 
 if __name__ == "__main__":
+    print('Run Algorithms!')
+    run = neptune.init_run(  # noqa
+        project="dever120/Deeplifting",
+        api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzYmIwMTUyNC05YmZmLTQ1NzctOTEyNS1kZTIxYjU5NjY5YjAifQ==",  # noqa
+    )  # your credentials
+    run['sys/tags'].add(['svm'])
+
     # Load in the CIFAR 100 dataset
     # Numpy data
     data = build_cifar100_dataset(image_class=46, test_split=True, torch_version=False)
