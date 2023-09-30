@@ -6057,6 +6057,20 @@ def lennard_jones(x, results=None, trial=None, version='numpy'):
                     result += (1.0 / ud - 2.0) / ud
 
     elif version == 'pytorch':
+        # result = torch.tensor(0.0)
+        # for i in range(k - 1):
+        #     for j in range(i + 1, k):
+        #         a = 3 * i
+        #         b = 3 * j
+        #         xd = x[a] - x[b]
+        #         yd = x[a + 1] - x[b + 1]
+        #         zd = x[a + 2] - x[b + 2]
+        #         ed = xd * xd + yd * yd + zd * zd
+        #         ud = ed * ed * ed
+
+        #         if ed > 0.0:
+        #             result += (1.0 / ud - 2.0) / ud
+
         # Assume positions has shape [B, 3N] where B is the batch size and N
         # is the number of atoms
         # Reshaping to get individual atoms' positions of shape [B, N, 3]
@@ -6077,8 +6091,8 @@ def lennard_jones(x, results=None, trial=None, version='numpy'):
         mask = distances > 0
 
         # Compute the pairwise cost (1 / dist)^12 - (1 / dist)^ 6
-        result = 1.0 / distances[mask] ** 12 - 2.0 / distances[mask] ** 6
-        result = result.sum()
+        result = 1.0 / distances[mask] ** 12 - 1.0 / distances[mask] ** 6
+        result = 4 * result.sum()
 
     else:
         raise ValueError('Unknown specified version')
@@ -8134,7 +8148,7 @@ lennard_jones_6d_config = {
     'bounds': [(-4.0, 4.0)],
     'max_iterations': 1000,
     'global_minimum': -1.0,
-    'dimensions': 6,
+    'dimensions': 3 * 2,
 }
 
 # Lennard Jones Setup
@@ -8143,7 +8157,7 @@ lennard_jones_9d_config = {
     'bounds': [(-4.0, 4.0)],
     'max_iterations': 1000,
     'global_minimum': -3.0,
-    'dimensions': 9,
+    'dimensions': 3 * 3,
 }
 
 # Lennard Jones Setup
@@ -8152,7 +8166,7 @@ lennard_jones_12d_config = {
     'bounds': [(-4.0, 4.0)],
     'max_iterations': 1000,
     'global_minimum': -6.0,
-    'dimensions': 12,
+    'dimensions': 3 * 4,
 }
 
 lennard_jones_15d_config = {
@@ -8160,7 +8174,7 @@ lennard_jones_15d_config = {
     'bounds': [(-4.0, 4.0)],
     'max_iterations': 1000,
     'global_minimum': -9.103852,
-    'dimensions': 15,
+    'dimensions': 3 * 5,
 }
 
 lennard_jones_30d_config = {
@@ -8168,7 +8182,7 @@ lennard_jones_30d_config = {
     'bounds': [(-4.0, 4.0)],
     'max_iterations': 1000,
     'global_minimum': -28.422532,
-    'dimensions': 30,
+    'dimensions': 3 * 10,
 }
 
 lennard_jones_39d_config = {
@@ -8176,7 +8190,7 @@ lennard_jones_39d_config = {
     'bounds': [(-4.0, 4.0)],
     'max_iterations': 1000,
     'global_minimum': -44.326801,
-    'dimensions': 39,
+    'dimensions': 3 * 13,
 }
 
 PROBLEMS_BY_NAME = {

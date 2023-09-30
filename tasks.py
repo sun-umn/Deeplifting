@@ -167,7 +167,7 @@ lennard_jones_series = [
     # 'lennard_jones_9d',
     # 'lennard_jones_12d',
     # 'lennard_jones_15d',
-    'lennard_jones_30d',
+    # 'lennard_jones_30d',
     'lennard_jones_39d',
 ]
 
@@ -253,13 +253,13 @@ search_hidden_sizes = [
     # # hidden_size_64 * 3,
     # # # Hidden sizes of 128
     hidden_size_128 * 2,
-    hidden_size_128 * 5,
-    hidden_size_128 * 10,
-    hidden_size_128 * 15,
-    hidden_size_128 * 20,
+    hidden_size_128 * 3,
+    # hidden_size_128 * 10,
+    # hidden_size_128 * 15,
+    # hidden_size_128 * 20,
     # # # Hidden sizes of 256
     hidden_size_256 * 2,
-    # hidden_size_256 * 3,
+    hidden_size_256 * 3,
     # hidden_size_256 * 4,
     # # hidden_size_256 * 3,
     # # # Hidden sizes of 382
@@ -275,7 +275,7 @@ search_hidden_sizes = [
 ]
 
 # Input sizes
-search_input_sizes = [1, 128]
+search_input_sizes = [128, 512]
 
 # Hidden activations
 search_hidden_activations = ['sine']
@@ -816,7 +816,7 @@ def find_best_architecture_task(problem_series, method, dimensionality):
                         output_activation=output_activation,
                         agg_function=agg_function,
                         include_bn=include_bn,
-                        method='particle',
+                        method='single-value',
                     )
 
             elif method == 'pytorch-lbfgs':

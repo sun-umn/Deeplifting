@@ -24,6 +24,7 @@ from deeplifting.utils import (
     DifferentialEvolutionCallback,
     DualAnnealingCallback,
     HaltLog,
+    get_devices,
     initialize_vector,
     set_seed,
 )
@@ -850,7 +851,7 @@ def run_high_dimensional_deeplifting(
     """
     # Get the device (CPU for now)
     dimensions = problem['dimensions']
-    device = torch.device('cuda:0')
+    device = get_devices()
     fn_values = []
 
     for trial in range(trials):
@@ -900,9 +901,9 @@ def run_high_dimensional_deeplifting(
 
         opts.x0 = x0
         opts.torch_device = device
-        # opts.print_level = 0
-        opts.print_frequency = 10
-        opts.limited_mem_size = 5
+        opts.print_level = 0
+        # opts.print_frequency = 10
+        # opts.limited_mem_size = 5
         opts.stat_l2_model = False
         opts.double_precision = True
         opts.disable_terminationcode_6 = True
