@@ -8179,6 +8179,38 @@ lennard_jones_15d_config = {
     'dimensions': 3 * 5,
 }
 
+lennard_jones_18d_config = {
+    'objective': lennard_jones,
+    'bounds': [(-4.0, 4.0)],
+    'max_iterations': 1000,
+    'global_minimum': -12.712062,
+    'dimensions': 3 * 6,
+}
+
+lennard_jones_21d_config = {
+    'objective': lennard_jones,
+    'bounds': [(-4.0, 4.0)],
+    'max_iterations': 1000,
+    'global_minimum': -16.505384,
+    'dimensions': 3 * 7,
+}
+
+lennard_jones_24d_config = {
+    'objective': lennard_jones,
+    'bounds': [(-4.0, 4.0)],
+    'max_iterations': 1000,
+    'global_minimum': -19.821489,
+    'dimensions': 3 * 8,
+}
+
+lennard_jones_27d_config = {
+    'objective': lennard_jones,
+    'bounds': [(-4.0, 4.0)],
+    'max_iterations': 1000,
+    'global_minimum': -24.113360,
+    'dimensions': 3 * 9,
+}
+
 lennard_jones_30d_config = {
     'objective': lennard_jones,
     'bounds': [(-4.0, 4.0)],
@@ -8456,6 +8488,10 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'lennard_jones_9d': lennard_jones_9d_config,
     'lennard_jones_12d': lennard_jones_12d_config,
     'lennard_jones_15d': lennard_jones_15d_config,
+    'lennard_jones_18d': lennard_jones_18d_config,
+    'lennard_jones_21d': lennard_jones_21d_config,
+    'lennard_jones_24d': lennard_jones_24d_config,
+    'lennard_jones_27d': lennard_jones_27d_config,
     'lennard_jones_30d': lennard_jones_30d_config,
     'lennard_jones_39d': lennard_jones_39d_config,
     'lennard_jones_225d': lennard_jones_225d_config,

@@ -163,13 +163,17 @@ schwefel_series = [
 ]
 
 lennard_jones_series = [
-    # 'lennard_jones_6d',
-    # 'lennard_jones_9d',
-    # 'lennard_jones_12d',
-    # 'lennard_jones_15d',
-    'lennard_jones_30d',
-    'lennard_jones_39d',
-    'lennard_jones_225d',
+    'lennard_jones_6d',
+    'lennard_jones_9d',
+    'lennard_jones_12d',
+    'lennard_jones_15d',
+    'lennard_jones_18d',
+    'lennard_jones_21d',
+    'lennard_jones_24d',
+    'lennard_jones_27d',
+    # 'lennard_jones_30d',
+    # 'lennard_jones_39d',
+    # 'lennard_jones_225d',
 ]
 
 high_dimensional_problem_names: List[str] = [  # noqa
@@ -253,11 +257,8 @@ search_hidden_sizes = [
     # hidden_size_64 * 10,
     # hidden_size_64 * 3,
     # # Hidden sizes of 128
-    # hidden_size_128 * 2,
-    # hidden_size_128 * 3,
-    # hidden_size_128 * 10,
-    # hidden_size_128 * 15,
-    # hidden_size_128 * 20,
+    hidden_size_128 * 2,
+    hidden_size_128 * 3,
     # # Hidden sizes of 256
     hidden_size_256 * 2,
     hidden_size_256 * 3,
