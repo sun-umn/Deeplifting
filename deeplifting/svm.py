@@ -339,7 +339,7 @@ def run_deeplifting(model, X, labels):
     opts.stat_l2_model = False
     opts.double_precision = True
     opts.opt_tol = 1e-5
-    opts.maxit = 10000
+    opts.maxit = 20000
 
     # Combined function
     comb_fn = lambda model: deeplifting_svm(model, X, labels)  # noqa

@@ -252,8 +252,8 @@ search_hidden_sizes = [
     # # hidden_size_64 * 10,
     # # hidden_size_64 * 3,
     # # # Hidden sizes of 128
-    hidden_size_128 * 2,
-    hidden_size_128 * 3,
+    hidden_size_128 * 4,
+    hidden_size_128 * 5,
     # hidden_size_128 * 10,
     # hidden_size_128 * 15,
     # hidden_size_128 * 20,
@@ -278,13 +278,13 @@ search_hidden_sizes = [
 search_input_sizes = [16, 32, 64]
 
 # Hidden activations
-search_hidden_activations = ['leaky_relu', 'sine']
+search_hidden_activations = ['sine']
 
 # Ouput activations
 search_output_activations = ['sine']
 
 # Aggregate functions - for skip connections
-search_agg_functions = ['sum', 'max']
+search_agg_functions = ['average', 'max']
 
 # Include BN
 search_include_bn = [False, True]
