@@ -287,7 +287,7 @@ class DeepliftingSkipMLP(nn.Module):
     def forward(self, inputs=None):
         intermediate_connections = []
         x = self.x
-        x = self.input_norm(x)
+        # x = self.input_norm(x)
 
         for i, layer in enumerate(self.layers):
             x_new = layer(x)

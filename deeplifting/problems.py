@@ -6027,19 +6027,24 @@ def lennard_jones(x, results=None, trial=None, version='numpy'):
     k = int(d / 3)
 
     if version == 'numpy':
-        result = 0.0
-        for i in range(k - 1):
-            for j in range(i + 1, k):
-                a = 3 * i
-                b = 3 * j
-                xd = x[a] - x[b]
-                yd = x[a + 1] - x[b + 1]
-                zd = x[a + 2] - x[b + 2]
-                ed = xd * xd + yd * yd + zd * zd
-                ud = ed * ed * ed
+        x = np.reshape(x, (1, -1))
+        positions = np.reshape(x, (x.shape[0], -1, 3))
 
-                if ed > 0.0:
-                    result += (1.0 / ud - 2.0) / ud
+        # Compute the pairwise differences
+        deltas = positions[:, :, np.newaxis] - positions[:, np.newaxis, :]
+
+        # Norm the differences to get [B, N, N]
+        distances = np.linalg.norm(deltas, axis=-1) ** 2
+
+        # Get the upper triangle matrix (ignoring the diagonal)
+        distances = np.triu(distances, k=1)
+
+        # Provide a mask to eliminate divisions from zero
+        mask = distances > 0
+
+        # Compute the pairwise cost (1 / dist)^12 - (1 / dist)^ 6
+        result = 1.0 / distances[mask] ** 6 - 1.0 / distances[mask] ** 3
+        result = 4 * result.sum()
 
     elif version == 'pyomo':
         result = 0.0
@@ -8226,6 +8231,22 @@ lennard_jones_39d_config = {
     'dimensions': 3 * 13,
 }
 
+lennard_jones_42d_config = {
+    'objective': lennard_jones,
+    'bounds': [(-4.0, 4.0)],
+    'max_iterations': 1000,
+    'global_minimum': -47.845157,
+    'dimensions': 3 * 14,
+}
+
+lennard_jones_45d_config = {
+    'objective': lennard_jones,
+    'bounds': [(-4.0, 4.0)],
+    'max_iterations': 1000,
+    'global_minimum': -52.322627,
+    'dimensions': 3 * 15,
+}
+
 lennard_jones_225d_config = {
     'objective': lennard_jones,
     'bounds': [(-4.0, 4.0)],
@@ -8493,5 +8514,7 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'lennard_jones_27d': lennard_jones_27d_config,
     'lennard_jones_30d': lennard_jones_30d_config,
     'lennard_jones_39d': lennard_jones_39d_config,
+    'lennard_jones_42d': lennard_jones_42d_config,
+    'lennard_jones_45d': lennard_jones_45d_config,
     'lennard_jones_225d': lennard_jones_225d_config,
 }

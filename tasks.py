@@ -163,17 +163,19 @@ schwefel_series = [
 ]
 
 lennard_jones_series = [
-    # 'lennard_jones_6d',
-    # 'lennard_jones_9d',
-    # 'lennard_jones_12d',
-    # 'lennard_jones_15d',
+    'lennard_jones_6d',
+    'lennard_jones_9d',
+    'lennard_jones_12d',
+    'lennard_jones_15d',
     'lennard_jones_18d',
     'lennard_jones_21d',
     'lennard_jones_24d',
     'lennard_jones_27d',
     'lennard_jones_30d',
     'lennard_jones_39d',
-    'lennard_jones_225d',
+    'lennard_jones_42d',
+    'lennard_jones_45d',
+    # 'lennard_jones_225d',
 ]
 
 high_dimensional_problem_names: List[str] = [  # noqa
@@ -210,8 +212,14 @@ high_dimensional_problem_names: List[str] = [  # noqa
     'lennard_jones_9d',
     'lennard_jones_12d',
     'lennard_jones_15d',
+    'lennard_jones_18d',
+    'lennard_jones_21d',
+    'lennard_jones_24d',
+    'lennard_jones_27d',
     'lennard_jones_30d',
-    'lennard_jones_39d'
+    'lennard_jones_39d',
+    'lennard_jones_42d',
+    'lennard_jones_45d',
     # # Levy Series - Non-origin solution
     # 'levy_3d',
     # 'levy_5d',
@@ -879,9 +887,9 @@ def find_best_architecture_task(problem_series, method, dimensionality):
             # Append performance
             performance_df_list.append(results)
 
-            # We hit at least once
-            if hits > 0:
-                break
+            # # We hit at least once
+            # if hits > 0:
+            #     break
 
 
 @cli.command('run-pygranso')

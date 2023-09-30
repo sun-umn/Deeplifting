@@ -249,6 +249,7 @@ def run_basinhopping(problem: Dict, trials: int):
         result = basinhopping(
             fn,
             x0=x0,
+            niter=1000,
             minimizer_kwargs=minimizer_kwargs,
         )
 
