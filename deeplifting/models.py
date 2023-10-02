@@ -231,14 +231,14 @@ class DeepliftingSkipMLP(nn.Module):
         self.skip_every_n = skip_every_n
         self.agg_function = agg_function
         self.include_bn = include_bn
-        self.first_hidden_Size = hidden_sizes[0] * 5  # hidden_sizes[0] // 2
+        self.first_hidden_size = 5 * output_size  # hidden_sizes[0] // 2
         self.scale = torch.randn(1) * 2 * torch.pi
         self.bounds = bounds
 
         # Input layer
         self.layers.append(
             DeepliftingBlock(
-                self.first_hidden_Size, hidden_sizes[0], activation=activation
+                self.first_hidden_size, hidden_sizes[0], activation=activation
             )
         )
 
@@ -281,12 +281,12 @@ class DeepliftingSkipMLP(nn.Module):
         # optimization is also let the input be variable. Some
         # of the problems we have looked at so far also are
         # between bounds
-        self.x = nn.Parameter(torch.randn(input_size, self.first_hidden_Size))
-        self.input_norm = nn.LayerNorm(self.first_hidden_Size)
+        # self.x = nn.Parameter(torch.randn(input_size, self.first_hidden_Size), requires_grad=False)  # noqa
+        self.input_norm = nn.LayerNorm(self.first_hidden_size)
 
     def forward(self, inputs=None):
         intermediate_connections = []
-        x = self.x
+        x = inputs
         # x = self.input_norm(x)
 
         for i, layer in enumerate(self.layers):

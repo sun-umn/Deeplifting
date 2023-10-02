@@ -32,7 +32,7 @@ warnings.filterwarnings('ignore')
 
 # Identify problems to run
 low_dimensional_problem_names = [
-    # 'ackley',
+    'ackley',
     # 'ackley2',
     # 'ackley3',
     # 'adjiman',
@@ -57,7 +57,7 @@ low_dimensional_problem_names = [
     # 'cross_leg_table',
     # 'crowned_cross',
     # 'cube',  # Correct but paper has wrong x*
-    'damavandi',
+    # 'damavandi',
     # 'drop_wave',  # Low, runs quickly
     # 'eggholder',  # Medium, takes time to run
     # 'ex8_1_1',
@@ -72,7 +72,7 @@ low_dimensional_problem_names = [
     # 'schaffer_n4',  # Low, 3-layer
     # 'schwefel',  # Takes a while to run, DA is better at 100% but we are at 85%
     # 'shubert',  # Takes a while to run
-    'sine_envelope',
+    # 'sine_envelope',
     # 'rosenbrock',
     # 'xinsheyang_n2',
     # 'xinsheyang_n3',
@@ -175,7 +175,6 @@ lennard_jones_series = [
     'lennard_jones_39d',
     'lennard_jones_42d',
     'lennard_jones_45d',
-    # 'lennard_jones_225d',
 ]
 
 high_dimensional_problem_names: List[str] = [  # noqa
@@ -208,10 +207,10 @@ high_dimensional_problem_names: List[str] = [  # noqa
     # 'griewank_500d',
     # 'griewank_1000d',
     # Lennard Jones
-    'lennard_jones_6d',
-    'lennard_jones_9d',
-    'lennard_jones_12d',
-    'lennard_jones_15d',
+    # 'lennard_jones_6d',
+    # 'lennard_jones_9d',
+    # 'lennard_jones_12d',
+    # 'lennard_jones_15d',
     'lennard_jones_18d',
     'lennard_jones_21d',
     'lennard_jones_24d',
@@ -285,7 +284,7 @@ search_hidden_sizes = [
 ]
 
 # Input sizes
-search_input_sizes = [128]
+search_input_sizes = [1]
 
 # Hidden activations
 search_hidden_activations = ['sine']
@@ -771,7 +770,7 @@ def find_best_architecture_task(problem_series, method, dimensionality):
         search_include_bn,
     )
     configurations = list(product(*combinations))
-    trials = 5
+    trials = 10
 
     # List to store performance data
     performance_df_list = []
@@ -790,6 +789,7 @@ def find_best_architecture_task(problem_series, method, dimensionality):
             ),
         ) in enumerate(configurations):
             print(problem_name)
+
             # Load the problems
             problem = PROBLEMS[problem_name]
             print(
@@ -846,13 +846,15 @@ def find_best_architecture_task(problem_series, method, dimensionality):
             # Get the results of the outputs
             output_size = problem['dimensions']
             x_columns = [f'x{i + 1}' for i in range(output_size)]
-            columns = x_columns + ['f', 'algorithm', 'total_time']
+            columns = x_columns + ['f', 'f_initial', 'algorithm', 'total_time']
 
             results = pd.DataFrame(outputs['final_results'], columns=columns)
 
             # Add meta data to the results
             results['input_size'] = input_size
             results['hidden_size'] = '-'.join(map(str, hidden_size))
+            results['num_layers'] = len(hidden_size)
+            results['num_neurons'] = hidden_size[0]
             results['hidden_activation'] = hidden_activation
             results['output_activation'] = output_activation
             results['agg_function'] = agg_function
@@ -863,7 +865,7 @@ def find_best_architecture_task(problem_series, method, dimensionality):
             results['hits'] = np.abs(results['f'] - results['global_minimum']) <= 1e-4
 
             # Print the results
-            hits = results['hits'].sum()
+            hits = results['hits'].mean()
             run_time = results['total_time'].mean()
             print(f'Success Rate = {hits}')
             print(f'Average run time = {run_time}')
@@ -887,9 +889,9 @@ def find_best_architecture_task(problem_series, method, dimensionality):
             # Append performance
             performance_df_list.append(results)
 
-            # # We hit at least once
-            # if hits > 0:
-            #     break
+            # We hit at least once
+            if hits >= 0.90:
+                break
 
 
 @cli.command('run-pygranso')

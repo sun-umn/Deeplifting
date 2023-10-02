@@ -1,3 +1,6 @@
+# stdlib
+import time
+
 # third party
 import neptune
 import numpy as np
@@ -14,7 +17,7 @@ from torchvision import datasets, transforms
 
 # first party
 from deeplifting.models import DeepliftingSkipMLP
-from deeplifting.utils import get_devices
+from deeplifting.utils import HaltLog, get_devices
 
 
 # Build a utility for loading in the iris dataset with option for a test set
@@ -347,7 +350,31 @@ def run_deeplifting(model, X, labels):
     # Run the main algorithm
     soln = pygranso(var_spec=model, combined_fn=comb_fn, user_opts=opts)
 
-    return soln
+    # Set PyGRANSO's logging function in opts
+    # Initiate halt log - we want to get this information to generate the
+    # objective trajectory and training logs
+    mHLF_obj = HaltLog()
+    halt_log_fn, get_log_fn = mHLF_obj.makeHaltLogFunctions(opts.maxit)
+    opts.halt_log_fn = halt_log_fn
+
+    # Run the main algorithm
+    start_time = time.time()
+    soln = pygranso(var_spec=model, combined_fn=comb_fn, user_opts=opts)
+    end_time = time.time()
+    total_time = end_time - start_time
+
+    # GET THE HISTORY OF ITERATES
+    # Even if an error is thrown, the log generated until the error can be
+    # obtained by calling get_log_fn()
+    log = get_log_fn()
+
+    # Final structure
+    indexes = (pd.Series(log.fn_evals).cumsum() - 1).values.tolist()  # noqa
+
+    # Results in a dict for now
+    results = {'soln': soln, 'time': total_time}
+
+    return results
 
 
 def build_predictions(w, X):
