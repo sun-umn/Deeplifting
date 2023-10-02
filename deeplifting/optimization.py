@@ -16,7 +16,7 @@ from pygranso.pygranso import pygranso
 from pygranso.pygransoStruct import pygransoStruct
 from pyomo.environ import ConcreteModel, Objective, SolverFactory, Var, minimize
 from scipy.optimize import basinhopping, differential_evolution, dual_annealing
-from torch.optim.lr_scheduler import ReduceLROnPlateau
+from torch.optim.lr_scheduler import OneCycleLR
 
 # first party
 from deeplifting.models import DeepliftingSkipMLP
@@ -1114,6 +1114,9 @@ def run_adam_deeplifting(
     output_size = problem['dimensions']
     device = get_devices()
 
+    # Final values
+    fn_values = []
+
     for trial in range(trials):
         # Objective function
         objective = problem['objective']
@@ -1146,23 +1149,31 @@ def run_adam_deeplifting(
         model = model.to(device=device, dtype=torch.double)
 
         # Set up the optimizer for the problem
+        epochs = 5000
         optimizer = optim.Adam(
             model.parameters(),
-            lr=1e-4,
         )
-        scheduler = ReduceLROnPlateau(
-            optimizer, mode='min', factor=0.5, patience=50, verbose=True
+        scheduler = OneCycleLR(
+            optimizer,
+            max_lr=1e-3,
+            epochs=epochs,
+            steps_per_epoch=1,
         )
 
         # Set up a training loop
         start = time.time()
 
-        # Get starting loss
-        outputs = model(inputs=None)
-        outputs = outputs.mean(axis=0)
-        # current_loss = objective(outputs, version='pytorch')
+        # Need to set up the inputs
+        # Fix the inputs for deeplifting
+        inputs = torch.randn(1, 5 * output_size)
+        inputs = inputs.to(device=device, dtype=torch.double)
 
-        for epoch in range(5000):
+        # Get starting loss
+        outputs = model(inputs=inputs)
+        outputs = outputs.mean(axis=0)
+        f_init = objective(outputs, version='pytorch')
+
+        for epoch in range(epochs):
             # Zero out the gradients
             optimizer.zero_grad()
 
@@ -1178,7 +1189,7 @@ def run_adam_deeplifting(
             outputs = outputs.mean(axis=0)
             updated_loss = objective(outputs, version='pytorch')
 
-            if epoch % 100 == 0:
+            if epoch % 10 == 0:
                 print(
                     f'loss = {updated_loss.detach()},'
                     # f'gradient_norm = {flat_grad.abs().max()}'
@@ -1186,16 +1197,35 @@ def run_adam_deeplifting(
 
             # Step through the optimzer to update the data with the gradients
             optimizer.step()
-            scheduler.step(loss)
+            scheduler.step()
 
+        # Get the final results
         end = time.time()
         total_time = end - start  # noqa
+
+        # Get final x we will also need to map
+        # it to the same bounds
+        outputs = model(inputs=inputs)
+        outputs = outputs.mean(axis=0)
+        final_fn = objective(outputs, version='pytorch')
+        f = final_fn.detach().cpu().numpy()
+        xf = outputs.detach().cpu().numpy()
+
+        # Make sure f_init is detached from graph
+        f_init = f_init.detach().cpu().numpy()
+        data_point = tuple(xf.flatten()) + (
+            float(f),
+            float(f_init),
+            'Adam',
+            total_time,
+        )
+        fn_values.append(data_point)
 
         # Collect garbage and empty cache
         gc.collect()
         torch.cuda.empty_cache()
 
-    return {'results': None, 'final_results': None, 'callbacks': []}
+    return {'results': None, 'final_results': fn_values, 'callbacks': []}
 
 
 def run_pyomo(problem, trials, method):
