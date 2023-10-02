@@ -15,6 +15,7 @@ import pandas as pd
 # first party
 from deeplifting.optimization import run_pyomo  # noqa
 from deeplifting.optimization import (
+    run_adam_deeplifting,
     run_basinhopping,
     run_deeplifting,
     run_differential_evolution,
@@ -840,6 +841,19 @@ def find_best_architecture_task(problem_series, method, dimensionality):
                     output_activation=output_activation,
                     agg_function=agg_function,
                 )
+
+            elif method == 'pytorch-adam':
+                outputs = run_adam_deeplifting(
+                    problem,
+                    problem_name=problem_name,
+                    trials=trials,
+                    input_size=input_size,
+                    hidden_sizes=hidden_size,
+                    activation=hidden_activation,
+                    output_activation=output_activation,
+                    agg_function=agg_function,
+                )
+
             else:
                 raise ValueError('Method is not supported!')
 
