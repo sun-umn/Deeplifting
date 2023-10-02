@@ -272,8 +272,8 @@ search_hidden_sizes = [
     # hidden_size_256 * 4,
     # hidden_size_256 * 3,
     # Hidden sizes of 382
-    # hidden_size_384 * 2,
-    # hidden_size_384 * 3,
+    hidden_size_384 * 2,
+    hidden_size_384 * 3,
     # hidden_size_384 * 3,
     # # Hidden sizes of 512
     # hidden_size_512 * 2,
@@ -284,7 +284,7 @@ search_hidden_sizes = [
 ]
 
 # Input sizes
-search_input_sizes = [1]
+search_input_sizes = [1, 32, 64, 128]
 
 # Hidden activations
 search_hidden_activations = ['sine']

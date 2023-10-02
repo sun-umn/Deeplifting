@@ -1016,7 +1016,7 @@ def run_lbfgs_deeplifting(
 
         # Fix the inputs for deeplifting
         inputs = torch.randn(1, 5 * output_size)
-        inputs = inputs.to(dtype=torch.double)
+        inputs = inputs.to(device=device, dtype=torch.double)
 
         # Get starting loss
         outputs = model(inputs=inputs)
