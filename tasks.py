@@ -164,18 +164,18 @@ schwefel_series = [
 ]
 
 lennard_jones_series = [
-    # 'lennard_jones_6d',
-    # 'lennard_jones_9d',
-    # 'lennard_jones_12d',
-    # 'lennard_jones_15d',
+    'lennard_jones_6d',
+    'lennard_jones_9d',
+    'lennard_jones_12d',
+    'lennard_jones_15d',
     'lennard_jones_18d',
-    # 'lennard_jones_21d',
-    # 'lennard_jones_24d',
-    # 'lennard_jones_27d',
-    # 'lennard_jones_30d',
-    # 'lennard_jones_39d',
-    # 'lennard_jones_42d',
-    # 'lennard_jones_45d',
+    'lennard_jones_21d',
+    'lennard_jones_24d',
+    'lennard_jones_27d',
+    'lennard_jones_30d',
+    'lennard_jones_39d',
+    'lennard_jones_42d',
+    'lennard_jones_45d',
 ]
 
 high_dimensional_problem_names: List[str] = [  # noqa
