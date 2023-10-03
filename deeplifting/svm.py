@@ -280,21 +280,19 @@ def deeplifting_svm(
     model.eval()
 
     # Build predictions within the loop now
-    dl_weights = model(inputs=inputs)
-    dl_weights = dl_weights.mean(axis=0)
-    dl_weights = dl_weights.detach().cpu().numpy().flatten().reshape(1, -1)
+    dl_weights = weight_vec.reshape(1, -1).detach().cpu().numpy()
 
     # Train accuracy
     preds_train = build_predictions(dl_weights, X_train.cpu().numpy())
     preds_train = preds_train.flatten()
-    train_accuracy.append(accuracy_score(y_train, preds_train))
-    train_f1.append(f1_score(y_train, preds_train))
+    train_accuracy.append(accuracy_score(y_train.cpu().numpy(), preds_train))
+    train_f1.append(f1_score(y_train.cpu().numpy(), preds_train))
 
     # Test accuracy
     preds_test = build_predictions(dl_weights, X_test.cpu().numpy())
     preds_test = preds_test.flatten()
-    test_accuracy.append(accuracy_score(y_test, preds_test))
-    test_f1.append(f1_score(y_test, preds_test))
+    test_accuracy.append(accuracy_score(y_test.cpu().numpy(), preds_test))
+    test_f1.append(f1_score(y_test.cpu().numpy(), preds_test))
 
     return f, ci, ce
 
@@ -403,7 +401,7 @@ def run_deeplifting(problem_name, model, data, trials=1):
         opts.stat_l2_model = False
         opts.double_precision = True
         opts.opt_tol = 1e-5
-        opts.maxit = 10000
+        opts.maxit = 10
 
         # Combined function
         comb_fn = lambda model: deeplifting_svm(
