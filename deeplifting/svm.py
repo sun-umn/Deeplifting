@@ -396,12 +396,12 @@ def run_deeplifting(problem_name, model, data, trials=1):
         # PyGranso (showing there are local minima)
         opts.x0 = x0
         opts.torch_device = device
-        opts.print_frequency = 1
+        opts.print_frequency = 100
         opts.limited_mem_size = 100
         opts.stat_l2_model = False
         opts.double_precision = True
         opts.opt_tol = 1e-5
-        opts.maxit = 10
+        opts.maxit = 10000
 
         # Combined function
         comb_fn = lambda model: deeplifting_svm(
@@ -523,21 +523,21 @@ if __name__ == "__main__":
     Xt_test = Xt_test.to(device=device, dtype=torch.double)
     yt_test = yt_test.to(device=device, dtype=torch.double)
 
-    # # Get the PyGRANSO result
-    # pygranso_result = run_pygranso(Xt_train.T, yt_train)
-    # pg_weights = pygranso_result.best.x
-    # pg_weights = pg_weights.detach().cpu().numpy().reshape(1, -1)
+    # Get the PyGRANSO result
+    pygranso_result = run_pygranso(Xt_train.T, yt_train)
+    pg_weights = pygranso_result.best.x
+    pg_weights = pg_weights.detach().cpu().numpy().reshape(1, -1)
 
-    # # Train accuracy
-    # preds_train = build_predictions(pg_weights, X_train.T)
+    # Train accuracy
+    preds_train = build_predictions(pg_weights, X_train.T)
 
-    # # Test accuracy
-    # preds_test = build_predictions(pg_weights, X_test.T)
+    # Test accuracy
+    preds_test = build_predictions(pg_weights, X_test.T)
 
-    # print(
-    #     accuracy_score(y_train, preds_train.flatten()),
-    #     accuracy_score(y_test, preds_test.flatten()),
-    # )
+    print(
+        accuracy_score(y_train, preds_train.flatten()),
+        accuracy_score(y_test, preds_test.flatten()),
+    )
 
     # Initialize the deeplifting model
     model = DeepliftingSkipMLP(
@@ -563,7 +563,7 @@ if __name__ == "__main__":
 
     # Run deeplifting and obtain the weights
     dl_results = run_deeplifting(
-        problem_name='CIFAR-100', model=model, data=dl_data, trials=2
+        problem_name='CIFAR-100', model=model, data=dl_data, trials=10
     )
 
     # Save the data
