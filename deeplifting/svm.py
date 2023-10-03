@@ -266,6 +266,7 @@ def deeplifting_svm(
 
     # Compute SVM objective
     denominator = torch.linalg.norm(weight_vec, ord=2)
+    print(weight_vec, X_train)
     prod = torch.matmul(weight_vec.T, X_train)
     numerator = y_train * prod
     obj = numerator / denominator
