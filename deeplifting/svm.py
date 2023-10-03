@@ -266,7 +266,6 @@ def deeplifting_svm(
 
     # Compute SVM objective
     denominator = torch.linalg.norm(weight_vec, ord=2)
-    print(weight_vec, X_train)
     prod = torch.matmul(weight_vec.T, X_train)
     numerator = y_train * prod
     obj = numerator / denominator
@@ -566,7 +565,7 @@ if __name__ == "__main__":
 
     # Run deeplifting and obtain the weights
     dl_results = run_deeplifting(
-        problem_name='CIFAR-100', model=model, data=data, trials=2
+        problem_name='CIFAR-100', model=model, data=dl_data, trials=2
     )
 
     # Save the data
