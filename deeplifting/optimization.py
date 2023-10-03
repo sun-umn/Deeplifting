@@ -1149,15 +1149,17 @@ def run_adam_deeplifting(
         model = model.to(device=device, dtype=torch.double)
 
         # Set up the optimizer for the problem
-        epochs = 5000
+        epochs = 10000
         optimizer = optim.Adam(
             model.parameters(),
+            lr=1e-4,
         )
         scheduler = OneCycleLR(
             optimizer,
-            max_lr=1e-3,
+            max_lr=1e-4,
             epochs=epochs,
             steps_per_epoch=1,
+            pct_start=0.0,
         )
 
         # Set up a training loop
@@ -1178,18 +1180,18 @@ def run_adam_deeplifting(
             optimizer.zero_grad()
 
             # The loss is the sum of the compliance
-            outputs = model(inputs=None)
+            outputs = model(inputs=inputs)
             outputs = outputs.mean(axis=0)
             loss = objective(outputs, version='pytorch')
 
             # Go through the backward pass and create the gradients
             loss.backward()
 
-            outputs = model(inputs=None)
+            outputs = model(inputs=inputs)
             outputs = outputs.mean(axis=0)
             updated_loss = objective(outputs, version='pytorch')
 
-            if epoch % 10 == 0:
+            if epoch % 100 == 0:
                 print(
                     f'loss = {updated_loss.detach()},'
                     # f'gradient_norm = {flat_grad.abs().max()}'

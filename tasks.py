@@ -164,18 +164,18 @@ schwefel_series = [
 ]
 
 lennard_jones_series = [
-    'lennard_jones_6d',
-    'lennard_jones_9d',
-    'lennard_jones_12d',
-    'lennard_jones_15d',
+    # 'lennard_jones_6d',
+    # 'lennard_jones_9d',
+    # 'lennard_jones_12d',
+    # 'lennard_jones_15d',
     'lennard_jones_18d',
-    'lennard_jones_21d',
-    'lennard_jones_24d',
-    'lennard_jones_27d',
-    'lennard_jones_30d',
-    'lennard_jones_39d',
-    'lennard_jones_42d',
-    'lennard_jones_45d',
+    # 'lennard_jones_21d',
+    # 'lennard_jones_24d',
+    # 'lennard_jones_27d',
+    # 'lennard_jones_30d',
+    # 'lennard_jones_39d',
+    # 'lennard_jones_42d',
+    # 'lennard_jones_45d',
 ]
 
 high_dimensional_problem_names: List[str] = [  # noqa
@@ -254,7 +254,7 @@ high_dimensional_problem_names: List[str] = [  # noqa
 hidden_size_64 = (64,)
 hidden_size_128 = (128,)
 hidden_size_256 = (256,)
-hidden_size_384 = (382,)
+hidden_size_384 = (384,)
 hidden_size_512 = (512,)
 hidden_size_768 = (768,)
 hidden_size_1024 = (1024,)
@@ -262,19 +262,26 @@ hidden_size_2048 = (2048,)
 
 # Hidden size combinations
 search_hidden_sizes = [
-    # hidden_size_64 * 2,
-    # hidden_size_64 * 3,
+    # # hidden_size_64 * 2,
+    # # hidden_size_64 * 3,
     # # Hidden sizes of 128
-    hidden_size_128 * 2,
-    hidden_size_128 * 3,
-    # # Hidden sizes of 256
+    # hidden_size_128 * 2,
+    # hidden_size_128 * 3,
+    # hidden_size_128 * 5,
+    # hidden_size_128 * 10,
+    # # hidden_size_128 * 15,
+    # Hidden sizes of 256
     hidden_size_256 * 2,
     hidden_size_256 * 3,
+    hidden_size_256 * 5,
+    hidden_size_256 * 6,
     # hidden_size_256 * 4,
     # hidden_size_256 * 3,
-    # Hidden sizes of 382
-    hidden_size_384 * 2,
-    hidden_size_384 * 3,
+    # # Hidden sizes of 382
+    # hidden_size_384 * 2,
+    # hidden_size_384 * 3,
+    # hidden_size_384 * 5,
+    # hidden_size_384 * 6,
     # hidden_size_384 * 3,
     # # Hidden sizes of 512
     # hidden_size_512 * 2,
@@ -285,19 +292,19 @@ search_hidden_sizes = [
 ]
 
 # Input sizes
-search_input_sizes = [1, 32, 64, 128]
+search_input_sizes = [1, 16, 32]
 
 # Hidden activations
-search_hidden_activations = ['sine']
+search_hidden_activations = ['relu']
 
 # Ouput activations
-search_output_activations = ['sine']
+search_output_activations = ['relu']
 
 # Aggregate functions - for skip connections
-search_agg_functions = ['sum', 'average']
+search_agg_functions = ['sum']
 
 # Include BN
-search_include_bn = [False, True]
+search_include_bn = [False]
 
 
 @click.group()
@@ -827,7 +834,7 @@ def find_best_architecture_task(problem_series, method, dimensionality):
                         output_activation=output_activation,
                         agg_function=agg_function,
                         include_bn=include_bn,
-                        method='single-value',
+                        method='particle',
                     )
 
             elif method == 'pytorch-lbfgs':
