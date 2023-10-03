@@ -1,4 +1,5 @@
 # stdlib
+import gc
 import os
 import time
 
@@ -293,6 +294,10 @@ def deeplifting_svm(
     preds_test = preds_test.flatten()
     test_accuracy.append(accuracy_score(y_test.cpu().numpy(), preds_test))
     test_f1.append(f1_score(y_test.cpu().numpy(), preds_test))
+
+    # Help clear memory
+    gc.collect()
+    torch.cuda.empty_cache()
 
     return f, ci, ce
 

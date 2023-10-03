@@ -367,8 +367,8 @@ class HaltLog:
         self.index += 1
 
         # EXAMPLE:
-        # store history of x iterates in a preallocated cell array
-        self.x_iterates.append(x)
+        # # store history of x iterates in a preallocated cell array
+        # self.x_iterates.append(x)
         self.f.append(penaltyfn_parts.f)
         self.tv.append(penaltyfn_parts.tv)
         self.evals.append(ls_evals)
@@ -387,7 +387,7 @@ class HaltLog:
         # EXAMPLE
         # return x_iterates, trimmed to correct size
         log = pygransoStruct()
-        log.x = self.x_iterates[0 : self.index]
+        # log.x = self.x_iterates[0 : self.index]
         log.f = self.f[0 : self.index]
         log.tv = self.tv[0 : self.index]
         log.fn_evals = self.evals[0 : self.index]
@@ -433,7 +433,7 @@ class HaltLog:
         # Make your shared variables here to store PyGRANSO history data
         # EXAMPLE - store history of iterates x_0,x_1,...,x_k
         self.index = 0
-        self.x_iterates = []
+        # self.x_iterates = []
         self.f = []
         self.tv = []
         self.evals = []
