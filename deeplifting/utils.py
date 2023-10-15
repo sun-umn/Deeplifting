@@ -12,6 +12,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from pygranso.pygransoStruct import pygransoStruct
+from torch.optim.lr_scheduler import OneCycleLR
 
 # first party
 from deeplifting.models import DeepliftingSkipMLP
@@ -93,7 +94,7 @@ def initialize_vector(size, bounds):
     return np.array(vector)
 
 
-def train_model_to_output(inputs, model, x0, epochs=1000, lr=1e-5, tolerance=1e-10):
+def train_model_to_output(inputs, model, x0, epochs=10000, lr=1e-4, tolerance=1e-10):
     """
     This function takes a model, input tensor, and target output (x0),
     and trains the model's output layer to produce x0 for the given input.
@@ -107,34 +108,41 @@ def train_model_to_output(inputs, model, x0, epochs=1000, lr=1e-5, tolerance=1e-
         tolerance: threshold for L2 distance to stop training (default: 1e-10)
     """
 
-    # Ensure x0 is a tensor
-    x0 = torch.tensor(x0, dtype=torch.float32)
-
     # Freeze all layers except the output layer
     for name, parameters in model.named_parameters():
         if (
-            'layer2' not in name
+            'output_layer' not in name
         ):  # assuming 'layer2' is the output layer, adjust if otherwise
             parameters.requires_grad = False
 
     # Begin training
     model.train()
-    optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=lr)
+    optimizer = optim.AdamW(
+        filter(lambda p: p.requires_grad, model.parameters()), lr=lr
+    )
+    scheduler = OneCycleLR(
+        optimizer,
+        max_lr=lr,
+        epochs=epochs,
+        steps_per_epoch=1,
+        pct_start=0.3,
+    )
     criterion = nn.MSELoss()
 
     for epoch in range(epochs):
         optimizer.zero_grad()  # Zero gradients
         outputs = model(inputs)  # Get model outputs for the input
-        outputs = outputs.flatten()  # Flatten the output tensor if needed
+        outputs = outputs.mean(axis=0).flatten()  # Flatten the output tensor if needed
         loss = criterion(x0, outputs)  # Compute loss
         loss.backward()  # Backward pass
         optimizer.step()  # Update parameters
+        scheduler.step()
 
         # Check L2 distance
         l2_distance = torch.norm(outputs - x0, p=2).item()
 
         # Print loss and L2 distance every 100 epochs
-        if (epoch + 1) % 100 == 0:
+        if (epoch + 1) % 1000 == 0:
             print(
                 f'Epoch [{epoch+1}/{epochs}], Loss: {loss.item():.4f}'
                 f', L2 Distance: {l2_distance:.4e}'

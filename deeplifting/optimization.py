@@ -28,6 +28,7 @@ from deeplifting.utils import (
     get_devices,
     initialize_vector,
     set_seed,
+    train_model_to_output,
 )
 
 # from torch.optim.lr_scheduler import ReduceLROnPlateau
@@ -672,6 +673,14 @@ def run_deeplifting(
             else:
                 bounds = bounds * output_size
 
+        # Fix the inputs for deeplifting
+        inputs = torch.randn(1, 5 * output_size)
+        inputs = inputs.to(device=device, dtype=torch.double)
+
+        x0 = initialize_vector(size=output_size, bounds=bounds)
+        x0 = torch.tensor(x0)
+        x0 = x0.to(device=device, dtype=torch.double)
+
         # Deeplifting model with skip connections
         model = DeepliftingSkipMLP(
             input_size=input_size,
@@ -687,6 +696,11 @@ def run_deeplifting(
         )
 
         model = model.to(device=device, dtype=torch.double)
+
+        # Let's make sure that all methods have the same x0
+        train_model_to_output(
+            inputs=inputs, model=model, x0=x0, epochs=5000, lr=1e-5, tolerance=1e-10
+        )
         nvar = getNvarTorch(model.parameters())
 
         # Setup a pygransoStruct for the algorithm
@@ -723,10 +737,6 @@ def run_deeplifting(
         fn = lambda x: objective(  # noqa
             x, results=results, trial=trial, version='pytorch'
         )
-
-        # Fix the inputs for deeplifting
-        inputs = torch.randn(1, 5 * output_size)
-        inputs = inputs.to(device=device, dtype=torch.double)
 
         # Get the objective value at the initial point
         outputs = model(inputs=inputs)
@@ -844,7 +854,8 @@ def run_high_dimensional_deeplifting(
     """
     # Get the device (CPU for now)
     output_size = problem['dimensions']
-    device = get_devices()
+    # device = get_devices()
+    device = torch.device('cpu')
     fn_values = []
 
     for trial in range(trials):
@@ -863,6 +874,14 @@ def run_high_dimensional_deeplifting(
             else:
                 bounds = bounds * output_size
 
+        # Fix the inputs for deeplifting
+        inputs = torch.randn(1, 5 * output_size)
+        inputs = inputs.to(device=device, dtype=torch.double)
+
+        x0 = initialize_vector(size=output_size, bounds=bounds)
+        x0 = torch.tensor(x0)
+        x0 = x0.to(device=device, dtype=torch.double)
+
         # Deeplifting model with skip connections
         model = DeepliftingSkipMLP(
             input_size=input_size,
@@ -876,11 +895,14 @@ def run_high_dimensional_deeplifting(
             include_bn=include_bn,
             seed=trial,
         )
+
         model = model.to(device=device, dtype=torch.double)
 
-        # Fix the inputs for deeplifting
-        inputs = torch.randn(1, 5 * output_size)
-        inputs = inputs.to(device=device, dtype=torch.double)
+        # Let's make sure that all methods have the same x0
+        print('Set weights to match x0')
+        train_model_to_output(
+            inputs=inputs, model=model, x0=x0, epochs=100000, lr=1e-4, tolerance=1e-10
+        )
 
         # Let's also get the initial values of the objective
         # so we can normalize the results
@@ -916,7 +938,7 @@ def run_high_dimensional_deeplifting(
         opts.halt_on_linesearch_bracket = False
         opts.linesearch_maxit = 50
         opts.opt_tol = 1e-10
-        opts.maxit = 5000
+        opts.maxit = 5
 
         # # Combined function
         comb_fn = lambda model: deeplifting_high_dimension_fn(
@@ -958,6 +980,7 @@ def run_lbfgs_deeplifting(
     activation='sine',
     output_activation='sine',
     agg_function='sum',
+    include_bn=False,
 ):
     """
     Function that runs our preimer method of deeplifting.
@@ -968,7 +991,8 @@ def run_lbfgs_deeplifting(
     """
     # Get the device (CPU for now)
     output_size = problem['dimensions']
-    device = get_devices()
+    # device = get_devices()
+    device = torch.device('cpu')
     fn_values = []  # noqa
 
     for trial in range(trials):
@@ -987,6 +1011,14 @@ def run_lbfgs_deeplifting(
             else:
                 bounds = bounds * output_size
 
+        # Fix the inputs for deeplifting
+        inputs = torch.randn(1, 5 * output_size)
+        inputs = inputs.to(device=device, dtype=torch.double)
+
+        x0 = initialize_vector(size=output_size, bounds=bounds)
+        x0 = torch.tensor(x0)
+        x0 = x0.to(device=device, dtype=torch.double)
+
         # Deeplifting model with skip connections
         model = DeepliftingSkipMLP(
             input_size=input_size,
@@ -997,26 +1029,29 @@ def run_lbfgs_deeplifting(
             activation=activation,
             output_activation=output_activation,
             agg_function=agg_function,
+            include_bn=include_bn,
             seed=trial,
         )
 
         model = model.to(device=device, dtype=torch.double)
 
+        # Let's make sure that all methods have the same x0
+        print('Set weights to match x0')
+        train_model_to_output(
+            inputs=inputs, model=model, x0=x0, epochs=100000, lr=1e-4, tolerance=1e-10
+        )
+
         # Set up the optimizer for the problem
         optimizer = optim.LBFGS(
             model.parameters(),
             lr=1.0,
-            history_size=100,
-            max_iter=50,
+            history_size=50,
+            max_iter=25,
             line_search_fn='strong_wolfe',
         )
 
         # Set up a training loop
         start = time.time()
-
-        # Fix the inputs for deeplifting
-        inputs = torch.randn(1, 5 * output_size)
-        inputs = inputs.to(device=device, dtype=torch.double)
 
         # Get starting loss
         outputs = model(inputs=inputs)
@@ -1062,10 +1097,11 @@ def run_lbfgs_deeplifting(
             if count > 10:
                 break
 
-            print(
-                f'loss = {updated_loss.detach()},'
-                f'gradient_norm = {flat_grad.abs().max()}'
-            )
+            if epoch % 100 == 0:
+                print(
+                    f'loss = {updated_loss.detach()},'
+                    f'gradient_norm = {flat_grad.abs().max()}'
+                )
 
         end = time.time()
         total_time = end - start
@@ -1102,6 +1138,7 @@ def run_adam_deeplifting(
     activation='sine',
     output_activation='sine',
     agg_function='sum',
+    include_bn=False,
 ):
     """
     Function that runs our preimer method of deeplifting.
@@ -1112,7 +1149,8 @@ def run_adam_deeplifting(
     """
     # Get the device (CPU for now)
     output_size = problem['dimensions']
-    device = get_devices()
+    # device = get_devices()
+    device = torch.device('cpu')
 
     # Final values
     fn_values = []
@@ -1133,6 +1171,14 @@ def run_adam_deeplifting(
             else:
                 bounds = bounds * output_size
 
+        # Fix the inputs for deeplifting
+        inputs = torch.randn(1, 5 * output_size)
+        inputs = inputs.to(device=device, dtype=torch.double)
+
+        x0 = initialize_vector(size=output_size, bounds=bounds)
+        x0 = torch.tensor(x0)
+        x0 = x0.to(device=device, dtype=torch.double)
+
         # Deeplifting model with skip connections
         model = DeepliftingSkipMLP(
             input_size=input_size,
@@ -1143,10 +1189,17 @@ def run_adam_deeplifting(
             activation=activation,
             output_activation=output_activation,
             agg_function=agg_function,
+            include_bn=include_bn,
             seed=trial,
         )
 
         model = model.to(device=device, dtype=torch.double)
+
+        # Let's make sure that all methods have the same x0
+        print('Set weights to match x0')
+        train_model_to_output(
+            inputs=inputs, model=model, x0=x0, epochs=100000, lr=1e-4, tolerance=1e-10
+        )
 
         # Set up the optimizer for the problem
         epochs = 10000
@@ -1165,15 +1218,14 @@ def run_adam_deeplifting(
         # Set up a training loop
         start = time.time()
 
-        # Need to set up the inputs
-        # Fix the inputs for deeplifting
-        inputs = torch.randn(1, 5 * output_size)
-        inputs = inputs.to(device=device, dtype=torch.double)
-
         # Get starting loss
         outputs = model(inputs=inputs)
         outputs = outputs.mean(axis=0)
         f_init = objective(outputs, version='pytorch')
+
+        # Check
+        print('Check that outputs match ... \n')
+        print(torch.norm(outputs - x0, p=2).item())
 
         for epoch in range(epochs):
             # Zero out the gradients

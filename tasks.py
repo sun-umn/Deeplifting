@@ -462,6 +462,7 @@ def find_best_architecture_task(problem_series, method, dimensionality):
                     activation=hidden_activation,
                     output_activation=output_activation,
                     agg_function=agg_function,
+                    include_bn=include_bn,
                 )
 
             elif method == 'pytorch-adam':
@@ -474,6 +475,7 @@ def find_best_architecture_task(problem_series, method, dimensionality):
                     activation=hidden_activation,
                     output_activation=output_activation,
                     agg_function=agg_function,
+                    include_bn=include_bn,
                 )
 
             else:
