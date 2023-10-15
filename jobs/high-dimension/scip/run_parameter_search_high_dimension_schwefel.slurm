@@ -1,5 +1,5 @@
 #!/bin/bash -l
-#SBATCH --time=48:00:00
+#SBATCH --time=24:00:00
 #SBATCH --ntasks=8
 #SBATCH --mem=40g
 #SBATCH --tmp=10g
@@ -9,4 +9,4 @@
 #SBATCH --gres=gpu:1
 cd /home/jusun/dever120/Deeplifting
 export PATH=/home/jusun/dever120/miniconda3/envs/deeplifting/bin:$PATH
-python -m tasks run-pygranso --dimensionality='high-dimensional' --trials=10
+python -m tasks run-algorithm-comparisons-scip --problem_series='schwefel' --method='pygranso' --dimensionality='high-dimensional'

@@ -9,4 +9,4 @@
 #SBATCH --gres=gpu:1
 cd /home/jusun/dever120/Deeplifting
 export PATH=/home/jusun/dever120/miniconda3/envs/deeplifting/bin:$PATH
-python -m tasks find-best-deeplifting-architecture --problem_name='griewank' --method='pygranso' --dimensionality='low-dimensional'
+python -m tasks find-best-deeplifting-architecture --problem_series='levy' --method='pytorch-lbfgs' --dimensionality='high-dimensional'

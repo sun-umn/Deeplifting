@@ -4,7 +4,6 @@ import os
 import warnings
 from datetime import datetime
 from itertools import product
-from typing import List
 
 # third party
 import click
@@ -13,6 +12,25 @@ import numpy as np
 import pandas as pd
 
 # first party
+from config import (
+    ackley_series,
+    alpine_series,
+    chung_reynolds_series,
+    griewank_series,
+    high_dimensional_problem_names,
+    lennard_jones_series,
+    levy_series,
+    low_dimensional_problem_names,
+    qing_series,
+    rastrigin_series,
+    schwefel_series,
+    search_agg_functions,
+    search_hidden_activations,
+    search_hidden_sizes,
+    search_include_bn,
+    search_input_sizes,
+    search_output_activations,
+)
 from deeplifting.optimization import run_pyomo  # noqa
 from deeplifting.optimization import (
     run_adam_deeplifting,
@@ -31,412 +49,10 @@ from deeplifting.utils import create_contour_plot
 # Filter warnings
 warnings.filterwarnings('ignore')
 
-# Identify problems to run
-low_dimensional_problem_names = [
-    'ackley',
-    'ackley2',
-    'ackley3',
-    'adjiman',
-    'alpine1',
-    'alpine2',
-    'bartels_conn',
-    'beale',
-    'bird',  # Takes a long time with SCIP
-    'bohachevsky1',
-    'bohachevsky2',
-    'bohachevsky3',
-    'booth',
-    'branin_rcos',
-    'brent',
-    'bukin_n2',
-    'bukin_n4',
-    'bukin_n6',  # High, 2 layer is best so far, takes a while to run
-    'camel_3hump',
-    'camel_6hump',
-    'chung_reynolds',
-    'cross_in_tray',  # Low, runs quickly
-    'cross_leg_table',
-    'crowned_cross',
-    'cube',  # Correct but paper has wrong x*
-    'damavandi',
-    'drop_wave',  # Low, runs quickly
-    'eggholder',  # Medium, takes time to run
-    'ex8_1_1',
-    'griewank',  # Low, (1.0 with 3-layer, 0.95 2-layer)
-    'holder_table',  # Medium
-    'levy',  # Low, 3-layer
-    'levy_n13',  # Low, 3-layer
-    'mathopt6',
-    'rastrigin',  # Low, 3-layer
-    'rosenbrock',
-    'schaffer_n2',  # Low, 3-layer
-    'schaffer_n4',  # Low, 3-layer
-    'schwefel',  # Takes a while to run, DA is better at 100% but we are at 85%
-    'shubert',  # Takes a while to run
-    'sine_envelope',
-    'rosenbrock',
-    'xinsheyang_n2',
-    'xinsheyang_n3',
-]
-
-# High dimensional series - used to run
-# series for deeplifting
-# TODO: Once our paper is published we will need to
-# refactor a lot of this code
-ackley_series = [
-    # Ackley Series - Origin Solution
-    'ackley_3d',
-    # 'ackley_5d',
-    # 'ackley_30d',
-    # 'ackley_100d',
-    # 'ackley_500d',
-    # 'ackley_1000d',
-]
-
-alpine_series = [
-    # Alpine1 Series - Origin Solution
-    'alpine1_3d',
-    'alpine1_5d',
-    # 'alpine1_30d',
-    # 'alpine1_100d',
-    # 'alpine1_500d',
-    # 'alpine1_1000d',
-]
-
-chung_reynolds_series = [
-    # Chung-Reynolds Series - Origin Solution
-    'chung_reyonlds_3d',
-    'chung_reynolds_5d',
-    'chung_reynolds_30d',
-    'chung_reynolds_100d',
-    'chung_reynolds_500d',
-    'chung_reynolds_1000d',
-]
-
-griewank_series = [
-    # # Griewank Series - Origin Solution
-    # 'griewank_3d',
-    # 'griewank_5d',
-    # 'griewank_30d',
-    # 'griewank_100d',
-    # 'griewank_500d',
-    'griewank_1000d',
-]
-
-levy_series = [
-    # Levy Series - Non-origin solution
-    'levy_3d',
-    'levy_5d',
-    'levy_30d',
-    'levy_100d',
-    'levy_500d',
-    'levy_1000d',
-]
-
-qing_series = [
-    # Qing Series - Non-origin solution
-    'qing_3d',
-    'qing_5d',
-    'qing_30d',
-    'qing_100d',
-    'qing_500d',
-    'qing_1000d',
-]
-
-rastrigin_series = [
-    # Rastrigin series - Origin solution
-    # 'rastrigin_3d',
-    # 'rastrigin_5d',
-    # 'rastrigin_30d',
-    # 'rastrigin_100d',
-    'rastrigin_500d',
-    'rastrigin_1000d',
-]
-
-schwefel_series = [
-    # # Schewefel series - Non-origin solution
-    # 'schwefel_3d',  # Found a solution
-    # 'schwefel_5d',  #
-    # 'schwefel_30d',  # Did not find a solution yet
-    # 'schwefel_100d',
-    # 'schwefel_500d',
-    'schwefel_1000d',  #
-]
-
-lennard_jones_series = [
-    'lennard_jones_6d',
-    'lennard_jones_9d',
-    'lennard_jones_12d',
-    'lennard_jones_15d',
-    'lennard_jones_18d',
-    'lennard_jones_21d',
-    'lennard_jones_24d',
-    'lennard_jones_27d',
-    'lennard_jones_30d',
-    'lennard_jones_39d',
-    'lennard_jones_42d',
-    'lennard_jones_45d',
-]
-
-high_dimensional_problem_names: List[str] = [  # noqa
-    # Ackley Series - Origin Solution
-    # 'ackley_3d',
-    # 'ackley_5d',
-    # 'ackley_30d',
-    # 'ackley_100d',
-    # 'ackley_500d',
-    # 'ackley_1000d',
-    # # Alpine1 Series - Origin Solution
-    # 'alpine1_3d',
-    # 'alpine1_5d',
-    # 'alpine1_30d',
-    # 'alpine1_100d',
-    # 'alpine1_500d',
-    # 'alpine1_1000d',
-    # # Chung-Reynolds Series - Origin Solution
-    # 'chung_reyonlds_3d',
-    # 'chung_reynolds_5d',
-    # 'chung_reynolds_30d',
-    # 'chung_reynolds_100d',
-    # 'chung_reynolds_500d',
-    # 'chung_reynolds_1000d',
-    # # Griewank Series - Origin Solution
-    # 'griewank_3d',
-    # 'griewank_5d',
-    # 'griewank_30d',
-    # 'griewank_100d',
-    # 'griewank_500d',
-    # 'griewank_1000d',
-    # Lennard Jones
-    # 'lennard_jones_6d',
-    # 'lennard_jones_9d',
-    # 'lennard_jones_12d',
-    # 'lennard_jones_15d',
-    'lennard_jones_18d',
-    'lennard_jones_21d',
-    'lennard_jones_24d',
-    'lennard_jones_27d',
-    'lennard_jones_30d',
-    'lennard_jones_39d',
-    'lennard_jones_42d',
-    'lennard_jones_45d',
-    # # Levy Series - Non-origin solution
-    # 'levy_3d',
-    # 'levy_5d',
-    # 'levy_30d',
-    # 'levy_100d',
-    # 'levy_500d',
-    # 'levy_1000d',
-    # # Qing Series - Non-origin solution
-    # 'qing_3d',
-    # 'qing_5d',
-    # 'qing_30d',
-    # 'qing_100d',
-    # 'qing_500d',
-    # 'qing_1000d',
-    # # Rastrigin series - Origin solution
-    # 'rastrigin_3d',
-    # 'rastrigin_5d',
-    # 'rastrigin_30d',
-    # 'rastrigin_100d',
-    # 'rastrigin_500d',
-    # 'rastrigin_1000d',
-    # # Schewefel series - Non-origin solution
-    # 'schwefel_3d',
-    # 'schwefel_5d',
-    # 'schwefel_30d',
-    # 'schwefel_100d',
-    # 'schwefel_500d',
-    # 'schwefel_1000d',
-]
-
-# Identify available hidden sizes
-hidden_size_64 = (64,)
-hidden_size_128 = (128,)
-hidden_size_256 = (256,)
-hidden_size_384 = (384,)
-hidden_size_512 = (512,)
-hidden_size_768 = (768,)
-hidden_size_1024 = (1024,)
-hidden_size_2048 = (2048,)
-
-# Hidden size combinations
-search_hidden_sizes = [
-    # Hidden sizes of 128
-    hidden_size_128 * 2,
-    hidden_size_128 * 3,
-    hidden_size_128 * 4,
-    hidden_size_128 * 5,
-    # Hidden sizes of 256
-    hidden_size_256 * 2,
-    hidden_size_256 * 3,
-    hidden_size_256 * 4,
-    hidden_size_256 * 5,
-    # hidden_size_256 * 4,
-    # hidden_size_256 * 3,
-    # Hidden sizes of 382
-    hidden_size_384 * 2,
-    hidden_size_384 * 3,
-    hidden_size_384 * 4,
-    hidden_size_384 * 5,
-    # Hidden sizes of 512
-    hidden_size_512 * 2,
-    hidden_size_512 * 3,
-    hidden_size_512 * 4,
-    hidden_size_512 * 5,
-]
-
-# Input sizes
-search_input_sizes = [1, 16, 32]
-
-# Hidden activations
-search_hidden_activations = ['relu']
-
-# Ouput activations
-search_output_activations = ['sine']
-
-# Aggregate functions - for skip connections
-search_agg_functions = ['sum']
-
-# Include BN
-search_include_bn = [False]
-
 
 @click.group()
 def cli():
     pass
-
-
-@cli.command('run-deeplifting-task')
-@click.option('--dimensionality', default='low-dimensional')
-@click.option('--layers', default=2)
-@click.option('--units', default=128)
-@click.option('--method', default='particle')
-@click.option('--output_activation', default='leaky_relu')
-@click.option('--agg_function', default='sum')
-@click.option('--trials', default=20)
-def run_deeplifting_task(
-    dimensionality, layers, method, output_activation, units, agg_function, trials
-):
-    """
-    Run deep lifting over specified available problems and over a search space
-    to find the best performance
-    """
-    # Enable the neptune run
-    # Get api token
-    # TODO: If api token is not present log a warning
-    # and default to saving files locally
-    run = neptune.init_run(  # noqa
-        project="dever120/Deeplifting",
-        api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzYmIwMTUyNC05YmZmLTQ1NzctOTEyNS1kZTIxYjU5NjY5YjAifQ==",  # noqa
-    )  # your credentials
-
-    input_sizes = [512]
-    hidden_activations = ['sine']
-
-    if dimensionality == 'low-dimensional':
-        problem_names = low_dimensional_problem_names
-        PROBLEMS = PROBLEMS_BY_NAME
-    elif dimensionality == 'high-dimensional':
-        problem_names = high_dimensional_problem_names
-        PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
-    else:
-        raise ValueError('Option for dimensionality does not exist!')
-
-    # Configuarable number of units / neurons
-    if units == 128:
-        hidden_size_units = hidden_size_128
-    elif units == 512:
-        hidden_size_units = hidden_size_512
-    else:
-        raise ValueError(f'{units} units is not supported')
-
-    # Configurable number of layers
-    if layers == 2:
-        dl_hidden_sizes = [hidden_size_units * 2]
-    elif layers == 3:
-        dl_hidden_sizes = [hidden_size_units * 3]
-    elif layers == 4:
-        dl_hidden_sizes = [hidden_size_units * 4]
-    else:
-        raise ValueError('This many layers is not yet configured!')
-
-    # Configurable output activation function
-    if output_activation == 'sine':
-        output_activations = ['sine']
-    elif output_activation == 'leaky_relu':
-        output_activations = ['leaky_relu']
-    else:
-        raise ValueError(f'{output_activation} not supported!')
-
-    # Aggregate function
-    if agg_function == 'sum':
-        agg_functions = ['sum']
-    elif agg_function == 'max':
-        agg_functions = ['max']
-
-    # Get the available configurations
-    combinations = (
-        input_sizes,
-        dl_hidden_sizes,
-        hidden_activations,
-        output_activations,
-        agg_functions,
-    )
-    configurations = list(product(*combinations))
-
-    # List to store performance data
-    performance_df_list = []
-
-    # Run over the experiments
-    for (
-        index,
-        (input_size, hidden_size, hidden_activation, output_activation, agg_function),
-    ) in enumerate(configurations):
-        for problem_name in problem_names:
-            print(problem_name)
-            # Load the problems
-            problem = PROBLEMS[problem_name]
-
-            # Get the outputs
-            outputs = run_deeplifting(
-                problem,
-                problem_name=problem_name,
-                trials=trials,
-                input_size=input_size,
-                hidden_sizes=hidden_size,
-                activation=hidden_activation,
-                output_activation=output_activation,
-                agg_function=agg_function,
-                method=method,
-            )
-
-            # Get the results of the outputs
-            output_size = problem['dimensions']
-            x_columns = [f'x{i + 1}' for i in range(output_size)]
-            columns = x_columns + ['f', 'algorithm', 'total_time']
-
-            results = pd.DataFrame(outputs['final_results'], columns=columns)
-
-            # Add meta data to the results
-            results['input_size'] = input_size
-            results['hidden_size'] = '-'.join(map(str, hidden_size))
-            results['hidden_activation'] = hidden_activation
-            results['output_activation'] = output_activation
-            results['agg_function'] = agg_function
-            results['problem_name'] = problem_name
-            results['global_minimum'] = problem['global_minimum']
-            results['dimensions'] = output_size
-
-            # Save to parquet
-            results.to_parquet(
-                f'./results/results-2023-08-{layers}-layer-{units}-{agg_function}'
-                f'-{problem_name}-{index}-{method}-{output_activation}'
-                f'{dimensionality}.parquet'  # noqa
-            )
-
-            # Append performance
-            performance_df_list.append(results)
 
 
 @cli.command('run-algorithm-comparisons')
@@ -672,6 +288,7 @@ def run_saved_model_task():
     Run deep lifting over specified available problems and over a search space
     to find the best performance
     """
+    hidden_size_128 = (128,)
     input_sizes = [512]
     hidden_sizes = [hidden_size_128 * 2]
     hidden_activations = ['sine']
@@ -724,6 +341,9 @@ def find_best_architecture_task(problem_series, method, dimensionality):
     "hard" high-dimensional problems. We will aim to tackle a large dimensional
     space with this function, 2500+
     """
+    # Set the number of threads to 1
+    os.environ['OMP_NUM_THREADS'] = '1'
+
     # Enable the neptune run
     # Get api token
     # TODO: If api token is not present log a warning
@@ -773,7 +393,7 @@ def find_best_architecture_task(problem_series, method, dimensionality):
         search_include_bn,
     )
     configurations = list(product(*combinations))
-    trials = 10
+    trials = 1
 
     # List to store performance data
     performance_df_list = []
@@ -829,7 +449,7 @@ def find_best_architecture_task(problem_series, method, dimensionality):
                         output_activation=output_activation,
                         agg_function=agg_function,
                         include_bn=include_bn,
-                        method='particle',
+                        method='single-value',
                     )
 
             elif method == 'pytorch-lbfgs':
@@ -911,9 +531,10 @@ def find_best_architecture_task(problem_series, method, dimensionality):
 
 
 @cli.command('run-pygranso')
+@click.option('--problem_series', default='ackley')
 @click.option('--dimensionality', default='low-dimensional')
 @click.option('--trials', default=10)
-def run_pygranso_task(dimensionality, trials):
+def run_pygranso_task(problem_series, dimensionality, trials):
     """
     Function that will run the competing algorithms to Deeplifting.
     The current competitor models are:
@@ -926,14 +547,32 @@ def run_pygranso_task(dimensionality, trials):
     )  # your credentials
     run['sys/tags'].add(['pygranso', dimensionality])
 
-    if dimensionality == 'low-dimensional':
-        problem_names = low_dimensional_problem_names
-        PROBLEMS = PROBLEMS_BY_NAME
-    elif dimensionality == 'high-dimensional':
-        problem_names = high_dimensional_problem_names
+    # Get the problem list
+    if dimensionality == 'high-dimensional':
         PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
-    else:
-        raise ValueError('Option for dimensionality does not exist!')
+        if problem_series == 'ackley':
+            problem_names = ackley_series
+        elif problem_series == 'alpine1':
+            problem_names = alpine_series
+        elif problem_series == 'chung_reynolds':
+            problem_names = chung_reynolds_series
+        elif problem_series == 'griewank':
+            problem_names = griewank_series
+        elif problem_series == 'lennard_jones':
+            problem_names = lennard_jones_series
+        elif problem_series == 'levy':
+            problem_names = levy_series
+        elif problem_series == 'qing':
+            problem_names = qing_series
+        elif problem_series == 'rastrigin':
+            problem_names = rastrigin_series
+        elif problem_series == 'schwefel':
+            problem_names = schwefel_series
+    elif dimensionality == 'low-dimensional':
+        if problem_series != 'all':
+            raise ValueError('Can only run full list for this option!')
+        PROBLEMS = PROBLEMS_BY_NAME
+        problem_names = low_dimensional_problem_names
 
     # Create the experiment date
     experiment_date = datetime.today().strftime('%Y-%m-%d-%H')
@@ -988,9 +627,10 @@ def run_pygranso_task(dimensionality, trials):
 
 
 @cli.command('run-algorithm-comparisons-scip')
+@click.option('--problem_series', default='ackley')
 @click.option('--dimensionality', default='low-dimensional')
 @click.option('--trials', default=10)
-def run_scip_task(dimensionality, trials):
+def run_scip_task(problem_series, dimensionality, trials):
     """
     Function that will run the competing algorithms to Deeplifting.
     The current competitor models are:
@@ -1006,14 +646,31 @@ def run_scip_task(dimensionality, trials):
     run['sys/tags'].add(['scip', dimensionality])
 
     print('Run Algorithms!')
-    if dimensionality == 'low-dimensional':
-        problem_names = low_dimensional_problem_names
-        PROBLEMS = PROBLEMS_BY_NAME
-    elif dimensionality == 'high-dimensional':
-        problem_names = high_dimensional_problem_names
+    # Get the problem list
+    if dimensionality == 'high-dimensional':
         PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
-    else:
-        raise ValueError('Option for dimensionality does not exist!')
+        if problem_series == 'ackley':
+            problem_names = ackley_series
+        elif problem_series == 'alpine1':
+            problem_names = alpine_series
+        elif problem_series == 'chung_reynolds':
+            problem_names = chung_reynolds_series
+        elif problem_series == 'griewank':
+            problem_names = griewank_series
+        elif problem_series == 'lennard_jones':
+            problem_names = lennard_jones_series
+        elif problem_series == 'levy':
+            problem_names = levy_series
+        elif problem_series == 'qing':
+            problem_names = qing_series
+        elif problem_series == 'rastrigin':
+            problem_names = rastrigin_series
+        elif problem_series == 'schwefel':
+            problem_names = schwefel_series
+    elif dimensionality == 'low-dimensional':
+        if problem_series != 'all':
+            raise ValueError('Can only run full list for this option!')
+        PROBLEMS = PROBLEMS_BY_NAME
 
     # One experiment date
     experiment_date = datetime.today().strftime('%Y-%m-%d-%H')
