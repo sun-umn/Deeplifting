@@ -90,7 +90,7 @@ def ackley(x, results=None, trial=None, version='numpy'):
     return result
 
 
-def bukin_n6(x, results=None, trial=None, version='numpy'):
+def bukin_n6(x, results=None, trial=None, p=0.0, version='numpy'):
     """
     Function that implements the Bukin Function N.6 in both
     numpy and pytorch and pyomo interface.
@@ -105,8 +105,8 @@ def bukin_n6(x, results=None, trial=None, version='numpy'):
         term2 = 0.01 * np.abs(x1 + 10.0)
         result = term1 + term2
     elif version == 'pytorch':
-        term1 = 100 * torch.sqrt(torch.abs(x2 - 0.01 * x1**2))
-        term2 = 0.01 * torch.abs(x1 + 10)
+        term1 = 100 * torch.sqrt(torch.abs((x2 - p) - 0.01 * (x1 - p) ** 2))
+        term2 = 0.01 * torch.abs((x1 - p) + 10)
         result = term1 + term2
     else:
         raise ValueError(

@@ -290,7 +290,7 @@ search_hidden_sizes = [
 search_input_sizes = [1, 16, 32]
 
 # Hidden activations
-search_hidden_activations = ['sine']
+search_hidden_activations = ['relu']
 
 # Ouput activations
 search_output_activations = ['sine']
