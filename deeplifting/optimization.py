@@ -1052,15 +1052,15 @@ def run_lbfgs_deeplifting(
         # Let's make sure that all methods have the same x0
         print('Set weights to match x0')
         train_model_to_output(
-            inputs=inputs, model=model, x0=x0, epochs=100000, lr=1e-4, tolerance=1e-10
+            inputs=inputs, model=model, x0=x0, epochs=100000, lr=1e-4, tolerance=1e-3
         )
 
         # Set up the optimizer for the problem
         optimizer = optim.LBFGS(
             model.parameters(),
             lr=1.0,
-            history_size=50,
-            max_iter=25,
+            history_size=200,
+            max_iter=50,
             line_search_fn='strong_wolfe',
         )
 
@@ -1074,7 +1074,7 @@ def run_lbfgs_deeplifting(
         print(f'Initial loss = {current_loss}')
 
         count = 0
-        for epoch in range(50000):
+        for epoch in range(100000):
 
             def closure():
                 # Zero out the gradients
@@ -1108,10 +1108,10 @@ def run_lbfgs_deeplifting(
             else:
                 current_loss = updated_loss
 
-            if count > 10:
+            if count > 10000:
                 break
 
-            if epoch % 100 == 0:
+            if epoch % 1000 == 0:
                 print(
                     f'loss = {updated_loss.detach()},'
                     f'gradient_norm = {flat_grad.abs().max()}'
@@ -1259,7 +1259,7 @@ def run_adam_deeplifting(
             outputs = outputs.mean(axis=0)
             updated_loss = objective(outputs, version='pytorch')
 
-            if epoch % 10000 == 0:
+            if epoch % 1000 == 0:
                 print(f'loss = {updated_loss.detach()},')
 
             delta = f_init.item() - updated_loss.item()
@@ -1290,7 +1290,7 @@ def run_adam_deeplifting(
         data_point = tuple(xf.flatten()) + (
             float(f),
             float(f_init),
-            'Adam',
+            'Deeplifting-Adam',
             total_time,
         )
         fn_values.append(data_point)

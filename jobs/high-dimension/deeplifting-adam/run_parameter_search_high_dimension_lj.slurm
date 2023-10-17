@@ -6,7 +6,6 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=dever120@umn.edu
 #SBATCH -p apollo_agate
-#SBATCH --gres=gpu:1
 cd /home/jusun/dever120/Deeplifting
 export PATH=/home/jusun/dever120/miniconda3/envs/deeplifting/bin:$PATH
 python -m tasks find-best-deeplifting-architecture --problem_series='lennard_jones' --method='pytorch-adam' --dimensionality='high-dimensional'
