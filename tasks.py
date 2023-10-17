@@ -393,7 +393,7 @@ def find_best_architecture_task(problem_series, method, dimensionality):
         search_include_bn,
     )
     configurations = list(product(*combinations))
-    trials = 2
+    trials = 10
 
     # List to store performance data
     performance_df_list = []
