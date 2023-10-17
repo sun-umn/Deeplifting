@@ -866,8 +866,7 @@ def run_high_dimensional_deeplifting(
     """
     # Get the device (CPU for now)
     output_size = problem['dimensions']
-    # device = get_devices()
-    device = torch.device('cpu')
+    device = get_devices()
     fn_values = []
 
     for trial in range(trials):
@@ -1004,8 +1003,7 @@ def run_lbfgs_deeplifting(
     """
     # Get the device (CPU for now)
     output_size = problem['dimensions']
-    # device = get_devices()
-    device = torch.device('cpu')
+    device = get_devices()
     fn_values = []  # noqa
 
     for trial in range(trials):
@@ -1163,8 +1161,7 @@ def run_adam_deeplifting(
     """
     # Get the device (CPU for now)
     output_size = problem['dimensions']
-    # device = get_devices()
-    device = torch.device('cpu')
+    device = get_devices()
 
     # Final values
     fn_values = []

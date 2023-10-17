@@ -405,7 +405,7 @@ def run_deeplifting(problem_name, model, data, trials=1):
         opts.limited_mem_size = 100
         opts.stat_l2_model = False
         opts.double_precision = True
-        opts.opt_tol = 1e-5
+        opts.opt_tol = 1e-3
         opts.maxit = 10000
 
         # Combined function

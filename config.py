@@ -28,7 +28,6 @@ low_dimensional_problem_names = [
     'cross_in_tray',
     'cross_leg_table',
     'crowned_cross',
-    # 'cube',
     'drop_wave',
     'eggholder',
     'griewank',
