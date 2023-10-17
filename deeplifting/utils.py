@@ -94,7 +94,7 @@ def initialize_vector(size, bounds):
     return np.array(vector)
 
 
-def train_model_to_output(inputs, model, x0, epochs=10000, lr=1e-4, tolerance=1e-10):
+def train_model_to_output(inputs, model, x0, epochs=10000, lr=1e-4, tolerance=1e-3):
     """
     This function takes a model, input tensor, and target output (x0),
     and trains the model's output layer to produce x0 for the given input.
@@ -125,7 +125,7 @@ def train_model_to_output(inputs, model, x0, epochs=10000, lr=1e-4, tolerance=1e
         max_lr=lr,
         epochs=epochs,
         steps_per_epoch=1,
-        pct_start=0.3,
+        pct_start=0.1,
     )
     criterion = nn.MSELoss()
 
@@ -142,7 +142,7 @@ def train_model_to_output(inputs, model, x0, epochs=10000, lr=1e-4, tolerance=1e
         l2_distance = torch.norm(outputs - x0, p=2).item()
 
         # Print loss and L2 distance every 100 epochs
-        if (epoch + 1) % 1000 == 0:
+        if (epoch + 1) % 10000 == 0:
             print(
                 f'Epoch [{epoch+1}/{epochs}], Loss: {loss.item():.4f}'
                 f', L2 Distance: {l2_distance:.4e}'
@@ -155,6 +155,9 @@ def train_model_to_output(inputs, model, x0, epochs=10000, lr=1e-4, tolerance=1e
                 f' L2 Distance: {l2_distance:.4e}'
             )
             break
+
+    print(f'Initial x0 in fn = {x0}')
+    print(f'Fitted x0 in fn = {outputs}')
 
     # Unfreeze all layers
     for parameters in model.parameters():

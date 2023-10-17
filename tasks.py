@@ -393,7 +393,7 @@ def find_best_architecture_task(problem_series, method, dimensionality):
         search_include_bn,
     )
     configurations = list(product(*combinations))
-    trials = 1
+    trials = 2
 
     # List to store performance data
     performance_df_list = []
@@ -527,9 +527,9 @@ def find_best_architecture_task(problem_series, method, dimensionality):
             # Append performance
             performance_df_list.append(results)
 
-            # We hit at least once
-            if hits >= 0.90:
-                break
+            # # We hit at least once
+            # if hits >= 0.90:
+            #     break
 
 
 @cli.command('run-pygranso')

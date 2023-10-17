@@ -147,7 +147,7 @@ def run_dual_annealing(
 
     for trial in range(trials):
         # Set a random seed
-        np.random.seed(trial + 1)
+        np.random.seed(trial)
 
         # Initial point
         x0 = initialize_vector(size=dimensions, bounds=bounds)
@@ -234,7 +234,7 @@ def run_basinhopping(problem: Dict, trials: int):
 
     for trial in range(trials):
         # Set a random seed
-        np.random.seed(trial + 1)
+        np.random.seed(trial)
 
         # Initial point
         x0 = initialize_vector(size=dimensions, bounds=bounds)
@@ -318,7 +318,7 @@ def run_differential_evolution(
 
     for trial in range(trials):
         # Set a random seed
-        np.random.seed(trial + 2)
+        np.random.seed(trial)
 
         # Initial point
         x0 = initialize_vector(size=dimensions, bounds=bounds)
@@ -470,7 +470,7 @@ def run_pygranso(problem: Dict, trials: int):
 
     for trial in range(trials):
         # Seed everything
-        set_seed(trial + 3)
+        set_seed(trial)
 
         # var in
         var_in = {}
@@ -658,6 +658,7 @@ def run_deeplifting(
     iterim_results: List[Any] = []  # noqa
 
     for trial in range(trials):
+        set_seed(trial)
         # Objective function
         objective = problem['objective']
 
@@ -699,13 +700,23 @@ def run_deeplifting(
 
         # Let's make sure that all methods have the same x0
         train_model_to_output(
-            inputs=inputs, model=model, x0=x0, epochs=5000, lr=1e-5, tolerance=1e-10
+            inputs=inputs, model=model, x0=x0, epochs=100000, lr=1e-4, tolerance=1e-3
         )
         nvar = getNvarTorch(model.parameters())
 
         # Setup a pygransoStruct for the algorithm
         # options
         opts = pygransoStruct()
+
+        # Print the model outputs and check against x0 also
+        # want to use a print out to make sure all models have the same starting
+        # point
+        model.eval()
+        outputs = model(inputs=inputs)
+        outputs = outputs.mean(axis=0)
+
+        print(f'Initial x0 = {x0}')
+        print(f'Fitted x0 = {outputs}')
 
         # Inital x0
         x0 = (
@@ -760,6 +771,7 @@ def run_deeplifting(
         )  # noqa
 
         # Run the main algorithm
+        model.train()
         start_time = time.time()
         soln = pygranso(var_spec=model, combined_fn=comb_fn, user_opts=opts)
         end_time = time.time()
@@ -859,6 +871,7 @@ def run_high_dimensional_deeplifting(
     fn_values = []
 
     for trial in range(trials):
+        set_seed(trial)
         # Objective function
         objective = problem['objective']
 
@@ -996,6 +1009,7 @@ def run_lbfgs_deeplifting(
     fn_values = []  # noqa
 
     for trial in range(trials):
+        set_seed(trial)
         # Objective function
         objective = problem['objective']
 
@@ -1156,6 +1170,7 @@ def run_adam_deeplifting(
     fn_values = []
 
     for trial in range(trials):
+        set_seed(trial)
         # Objective function
         objective = problem['objective']
 
@@ -1198,7 +1213,7 @@ def run_adam_deeplifting(
         # Let's make sure that all methods have the same x0
         print('Set weights to match x0')
         train_model_to_output(
-            inputs=inputs, model=model, x0=x0, epochs=100000, lr=1e-4, tolerance=1e-10
+            inputs=inputs, model=model, x0=x0, epochs=100000, lr=1e-4, tolerance=1e-3
         )
 
         # Set up the optimizer for the problem
@@ -1227,6 +1242,7 @@ def run_adam_deeplifting(
         print('Check that outputs match ... \n')
         print(torch.norm(outputs - x0, p=2).item())
 
+        early_stopping_count = 0
         for epoch in range(epochs):
             # Zero out the gradients
             optimizer.zero_grad()
@@ -1243,11 +1259,15 @@ def run_adam_deeplifting(
             outputs = outputs.mean(axis=0)
             updated_loss = objective(outputs, version='pytorch')
 
-            if epoch % 100 == 0:
-                print(
-                    f'loss = {updated_loss.detach()},'
-                    # f'gradient_norm = {flat_grad.abs().max()}'
-                )
+            if epoch % 10000 == 0:
+                print(f'loss = {updated_loss.detach()},')
+
+            delta = f_init.item() - updated_loss.item()
+            if epoch >= 10000 and delta < 1e-10:
+                early_stopping_count += 1
+
+            if early_stopping_count == 10000:
+                break
 
             # Step through the optimzer to update the data with the gradients
             optimizer.step()

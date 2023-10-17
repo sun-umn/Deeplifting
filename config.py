@@ -5,7 +5,7 @@
 # Identify problems to run
 low_dimensional_problem_names = [
     'ackley',
-    # 'ackley2',
+    'ackley2',
     # 'ackley3',
     # 'adjiman',
     # 'alpine1',
@@ -174,23 +174,23 @@ search_hidden_sizes = [
     # Hidden sizes of 128
     hidden_size_128 * 2,
     hidden_size_128 * 3,
-    hidden_size_128 * 4,
-    hidden_size_128 * 5,
+    # hidden_size_128 * 4,
+    # hidden_size_128 * 5,
     # Hidden sizes of 256
     hidden_size_256 * 2,
     hidden_size_256 * 3,
-    hidden_size_256 * 4,
-    hidden_size_256 * 5,
-    # Hidden sizes of 382
-    hidden_size_384 * 2,
-    hidden_size_384 * 3,
-    hidden_size_384 * 4,
-    hidden_size_384 * 5,
-    # Hidden sizes of 512
-    hidden_size_512 * 2,
-    hidden_size_512 * 3,
-    hidden_size_512 * 4,
-    hidden_size_512 * 5,
+    # hidden_size_256 * 4,
+    # hidden_size_256 * 5,
+    # # Hidden sizes of 382
+    # hidden_size_384 * 2,
+    # hidden_size_384 * 3,
+    # hidden_size_384 * 4,
+    # hidden_size_384 * 5,
+    # # Hidden sizes of 512
+    # hidden_size_512 * 2,
+    # hidden_size_512 * 3,
+    # hidden_size_512 * 4,
+    # hidden_size_512 * 5,
 ]
 
 # Input sizes
@@ -206,4 +206,4 @@ search_output_activations = ['sine']
 search_agg_functions = ['sum']
 
 # Include BN
-search_include_bn = [False, True]
+search_include_bn = [False]
