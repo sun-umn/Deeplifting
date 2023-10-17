@@ -10,6 +10,7 @@ high-dimension-paper-results/
 low-dimension-search-results/
 data-queue*/
 data*/
+experiments/*
 .neptune
 .virtual_documents/
 LJ_data*

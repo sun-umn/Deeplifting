@@ -2,6 +2,7 @@
 import glob
 import os
 import random
+import uuid
 from functools import partial
 
 # third party
@@ -16,6 +17,63 @@ from torch.optim.lr_scheduler import OneCycleLR
 
 # first party
 from deeplifting.models import DeepliftingSkipMLP
+
+
+def create_unique_experiment_directory():
+    # Generate a UUID
+    unique_id = str(uuid.uuid4())
+
+    # Define the path to the experiments folder and the new UUID directory
+    experiments_path = 'experiments'
+    new_dir_path = os.path.join(experiments_path, unique_id)
+
+    # Check if the directory already exists
+    if not os.path.exists(new_dir_path):
+        # Create the directory
+        os.makedirs(new_dir_path)
+        print(f"Directory {new_dir_path} created.")
+    else:
+        print(f"Directory {new_dir_path} already exists.")
+
+    # Path for the UUID file under the experiments directory
+    uuid_file_path = os.path.join(experiments_path, 'current_experiment_uuid.txt')
+
+    # Write the UUID to the file
+    with open(uuid_file_path, 'w') as file:
+        file.write(unique_id)
+        print(f"UUID {unique_id} written to {uuid_file_path}.")
+
+    # List of main subdirectories
+    main_subdirectories = ['low-dimension', 'high-dimension']
+
+    # List of subdirectories for low-dimension and high-dimension
+    subdirectories = [
+        'dual_annealing',
+        'differential_evolution',
+        'ipopt',
+        'pygranso',
+        'scip',
+        'deeplifting-pygranso',
+        'deeplifting-adam',
+        'deeplifting-lbfgs',
+        'basinhopping',
+    ]
+
+    # Create each main subdirectory
+    for main_sub in main_subdirectories:
+        main_sub_path = os.path.join(new_dir_path, main_sub)
+        if not os.path.exists(main_sub_path):
+            os.makedirs(main_sub_path)
+            print(f"Directory {main_sub_path} created.")
+
+        # Create each subdirectory under the main subdirectory
+        for sub in subdirectories:
+            sub_path = os.path.join(main_sub_path, sub)
+            if not os.path.exists(sub_path):
+                os.makedirs(sub_path)
+                print(f"Directory {sub_path} created.")
+
+    return new_dir_path
 
 
 def build_deeplifting_results(file_structure, epsilon=5.5e-4):
