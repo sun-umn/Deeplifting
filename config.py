@@ -5,45 +5,45 @@
 # Identify problems to run
 low_dimensional_problem_names = [
     'ackley',
-    'ackley2',
-    'ackley3',
-    'adjiman',
-    'alpine1',
-    'alpine2',
-    'bartels_conn',
-    'beale',
-    'bird',
-    'bohachevsky1',
-    'bohachevsky2',
-    'bohachevsky3',
-    'booth',
-    'branin_rcos',
-    'brent',
-    'bukin_n2',
-    'bukin_n4',
-    'bukin_n6',
-    'camel_3hump',
-    'camel_6hump',
-    'chung_reynolds',
-    'cross_in_tray',
-    'cross_leg_table',
-    'crowned_cross',
-    'drop_wave',
-    'eggholder',
-    'griewank',
-    'holder_table',
-    'levy',
-    'levy_n13',
-    'mathopt6',
-    'rastrigin',
-    'rosenbrock',
-    'schaffer_n2',
-    'schaffer_n4',
-    'schwefel',
-    'shubert',
-    'rosenbrock',
-    'xinsheyang_n2',
-    'xinsheyang_n3',
+    # 'ackley2',
+    # 'ackley3',
+    # 'adjiman',
+    # 'alpine1',
+    # 'alpine2',
+    # 'bartels_conn',
+    # 'beale',
+    # 'bird',
+    # 'bohachevsky1',
+    # 'bohachevsky2',
+    # 'bohachevsky3',
+    # 'booth',
+    # 'branin_rcos',
+    # 'brent',
+    # 'bukin_n2',
+    # 'bukin_n4',
+    # 'bukin_n6',
+    # 'camel_3hump',
+    # 'camel_6hump',
+    # 'chung_reynolds',
+    # 'cross_in_tray',
+    # 'cross_leg_table',
+    # 'crowned_cross',
+    # 'drop_wave',
+    # 'eggholder',
+    # 'griewank',
+    # 'holder_table',
+    # 'levy',
+    # 'levy_n13',
+    # 'mathopt6',
+    # 'rastrigin',
+    # 'rosenbrock',
+    # 'schaffer_n2',
+    # 'schaffer_n4',
+    # 'schwefel',
+    # 'shubert',
+    # 'rosenbrock',
+    # 'xinsheyang_n2',
+    # 'xinsheyang_n3',
 ]
 
 # High dimension test problems
@@ -160,6 +160,7 @@ high_dimensional_problem_names = (
 # Identify available hidden sizes
 hidden_size_64 = (64,)
 hidden_size_128 = (128,)
+hidden_size_192 = (192,)
 hidden_size_256 = (256,)
 hidden_size_384 = (384,)
 hidden_size_512 = (512,)
@@ -175,28 +176,30 @@ search_hidden_sizes = [
     hidden_size_128 * 4,
     hidden_size_128 * 5,
     hidden_size_128 * 10,
-    hidden_size_128 * 20,
+    # Hidden sizes of 192
+    hidden_size_192 * 2,
+    hidden_size_192 * 3,
+    hidden_size_192 * 4,
+    hidden_size_192 * 5,
+    hidden_size_192 * 10,
     # Hidden sizes of 256
     hidden_size_256 * 2,
     hidden_size_256 * 3,
     hidden_size_256 * 4,
     hidden_size_256 * 5,
     hidden_size_256 * 10,
-    hidden_size_256 * 20,
     # Hidden sizes of 382
     hidden_size_384 * 2,
     hidden_size_384 * 3,
     hidden_size_384 * 4,
     hidden_size_384 * 5,
     hidden_size_384 * 10,
-    hidden_size_384 * 20,
     # Hidden sizes of 512
     hidden_size_512 * 2,
     hidden_size_512 * 3,
     hidden_size_512 * 4,
     hidden_size_512 * 5,
     hidden_size_512 * 10,
-    hidden_size_512 * 20,
 ]
 
 # Input sizes
@@ -212,4 +215,4 @@ search_output_activations = ['sine']
 search_agg_functions = ['sum']
 
 # Include BN
-search_include_bn = [False, True]
+search_include_bn = [False]

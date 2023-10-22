@@ -166,12 +166,12 @@ def train_model_to_output(inputs, model, x0, epochs=10000, lr=1e-4, tolerance=1e
         tolerance: threshold for L2 distance to stop training (default: 1e-10)
     """
 
-    # Freeze all layers except the output layer
-    for name, parameters in model.named_parameters():
-        if (
-            'output_layer' not in name
-        ):  # assuming 'layer2' is the output layer, adjust if otherwise
-            parameters.requires_grad = False
+    # # Freeze all layers except the output layer
+    # for name, parameters in model.named_parameters():
+    #     if (
+    #         'output_layer' not in name
+    #     ):  # assuming 'layer2' is the output layer, adjust if otherwise
+    #         parameters.requires_grad = False
 
     # Begin training
     model.train()
@@ -217,9 +217,9 @@ def train_model_to_output(inputs, model, x0, epochs=10000, lr=1e-4, tolerance=1e
     print(f'Initial x0 in fn = {x0}')
     print(f'Fitted x0 in fn = {outputs}')
 
-    # Unfreeze all layers
-    for parameters in model.parameters():
-        parameters.requires_grad = True
+    # # Unfreeze all layers
+    # for parameters in model.parameters():
+    #     parameters.requires_grad = True
 
 
 def add_jitter(points, jitter_amount=0.05):
