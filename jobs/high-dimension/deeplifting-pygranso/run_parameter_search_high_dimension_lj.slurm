@@ -1,6 +1,6 @@
 #!/bin/bash -l
-#SBATCH --time=24:00:00
-#SBATCH --ntasks=8
+#SBATCH --time=96:00:00
+#SBATCH --ntasks=2
 #SBATCH --mem=40g
 #SBATCH --tmp=10g
 #SBATCH --mail-type=ALL
