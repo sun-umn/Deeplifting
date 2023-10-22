@@ -519,11 +519,12 @@ def run_svm_dual_annealing(trials, experimentation):
     if experimentation:
         wandb.login(key='2080070c4753d0384b073105ed75e1f46669e4bf')
 
-    wandb.init(
-        # set the wandb project where this run will be logged
-        project="Deeplifting-SVM",
-        tags=['dual-annealing-svm'],
-    )
+        wandb.init(
+            # set the wandb project where this run will be logged
+            project="Deeplifting-SVM",
+            tags=['dual-annealing-svm'],
+        )
+
     print('Run Dual Annealing for SVM')
 
     # Path for the UUID file under the experiments directory
@@ -549,7 +550,7 @@ def run_svm_dual_annealing(trials, experimentation):
 
         # Run the dual annealing version
         start = time.time()
-        dual_annealing_result = svm_dual_annealing(X_train.T, y_train)
+        dual_annealing_result = svm_dual_annealing(X_train.T, y_train, trial=trial)
         da_objective = dual_annealing_result.fun
         da_weights = dual_annealing_result.x
 
@@ -575,6 +576,7 @@ def run_svm_dual_annealing(trials, experimentation):
         results_df['trial'] = trial
         results_df['problem_name'] = 'CIFAR-100'
         results_df['total_time'] = total_time
+        results_df['algorithm'] = 'Dual-Annealing'
 
         # Append data to list
         results_df_list.append(results_df)
@@ -592,7 +594,8 @@ def run_svm_dual_annealing(trials, experimentation):
     results_df.to_parquet(save_path)
 
     print('Process finished!')
-    wandb.finish()
+    if experimentation:
+        wandb.finish()
 
 
 if __name__ == "__main__":
