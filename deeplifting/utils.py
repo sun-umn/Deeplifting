@@ -44,12 +44,12 @@ def create_unique_experiment_directory():
         print(f"UUID {unique_id} written to {uuid_file_path}.")
 
     # List of main subdirectories
-    main_subdirectories = ['low-dimension', 'high-dimension']
+    main_subdirectories = ['low-dimension', 'high-dimension', 'svm']
 
     # List of subdirectories for low-dimension and high-dimension
     subdirectories = [
-        'dual_annealing',
-        'differential_evolution',
+        'dual-annealing',
+        'differential-evolution',
         'ipopt',
         'pygranso',
         'scip',

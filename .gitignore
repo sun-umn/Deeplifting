@@ -11,6 +11,7 @@ low-dimension-search-results/
 data-queue*/
 data*/
 experiments/*
+wandb/*
 .neptune
 .virtual_documents/
 LJ_data*

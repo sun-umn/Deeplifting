@@ -527,10 +527,6 @@ def find_best_architecture_task(problem_series, method, dimensionality):
             # Append performance
             performance_df_list.append(results)
 
-            # # We hit at least once
-            # if hits >= 0.90:
-            #     break
-
 
 @cli.command('run-pygranso')
 @click.option('--problem_series', default='ackley')

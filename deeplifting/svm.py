@@ -4,10 +4,11 @@ import os
 import time
 
 # third party
-import neptune
+import click
 import numpy as np
 import pandas as pd
 import torch
+import wandb
 from pygranso.private.getNvar import getNvarTorch
 from pygranso.pygranso import pygranso
 from pygranso.pygransoStruct import pygransoStruct
@@ -18,8 +19,8 @@ from sklearn.model_selection import train_test_split
 from torchvision import datasets, transforms
 
 # first party
-from deeplifting.models import DeepliftingSkipMLP
-from deeplifting.utils import HaltLog, get_devices
+# from deeplifting.models import DeepliftingSkipMLP
+from deeplifting.utils import HaltLog, get_devices, initialize_vector, set_seed
 
 
 # Build a utility for loading in the iris dataset with option for a test set
@@ -302,27 +303,30 @@ def deeplifting_svm(
     return f, ci, ce
 
 
-def run_dual_annealing_svm(X, labels):
-    # Initialize a weight vector
-    x0 = np.random.randn(X.shape[0])
-
-    # Setup the objective function
-    fn = lambda w: numpy_svm(w, X, labels)
+def svm_dual_annealing(X, labels, trial):
+    # Set seed for the generated x0
+    set_seed(trial)
 
     # For this problem we will set up arbitrary bounds
     bounds = [(-10, 10)] * X.shape[0]
+
+    # Initialize a weight vector
+    x0 = initialize_vector(size=X.shape[0], bounds=bounds)
+
+    # Setup the objective function
+    fn = lambda w: numpy_svm(w, X, labels)
 
     # Get the result
     result = dual_annealing(
         fn,
         bounds,
         x0=x0,
-        maxiter=1000,
+        maxiter=100,
     )
     return result
 
 
-def run_pygranso(X, labels):
+def svm_pygranso(X, labels):
     device = get_devices()
     w0 = torch.randn(
         (X.shape[0], 1),
@@ -355,7 +359,7 @@ def run_pygranso(X, labels):
     return soln
 
 
-def run_deeplifting(problem_name, model, data, trials=1):
+def svm_deeplifting(problem_name, model, data, trials=1):
     X_train = data['X_train']
     y_train = data['y_train']
     X_test = data['X_test']
@@ -498,13 +502,35 @@ def build_predictions(w, X):
     return predictions
 
 
-if __name__ == "__main__":
-    print('Run Algorithms!')
-    run = neptune.init_run(  # noqa
-        project="dever120/Deeplifting",
-        api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzYmIwMTUyNC05YmZmLTQ1NzctOTEyNS1kZTIxYjU5NjY5YjAifQ==",  # noqa
-    )  # your credentials
-    run['sys/tags'].add(['svm'])
+# Define CLI
+@click.group()
+def cli():
+    pass
+
+
+@cli.command('run-svm-dual-annealing')
+@click.option('--trials', default=10)
+@click.option('--experimentation', default=True)
+def run_svm_dual_annealing(trials, experimentation):
+    """
+    Function that will run dual annealing for determining
+    the weights for SVM
+    """
+    if experimentation:
+        wandb.login(key='2080070c4753d0384b073105ed75e1f46669e4bf')
+
+    wandb.init(
+        # set the wandb project where this run will be logged
+        project="Deeplifting-SVM",
+        tags=['dual-annealing-svm'],
+    )
+    print('Run Dual Annealing for SVM')
+
+    # Path for the UUID file under the experiments directory
+    experiments_path = './experiments'
+    uuid_file_path = os.path.join(experiments_path, 'current_experiment_uuid.txt')
+    with open(uuid_file_path) as f:
+        uuid = f.readline()
 
     # Load in the CIFAR 100 dataset
     # Numpy data
@@ -514,65 +540,139 @@ if __name__ == "__main__":
     X_test = data['X_test']
     y_test = data['y_test']
 
-    # Torch data
-    data = build_cifar100_dataset(test_split=True, torch_version=True)
-    Xt_train = data['X_train']
-    yt_train = data['y_train']
-    Xt_test = data['X_test']
-    yt_test = data['y_test']
+    # result data
+    results_df_list = []
 
-    # Need to put the torch data on the same device
-    device = get_devices()
-    Xt_train = Xt_train.to(device=device, dtype=torch.double)
-    yt_train = yt_train.to(device=device, dtype=torch.double)
-    Xt_test = Xt_test.to(device=device, dtype=torch.double)
-    yt_test = yt_test.to(device=device, dtype=torch.double)
+    # We want to run n trials of the modeling for analysis
+    for trial in range(trials):
+        print(f'Running trial {trial + 1}')
 
-    # Get the PyGRANSO result
-    pygranso_result = run_pygranso(Xt_train.T, yt_train)
-    pg_weights = pygranso_result.best.x
-    pg_weights = pg_weights.detach().cpu().numpy().reshape(1, -1)
+        # Run the dual annealing version
+        start = time.time()
+        dual_annealing_result = svm_dual_annealing(X_train.T, y_train)
+        da_objective = dual_annealing_result.fun
+        da_weights = dual_annealing_result.x
 
-    # Train accuracy
-    preds_train = build_predictions(pg_weights, X_train.T)
+        # Create predictions for train and test data
+        preds_train = build_predictions(da_weights, X_train.T)
+        preds_test = build_predictions(da_weights, X_test.T)
+        end = time.time()
 
-    # Test accuracy
-    preds_test = build_predictions(pg_weights, X_test.T)
+        # Compute total time
+        total_time = end - start
 
-    print(
-        accuracy_score(y_train, preds_train.flatten()),
-        accuracy_score(y_test, preds_test.flatten()),
-    )
+        # Train and test data accuracy
+        train_accuracy = accuracy_score(y_train, preds_train)
+        test_accuracy = accuracy_score(y_test, preds_test)
 
-    # Initialize the deeplifting model
-    model = DeepliftingSkipMLP(
-        input_size=64,
-        hidden_sizes=(128,) * 3,
-        output_size=Xt_train.T.shape[0],
-        bounds=None,
-        skip_every_n=1,
-        activation='leaky_relu',
-        output_activation='sine',
-        agg_function='identity',
-        include_bn=True,
-        seed=0,
-    )
+        # save the data
+        results_df = pd.DataFrame(
+            {
+                'values': [da_objective, train_accuracy, test_accuracy],
+                'metric': ['Objective', 'Train-Accuracy', 'Test-Accuracy'],
+            }
+        )
+        results_df['trial'] = trial
+        results_df['problem_name'] = 'CIFAR-100'
+        results_df['total_time'] = total_time
 
-    # data for deeplifting
-    dl_data = {
-        'X_train': Xt_train,
-        'y_train': yt_train,
-        'X_test': Xt_test,
-        'y_test': yt_test,
-    }
+        # Append data to list
+        results_df_list.append(results_df)
 
-    # Run deeplifting and obtain the weights
-    dl_results = run_deeplifting(
-        problem_name='CIFAR-100', model=model, data=dl_data, trials=10
-    )
+    # Create full dataframe
+    results_df = pd.concat(results_df_list)
 
     # Save the data
-    save_path = os.path.join(
-        os.getcwd(), 'data', 'svm', 'svm-deeplifting-results.parquet'
-    )
-    dl_results.to_parquet(save_path)
+    svm_path = f'./experiments/{uuid}/svm/dual-annealing'
+    file_name = 'svm.parquet'
+    save_path = os.path.join(svm_path, file_name)
+
+    # Save dual annealing data
+    print('Saving data!')
+    results_df.to_parquet(save_path)
+
+    print('Process finished!')
+    wandb.finish()
+
+
+if __name__ == "__main__":
+    # Be able to run different commands
+    cli()
+
+    # print('Run Algorithms!')
+    # run = neptune.init_run(  # noqa
+    #     project="dever120/Deeplifting",
+    #     api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzYmIwMTUyNC05YmZmLTQ1NzctOTEyNS1kZTIxYjU5NjY5YjAifQ==",  # noqa
+    # )  # your credentials
+    # run['sys/tags'].add(['svm'])
+
+    # # Load in the CIFAR 100 dataset
+    # # Numpy data
+    # data = build_cifar100_dataset(test_split=True, torch_version=False)
+    # X_train = data['X_train']
+    # y_train = data['y_train']
+    # X_test = data['X_test']
+    # y_test = data['y_test']
+
+    # # Torch data
+    # data = build_cifar100_dataset(test_split=True, torch_version=True)
+    # Xt_train = data['X_train']
+    # yt_train = data['y_train']
+    # Xt_test = data['X_test']
+    # yt_test = data['y_test']
+
+    # # Need to put the torch data on the same device
+    # device = get_devices()
+    # Xt_train = Xt_train.to(device=device, dtype=torch.double)
+    # yt_train = yt_train.to(device=device, dtype=torch.double)
+    # Xt_test = Xt_test.to(device=device, dtype=torch.double)
+    # yt_test = yt_test.to(device=device, dtype=torch.double)
+
+    # # Get the PyGRANSO result
+    # pygranso_result = run_pygranso(Xt_train.T, yt_train)
+    # pg_weights = pygranso_result.best.x
+    # pg_weights = pg_weights.detach().cpu().numpy().reshape(1, -1)
+
+    # # Train accuracy
+    # preds_train = build_predictions(pg_weights, X_train.T)
+
+    # # Test accuracy
+    # preds_test = build_predictions(pg_weights, X_test.T)
+
+    # print(
+    #     accuracy_score(y_train, preds_train.flatten()),
+    #     accuracy_score(y_test, preds_test.flatten()),
+    # )
+
+    # # Initialize the deeplifting model
+    # model = DeepliftingSkipMLP(
+    #     input_size=64,
+    #     hidden_sizes=(256,) * 3,
+    #     output_size=Xt_train.T.shape[0],
+    #     bounds=None,
+    #     skip_every_n=1,
+    #     activation='leaky_relu',
+    #     output_activation='sine',
+    #     agg_function='identity',
+    #     include_bn=True,
+    #     seed=0,
+    # )
+
+    # # data for deeplifting
+    # dl_data = {
+    #     'X_train': Xt_train,
+    #     'y_train': yt_train,
+    #     'X_test': Xt_test,
+    #     'y_test': yt_test,
+    # }
+
+    # # Run deeplifting and obtain the weights
+    # dl_results = run_deeplifting(
+    #     problem_name='CIFAR-100', model=model, data=dl_data, trials=10
+    # )
+
+    # # Save the data from SVM
+    # save_path = os.path.join(
+    #     os.getcwd(), 'data', 'svm', 'svm-deeplifting-results.parquet'
+    # )
+    # dl_results.to_parquet(save_path)
