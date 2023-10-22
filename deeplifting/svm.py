@@ -614,9 +614,9 @@ def run_svm_deeplifting(trials, experimentation):
             output_size=X_train.T.shape[0],
             bounds=None,
             skip_every_n=1,
-            activation='sine',
+            activation='leaky_relu',
             output_activation='sine',
-            agg_function='sum',
+            agg_function='identity',
             include_bn=False,
             seed=trial,
         )
