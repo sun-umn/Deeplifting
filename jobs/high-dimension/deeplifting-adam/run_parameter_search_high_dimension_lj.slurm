@@ -8,4 +8,4 @@
 #SBATCH -p apollo_agate
 cd /home/jusun/dever120/Deeplifting
 export PATH=/home/jusun/dever120/miniconda3/envs/deeplifting/bin:$PATH
-python -m tasks find-best-deeplifting-architecture --problem_series='lennard_jones' --method='pytorch-adam' --dimensionality='high-dimensional'
+python -m tasks find-best-deeplifting-architecture --problem_series='lennard_jones' --method='pytorch-adam' --dimensionality='high-dimensional' --early-stopping=True

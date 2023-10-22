@@ -335,7 +335,8 @@ def run_saved_model_task():
 @click.option('--problem_series', default='ackley')
 @click.option('--method', default='pygranso')
 @click.option('--dimensionality', default='high-dimensional')
-def find_best_architecture_task(problem_series, method, dimensionality):
+@click.option('--early-stopping', default=False)
+def find_best_architecture_task(problem_series, method, dimensionality, early_stopping):
     """
     Function that we will use to find the best architecture over multiple
     "hard" high-dimensional problems. We will aim to tackle a large dimensional
@@ -526,6 +527,10 @@ def find_best_architecture_task(problem_series, method, dimensionality):
 
             # Append performance
             performance_df_list.append(results)
+
+            if early_stopping:
+                if hits >= 0.90:
+                    break
 
 
 @cli.command('run-pygranso')
