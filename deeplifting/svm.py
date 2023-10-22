@@ -19,7 +19,12 @@ from torchvision import datasets, transforms
 
 # first party
 from deeplifting.models import DeepliftingSkipMLP
-from deeplifting.utils import get_devices, initialize_vector, set_seed
+from deeplifting.utils import (
+    get_devices,
+    initialize_vector,
+    set_seed,
+    train_model_to_output,
+)
 
 
 # Build a utility for loading in the iris dataset with option for a test set
@@ -339,29 +344,12 @@ def svm_pygranso(X, labels, trial):
     return soln
 
 
-def svm_deeplifting(data, inputs, trial):
+def svm_deeplifting(model, data, inputs, trial):
     X_train = data['X_train']
     y_train = data['y_train']
 
     # Deeplifting time!
     device = get_devices()
-
-    # Initialize the deeplifting model
-    model = DeepliftingSkipMLP(
-        input_size=64,
-        hidden_sizes=(256,) * 3,
-        output_size=X_train.T.shape[0],
-        bounds=None,
-        skip_every_n=1,
-        activation='leaky_relu',
-        output_activation='sine',
-        agg_function='identity',
-        include_bn=True,
-        seed=trial,
-    )
-
-    # Put the model on the correct device
-    model = model.to(device=device, dtype=torch.double)
     nvar = getNvarTorch(model.parameters())
 
     # Setup the options
@@ -605,17 +593,47 @@ def run_svm_deeplifting(trials, experimentation):
 
     # We want to run n trials of the modeling for analysis
     for trial in range(trials):
+        set_seed(trial)
         print(f'Running trial {trial + 1}')
 
         # Get the inputs for the model
         inputs = torch.randn(1, 5 * X_train.T.shape[0])
         inputs = inputs.to(device=device, dtype=torch.double)
 
+        # Get the initial seed
+        x0 = initialize_vector(size=X_train.T.shape[0], bounds=None)
+        x0 = x0.reshape(X_train.T.shape[0], 1)
+        x0 = torch.from_numpy(x0).to(device=device, dtype=torch.double)
+
+        # Initialize the deeplifting model
+        model = DeepliftingSkipMLP(
+            input_size=1,
+            hidden_sizes=(256,) * 3,
+            output_size=X_train.T.shape[0],
+            bounds=None,
+            skip_every_n=1,
+            activation='sine',
+            output_activation='sine',
+            agg_function='sum',
+            include_bn=False,
+            seed=trial,
+        )
+
+        # Put the model on the correct device
+        model = model.to(device=device, dtype=torch.double)
+
+        print('Set weights to match x0')
+        train_model_to_output(
+            inputs=inputs, model=model, x0=x0, epochs=100000, lr=1e-4, tolerance=1e-10
+        )
+
         # Run the dual annealing version
         start = time.time()
 
         # put model in training mode
-        result, model = svm_deeplifting(data=dl_data, inputs=inputs, trial=trial)
+        result, model = svm_deeplifting(
+            model=model, data=dl_data, inputs=inputs, trial=trial
+        )
         objective = result.best.f
 
         # Weights are different with deeplifting

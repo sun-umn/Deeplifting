@@ -37,15 +37,6 @@ class SinActivation(nn.Module):
         return self.amplitude * torch.sin((x - self.shift) * self.scale)
 
 
-class DualReLU(nn.Module):
-    def __init__(self):
-        super(DualReLU, self).__init__()
-        self.scale = nn.Parameter(torch.ones(1), requires_grad=True)
-
-    def forward(self, x):
-        return self.scale * (-nn.ReLU()(-x) + nn.ReLU()(x))
-
-
 class AddOffset(nn.Module):
     """
     Class that adds the weights / bias offsets & is
@@ -111,8 +102,6 @@ class DeepliftingBlock(nn.Module):
             self.activation_layer = nn.ReLU()
         elif self.activation == 'leaky_relu':
             self.activation_layer = nn.LeakyReLU()
-        elif self.activation == 'dual_relu':
-            self.activation_layer = DualReLU()
         else:
             self.activation_layer = nn.Identity()
 
@@ -133,9 +122,6 @@ class DeepliftingBlock(nn.Module):
         if self.include_bn:
             # Batch Normalization
             x = self.batch_norm(x)
-
-        # # Dropout
-        # x = self.dropout(x)
 
         # Activation function
         x = self.activation_layer(x)
@@ -282,7 +268,7 @@ class DeepliftingSkipMLP(nn.Module):
         # of the problems we have looked at so far also are
         # between bounds
         # self.x = nn.Parameter(torch.randn(input_size, self.first_hidden_Size), requires_grad=False)  # noqa
-        self.input_norm = nn.LayerNorm(self.first_hidden_size)
+        # self.input_norm = nn.LayerNorm(self.first_hidden_size)
 
     def forward(self, inputs=None):
         intermediate_connections = []
