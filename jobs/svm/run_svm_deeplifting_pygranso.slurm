@@ -9,4 +9,4 @@
 #SBATCH --gres=gpu:a100:1
 cd /home/jusun/dever120/Deeplifting
 export PATH=/home/jusun/dever120/miniconda3/envs/deeplifting/bin:$PATH
-python -m deeplifting.svm run-svm-deeplifting --trials=10 --experimentation=True
+python -m deeplifting.svm run-svm-deeplifting --trials=1 --experimentation=True
