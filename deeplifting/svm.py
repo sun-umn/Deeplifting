@@ -272,7 +272,7 @@ def svm_deeplifting_objective(
 
     # Orig obj
     f = torch.amax(-1 * obj)
-    f = f / torch.sqrt(torch.tensor(inputs_X.shape[0]))
+    f = f * torch.sqrt(torch.tensor(inputs_X.shape[0]))
 
     ce = None
     ci = None
