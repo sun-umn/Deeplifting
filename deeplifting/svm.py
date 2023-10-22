@@ -602,7 +602,7 @@ def run_svm_deeplifting(trials, experimentation):
 
         # Get the initial seed
         x0 = initialize_vector(size=X_train.T.shape[0], bounds=None)
-        x0 = x0.reshape(X_train.T.shape[0], 1)
+        x0 = x0.flatten()
         x0 = torch.from_numpy(x0).to(device=device, dtype=torch.double)
 
         # Initialize the deeplifting model
