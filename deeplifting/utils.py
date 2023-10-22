@@ -145,11 +145,16 @@ def set_seed(seed):
 
 
 def initialize_vector(size, bounds):
-    if len(bounds) != size:
-        raise ValueError("The number of bounds must match the size of the vector")
+    if bounds is not None:
+        if len(bounds) != size:
+            raise ValueError("The number of bounds must match the size of the vector")
 
-    vector = [np.random.uniform(low, high) for low, high in bounds]
-    return np.array(vector)
+        vector = [np.random.uniform(low, high) for low, high in bounds]
+        vector = np.array(vector)
+    else:
+        vector = np.random.randn(size)
+
+    return vector
 
 
 def train_model_to_output(inputs, model, x0, epochs=10000, lr=1e-4, tolerance=1e-3):

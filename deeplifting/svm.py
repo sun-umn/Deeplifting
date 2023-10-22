@@ -1,5 +1,4 @@
 # stdlib
-import gc
 import os
 import time
 
@@ -14,13 +13,13 @@ from pygranso.pygranso import pygranso
 from pygranso.pygransoStruct import pygransoStruct
 from scipy.optimize import dual_annealing
 from sklearn.datasets import load_digits, load_iris
-from sklearn.metrics import accuracy_score, f1_score
+from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from torchvision import datasets, transforms
 
 # first party
-# from deeplifting.models import DeepliftingSkipMLP
-from deeplifting.utils import HaltLog, get_devices, initialize_vector, set_seed
+from deeplifting.models import DeepliftingSkipMLP
+from deeplifting.utils import get_devices, initialize_vector, set_seed
 
 
 # Build a utility for loading in the iris dataset with option for a test set
@@ -218,7 +217,7 @@ def build_cifar100_dataset(test_split=True, torch_version=False):
 
 # Set up the learning function this will be for algorithms such
 # as dual annealing
-def numpy_svm(weight_vec, inputs_X, labels):
+def svm_numpy_objective(weight_vec, inputs_X, labels):
     # Compute SVM objective
     denominator = np.linalg.norm(weight_vec, ord=2)
     prod = np.matmul(weight_vec.T, inputs_X)
@@ -232,7 +231,7 @@ def numpy_svm(weight_vec, inputs_X, labels):
 
 
 # Set up the learning function - this will be for PyGRANSO
-def pygranso_svm(X_struct, inputs_X, labels):
+def svm_pygranso_objective(X_struct, inputs_X, labels):
     weight_vec = X_struct.w
 
     # Compute SVM objective
@@ -250,17 +249,11 @@ def pygranso_svm(X_struct, inputs_X, labels):
 
 
 # Set up the learning function
-def deeplifting_svm(
+def svm_deeplifting_objective(
     model,
     inputs,
-    X_train,
-    y_train,
-    X_test,
-    y_test,
-    train_accuracy,
-    test_accuracy,
-    train_f1,
-    test_f1,
+    inputs_X,
+    labels,
 ):
     model.train()
     outputs = model(inputs=inputs)
@@ -268,37 +261,16 @@ def deeplifting_svm(
 
     # Compute SVM objective
     denominator = torch.linalg.norm(weight_vec, ord=2)
-    prod = torch.matmul(weight_vec.reshape(1, -1), X_train)
-    numerator = y_train * prod
+    prod = torch.matmul(weight_vec.reshape(1, -1), inputs_X)
+    numerator = labels * prod
     obj = numerator / denominator
 
     # Orig obj
     f = torch.amax(-1 * obj)
+    f = f / torch.sqrt(torch.tensor(inputs_X.shape[0]))
 
     ce = None
     ci = None
-
-    # Let's also compute the iteration accuracy and f1 meaures
-    model.eval()
-
-    # Build predictions within the loop now
-    dl_weights = weight_vec.reshape(1, -1).detach().cpu().numpy()
-
-    # Train accuracy
-    preds_train = build_predictions(dl_weights, X_train.cpu().numpy())
-    preds_train = preds_train.flatten()
-    train_accuracy.append(accuracy_score(y_train.cpu().numpy(), preds_train))
-    train_f1.append(f1_score(y_train.cpu().numpy(), preds_train))
-
-    # Test accuracy
-    preds_test = build_predictions(dl_weights, X_test.cpu().numpy())
-    preds_test = preds_test.flatten()
-    test_accuracy.append(accuracy_score(y_test.cpu().numpy(), preds_test))
-    test_f1.append(f1_score(y_test.cpu().numpy(), preds_test))
-
-    # Help clear memory
-    gc.collect()
-    torch.cuda.empty_cache()
 
     return f, ci, ce
 
@@ -308,32 +280,40 @@ def svm_dual_annealing(X, labels, trial):
     set_seed(trial)
 
     # For this problem we will set up arbitrary bounds
-    bounds = [(-10, 10)] * X.shape[0]
+    bounds = [(-100, 100)] * X.shape[0]
 
     # Initialize a weight vector
-    x0 = initialize_vector(size=X.shape[0], bounds=bounds)
+    x0 = initialize_vector(size=X.shape[0], bounds=None)
 
     # Setup the objective function
-    fn = lambda w: numpy_svm(w, X, labels)
+    fn = lambda w: svm_numpy_objective(w, X, labels)
 
     # Get the result
     result = dual_annealing(
         fn,
         bounds,
         x0=x0,
-        maxiter=100,
+        maxiter=1,
     )
     return result
 
 
-def svm_pygranso(X, labels):
-    device = get_devices()
-    w0 = torch.randn(
-        (X.shape[0], 1),
-    ).to(device, dtype=torch.double)
-    var_in = {"w": list(w0.shape)}
+def svm_pygranso(X, labels, trial):
+    # Set the seed for the random initialization
+    set_seed(trial)
 
-    comb_fn = lambda X_struct: pygranso_svm(
+    # Get the device
+    device = get_devices()
+
+    # Initialize a weight vector
+    x0 = initialize_vector(size=X.shape[0], bounds=None)
+    x0 = x0.reshape(X.shape[0], 1)
+    x0 = torch.from_numpy(x0).to(device=device, dtype=torch.double)
+
+    # Get the dimension of the input variable
+    var_in = {"w": list(x0.shape)}
+
+    comb_fn = lambda X_struct: svm_pygranso_objective(
         X_struct,
         X,
         labels,
@@ -345,10 +325,10 @@ def svm_pygranso(X, labels):
     # Increase max number of iterations and let convege to stationarity
     # Do we see local minima in the PyGranso version
     # Dual Annealing, SCIP and Deeplifting, PyGranso (showing there are local minima)
-    opts.x0 = torch.reshape(w0, (-1, 1))
+    opts.x0 = torch.reshape(x0, (-1, 1))
     opts.torch_device = device
     opts.print_frequency = 10
-    opts.limited_mem_size = 5
+    opts.limited_mem_size = 100
     opts.stat_l2_model = False
     opts.double_precision = True
     opts.opt_tol = 1e-5
@@ -359,146 +339,81 @@ def svm_pygranso(X, labels):
     return soln
 
 
-def svm_deeplifting(problem_name, model, data, trials=1):
+def svm_deeplifting(data, inputs, trial):
     X_train = data['X_train']
     y_train = data['y_train']
-    X_test = data['X_test']
-    y_test = data['y_test']
 
     # Deeplifting time!
     device = get_devices()
 
-    # Final results
-    fn_results = []
+    # Initialize the deeplifting model
+    model = DeepliftingSkipMLP(
+        input_size=64,
+        hidden_sizes=(256,) * 3,
+        output_size=X_train.T.shape[0],
+        bounds=None,
+        skip_every_n=1,
+        activation='leaky_relu',
+        output_activation='sine',
+        agg_function='identity',
+        include_bn=True,
+        seed=trial,
+    )
 
-    # Let's do this over multiple restarts
-    for trial in range(trials):
-        # Get accuracy and F1 results
-        train_accuracy = []
-        test_accuracy = []
-        train_f1 = []
-        test_f1 = []
+    # Put the model on the correct device
+    model = model.to(device=device, dtype=torch.double)
+    nvar = getNvarTorch(model.parameters())
 
-        model = model.to(device=device, dtype=torch.double)
-        nvar = getNvarTorch(model.parameters())
+    # Setup the options
+    opts = pygransoStruct()
 
-        opts = pygransoStruct()
+    # Inital x0
+    x0 = (
+        torch.nn.utils.parameters_to_vector(model.parameters())
+        .detach()
+        .reshape(nvar, 1)
+        .to(device=device, dtype=torch.double)
+    )
 
-        # Inital x0
-        x0 = (
-            torch.nn.utils.parameters_to_vector(model.parameters())
-            .detach()
-            .reshape(nvar, 1)
-            .to(device=device, dtype=torch.double)
-        )
+    # PyGranso options
+    # Increase max number of iterations and
+    # let convege to stationarity
+    # Do we see local minima in the PyGranso version
+    # Dual Annealing, SCIP and Deeplifting,
+    # PyGranso (showing there are local minima)
+    opts.x0 = x0
+    opts.torch_device = device
+    opts.print_frequency = 1
+    opts.limited_mem_size = 100
+    opts.stat_l2_model = False
+    opts.double_precision = True
+    opts.opt_tol = 1e-5
+    opts.maxit = 10000
 
-        # Fix the inputs for deeplifting
-        output_size = X_train.T.shape[0]
-        inputs = torch.randn(1, 5 * output_size)
-        inputs = inputs.to(device=device, dtype=torch.double)
+    # Combined function
+    comb_fn = lambda model: svm_deeplifting_objective(
+        model,
+        inputs,
+        X_train.T,
+        y_train,
+    )  # noqa
 
-        # PyGranso options
-        # Increase max number of iterations and
-        # let convege to stationarity
-        # Do we see local minima in the PyGranso version
-        # Dual Annealing, SCIP and Deeplifting,
-        # PyGranso (showing there are local minima)
-        opts.x0 = x0
-        opts.torch_device = device
-        opts.print_frequency = 100
-        opts.limited_mem_size = 100
-        opts.stat_l2_model = False
-        opts.double_precision = True
-        opts.opt_tol = 1e-4
-        opts.maxit = 10000
-
-        # Combined function
-        comb_fn = lambda model: deeplifting_svm(
-            model,
-            inputs,
-            X_train.T,
-            y_train,
-            X_test.T,
-            y_test,
-            train_accuracy,
-            test_accuracy,
-            train_f1,
-            test_f1,
-        )  # noqa
-
-        # Set PyGRANSO's logging function in opts
-        # Initiate halt log - we want to get this information to generate the
-        # objective trajectory and training logs
-        mHLF_obj = HaltLog()
-        halt_log_fn, get_log_fn = mHLF_obj.makeHaltLogFunctions(opts.maxit)
-        opts.halt_log_fn = halt_log_fn
-
-        # Run the main algorithm
-        start_time = time.time()
-        _ = pygranso(var_spec=model, combined_fn=comb_fn, user_opts=opts)
-        end_time = time.time()
-        total_time = end_time - start_time
-
-        # GET THE HISTORY OF ITERATES
-        # Even if an error is thrown, the log generated until the error can be
-        # obtained by calling get_log_fn()
-        log = get_log_fn()
-
-        # Final structure
-        indexes = (pd.Series(log.fn_evals).cumsum() - 1).values.tolist()  # noqa
-
-        # Results in a dict for now
-        # Let's check out the final results
-        train_accuracy = pd.Series(train_accuracy)[indexes].values
-        train_f1 = pd.Series(train_f1)[indexes].values
-        test_accuracy = pd.Series(test_accuracy)[indexes].values
-        test_f1 = pd.Series(test_f1)[indexes].values
-        objective_values = pd.Series(log.f).values
-
-        # Objective value
-        objective_df = pd.DataFrame(
-            {
-                'values': objective_values,
-                'metric': 'Objective',
-                'trial': trial,
-                'iteration': range(len(objective_values)),
-            }
-        )
-        objective_df['problem_name'] = problem_name
-
-        # Train accuracy
-        train_df = pd.DataFrame(
-            {
-                'values': train_accuracy,
-                'metric': 'Train Accuracy',
-                'trial': trial,
-                'iteration': range(len(train_accuracy)),
-            }
-        )
-        train_df['problem_name'] = problem_name
-
-        # Test accuracy
-        test_df = pd.DataFrame(
-            {
-                'values': test_accuracy,
-                'metric': 'Test Accuracy',
-                'trial': trial,
-                'iteration': range(len(test_accuracy)),
-            }
-        )
-        test_df['problem_name'] = problem_name
-
-        # Compile all results
-        results_df = pd.concat([objective_df, train_df, test_df], ignore_index=True)
-        results_df['total_time'] = total_time
-
-        fn_results.append(results_df)
-
-    return pd.concat(fn_results, ignore_index=True)
+    # Run the main algorithm
+    model.train()
+    soln = pygranso(var_spec=model, combined_fn=comb_fn, user_opts=opts)
+    return soln, model
 
 
-def build_predictions(w, X):
-    predictions = np.sign(w @ X)
+def build_predictions(w, X, version='numpy'):
+    """
+    Simple utility function to build the predictions
+    from the fitted weights
+    """
+    predictions = w @ X
+    if version == 'pytorch':
+        predictions = predictions.cpu().detach().numpy()
+
+    predictions = np.sign(predictions)
     return predictions
 
 
@@ -508,10 +423,11 @@ def cli():
     pass
 
 
-@cli.command('run-svm-dual-annealing')
+@cli.command('run-svm')
+@click.option('--algorithm', default='dual-annealing')
 @click.option('--trials', default=10)
 @click.option('--experimentation', default=True)
-def run_svm_dual_annealing(trials, experimentation):
+def run_svm(algorithm, trials, experimentation):
     """
     Function that will run dual annealing for determining
     the weights for SVM
@@ -522,7 +438,7 @@ def run_svm_dual_annealing(trials, experimentation):
         wandb.init(
             # set the wandb project where this run will be logged
             project="Deeplifting-SVM",
-            tags=['dual-annealing-svm'],
+            tags=[f'{algorithm}-svm'],
         )
 
     print('Run Dual Annealing for SVM')
@@ -535,11 +451,25 @@ def run_svm_dual_annealing(trials, experimentation):
 
     # Load in the CIFAR 100 dataset
     # Numpy data
-    data = build_cifar100_dataset(test_split=True, torch_version=False)
-    X_train = data['X_train']
-    y_train = data['y_train']
-    X_test = data['X_test']
-    y_test = data['y_test']
+    if algorithm in ('dual-annealing'):
+        data = build_cifar100_dataset(test_split=True, torch_version=False)
+        X_train = data['X_train']
+        y_train = data['y_train']
+        X_test = data['X_test']
+        y_test = data['y_test']
+
+    # If the algorithm is either pygranso or deeplifting we need to
+    # convert the data
+    if algorithm in ('pygranso'):
+        # Get the device
+        device = get_devices()
+
+        # Load the torch data
+        data = build_cifar100_dataset(test_split=True, torch_version=True)
+        X_train = data['X_train'].to(device=device, dtype=torch.double)
+        y_train = data['y_train'].to(device=device, dtype=torch.double)
+        X_test = data['X_test'].to(device=device, dtype=torch.double)
+        y_test = data['y_test'].to(device=device, dtype=torch.double)
 
     # result data
     results_df_list = []
@@ -550,33 +480,61 @@ def run_svm_dual_annealing(trials, experimentation):
 
         # Run the dual annealing version
         start = time.time()
-        dual_annealing_result = svm_dual_annealing(X_train.T, y_train, trial=trial)
-        da_objective = dual_annealing_result.fun
-        da_weights = dual_annealing_result.x
 
-        # Create predictions for train and test data
-        preds_train = build_predictions(da_weights, X_train.T)
-        preds_test = build_predictions(da_weights, X_test.T)
-        end = time.time()
+        if algorithm == 'dual-annealing':
+            result = svm_dual_annealing(X_train.T, y_train, trial=trial)
+            objective = result.fun
+            weights = result.x
 
-        # Compute total time
-        total_time = end - start
+            # Create predictions for train and test data
+            preds_train = build_predictions(weights, X_train.T)
+            preds_test = build_predictions(weights, X_test.T)
 
-        # Train and test data accuracy
-        train_accuracy = accuracy_score(y_train, preds_train)
-        test_accuracy = accuracy_score(y_test, preds_test)
+            end = time.time()
+
+            # Compute total time
+            total_time = end - start
+
+            # Train and test data accuracy
+            train_accuracy = accuracy_score(y_train, preds_train)
+            test_accuracy = accuracy_score(y_test, preds_test)
+
+        elif algorithm == 'pygranso':
+            result = svm_pygranso(X_train.T, y_train, trial=trial)
+            objective = result.best.f
+            weights = result.best.x.flatten().reshape(1, -1)
+
+            # Create predictions for train and test data
+            preds_train = build_predictions(
+                weights, X_train.T, version='pytorch'
+            ).flatten()
+            preds_test = build_predictions(
+                weights, X_test.T, version='pytorch'
+            ).flatten()
+
+            end = time.time()
+
+            # Compute total time
+            total_time = end - start
+
+            # Train and test data accuracy
+
+            train_accuracy = accuracy_score(
+                y_train.cpu().numpy().flatten(), preds_train
+            )
+            test_accuracy = accuracy_score(y_test.cpu().numpy().flatten(), preds_test)
 
         # save the data
         results_df = pd.DataFrame(
             {
-                'values': [da_objective, train_accuracy, test_accuracy],
+                'values': [objective, train_accuracy, test_accuracy],
                 'metric': ['Objective', 'Train-Accuracy', 'Test-Accuracy'],
             }
         )
         results_df['trial'] = trial
         results_df['problem_name'] = 'CIFAR-100'
         results_df['total_time'] = total_time
-        results_df['algorithm'] = 'Dual-Annealing'
+        results_df['algorithm'] = algorithm
 
         # Append data to list
         results_df_list.append(results_df)
@@ -585,7 +543,119 @@ def run_svm_dual_annealing(trials, experimentation):
     results_df = pd.concat(results_df_list)
 
     # Save the data
-    svm_path = f'./experiments/{uuid}/svm/dual-annealing'
+    svm_path = f'./experiments/{uuid}/svm/{algorithm}'
+    file_name = 'svm.parquet'
+    save_path = os.path.join(svm_path, file_name)
+
+    # Save dual annealing data
+    print('Saving data!')
+    results_df.to_parquet(save_path)
+
+    print('Process finished!')
+    if experimentation:
+        wandb.finish()
+
+
+@cli.command('run-svm-deeplifting')
+@click.option('--trials', default=10)
+@click.option('--experimentation', default=True)
+def run_svm_deeplifting(trials, experimentation):
+    """
+    Function that will run deeplifting for determining
+    the weights for SVM
+    """
+    if experimentation:
+        wandb.login(key='2080070c4753d0384b073105ed75e1f46669e4bf')
+
+        wandb.init(
+            # set the wandb project where this run will be logged
+            project="Deeplifting-SVM",
+            tags=['deeplifting-pygranso-svm'],
+        )
+
+    print('Run Deeplifting-PyGranso for SVM')
+
+    # Path for the UUID file under the experiments directory
+    experiments_path = './experiments'
+    uuid_file_path = os.path.join(experiments_path, 'current_experiment_uuid.txt')
+    with open(uuid_file_path) as f:
+        uuid = f.readline()
+
+    # Load in the CIFAR 100 dataset
+    # Get the device
+    device = get_devices()
+
+    # Load the torch data
+    data = build_cifar100_dataset(test_split=True, torch_version=True)
+    X_train = data['X_train'].to(device=device, dtype=torch.double)
+    y_train = data['y_train'].to(device=device, dtype=torch.double)
+    X_test = data['X_test'].to(device=device, dtype=torch.double)
+    y_test = data['y_test'].to(device=device, dtype=torch.double)
+
+    # data for deeplifting
+    dl_data = {
+        'X_train': X_train,
+        'y_train': y_train,
+        'X_test': X_test,
+        'y_test': y_test,
+    }
+
+    # result data
+    results_df_list = []
+
+    # We want to run n trials of the modeling for analysis
+    for trial in range(trials):
+        print(f'Running trial {trial + 1}')
+
+        # Get the inputs for the model
+        inputs = torch.randn(1, 5 * X_train.T.shape[0])
+        inputs = inputs.to(device=device, dtype=torch.double)
+
+        # Run the dual annealing version
+        start = time.time()
+
+        # put model in training mode
+        result, model = svm_deeplifting(data=dl_data, inputs=inputs, trial=trial)
+        objective = result.best.f
+
+        # Weights are different with deeplifting
+        model.eval()
+        weights = model(inputs=inputs)
+        weights = weights.mean(axis=0).reshape(1, -1)
+
+        # Create predictions for train and test data
+        preds_train = build_predictions(weights, X_train.T, version='pytorch').flatten()
+        preds_test = build_predictions(weights, X_test.T, version='pytorch').flatten()
+
+        end = time.time()
+
+        # Compute total time
+        total_time = end - start
+
+        # Train and test data accuracy
+        train_accuracy = accuracy_score(y_train.cpu().numpy().flatten(), preds_train)
+        test_accuracy = accuracy_score(y_test.cpu().numpy().flatten(), preds_test)
+
+        # save the data
+        results_df = pd.DataFrame(
+            {
+                'values': [objective, train_accuracy, test_accuracy],
+                'metric': ['Objective', 'Train-Accuracy', 'Test-Accuracy'],
+            }
+        )
+        results_df['trial'] = trial
+        results_df['problem_name'] = 'CIFAR-100'
+        results_df['total_time'] = total_time
+        results_df['algorithm'] = 'deeplifting-pygranso'
+
+        # Append data to list
+        results_df_list.append(results_df)
+
+    # Create full dataframe
+    results_df = pd.concat(results_df_list)
+
+    # Save the data
+    svm_path = f'./experiments/{uuid}/svm/deeplifting-pygranso'
     file_name = 'svm.parquet'
     save_path = os.path.join(svm_path, file_name)
 
@@ -601,81 +671,3 @@ def run_svm_dual_annealing(trials, experimentation):
 if __name__ == "__main__":
     # Be able to run different commands
     cli()
-
-    # print('Run Algorithms!')
-    # run = neptune.init_run(  # noqa
-    #     project="dever120/Deeplifting",
-    #     api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzYmIwMTUyNC05YmZmLTQ1NzctOTEyNS1kZTIxYjU5NjY5YjAifQ==",  # noqa
-    # )  # your credentials
-    # run['sys/tags'].add(['svm'])
-
-    # # Load in the CIFAR 100 dataset
-    # # Numpy data
-    # data = build_cifar100_dataset(test_split=True, torch_version=False)
-    # X_train = data['X_train']
-    # y_train = data['y_train']
-    # X_test = data['X_test']
-    # y_test = data['y_test']
-
-    # # Torch data
-    # data = build_cifar100_dataset(test_split=True, torch_version=True)
-    # Xt_train = data['X_train']
-    # yt_train = data['y_train']
-    # Xt_test = data['X_test']
-    # yt_test = data['y_test']
-
-    # # Need to put the torch data on the same device
-    # device = get_devices()
-    # Xt_train = Xt_train.to(device=device, dtype=torch.double)
-    # yt_train = yt_train.to(device=device, dtype=torch.double)
-    # Xt_test = Xt_test.to(device=device, dtype=torch.double)
-    # yt_test = yt_test.to(device=device, dtype=torch.double)
-
-    # # Get the PyGRANSO result
-    # pygranso_result = run_pygranso(Xt_train.T, yt_train)
-    # pg_weights = pygranso_result.best.x
-    # pg_weights = pg_weights.detach().cpu().numpy().reshape(1, -1)
-
-    # # Train accuracy
-    # preds_train = build_predictions(pg_weights, X_train.T)
-
-    # # Test accuracy
-    # preds_test = build_predictions(pg_weights, X_test.T)
-
-    # print(
-    #     accuracy_score(y_train, preds_train.flatten()),
-    #     accuracy_score(y_test, preds_test.flatten()),
-    # )
-
-    # # Initialize the deeplifting model
-    # model = DeepliftingSkipMLP(
-    #     input_size=64,
-    #     hidden_sizes=(256,) * 3,
-    #     output_size=Xt_train.T.shape[0],
-    #     bounds=None,
-    #     skip_every_n=1,
-    #     activation='leaky_relu',
-    #     output_activation='sine',
-    #     agg_function='identity',
-    #     include_bn=True,
-    #     seed=0,
-    # )
-
-    # # data for deeplifting
-    # dl_data = {
-    #     'X_train': Xt_train,
-    #     'y_train': yt_train,
-    #     'X_test': Xt_test,
-    #     'y_test': yt_test,
-    # }
-
-    # # Run deeplifting and obtain the weights
-    # dl_results = run_deeplifting(
-    #     problem_name='CIFAR-100', model=model, data=dl_data, trials=10
-    # )
-
-    # # Save the data from SVM
-    # save_path = os.path.join(
-    #     os.getcwd(), 'data', 'svm', 'svm-deeplifting-results.parquet'
-    # )
-    # dl_results.to_parquet(save_path)
