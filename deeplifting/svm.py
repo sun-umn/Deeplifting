@@ -232,6 +232,7 @@ def svm_numpy_objective(weight_vec, inputs_X, labels):
 
     # Orig obj
     f = np.amax(-1 * obj)
+    f = f * np.sqrt(inputs_X.shape[0])
     return f
 
 
@@ -247,6 +248,7 @@ def svm_pygranso_objective(X_struct, inputs_X, labels):
 
     # Orig obj
     f = torch.amax(-1 * obj)
+    f = f * torch.sqrt(torch.tensor(inputs_X.shape[0]))
 
     ce = None
     ci = None
