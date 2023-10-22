@@ -300,7 +300,7 @@ def svm_dual_annealing(X, labels, trial):
         fn,
         bounds,
         x0=x0,
-        maxiter=1,
+        maxiter=1000,
     )
     return result
 
