@@ -609,15 +609,15 @@ def run_svm_deeplifting(trials, experimentation):
 
         # Initialize the deeplifting model
         model = DeepliftingSkipMLP(
-            input_size=1,
-            hidden_sizes=(256,) * 3,
+            input_size=64,
+            hidden_sizes=(128,) * 3,
             output_size=X_train.T.shape[0],
             bounds=None,
             skip_every_n=1,
             activation='leaky_relu',
             output_activation='sine',
             agg_function='identity',
-            include_bn=False,
+            include_bn=True,
             seed=trial,
         )
 
