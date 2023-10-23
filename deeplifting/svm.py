@@ -175,7 +175,7 @@ def build_cifar100_dataset(test_split=True, torch_version=False):
     df['labels'] = y
 
     # Need a smaller sample
-    df = df.sample(frac=0.20)
+    df = df.sample(frac=0.10)
 
     X = df[columns + [f'f{X.shape[1] + 1}']].values
     y = df['labels']
