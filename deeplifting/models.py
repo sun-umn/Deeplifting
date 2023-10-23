@@ -255,6 +255,9 @@ class DeepliftingSkipMLP(nn.Module):
             activation=output_activation,
         )
 
+        # Linear scaling layer
+        self.linear_scaling_layer = nn.Linear(output_size, output_size)
+
         # Final scaling layer
         self.scaling_layer = DeepliftingScalingBlock(
             bounds=bounds,
@@ -309,5 +312,6 @@ class DeepliftingSkipMLP(nn.Module):
 
         # Run through the scaling layer
         if self.bounds is not None:
+            out = self.linear_scaling_layer(out)
             out = self.scaling_layer(out)
         return out
