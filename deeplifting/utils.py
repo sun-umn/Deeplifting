@@ -175,7 +175,7 @@ def train_model_to_output(inputs, model, x0, epochs=10000, lr=1e-4, tolerance=1e
     # Freeze all layers except the output layer
     for name, parameters in model.named_parameters():
         if (
-            'scaling_layer' not in name
+            'linear_scaling' not in name
         ):  # assuming 'layer2' is the output layer, adjust if otherwise
             parameters.requires_grad = False
 
