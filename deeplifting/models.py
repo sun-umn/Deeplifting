@@ -311,7 +311,7 @@ class DeepliftingSkipMLP(nn.Module):
         torch.cuda.empty_cache()
 
         # Run through the scaling layer
+        out = self.linear_scaling_layer(out)
         if self.bounds is not None:
-            out = self.linear_scaling_layer(out)
             out = self.scaling_layer(out)
         return out
