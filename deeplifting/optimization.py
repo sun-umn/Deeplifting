@@ -657,6 +657,12 @@ def run_deeplifting(
     fn_values = []
     iterim_results: List[Any] = []  # noqa
 
+    # Get the initial starting point for each trial
+    initial_values = []
+
+    # Keep the termination codes for each of the trials
+    termination_codes = []
+
     for trial in range(trials):
         set_seed(trial)
         # Objective function
@@ -717,6 +723,7 @@ def run_deeplifting(
 
         print(f'Initial x0 = {x0}')
         print(f'Fitted x0 = {outputs}')
+        initial_values.append(outputs.detach().cpu().numpy())
 
         # Inital x0
         x0 = (
@@ -778,6 +785,9 @@ def run_deeplifting(
         end_time = time.time()
         total_time = end_time - start_time
 
+        # Save the termination code
+        termination_codes.append(soln.termination_code)
+
         # Get final x we will also need to map
         # it to the same bounds
         outputs = model(inputs=inputs)
@@ -829,7 +839,13 @@ def run_deeplifting(
         gc.collect()
         torch.cuda.empty_cache()
 
-    return {'results': None, 'final_results': fn_values, 'callbacks': iterim_results}
+    return {
+        'results': None,
+        'final_results': fn_values,
+        'callbacks': iterim_results,
+        'initial_values': initial_values,
+        'termination_codes': termination_codes,
+    }
 
 
 def deeplifting_high_dimension_fn(model, objective, inputs=None):
