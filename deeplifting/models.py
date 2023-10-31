@@ -255,8 +255,8 @@ class DeepliftingSkipMLP(nn.Module):
             activation=output_activation,
         )
 
-        # Linear scaling layer
-        self.linear_scaling_layer = nn.Linear(output_size, output_size)
+        # # Linear scaling layer
+        # self.linear_scaling_layer = nn.Linear(output_size, output_size)
 
         # Final scaling layer
         self.scaling_layer = DeepliftingScalingBlock(
@@ -310,8 +310,8 @@ class DeepliftingSkipMLP(nn.Module):
         del intermediate_connections
         torch.cuda.empty_cache()
 
-        # Run through the scaling layer
-        out = self.linear_scaling_layer(out)
+        # # Run through the scaling layer
+        # out = self.linear_scaling_layer(out)
         if self.bounds is not None:
             out = self.scaling_layer(out)
         return out
