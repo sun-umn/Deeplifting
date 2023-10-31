@@ -698,10 +698,10 @@ def run_deeplifting(
 
         model = model.to(device=device, dtype=torch.double)
 
-        # Let's make sure that all methods have the same x0
-        train_model_to_output(
-            inputs=inputs, model=model, x0=x0, epochs=100000, lr=1e-4, tolerance=1e-3
-        )
+        # # Let's make sure that all methods have the same x0
+        # train_model_to_output(
+        #     inputs=inputs, model=model, x0=x0, epochs=100000, lr=1e-4, tolerance=1e-3
+        # )
         nvar = getNvarTorch(model.parameters())
 
         # Setup a pygransoStruct for the algorithm
@@ -728,7 +728,8 @@ def run_deeplifting(
 
         opts.x0 = x0
         opts.torch_device = device
-        opts.print_level = 0
+        # opts.print_level = 0
+        opts.print_frequency = 1
         opts.limited_mem_size = 100
         opts.stat_l2_model = False
         opts.double_precision = True
