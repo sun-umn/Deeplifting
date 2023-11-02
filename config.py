@@ -200,6 +200,12 @@ search_hidden_sizes = [
     hidden_size_512 * 4,
     hidden_size_512 * 5,
     hidden_size_512 * 10,
+    # Hidden sizes of 512
+    hidden_size_1024 * 2,
+    hidden_size_1024 * 3,
+    hidden_size_1024 * 4,
+    hidden_size_1024 * 5,
+    hidden_size_1024 * 10,
 ]
 
 # Input sizes
