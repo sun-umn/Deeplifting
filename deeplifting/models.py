@@ -114,11 +114,19 @@ class DeepliftingBlock(nn.Module):
             nn.init.kaiming_normal_(
                 self.linear.weight,
                 mode='fan_in',
-                nonlinearity='relu',
+                nonlinearity=self.activation,
             )
-
-            # gain = torch.nn.init.calculate_gain('relu')
-            # nn.init.xavier_uniform_(self.linear.weight, gain=gain)
+            # Initalize the bias to zero
+            nn.init.zeros_(self.linear.bias)
+        elif self.activation == 'leaky_relu':
+            # Initialize the weights for leaky relu
+            nn.init.kaiming_normal_(
+                self.linear.weight,
+                mode='fan_in',
+                nonlinearity=self.activation,
+            )
+            # Initailize the bias to zero
+            nn.init.zeros_(self.linear.bias)
 
         # Define the Batch Normalization layer
         # self.batch_norm = nn.BatchNorm1d(output_size)
