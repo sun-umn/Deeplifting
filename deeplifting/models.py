@@ -118,6 +118,7 @@ class DeepliftingBlock(nn.Module):
             )
             # Initalize the bias to zero
             nn.init.zeros_(self.linear.bias)
+
         elif self.activation == 'leaky_relu':
             # Initialize the weights for leaky relu
             nn.init.kaiming_uniform_(
@@ -277,7 +278,7 @@ class DeepliftingSkipMLP(nn.Module):
         # Final scaling layer
         self.scaling_layer = DeepliftingScalingBlock(
             bounds=bounds,
-            output_activation=output_activation,
+            output_activation='sine',
             dimensions=output_size,
             scale=self.scale,
         )
