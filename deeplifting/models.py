@@ -28,13 +28,13 @@ class SinActivation(nn.Module):
 
     def __init__(self):  # noqa
         super(SinActivation, self).__init__()
-        self.amplitude = nn.Parameter(torch.pi * torch.ones(1), requires_grad=True)
+        # self.amplitude = nn.Parameter(torch.pi * torch.ones(1), requires_grad=True)
         self.scale = nn.Parameter(torch.ones(1), requires_grad=True)
         self.shift = nn.Parameter(torch.zeros(1), requires_grad=True)
         self.y_shift = nn.Parameter(torch.zeros(1), requires_grad=True)
 
     def forward(self, x):  # noqa
-        return self.amplitude * torch.sin((x - self.shift) * self.scale)
+        return torch.sin((x - self.shift) * self.scale)
 
 
 class AddOffset(nn.Module):
@@ -108,12 +108,21 @@ class DeepliftingBlock(nn.Module):
         # Define the Linear layer
         self.linear = nn.Linear(input_size, output_size)
 
+        # Define a initlization scheme
+        if self.activation == 'relu':
+            # initialize the weights
+            nn.init.kaiming_normal_(
+                self.linear.weight,
+                mode='fan_in',
+                nonlinearity='relu',
+            )
+
+            # gain = torch.nn.init.calculate_gain('relu')
+            # nn.init.xavier_uniform_(self.linear.weight, gain=gain)
+
         # Define the Batch Normalization layer
         # self.batch_norm = nn.BatchNorm1d(output_size)
         self.batch_norm = nn.LayerNorm(output_size)
-
-        # Dropout
-        self.dropout = nn.Dropout(p=0.01)
 
     def forward(self, x):
         # Linear layer
@@ -122,6 +131,9 @@ class DeepliftingBlock(nn.Module):
         if self.include_bn:
             # Batch Normalization
             x = self.batch_norm(x)
+
+        if self.activation not in ('sine', 'relu', 'leaky_relu'):
+            return x
 
         # Activation function
         x = self.activation_layer(x)
@@ -176,13 +188,9 @@ class DeepliftingScalingBlock(nn.Module):
                 # to avoid weird behavior
                 elif (a is not None) and (b is not None):
                     if self.output_activation != 'sine':
-                        x_constr = a + (b - a) / 2.0 * (
-                            torch.sin(outputs[:, index]) + 1
-                        )
+                        x_constr = a + (b - a) / 2.0 * (outputs[:, index] + 1)
                     else:
-                        x_constr = a + (b - a) / 2.0 * (
-                            torch.sin(outputs[:, index]) + 1
-                        )
+                        x_constr = a + (b - a) / 2.0 * (outputs[:, index] + 1)
                 x_values_float.append(x_constr)
             x = torch.stack(x_values_float, axis=1)
 
@@ -252,7 +260,7 @@ class DeepliftingSkipMLP(nn.Module):
         self.output_layer = DeepliftingBlock(
             hidden_sizes[-1],
             output_size,
-            activation=output_activation,
+            activation='sine',
         )
 
         # # Linear scaling layer
@@ -276,7 +284,6 @@ class DeepliftingSkipMLP(nn.Module):
     def forward(self, inputs=None):
         intermediate_connections = []
         x = inputs
-        # x = self.input_norm(x)
 
         for i, layer in enumerate(self.layers):
             x_new = layer(x)
@@ -310,8 +317,8 @@ class DeepliftingSkipMLP(nn.Module):
         del intermediate_connections
         torch.cuda.empty_cache()
 
-        # # Run through the scaling layer
-        # out = self.linear_scaling_layer(out)
-        if self.bounds is not None:
-            out = self.scaling_layer(out)
+        # # # Run through the scaling layer
+        # # out = self.linear_scaling_layer(out)
+        # if self.bounds is not None:
+        #     out = self.scaling_layer(out)
         return out
