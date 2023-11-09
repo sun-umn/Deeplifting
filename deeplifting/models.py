@@ -111,7 +111,7 @@ class DeepliftingBlock(nn.Module):
         # Define a initlization scheme
         if self.activation == 'relu':
             # initialize the weights
-            nn.init.kaiming_uniform_(
+            nn.init.kaiming_normal_(
                 self.linear.weight,
                 mode='fan_in',
                 nonlinearity=self.activation,
@@ -121,7 +121,7 @@ class DeepliftingBlock(nn.Module):
 
         elif self.activation == 'leaky_relu':
             # Initialize the weights for leaky relu
-            nn.init.kaiming_uniform_(
+            nn.init.kaiming_normal_(
                 self.linear.weight,
                 mode='fan_in',
                 nonlinearity=self.activation,
