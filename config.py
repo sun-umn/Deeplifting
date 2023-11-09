@@ -177,7 +177,6 @@ search_hidden_sizes = [
     hidden_size_128 * 5,
     hidden_size_128 * 10,
     hidden_size_128 * 15,
-    hidden_size_128 * 20,
     # Hidden sizes of 192
     hidden_size_192 * 2,
     hidden_size_192 * 3,
@@ -185,7 +184,6 @@ search_hidden_sizes = [
     hidden_size_192 * 5,
     hidden_size_192 * 10,
     hidden_size_192 * 15,
-    hidden_size_192 * 20,
     # Hidden sizes of 256
     hidden_size_256 * 2,
     hidden_size_256 * 3,
@@ -193,7 +191,6 @@ search_hidden_sizes = [
     hidden_size_256 * 5,
     hidden_size_256 * 10,
     hidden_size_256 * 15,
-    hidden_size_256 * 20,
     # Hidden sizes of 382
     hidden_size_384 * 2,
     hidden_size_384 * 3,
@@ -201,7 +198,6 @@ search_hidden_sizes = [
     hidden_size_384 * 5,
     hidden_size_384 * 10,
     hidden_size_384 * 15,
-    hidden_size_384 * 20,
     # Hidden sizes of 512
     hidden_size_512 * 2,
     hidden_size_512 * 3,
@@ -209,14 +205,13 @@ search_hidden_sizes = [
     hidden_size_512 * 5,
     hidden_size_512 * 10,
     hidden_size_512 * 15,
-    hidden_size_512 * 20,
 ]
 
 # Input sizes
 search_input_sizes = [1]
 
 # Hidden activations
-search_hidden_activations = ['sine']
+search_hidden_activations = ['relu']
 
 # Ouput activations
 search_output_activations = ['sine']
