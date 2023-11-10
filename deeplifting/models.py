@@ -269,7 +269,7 @@ class DeepliftingSkipMLP(nn.Module):
         self.output_layer = DeepliftingBlock(
             hidden_sizes[-1],
             output_size,
-            activation='sine',
+            activation=activation,
         )
 
         # # Linear scaling layer
