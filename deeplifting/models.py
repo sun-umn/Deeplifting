@@ -129,6 +129,16 @@ class DeepliftingBlock(nn.Module):
             # Initailize the bias to zero
             nn.init.zeros_(self.linear.bias)
 
+        elif self.activation == 'identity':
+            # Initialize the weights for leaky relu
+            nn.init.kaiming_normal_(
+                self.linear.weight,
+                mode='fan_in',
+                nonlinearity=self.activation,
+            )
+            # Initailize the bias to zero
+            nn.init.zeros_(self.linear.bias)
+
         # Define the Batch Normalization layer
         # self.batch_norm = nn.BatchNorm1d(output_size)
         self.batch_norm = nn.LayerNorm(output_size)
@@ -269,8 +279,10 @@ class DeepliftingSkipMLP(nn.Module):
         self.output_layer = DeepliftingBlock(
             hidden_sizes[-1],
             output_size,
-            activation=activation,
+            activation='identity',
         )
+
+        self.output_layer_activation = SinActivation()
 
         # # Linear scaling layer
         # self.linear_scaling_layer = nn.Linear(output_size, output_size)
@@ -322,6 +334,9 @@ class DeepliftingSkipMLP(nn.Module):
             x = torch.amax(x, axis=0)
             # Final output layer
             out = self.output_layer(x)
+
+        # Output activation layer
+        out = self.output_layer_activation(out)
 
         del intermediate_connections
         torch.cuda.empty_cache()
