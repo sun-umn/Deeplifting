@@ -134,7 +134,7 @@ class DeepliftingBlock(nn.Module):
             nn.init.kaiming_normal_(
                 self.linear.weight,
                 mode='fan_in',
-                nonlinearity=self.activation,
+                nonlinearity='relu',
             )
             # Initailize the bias to zero
             nn.init.zeros_(self.linear.bias)
