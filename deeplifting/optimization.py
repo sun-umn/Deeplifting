@@ -573,7 +573,6 @@ def deeplifting_nd_fn(
     trial,
     dimensions,
     deeplifting_results,
-    problem_name,
     inputs,
 ):
     """
