@@ -950,7 +950,7 @@ def find_best_architecture_task(problem_name, method, dimensionality):
             filename = os.path.join(
                 main_directory,
                 deeplifting_directory,
-                'ackley-relu-{num_layers}-{units}.parquet',
+                f'ackley-relu-{num_layers}-{units}.parquet',
             )
             results_df.to_parquet(filename)
 
