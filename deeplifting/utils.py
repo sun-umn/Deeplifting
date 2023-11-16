@@ -224,8 +224,6 @@ def train_model_to_output(inputs, model, x0, epochs=10000, lr=1e-4, tolerance=1e
             )
             break
 
-    print(f'Initial x0 in fn = {x0}')
-    print(f'Fitted x0 in fn = {outputs}')
     print(f'Final L2 distance {l2_distance:.4e}')
 
     # Unfreeze all layers

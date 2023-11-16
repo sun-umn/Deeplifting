@@ -872,9 +872,6 @@ def find_best_architecture_task(problem_name, method, dimensionality, experiment
                     model.eval()
                     outputs = model(inputs=inputs)
 
-                    print(f'Initial x0 = {x_start}')
-                    print(f'Fitted x0 = {outputs}')
-
                     # Inital x0 - for neural network
                     x0 = (
                         torch.nn.utils.parameters_to_vector(model.parameters())
