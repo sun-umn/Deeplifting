@@ -155,7 +155,7 @@ def initialize_vector(size, bounds):
         bounds = list(zip(lower_bounds, upper_bounds))
 
         vector = [np.random.uniform(low, high) for low, high in bounds]
-        vector = np.array(vector)
+        vector = np.array(vector).flatten()
     else:
         vector = np.random.randn(size)
 
