@@ -851,6 +851,7 @@ def find_best_architecture_task(problem_name, method, dimensionality, experiment
                     model = model.to(device=device, dtype=torch.double)
 
                     # Let's make sure that all methods have the same x0
+                    # Test
                     train_model_to_output(
                         inputs=inputs,
                         model=model,
