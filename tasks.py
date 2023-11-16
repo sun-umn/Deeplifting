@@ -3,14 +3,17 @@
 import os
 import warnings
 from datetime import datetime
-from itertools import product
 
 # third party
 import click
 import neptune
 import numpy as np
 import pandas as pd
+import torch
 import wandb
+from pygranso.private.getNvar import getNvarTorch
+from pygranso.pygranso import pygranso
+from pygranso.pygransoStruct import pygransoStruct
 
 # first party
 from config import (
@@ -25,27 +28,19 @@ from config import (
     qing_series,
     rastrigin_series,
     schwefel_series,
-    search_agg_functions,
-    search_hidden_activations,
-    search_hidden_sizes,
-    search_include_bn,
-    search_input_sizes,
-    search_output_activations,
 )
+from deeplifting.models import ReLUDeepliftingMLP
 from deeplifting.optimization import run_pyomo  # noqa
 from deeplifting.optimization import (
-    run_adam_deeplifting,
+    deeplifting_predictions,
     run_basinhopping,
-    run_deeplifting,
     run_differential_evolution,
     run_dual_annealing,
-    run_high_dimensional_deeplifting,
     run_ipopt,
-    run_lbfgs_deeplifting,
     run_pygranso,
 )
 from deeplifting.problems import HIGH_DIMENSIONAL_PROBLEMS_BY_NAME, PROBLEMS_BY_NAME
-from deeplifting.utils import create_contour_plot
+from deeplifting.utils import get_devices, initialize_vector, train_model_to_output
 
 # Filter warnings
 warnings.filterwarnings('ignore')
@@ -205,332 +200,332 @@ def run_algorithm_comparison_task(dimensionality, trials):
         problem_performance_df.to_parquet(f'{path}/{dimensionality}.parquet')
 
 
-@cli.command('create-trajectory-plot')
-def run_create_trajectory_plot():
-    """
-    Function that will run each of the models and create a
-    "trajectory plot" for the paper. Every function now has the ability
-    to observe the intermediate trajectory of the optimization with the
-    exception of IPOPT (we need to use a completely different API).
-    With this information we can plot the trajectory of the optimization
-    """
-    print('Create trajectory plot!')
-    # Problem set up
-    problem_name = 'cross_in_tray'
-    trials = 1
-    index = 0
-    problem = PROBLEMS_BY_NAME[problem_name]
+# @cli.command('create-trajectory-plot')
+# def run_create_trajectory_plot():
+#     """
+#     Function that will run each of the models and create a
+#     "trajectory plot" for the paper. Every function now has the ability
+#     to observe the intermediate trajectory of the optimization with the
+#     exception of IPOPT (we need to use a completely different API).
+#     With this information we can plot the trajectory of the optimization
+#     """
+#     print('Create trajectory plot!')
+#     # Problem set up
+#     problem_name = 'cross_in_tray'
+#     trials = 1
+#     index = 0
+#     problem = PROBLEMS_BY_NAME[problem_name]
 
-    # First run IPOPT
-    outputs_ipopt = run_ipopt(problem, trials=trials)
-    ipopt_trajectory_data = outputs_ipopt['results'][index, :, :]
+#     # First run IPOPT
+#     outputs_ipopt = run_ipopt(problem, trials=trials)
+#     ipopt_trajectory_data = outputs_ipopt['results'][index, :, :]
 
-    # For IPOPT we need to manually get the data
-    mask = ~np.isnan(ipopt_trajectory_data).any(axis=1)
-    ipopt_trajectory_data = ipopt_trajectory_data[mask]
-    midpoint = len(ipopt_trajectory_data) // 2
-    ipopt_trajectory_data = ipopt_trajectory_data[[0, midpoint, -1], :2]
-    ipopt_trajectory_data = ipopt_trajectory_data.tolist()
+#     # For IPOPT we need to manually get the data
+#     mask = ~np.isnan(ipopt_trajectory_data).any(axis=1)
+#     ipopt_trajectory_data = ipopt_trajectory_data[mask]
+#     midpoint = len(ipopt_trajectory_data) // 2
+#     ipopt_trajectory_data = ipopt_trajectory_data[[0, midpoint, -1], :2]
+#     ipopt_trajectory_data = ipopt_trajectory_data.tolist()
 
-    # Next add dual annealing
-    outputs_dual_annealing = run_dual_annealing(problem, trials=trials)
-    dual_annealing_trajectory_data = outputs_dual_annealing['callbacks'][
-        index
-    ].x_history
+#     # Next add dual annealing
+#     outputs_dual_annealing = run_dual_annealing(problem, trials=trials)
+#     dual_annealing_trajectory_data = outputs_dual_annealing['callbacks'][
+#         index
+#     ].x_history
 
-    # Next add differential evolution
-    outputs_differential_evolution = run_differential_evolution(problem, trials=trials)
-    differential_evolution_trajectory_data = outputs_differential_evolution[
-        'callbacks'
-    ][index].x_history
+#     # Next add differential evolution
+#     outputs_differential_evolution = run_differential_evolution(problem, trials=trials)  # noqa
+#     differential_evolution_trajectory_data = outputs_differential_evolution[
+#         'callbacks'
+#     ][index].x_history
 
-    # Next add pygranso
-    outputs_pygranso = run_pygranso(problem, trials=trials)
-    pygranso_trajectory_data = outputs_pygranso['callbacks'][index]
+#     # Next add pygranso
+#     outputs_pygranso = run_pygranso(problem, trials=trials)
+#     pygranso_trajectory_data = outputs_pygranso['callbacks'][index]
 
-    # Run deeplifting
-    outputs_deeplifting = run_deeplifting(
-        problem, problem_name=problem_name, trials=trials
-    )
-    deeplifting_trajectory_data = outputs_deeplifting['callbacks'][index]
+#     # Run deeplifting
+#     outputs_deeplifting = run_deeplifting(
+#         problem, problem_name=problem_name, trials=trials
+#     )
+#     deeplifting_trajectory_data = outputs_deeplifting['callbacks'][index]
 
-    # Create models and trajectories
-    trajectories = [
-        deeplifting_trajectory_data.tolist(),
-        ipopt_trajectory_data,
-        dual_annealing_trajectory_data,
-        differential_evolution_trajectory_data,
-        pygranso_trajectory_data,
-    ]
+#     # Create models and trajectories
+#     trajectories = [
+#         deeplifting_trajectory_data.tolist(),
+#         ipopt_trajectory_data,
+#         dual_annealing_trajectory_data,
+#         differential_evolution_trajectory_data,
+#         pygranso_trajectory_data,
+#     ]
 
-    models = [
-        'Deeplifting',
-        'IPOPT',
-        'Dual Annealing',
-        'Differential Evolution',
-        'PyGranso',
-    ]
+#     models = [
+#         'Deeplifting',
+#         'IPOPT',
+#         'Dual Annealing',
+#         'Differential Evolution',
+#         'PyGranso',
+#     ]
 
-    # plot the data
-    fig = create_contour_plot(
-        problem_name=problem_name,
-        problem=problem,
-        models=models,
-        trajectories=trajectories,
-        colormap='Greys',
-    )
+#     # plot the data
+#     fig = create_contour_plot(
+#         problem_name=problem_name,
+#         problem=problem,
+#         models=models,
+#         trajectories=trajectories,
+#         colormap='Greys',
+#     )
 
-    fig.savefig('./images/trajectory.png', bbox_inches='tight', pad_inches=0.05)
-
-
-@cli.command('run-deeplifting-and-save')
-def run_saved_model_task():
-    """
-    Run deep lifting over specified available problems and over a search space
-    to find the best performance
-    """
-    hidden_size_128 = (128,)
-    input_sizes = [512]
-    hidden_sizes = [hidden_size_128 * 2]
-    hidden_activations = ['sine']
-    output_activations = ['leaky_relu']
-    agg_functions = ['sum']
-
-    # Get the available configurations
-    problem_name = 'eggholder'
-    combinations = (
-        input_sizes,
-        hidden_sizes,
-        hidden_activations,
-        output_activations,
-        agg_functions,
-    )
-    configurations = list(product(*combinations))
-
-    # Number of trials
-    trials = 5
-
-    # Run over the experiments
-    for (
-        index,
-        (input_size, hidden_size, hidden_activation, output_activation, agg_function),
-    ) in enumerate(configurations):
-        # Get problem_information
-        problem = PROBLEMS_BY_NAME[problem_name]
-
-        # Get the outputs
-        _ = run_deeplifting(
-            problem,
-            problem_name=problem_name,
-            trials=trials,
-            input_size=input_size,
-            hidden_sizes=hidden_size,
-            activation=hidden_activation,
-            output_activation=output_activation,
-            agg_function=agg_function,
-            save_model_path='./models/',
-        )
+#     fig.savefig('./images/trajectory.png', bbox_inches='tight', pad_inches=0.05)
 
 
-@cli.command('find-best-deeplifting-architecture')
-@click.option('--problem_series', default='ackley')
-@click.option('--method', default='pygranso')
-@click.option('--dimensionality', default='high-dimensional')
-@click.option('--early-stopping', default=False)
-def find_best_architecture_task(problem_series, method, dimensionality, early_stopping):
-    """
-    Function that we will use to find the best architecture over multiple
-    "hard" high-dimensional problems. We will aim to tackle a large dimensional
-    space with this function, 2500+
-    """
-    # Set the number of threads to 1
-    os.environ['OMP_NUM_THREADS'] = '1'
+# @cli.command('run-deeplifting-and-save')
+# def run_saved_model_task():
+#     """
+#     Run deep lifting over specified available problems and over a search space
+#     to find the best performance
+#     """
+#     hidden_size_128 = (128,)
+#     input_sizes = [512]
+#     hidden_sizes = [hidden_size_128 * 2]
+#     hidden_activations = ['sine']
+#     output_activations = ['leaky_relu']
+#     agg_functions = ['sum']
 
-    # Enable wandb
-    wandb.login(key='2080070c4753d0384b073105ed75e1f46669e4bf')
+#     # Get the available configurations
+#     problem_name = 'eggholder'
+#     combinations = (
+#         input_sizes,
+#         hidden_sizes,
+#         hidden_activations,
+#         output_activations,
+#         agg_functions,
+#     )
+#     configurations = list(product(*combinations))
 
-    wandb.init(
-        # set the wandb project where this run will be logged
-        project="Deeplifting-HD",
-        tags=[f'{method}', f'{problem_series}'],
-    )
+#     # Number of trials
+#     trials = 5
 
-    # Get the problem list
-    if dimensionality == 'high-dimensional':
-        directory = 'high-dimension-search-results'
-        PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
-        if problem_series == 'ackley':
-            problem_names = ackley_series
-        elif problem_series == 'alpine1':
-            problem_names = alpine_series
-        elif problem_series == 'chung_reynolds':
-            problem_names = chung_reynolds_series
-        elif problem_series == 'griewank':
-            problem_names = griewank_series
-        elif problem_series == 'lennard_jones':
-            problem_names = lennard_jones_series
-        elif problem_series == 'levy':
-            problem_names = levy_series
-        elif problem_series == 'qing':
-            problem_names = qing_series
-        elif problem_series == 'rastrigin':
-            problem_names = rastrigin_series
-        elif problem_series == 'schwefel':
-            problem_names = schwefel_series
-    elif dimensionality == 'low-dimensional':
-        if problem_series != 'all':
-            raise ValueError('Can only run full list for this option!')
-        directory = 'low-dimension-search-results'
-        PROBLEMS = PROBLEMS_BY_NAME
-        problem_names = low_dimensional_problem_names
+#     # Run over the experiments
+#     for (
+#         index,
+#         (input_size, hidden_size, hidden_activation, output_activation, agg_function),
+#     ) in enumerate(configurations):
+#         # Get problem_information
+#         problem = PROBLEMS_BY_NAME[problem_name]
 
-    # Get the available configurations
-    combinations = (
-        search_input_sizes,
-        search_hidden_sizes,
-        search_hidden_activations,
-        search_output_activations,
-        search_agg_functions,
-        search_include_bn,
-    )
-    configurations = list(product(*combinations))
-    trials = 10
+#         # Get the outputs
+#         _ = run_deeplifting(
+#             problem,
+#             problem_name=problem_name,
+#             trials=trials,
+#             input_size=input_size,
+#             hidden_sizes=hidden_size,
+#             activation=hidden_activation,
+#             output_activation=output_activation,
+#             agg_function=agg_function,
+#             save_model_path='./models/',
+#         )
 
-    # List to store performance data
-    performance_df_list = []
-    experiment_date = datetime.today().strftime('%Y-%m-%d-%H')
-    for problem_name in problem_names:
-        # Run over the experiments
-        for (
-            index,
-            (
-                input_size,
-                hidden_size,
-                hidden_activation,
-                output_activation,
-                agg_function,
-                include_bn,
-            ),
-        ) in enumerate(configurations):
-            print(problem_name)
 
-            # Load the problems
-            problem = PROBLEMS[problem_name]
-            print(
-                input_size,
-                hidden_size,
-                hidden_activation,
-                output_activation,
-                agg_function,
-                include_bn,
-            )
+# @cli.command('find-best-deeplifting-architecture')
+# @click.option('--problem_series', default='ackley')
+# @click.option('--method', default='pygranso')
+# @click.option('--dimensionality', default='high-dimensional')
+# @click.option('--early-stopping', default=False)
+# def find_best_architecture_task(problem_series, method, dimensionality, early_stopping):  # noqa
+#     """
+#     Function that we will use to find the best architecture over multiple
+#     "hard" high-dimensional problems. We will aim to tackle a large dimensional
+#     space with this function, 2500+
+#     """
+#     # Set the number of threads to 1
+#     os.environ['OMP_NUM_THREADS'] = '1'
 
-            # Get the outputs
-            if method == 'pygranso':
-                if dimensionality == 'high-dimensional':
-                    outputs = run_high_dimensional_deeplifting(
-                        problem,
-                        problem_name=problem_name,
-                        trials=trials,
-                        input_size=input_size,
-                        hidden_sizes=hidden_size,
-                        activation=hidden_activation,
-                        output_activation=output_activation,
-                        agg_function=agg_function,
-                        include_bn=include_bn,
-                    )
-                elif dimensionality == 'low-dimensional':
-                    outputs = run_deeplifting(
-                        problem,
-                        problem_name=problem_name,
-                        trials=trials,
-                        input_size=input_size,
-                        hidden_sizes=hidden_size,
-                        activation=hidden_activation,
-                        output_activation=output_activation,
-                        agg_function=agg_function,
-                        include_bn=include_bn,
-                        method='single-value',
-                    )
+#     # Enable wandb
+#     wandb.login(key='2080070c4753d0384b073105ed75e1f46669e4bf')
 
-            elif method == 'pytorch-lbfgs':
-                outputs = run_lbfgs_deeplifting(
-                    problem,
-                    problem_name=problem_name,
-                    trials=trials,
-                    input_size=input_size,
-                    hidden_sizes=hidden_size,
-                    activation=hidden_activation,
-                    output_activation=output_activation,
-                    agg_function=agg_function,
-                    include_bn=include_bn,
-                )
+#     wandb.init(
+#         # set the wandb project where this run will be logged
+#         project="Deeplifting-HD",
+#         tags=[f'{method}', f'{problem_series}'],
+#     )
 
-            elif method == 'pytorch-adam':
-                outputs = run_adam_deeplifting(
-                    problem,
-                    problem_name=problem_name,
-                    trials=trials,
-                    input_size=input_size,
-                    hidden_sizes=hidden_size,
-                    activation=hidden_activation,
-                    output_activation=output_activation,
-                    agg_function=agg_function,
-                    include_bn=include_bn,
-                )
+#     # Get the problem list
+#     if dimensionality == 'high-dimensional':
+#         directory = 'high-dimension-search-results'
+#         PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
+#         if problem_series == 'ackley':
+#             problem_names = ackley_series
+#         elif problem_series == 'alpine1':
+#             problem_names = alpine_series
+#         elif problem_series == 'chung_reynolds':
+#             problem_names = chung_reynolds_series
+#         elif problem_series == 'griewank':
+#             problem_names = griewank_series
+#         elif problem_series == 'lennard_jones':
+#             problem_names = lennard_jones_series
+#         elif problem_series == 'levy':
+#             problem_names = levy_series
+#         elif problem_series == 'qing':
+#             problem_names = qing_series
+#         elif problem_series == 'rastrigin':
+#             problem_names = rastrigin_series
+#         elif problem_series == 'schwefel':
+#             problem_names = schwefel_series
+#     elif dimensionality == 'low-dimensional':
+#         if problem_series != 'all':
+#             raise ValueError('Can only run full list for this option!')
+#         directory = 'low-dimension-search-results'
+#         PROBLEMS = PROBLEMS_BY_NAME
+#         problem_names = low_dimensional_problem_names
 
-            else:
-                raise ValueError('Method is not supported!')
+#     # Get the available configurations
+#     combinations = (
+#         search_input_sizes,
+#         search_hidden_sizes,
+#         search_hidden_activations,
+#         search_output_activations,
+#         search_agg_functions,
+#         search_include_bn,
+#     )
+#     configurations = list(product(*combinations))
+#     trials = 10
 
-            # Get the results of the outputs
-            output_size = problem['dimensions']
-            x_columns = [f'x{i + 1}' for i in range(output_size)]
-            columns = x_columns + ['f', 'f_initial', 'algorithm', 'total_time']
+#     # List to store performance data
+#     performance_df_list = []
+#     experiment_date = datetime.today().strftime('%Y-%m-%d-%H')
+#     for problem_name in problem_names:
+#         # Run over the experiments
+#         for (
+#             index,
+#             (
+#                 input_size,
+#                 hidden_size,
+#                 hidden_activation,
+#                 output_activation,
+#                 agg_function,
+#                 include_bn,
+#             ),
+#         ) in enumerate(configurations):
+#             print(problem_name)
 
-            results = pd.DataFrame(outputs['final_results'], columns=columns)
+#             # Load the problems
+#             problem = PROBLEMS[problem_name]
+#             print(
+#                 input_size,
+#                 hidden_size,
+#                 hidden_activation,
+#                 output_activation,
+#                 agg_function,
+#                 include_bn,
+#             )
 
-            # Add meta data to the results
-            results['input_size'] = input_size
-            results['hidden_size'] = '-'.join(map(str, hidden_size))
-            results['num_layers'] = len(hidden_size)
-            results['num_neurons'] = hidden_size[0]
-            results['hidden_activation'] = hidden_activation
-            results['output_activation'] = output_activation
-            results['agg_function'] = agg_function
-            results['include_bn'] = include_bn
-            results['problem_name'] = problem_name
-            results['global_minimum'] = problem['global_minimum']
-            results['dimensions'] = output_size
-            results['hits'] = np.abs(results['f'] - results['global_minimum']) <= 1e-4
+#             # Get the outputs
+#             if method == 'pygranso':
+#                 if dimensionality == 'high-dimensional':
+#                     outputs = run_high_dimensional_deeplifting(
+#                         problem,
+#                         problem_name=problem_name,
+#                         trials=trials,
+#                         input_size=input_size,
+#                         hidden_sizes=hidden_size,
+#                         activation=hidden_activation,
+#                         output_activation=output_activation,
+#                         agg_function=agg_function,
+#                         include_bn=include_bn,
+#                     )
+#                 elif dimensionality == 'low-dimensional':
+#                     outputs = run_deeplifting(
+#                         problem,
+#                         problem_name=problem_name,
+#                         trials=trials,
+#                         input_size=input_size,
+#                         hidden_sizes=hidden_size,
+#                         activation=hidden_activation,
+#                         output_activation=output_activation,
+#                         agg_function=agg_function,
+#                         include_bn=include_bn,
+#                         method='single-value',
+#                     )
 
-            # Print the results
-            hits = results['hits'].mean()
-            run_time = results['total_time'].mean()
-            print(f'Success Rate = {hits}')
-            print(f'Average run time = {run_time}')
+#             elif method == 'pytorch-lbfgs':
+#                 outputs = run_lbfgs_deeplifting(
+#                     problem,
+#                     problem_name=problem_name,
+#                     trials=trials,
+#                     input_size=input_size,
+#                     hidden_sizes=hidden_size,
+#                     activation=hidden_activation,
+#                     output_activation=output_activation,
+#                     agg_function=agg_function,
+#                     include_bn=include_bn,
+#                 )
 
-            # Save to parquet
-            layers = len(hidden_size)
-            units = hidden_size[0]
+#             elif method == 'pytorch-adam':
+#                 outputs = run_adam_deeplifting(
+#                     problem,
+#                     problem_name=problem_name,
+#                     trials=trials,
+#                     input_size=input_size,
+#                     hidden_sizes=hidden_size,
+#                     activation=hidden_activation,
+#                     output_activation=output_activation,
+#                     agg_function=agg_function,
+#                     include_bn=include_bn,
+#                 )
 
-            path = f'./{directory}/{experiment_date}-{problem_name}'
-            if not os.path.exists(path):
-                os.makedirs(path)
+#             else:
+#                 raise ValueError('Method is not supported!')
 
-            results.to_parquet(
-                f'{path}/{layers}'
-                f'-layer-{units}-{agg_function}'
-                f'-{index}-{method}-{hidden_activation}'
-                f'-{output_activation}-{include_bn}-'
-                f'input-size-{input_size}.parquet'  # noqa
-            )
+#             # Get the results of the outputs
+#             output_size = problem['dimensions']
+#             x_columns = [f'x{i + 1}' for i in range(output_size)]
+#             columns = x_columns + ['f', 'f_initial', 'algorithm', 'total_time']
 
-            # Append performance
-            performance_df_list.append(results)
+#             results = pd.DataFrame(outputs['final_results'], columns=columns)
 
-            if early_stopping:
-                if hits >= 0.90:
-                    break
+#             # Add meta data to the results
+#             results['input_size'] = input_size
+#             results['hidden_size'] = '-'.join(map(str, hidden_size))
+#             results['num_layers'] = len(hidden_size)
+#             results['num_neurons'] = hidden_size[0]
+#             results['hidden_activation'] = hidden_activation
+#             results['output_activation'] = output_activation
+#             results['agg_function'] = agg_function
+#             results['include_bn'] = include_bn
+#             results['problem_name'] = problem_name
+#             results['global_minimum'] = problem['global_minimum']
+#             results['dimensions'] = output_size
+#             results['hits'] = np.abs(results['f'] - results['global_minimum']) <= 1e-4
+
+#             # Print the results
+#             hits = results['hits'].mean()
+#             run_time = results['total_time'].mean()
+#             print(f'Success Rate = {hits}')
+#             print(f'Average run time = {run_time}')
+
+#             # Save to parquet
+#             layers = len(hidden_size)
+#             units = hidden_size[0]
+
+#             path = f'./{directory}/{experiment_date}-{problem_name}'
+#             if not os.path.exists(path):
+#                 os.makedirs(path)
+
+#             results.to_parquet(
+#                 f'{path}/{layers}'
+#                 f'-layer-{units}-{agg_function}'
+#                 f'-{index}-{method}-{hidden_activation}'
+#                 f'-{output_activation}-{include_bn}-'
+#                 f'input-size-{input_size}.parquet'  # noqa
+#             )
+
+#             # Append performance
+#             performance_df_list.append(results)
+
+#             if early_stopping:
+#                 if hits >= 0.90:
+#                     break
 
 
 @cli.command('run-pygranso')
@@ -724,6 +719,240 @@ def run_scip_task(problem_series, dimensionality, trials):
             os.makedirs(path)
 
         problem_performance_df.to_parquet(f'{path}/{dimensionality}.parquet')
+
+
+# Adding a brand new task but will clean up code
+# TODO: Clean up code
+@cli.command('find-best-deeplifting-architecture-v2')
+@click.option('--problem_name', default='ackley')
+@click.option('--method', default='pygranso')
+@click.option('--dimensionality', default='low-dimensional')
+@click.option('--early-stopping', default=False)
+def find_best_architecture_task(problem_name, method, dimensionality):
+    """
+    Function that we will use to find the best architecture over multiple
+    "hard" high-dimensional problems. We will aim to tackle a large dimensional
+    space with this function, 2500+
+    """
+    # Set the number of threads to 1
+    os.environ['OMP_NUM_THREADS'] = '1'
+
+    # Get the available device
+    device = get_devices()
+
+    # Enable wandb
+    wandb.login(key='2080070c4753d0384b073105ed75e1f46669e4bf')
+
+    wandb.init(
+        # set the wandb project where this run will be logged
+        project="Deeplifting-HD",
+        tags=[f'{method}', f'{problem_name}'],
+    )
+
+    # Setup the problem
+    PROBLEMS = PROBLEMS_BY_NAME
+    problem = PROBLEMS[problem_name]
+
+    # Objective function
+    objective = problem['objective']
+
+    # Bounds
+    bounds = problem['bounds']
+
+    # Get the device (CPU for now)
+    output_size = problem['dimensions']
+
+    # Setup list to store information
+    objective_values = []
+    initial_values = []
+    indexes = []
+    network_config = []
+    results_df_list = []
+
+    # Layer search
+    minimum_num_layers = 2
+    maximum_num_layers = 10
+
+    # Number of neurons
+    units_search = [64, 128, 256, 512]
+
+    # Initial layer type
+    input_dimension = 64
+    initial_layer_type = 'linear'
+    include_weight_initialization = True
+    include_bn = True
+
+    # Maximum number of trials
+    # Let's actually try and do 50 - we will use the linear
+    # method
+    trials = 50
+
+    for num_layers in range(minimum_num_layers, maximum_num_layers + 1):
+        for units in units_search:
+            # n-layer m neuron network
+            hidden_sizes = (units,) * num_layers
+
+            # We have an observation that we can start at the same point
+            # but it may or may not converge so we can try different
+            # weights
+            for index, trial in enumerate(range(trials)):
+                # Fix the inputs for deeplifting
+                if initial_layer_type == 'embedding':
+                    inputs = torch.randint(
+                        low=0, high=(units - 1), size=(input_dimension, units)
+                    )
+                    inputs = inputs.to(device=device, dtype=torch.long)
+
+                elif initial_layer_type == 'linear':
+                    inputs = torch.randn(size=(input_dimension, units))
+                    inputs = inputs.to(device=device, dtype=torch.double)
+
+                else:
+                    raise ValueError(f'{initial_layer_type} is not an accepted type!')
+
+                # Initialization for other models
+                x_start = initialize_vector(size=output_size, bounds=bounds)
+                x_start = torch.tensor(x_start)
+                x_start = x_start.to(device=device, dtype=torch.double)
+
+                # Creates different weight intializations for the same starting point
+                # x0
+                for i in range(10, 110, 10):
+                    print(f'Fitting point {x_start} - with weights {i}')
+                    print(
+                        f' - layers - {num_layers} - units - {units} - trial - {trial}'
+                    )
+
+                    # Deeplifting model with skip connections
+                    model = ReLUDeepliftingMLP(
+                        initial_hidden_size=units,
+                        hidden_sizes=hidden_sizes,
+                        output_size=output_size,
+                        bounds=bounds,
+                        initial_layer_type=initial_layer_type,
+                        include_weight_initialization=include_weight_initialization,
+                        include_bn=include_bn,
+                        seed=i,
+                    )
+
+                    model = model.to(device=device, dtype=torch.double)
+
+                    # Let's make sure that all methods have the same x0
+                    train_model_to_output(
+                        inputs=inputs,
+                        model=model,
+                        x0=x_start,
+                        epochs=1000,
+                        lr=1,
+                        tolerance=1e-3,
+                    )
+                    nvar = getNvarTorch(model.parameters())
+
+                    # Setup a pygransoStruct for the algorithm
+                    # options
+                    opts = pygransoStruct()
+
+                    # Print the model outputs and check against x0 also
+                    # want to use a print out to make sure all models have
+                    # the same starting point
+                    model.eval()
+                    outputs = model(inputs=inputs)
+
+                    print(f'Initial x0 = {x_start}')
+                    print(f'Fitted x0 = {outputs}')
+
+                    # Inital x0 - for neural network
+                    x0 = (
+                        torch.nn.utils.parameters_to_vector(model.parameters())
+                        .detach()
+                        .reshape(nvar, 1)
+                        .to(device=device, dtype=torch.double)
+                    )
+
+                    # PyGranso options
+                    opts.x0 = x0
+                    opts.torch_device = device
+                    opts.print_frequency = 1
+                    opts.limited_mem_size = 100
+                    opts.stat_l2_model = False
+                    opts.double_precision = True
+
+                    # opts.disable_terminationcode_6 = True
+                    # opts.halt_on_linesearch_bracket = False
+
+                    opts.opt_tol = 1e-10
+                    opts.maxit = 1000
+
+                    # TODO: Clean up meaningless variables
+                    results = None
+                    deeplifting_results = None
+
+                    # Set up the function with the results
+                    fn = lambda x: objective(  # noqa
+                        x, results=results, trial=trial, version='pytorch'
+                    )
+
+                    # Get the objective value at the initial point
+                    outputs = model(inputs=inputs)
+
+                    # Get the initial value of the objective
+                    init_fn = lambda x: objective(  # noqa
+                        x, results=None, trial=0, version='pytorch'
+                    )
+                    x_init, f_init = deeplifting_predictions(outputs, init_fn)
+                    f_init = f_init.detach().cpu().numpy()
+
+                    # Combined function
+                    comb_fn = lambda model: deeplifting_nd_fn(  # noqa
+                        model,
+                        fn,
+                        trial,
+                        output_size,
+                        deeplifting_results,
+                        inputs=inputs,
+                    )  # noqa
+
+                    # Run the main algorithm
+                    model.train()
+                    soln = pygranso(var_spec=model, combined_fn=comb_fn, user_opts=opts)
+
+                    # Hits
+                    hit = int(
+                        np.abs(problem['global_minimum'] - soln.best.f)
+                        / np.abs(f_init - problem['global_minimum'])
+                        <= 1e-4
+                    )
+                    objective_values.append(
+                        (hit, f_init, problem['global_minimum'], soln.best.f)
+                    )
+                    initial_values.append(x_start.detach().cpu().numpy())
+                    indexes.append(index)
+                    network_config.append((num_layers, units))
+
+                    if hit == 1.0:
+                        break
+
+            # Create the data from this run and save sequentially
+            results_df = pd.DataFrame(initial_values, columns=['x1', 'x2'])
+            results_df[['success', 'f_init', 'global_minimum', 'f']] = np.asarray(
+                objective_values
+            )
+            results_df[['num_layers', 'units']] = network_config
+            results_df['index'] = indexes
+
+            # Save the results
+            results_df_list.append(results_df)
+            main_directory = '/home/jusun/dever120/Deeplifting'
+            deeplifting_directory = (
+                'experiments/3b39b4fb-0520-4795-aaba-a8eab24ff8fd/'
+                'low-dimension/deeplifting-pygranso'
+            )
+            filename = os.path.join(
+                main_directory,
+                deeplifting_directory,
+                'ackley-relu-{num_layers}-{units}.parquet',
+            )
+            results_df.to_parquet(filename)
 
 
 if __name__ == "__main__":
