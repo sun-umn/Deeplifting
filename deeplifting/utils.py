@@ -210,7 +210,7 @@ def train_model_to_output(inputs, model, x0, epochs=10000, lr=1e-4, tolerance=1e
         l2_distance = torch.norm(outputs - x0, p=2).item()
 
         # Print loss and L2 distance every 100 epochs
-        if (epoch + 1) % 10000 == 0:
+        if (epoch + 1) % 1000 == 0:
             print(
                 f'Epoch [{epoch+1}/{epochs}], Loss: {loss.item():.4f}'
                 f', L2 Distance: {l2_distance:.4e}'

@@ -855,7 +855,7 @@ def find_best_architecture_task(problem_name, method, dimensionality, experiment
                         inputs=inputs,
                         model=model,
                         x0=x_start,
-                        epochs=1000,
+                        epochs=5000,
                         lr=1,
                         tolerance=1e-3,
                     )
