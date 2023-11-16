@@ -729,7 +729,8 @@ def run_scip_task(problem_series, dimensionality, trials):
 @click.option('--problem_name', default='ackley')
 @click.option('--method', default='pygranso')
 @click.option('--dimensionality', default='low-dimensional')
-def find_best_architecture_task(problem_name, method, dimensionality):
+@click.option('--experimentation', default=True)
+def find_best_architecture_task(problem_name, method, dimensionality, experimentation):
     """
     Function that we will use to find the best architecture over multiple
     "hard" high-dimensional problems. We will aim to tackle a large dimensional
@@ -741,14 +742,15 @@ def find_best_architecture_task(problem_name, method, dimensionality):
     # Get the available device
     device = get_devices()
 
-    # Enable wandb
-    wandb.login(key='2080070c4753d0384b073105ed75e1f46669e4bf')
+    if experimentation:
+        # Enable wandb
+        wandb.login(key='2080070c4753d0384b073105ed75e1f46669e4bf')
 
-    wandb.init(
-        # set the wandb project where this run will be logged
-        project="Deeplifting-HD",
-        tags=[f'{method}', f'{problem_name}'],
-    )
+        wandb.init(
+            # set the wandb project where this run will be logged
+            project="Deeplifting-HD",
+            tags=[f'{method}', f'{problem_name}'],
+        )
 
     # Setup the problem
     if dimensionality == 'low-dimensional':
