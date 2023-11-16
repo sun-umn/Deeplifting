@@ -727,7 +727,6 @@ def run_scip_task(problem_series, dimensionality, trials):
 @click.option('--problem_name', default='ackley')
 @click.option('--method', default='pygranso')
 @click.option('--dimensionality', default='low-dimensional')
-@click.option('--early-stopping', default=False)
 def find_best_architecture_task(problem_name, method, dimensionality):
     """
     Function that we will use to find the best architecture over multiple
