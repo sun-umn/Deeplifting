@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # stdlib
 import os
+import time
 import warnings
 from datetime import datetime
 
@@ -768,6 +769,9 @@ def find_best_architecture_task(problem_name, method, dimensionality):
     indexes = []
     network_config = []
     results_df_list = []
+    run_times = []
+    iterations = []
+    fn_evals = []
 
     # Layer search
     minimum_num_layers = 2
@@ -914,7 +918,10 @@ def find_best_architecture_task(problem_name, method, dimensionality):
 
                     # Run the main algorithm
                     model.train()
+                    start = time.time()
                     soln = pygranso(var_spec=model, combined_fn=comb_fn, user_opts=opts)
+                    end = time.time()
+                    total_time = end - start
 
                     # Hits
                     hit = int(
@@ -928,6 +935,9 @@ def find_best_architecture_task(problem_name, method, dimensionality):
                     initial_values.append(x_start.detach().cpu().numpy())
                     indexes.append(index)
                     network_config.append((num_layers, units))
+                    run_times.append(total_time)
+                    iterations.append(soln.iters)
+                    fn_evals.append(soln.fn_evals)
 
                     if hit == 1.0:
                         break
@@ -939,6 +949,7 @@ def find_best_architecture_task(problem_name, method, dimensionality):
             )
             results_df[['num_layers', 'units']] = network_config
             results_df['index'] = indexes
+            results_df['total_time'] = run_times
 
             # Save the results
             results_df_list.append(results_df)
