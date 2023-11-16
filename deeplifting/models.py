@@ -450,6 +450,21 @@ class ReluDeepliftingBlock(nn.Module):
         return x
 
 
+class AlignmentLayer(nn.Module):
+    """
+    Class that makes the sin function
+    an activation function
+    """
+
+    def __init__(self, output_size):  # noqa
+        super(AlignmentLayer, self).__init__()
+        # self.amplitude = nn.Parameter(torch.pi * torch.ones(1), requires_grad=True)
+        self.alignment = nn.Parameter(torch.rand(output_size))
+
+    def forward(self, x):  # noqa
+        return x * self.alignment
+
+
 # Build a neural network that does not have skip connections
 # Automating skip connection block
 class ReLUDeepliftingMLP(nn.Module):
@@ -527,7 +542,7 @@ class ReLUDeepliftingMLP(nn.Module):
         self.output_activation_layer = SinActivation()
 
         # Initialization parameter
-        self.alignment = nn.Parameter(torch.rand(output_size))
+        self.alignment_layer = AlignmentLayer(output_size=output_size)
 
     def forward(self, inputs=None):
         x = inputs
@@ -537,18 +552,18 @@ class ReLUDeepliftingMLP(nn.Module):
             x = layer(x)
 
         # Put it through the output layer
-        out = self.linear_output(x)
+        x = self.linear_output(x)
 
         # If there is an embedding layer then swap axes and
         # collapse data
         if self.initial_layer_type == 'embedding':
-            out = out.swapaxes(2, 1)
-            out = out.mean(axis=-1)
+            x = x.swapaxes(2, 1)
+            x = x.mean(axis=-1)
 
         # Small layer to align the outputs of the neural network
-        out = out.mean(axis=0)
+        x = x.mean(axis=0)
 
-        out = out + self.alignment
+        out = self.alignment_layer(x)
         out = self.output_activation_layer(out)
 
         if self.bounds is not None:
