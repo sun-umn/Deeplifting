@@ -32,6 +32,7 @@ from config import (
 from deeplifting.models import ReLUDeepliftingMLP
 from deeplifting.optimization import run_pyomo  # noqa
 from deeplifting.optimization import (
+    deeplifting_nd_fn,
     deeplifting_predictions,
     run_basinhopping,
     run_differential_evolution,
