@@ -751,7 +751,14 @@ def find_best_architecture_task(problem_name, method, dimensionality):
     )
 
     # Setup the problem
-    PROBLEMS = PROBLEMS_BY_NAME
+    if dimensionality == 'low-dimensional':
+        PROBLEMS = PROBLEMS_BY_NAME
+
+    elif dimensionality == 'high-dimensional':
+        PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
+
+    else:
+        raise ValueError(f'{dimensionality} is not valid!')
     problem = PROBLEMS[problem_name]
 
     # Objective function
