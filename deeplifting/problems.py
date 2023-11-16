@@ -6195,8 +6195,8 @@ drop_wave_config = {
 eggholder_config = {
     'objective': eggholder,
     'bounds': {
-        'lower_bounds': [(-512.0, -512.0)],
-        'upper_bounds': [(512.0, 512.0)],
+        'lower_bounds': [-512.0] * 2,
+        'upper_bounds': [512.0] * 2,
     },
     'max_iterations': 1000,
     'global_minimum': -959.6407,
