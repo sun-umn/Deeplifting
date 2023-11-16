@@ -6296,7 +6296,7 @@ shubert_config = {
 # Multi-Dimensional Problems #
 ackley_3d_config = {
     'objective': ndackley,
-    'bounds': [(-32.768, 32.768)],  # Will use a single level bound and then expand
+    'bounds': {'lower_bounds': [-32.768] * 3, 'upper_bounds': [32.768] * 3},
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 3,

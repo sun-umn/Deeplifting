@@ -144,15 +144,15 @@ def set_seed(seed):
 
 def initialize_vector(size, bounds):
     if bounds is not None:
-        if len(bounds) != size:
-            raise ValueError("The number of bounds must match the size of the vector")
-
         # Get the upper and lower bounds
         lower_bounds = bounds['lower_bounds']
         upper_bounds = bounds['upper_bounds']
 
         # Redefine bounds
         bounds = list(zip(lower_bounds, upper_bounds))
+
+        if len(bounds) != size:
+            raise ValueError("The number of bounds must match the size of the vector")
 
         vector = [np.random.uniform(low, high) for low, high in bounds]
         vector = np.array(vector).flatten()
