@@ -6305,7 +6305,7 @@ ackley_3d_config = {
 # Multi-Dimensional Problems #
 ackley_5d_config = {
     'objective': ndackley,
-    'bounds': [(-32.768, 32.768)],  # Will use a single level bound and then expand
+    'bounds': {'lower_bounds': [-32.768] * 5, 'upper_bounds': [32.768] * 5},
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 5,
@@ -6314,7 +6314,7 @@ ackley_5d_config = {
 # Multi-Dimensional Problems #
 ackley_30d_config = {
     'objective': ndackley,
-    'bounds': [(-32.768, 32.768)],  # Will use a single level bound and then expand
+    'bounds': {'lower_bounds': [-32.768] * 30, 'upper_bounds': [32.768] * 30},
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 30,
@@ -6322,7 +6322,7 @@ ackley_30d_config = {
 
 ackley_100d_config = {
     'objective': ndackley,
-    'bounds': [(-32.768, 32.768)],  # Will use a single level bound and then expand
+    'bounds': {'lower_bounds': [-32.768] * 100, 'upper_bounds': [32.768] * 100},
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 100,
@@ -6330,7 +6330,7 @@ ackley_100d_config = {
 
 ackley_500d_config = {
     'objective': ndackley,
-    'bounds': [(-32.768, 32.768)],  # Will use a single level bound and then expand
+    'bounds': {'lower_bounds': [-32.768] * 500, 'upper_bounds': [32.768] * 500},
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 500,
