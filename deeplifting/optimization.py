@@ -555,74 +555,42 @@ def run_pygranso(problem: Dict, trials: int):
     return {'results': None, 'final_results': fn_values, 'callbacks': interim_results}
 
 
-# def deeplifting_predictions(x, objective, method='particle'):
-#     """
-#     Convert scaled values to the objective function
-#     """
-#     if method == 'particle':
-#         # Iterate over the objective values
-#         objective_values = []
-#         for i in range(len(x)):
-#             f = objective(x[i, :])
-#             objective_values.append(f)
+def deeplifting_predictions(x, objective):
+    """
+    Convert scaled values to the objective function
+    """
+    f = objective(x)
 
-#         objective_values = torch.stack(objective_values)
-#         f = torch.min(objective_values)
+    # Detach and return x
+    x = x.detach().cpu().numpy().flatten()
 
-#         # Need to get the minimum of f
-#         idx_min = torch.argmin(objective_values)
-#         x = x[idx_min, :]
-#         x = x.detach().cpu().numpy().flatten()
-
-#     elif method == 'single-value':
-#         x = x.mean(axis=0)
-#         f = objective(x)
-
-#         # Detach and return x
-#         x = x.detach().cpu().numpy().flatten()
-
-#     else:
-#         raise ValueError(f'{method} does not exist!')
-
-#     return x, f
+    return x, f
 
 
-# def deeplifting_nd_fn(
-#     model,
-#     objective,
-#     trial,
-#     dimensions,
-#     deeplifting_results,
-#     problem_name,
-#     method='particle',
-#     inputs=None,
-# ):
-#     """
-#     Combined funtion used for PyGranso
-#     """
-#     outputs = model(inputs=inputs)
+def deeplifting_nd_fn(
+    model,
+    objective,
+    trial,
+    dimensions,
+    deeplifting_results,
+    problem_name,
+    inputs,
+):
+    """
+    Combined funtion used for PyGranso
+    """
+    outputs = model(inputs=inputs)
 
-#     # Get x1 and x2 so we can add the bounds
-#     # outputs = torch.sigmoid(outputs)
-#     # x = outputs.mean(axis=0)
-#     # print(f'Output x {x}')
-#     x, f = deeplifting_predictions(outputs, objective, method=method)
-#     # print(x, f)
-#     # f_copy = f.detach().cpu().numpy()
+    # Get the predictions and x-values
+    x, f = deeplifting_predictions(outputs, objective)
 
-#     # # Fill in the intermediate results
-#     # if problem_name not in EXCLUDE_PROBLEMS:
-#     #     iteration = np.argmin(~np.any(np.isnan(deeplifting_results[trial]), axis=1))
-#     #     deeplifting_results[trial, iteration, :dimensions] = x
-#     #     deeplifting_results[trial, iteration, -1] = f_copy
+    # Inequality constraint
+    ci = None
 
-#     # Inequality constraint
-#     ci = None
+    # Equality constraing
+    ce = None
 
-#     # Equality constraing
-#     ce = None
-
-#     return f, ci, ce
+    return f, ci, ce
 
 
 # def run_deeplifting(
