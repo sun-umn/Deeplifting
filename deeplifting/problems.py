@@ -6155,7 +6155,10 @@ def lennard_jones(x, results=None, trial=None, version='numpy'):
 # Ackley
 ackley_config = {
     'objective': ackley,
-    'bounds': [(-32.768, 32.768), (-32.768, 32.768)],
+    'bounds': {
+        'lower_bounds': [(-32.768, -32.768)],
+        'upper_bounds': [(32.768, 32.768)],
+    },
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 2,

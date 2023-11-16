@@ -16,9 +16,6 @@ import torch.optim as optim
 from pygranso.pygransoStruct import pygransoStruct
 from torch.optim.lr_scheduler import OneCycleLR
 
-# first party
-from deeplifting.models import DeepliftingSkipMLP
-
 
 def create_unique_experiment_directory():
     # Generate a UUID
@@ -100,36 +97,36 @@ def build_deeplifting_results(file_structure, epsilon=5.5e-4):
     return df.groupby('problem_name').agg({'hits': 'mean'})
 
 
-def load_deeplifting_model(model_path, config):
-    """
-    Load a saved model from path. The input config
-    will be the parameters of the neural network
-    and will contain a path with the saved file
-    """
-    input_size = config['input_size']
-    hidden_sizes = config['hidden_sizes']
-    dimensions = config['dimensions']
-    bounds = config['bounds']
-    activation = config['activation']
-    output_activation = config['output_activation']
-    agg_function = config['agg_function']
-    seed = config['seed']
+# def load_deeplifting_model(model_path, config):
+#     """
+#     Load a saved model from path. The input config
+#     will be the parameters of the neural network
+#     and will contain a path with the saved file
+#     """
+#     input_size = config['input_size']
+#     hidden_sizes = config['hidden_sizes']
+#     dimensions = config['dimensions']
+#     bounds = config['bounds']
+#     activation = config['activation']
+#     output_activation = config['output_activation']
+#     agg_function = config['agg_function']
+#     seed = config['seed']
 
-    # Initialize the model
-    model = DeepliftingSkipMLP(
-        input_size=input_size,
-        hidden_sizes=hidden_sizes,
-        output_size=dimensions,
-        bounds=bounds,
-        skip_every_n=1,
-        activation=activation,
-        output_activation=output_activation,
-        agg_function=agg_function,
-        seed=seed,
-    )
+#     # Initialize the model
+#     model = DeepliftingSkipMLP(
+#         input_size=input_size,
+#         hidden_sizes=hidden_sizes,
+#         output_size=dimensions,
+#         bounds=bounds,
+#         skip_every_n=1,
+#         activation=activation,
+#         output_activation=output_activation,
+#         agg_function=agg_function,
+#         seed=seed,
+#     )
 
-    # Load the model
-    model.load_state_dict(torch.load(model_path))
+#     # Load the model
+#     model.load_state_dict(torch.load(model_path))
 
 
 def set_seed(seed):
