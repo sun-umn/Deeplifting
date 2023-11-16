@@ -774,7 +774,7 @@ def find_best_architecture_task(problem_name, method, dimensionality):
     maximum_num_layers = 10
 
     # Number of neurons
-    units_search = [64, 128, 256, 512]
+    units_search = [64, 128, 256]
 
     # Initial layer type
     input_dimension = 64
@@ -787,7 +787,7 @@ def find_best_architecture_task(problem_name, method, dimensionality):
     # method
     trials = 50
 
-    for num_layers in range(minimum_num_layers, maximum_num_layers + 1):
+    for num_layers in reversed(range(minimum_num_layers, maximum_num_layers + 1)):
         for units in units_search:
             # n-layer m neuron network
             hidden_sizes = (units,) * num_layers
