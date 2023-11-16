@@ -200,7 +200,7 @@ def train_model_to_output(inputs, model, x0, epochs=10000, lr=1e-4, tolerance=1e
     for epoch in range(epochs):
         optimizer.zero_grad()  # Zero gradients
         outputs = model(inputs)  # Get model outputs for the input
-        outputs = outputs.mean(axis=0).flatten()  # Flatten the output tensor if needed
+        outputs = outputs.flatten()  # Flatten the output tensor if needed
         loss = criterion(x0, outputs)  # Compute loss
         loss.backward()  # Backward pass
         optimizer.step()  # Update parameters
