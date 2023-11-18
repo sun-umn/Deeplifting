@@ -754,9 +754,11 @@ def find_best_architecture_task(problem_name, method, dimensionality, experiment
 
     # Setup the problem
     if dimensionality == 'low-dimensional':
+        directory = 'low-dimension'
         PROBLEMS = PROBLEMS_BY_NAME
 
     elif dimensionality == 'high-dimensional':
+        directory = 'high-dimension'
         PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
 
     else:
@@ -963,7 +965,7 @@ def find_best_architecture_task(problem_name, method, dimensionality, experiment
             main_directory = '/home/jusun/dever120/Deeplifting'
             deeplifting_directory = (
                 'experiments/3b39b4fb-0520-4795-aaba-a8eab24ff8fd/'
-                'low-dimension/deeplifting-pygranso'
+                f'{directory}/deeplifting-pygranso'
             )
             filename = os.path.join(
                 main_directory,
