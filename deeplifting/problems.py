@@ -6185,7 +6185,10 @@ cross_in_tray_config = {
 # Drop Wave
 drop_wave_config = {
     'objective': drop_wave,
-    'bounds': [(-5.12, 5.12), (-5.12, 5.12)],
+    'bounds': {
+        'lower_bounds': [-5.12, -5.12],
+        'upper_bounds': [5.12, 5.12],
+    },
     'max_iterations': 1000,
     'global_minimum': -1.0,
     'dimensions': 2,
