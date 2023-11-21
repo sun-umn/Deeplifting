@@ -942,21 +942,21 @@ def find_best_architecture_task(problem_name, method, dimensionality, experiment
                     objective_values.append(
                         (hit, f_init, problem['global_minimum'], soln.best.f)
                     )
-                    initial_values.append(x_start.detach().cpu().numpy())
                     indexes.append(index)
                     network_config.append((num_layers, units))
                     run_times.append(total_time)
                     iterations.append(soln.iters)
                     fn_evals.append(soln.fn_evals)
 
+                    # Create initial values
+                    columns = [f'x{i + 1}' for i in range(output_size)]
+                    xs = json.dumps(dict(zip(columns, initial_values[0])))
+                    initial_values.append(xs)
+
                     if hit == 1.0:
                         break
 
             # Create the data from this run and save sequentially
-            # For the starting positions let's save as a json string
-            columns = [f'x{i + 1}' for i in range(output_size)]
-            xs = json.dumps(dict(zip(columns, initial_values[0])))
-
             # Initialize results
             results_df = pd.DataFrame(
                 np.asarray(objective_values),
@@ -965,7 +965,7 @@ def find_best_architecture_task(problem_name, method, dimensionality, experiment
             results_df[['num_layers', 'units']] = network_config
             results_df['index'] = indexes
             results_df['total_time'] = run_times
-            results_df['xs'] = xs
+            results_df['xs'] = initial_values
 
             # Save the results
             results_df_list.append(results_df)
