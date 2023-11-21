@@ -801,7 +801,7 @@ def find_best_architecture_task(problem_name, method, dimensionality, experiment
     # Maximum number of trials
     # Let's actually try and do 50 - we will use the linear
     # method
-    trials = 2
+    trials = 1
 
     for num_layers in reversed(range(minimum_num_layers, maximum_num_layers + 1)):
         for units in units_search:
@@ -942,6 +942,7 @@ def find_best_architecture_task(problem_name, method, dimensionality, experiment
                     objective_values.append(
                         (hit, f_init, problem['global_minimum'], soln.best.f)
                     )
+                    initial_values.append(x_start.detach().cpu().numpy())
                     indexes.append(index)
                     network_config.append((num_layers, units))
                     run_times.append(total_time)
@@ -950,7 +951,7 @@ def find_best_architecture_task(problem_name, method, dimensionality, experiment
 
                     # Create initial values
                     columns = [f'x{i + 1}' for i in range(output_size)]
-                    xs = json.dumps(dict(zip(columns, initial_values[0])))
+                    xs = json.dumps(dict(zip(columns, x_start.detach().cpu().numpy())))
                     initial_values.append(xs)
 
                     if hit == 1.0:
