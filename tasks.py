@@ -942,7 +942,6 @@ def find_best_architecture_task(problem_name, method, dimensionality, experiment
                     objective_values.append(
                         (hit, f_init, problem['global_minimum'], soln.best.f)
                     )
-                    initial_values.append(x_start.detach().cpu().numpy())
                     indexes.append(index)
                     network_config.append((num_layers, units))
                     run_times.append(total_time)
