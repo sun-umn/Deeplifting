@@ -956,6 +956,8 @@ def find_best_architecture_task(problem_name, method, dimensionality, experiment
             # For the starting positions let's save as a json string
             columns = [f'x{i + 1}' for i in range(output_size)]
             xs = json.dumps(dict(zip(columns, initial_values[0])))
+
+            # Initialize results
             results_df = pd.DataFrame(
                 np.asarray(objective_values),
                 columns=['success', 'f_init', 'global_minimum', 'f'],
