@@ -787,10 +787,10 @@ def find_best_architecture_task(problem_name, method, dimensionality, experiment
 
     # Layer search
     minimum_num_layers = 2
-    maximum_num_layers = 3
+    maximum_num_layers = 10
 
     # Number of neurons
-    units_search = [64]
+    units_search = [256, 128, 64]
 
     # Initial layer type
     input_dimension = 64
@@ -801,7 +801,7 @@ def find_best_architecture_task(problem_name, method, dimensionality, experiment
     # Maximum number of trials
     # Let's actually try and do 50 - we will use the linear
     # method
-    trials = 1
+    trials = 50
 
     for num_layers in reversed(range(minimum_num_layers, maximum_num_layers + 1)):
         for units in units_search:
