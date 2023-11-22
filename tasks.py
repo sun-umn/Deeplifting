@@ -784,6 +784,7 @@ def find_best_architecture_task(problem_name, method, dimensionality, experiment
     run_times = []
     iterations = []
     fn_evals = []
+    termination_codes = []
 
     # Layer search
     minimum_num_layers = 2
@@ -947,6 +948,7 @@ def find_best_architecture_task(problem_name, method, dimensionality, experiment
                     run_times.append(total_time)
                     iterations.append(soln.iters)
                     fn_evals.append(soln.fn_evals)
+                    termination_codes.append(soln.termination_code)
 
                     # Create initial values
                     columns = [f'x{i + 1}' for i in range(output_size)]
@@ -966,6 +968,7 @@ def find_best_architecture_task(problem_name, method, dimensionality, experiment
             results_df['index'] = indexes
             results_df['total_time'] = run_times
             results_df['xs'] = initial_values
+            results_df['termination_code'] = termination_codes
 
             # Save the results
             results_df_list.append(results_df)
@@ -977,7 +980,8 @@ def find_best_architecture_task(problem_name, method, dimensionality, experiment
             filename = os.path.join(
                 main_directory,
                 deeplifting_directory,
-                f'{problem_name}-relu-{num_layers}-{units}.parquet',
+                f'{problem_name}-relu-{num_layers}-{units}-'
+                f'{include_weight_initialization}.parquet',
             )
             results_df.to_parquet(filename)
 
