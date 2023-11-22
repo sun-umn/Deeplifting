@@ -18,7 +18,7 @@ from pygranso.pygransoStruct import pygransoStruct
 from torch.optim.lr_scheduler import OneCycleLR
 
 
-def build_model_complexity_plots(path: str, problem: str) -> None:
+def build_model_complexity_plots(path: str, problem: str, dimension: str) -> None:
     """
     Function that will take as input a string path and a problem
     name and compile the results to create the success rate vs.
@@ -65,7 +65,7 @@ def build_model_complexity_plots(path: str, problem: str) -> None:
 
     # Now create the heatmap with seaborn
     base_save_path = '/panfs/jay/groups/15/jusun/dever120/Deeplifting'
-    image_results_path = 'image-results/low-dimension/deeplifting-pygranso/'
+    image_results_path = f'image-results/{dimension}/deeplifting-pygranso/'
     image_save_path = os.path.join(base_save_path, image_results_path, f'{problem}.png')
 
     # Set up figure and create image and save
