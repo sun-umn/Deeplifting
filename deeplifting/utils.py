@@ -10,11 +10,76 @@ from functools import partial
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import seaborn as sns
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from pygranso.pygransoStruct import pygransoStruct
 from torch.optim.lr_scheduler import OneCycleLR
+
+
+def build_model_complexity_plots(path: str, problem: str) -> None:
+    """
+    Function that will take as input a string path and a problem
+    name and compile the results to create the success rate vs.
+    model complexity plots
+
+    The data should have columns:
+    success;
+    f_init;
+    global_minimum;
+    f;
+    num_layers;
+    units;
+    index;
+    total_time;
+    xs;
+
+    Forgot the termination codes!
+    At the moment this assumes low-dimension
+    """
+    files = os.path.join(path, f'{problem}-relu-*')
+    problem_files = glob.glob(files)
+    data = pd.read_parquet(problem_files)
+
+    # Create the results
+    results_df = (
+        data.groupby(
+            ['xs', 'num_layers', 'units']
+        )  # Group by each starting point, layers, units  # noqa
+        .agg(
+            {'success': 'max'}
+        )  # This is actual a binary check either there was a success or not  # noqa
+        .reset_index()
+        .groupby(
+            ['num_layers', 'units']
+        )  # Now we want to know the percentage of optimization successes  # noqa
+        .agg({'success': 'mean'})
+        .reset_index()
+    )
+
+    # Turn results df into heatmap format
+    heatmap_df = results_df.pivot_table(
+        index='units', columns='num_layers', values='success'
+    )
+
+    # Now create the heatmap with seaborn
+    base_save_path = '/panfs/jay/groups/15/jusun/dever120/Deeplifting'
+    image_results_path = 'image-results/low-dimension/deeplifting-pygranso/'
+    image_save_path = os.path.join(base_save_path, image_results_path, f'{problem}.png')
+
+    # Set up figure and create image and save
+    fig, ax = plt.subplots(1, 1, figsize=(10, 4))
+    sns.heatmap(
+        heatmap_df.sort_index(ascending=False), annot=True, cmap='Spectral_r', ax=ax
+    )
+    ax.set_title(f'{problem.capitalize()}: Success Rate Vs. Network Complexity')
+    ax.set_xlabel('Number of Layers')
+    ax.set_ylabel('Number of Neurons Per Layer')
+
+    # Save figure
+    fig.savefig(image_save_path)
+    plt.close()
 
 
 def create_unique_experiment_directory():
