@@ -6167,7 +6167,10 @@ ackley_config = {
 # Bukin N.6
 bukin_n6_config = {
     'objective': bukin_n6,
-    'bounds': [(-15.0, -5.0), (-3.0, 3.0)],
+    'bounds': {
+        'lower_bounds': [-15.0, -5.0],
+        'upper_bounds': [-3.0, 3.0],
+    },
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 2,
@@ -6176,7 +6179,10 @@ bukin_n6_config = {
 # Cross-in-Tray
 cross_in_tray_config = {
     'objective': cross_in_tray,
-    'bounds': [(-10.0, 10.0), (-10.0, 10.0)],
+    'bounds': {
+        'lower_bounds': [-10.0, -10.0],
+        'upper_bounds': [10.0, 10.0],
+    },
     'max_iterations': 1000,
     'global_minimum': -2.06261,
     'dimensions': 2,
