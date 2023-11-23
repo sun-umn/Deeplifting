@@ -731,7 +731,10 @@ def run_scip_task(problem_series, dimensionality, trials):
 @click.option('--method', default='pygranso')
 @click.option('--dimensionality', default='low-dimensional')
 @click.option('--experimentation', default=True)
-def find_best_architecture_task(problem_name, method, dimensionality, experimentation):
+@click.option('--include_weight_initialization', default=True)
+def find_best_architecture_task(
+    problem_name, method, dimensionality, experimentation, include_weight_initialization
+):
     """
     Function that we will use to find the best architecture over multiple
     "hard" high-dimensional problems. We will aim to tackle a large dimensional
@@ -796,7 +799,6 @@ def find_best_architecture_task(problem_name, method, dimensionality, experiment
     # Initial layer type
     input_dimension = 64
     initial_layer_type = 'linear'
-    include_weight_initialization = True
     include_bn = True
 
     # Maximum number of trials
