@@ -6215,7 +6215,10 @@ eggholder_config = {
 # Griewank
 griewank_config = {
     'objective': griewank,
-    'bounds': [(-600.0, 600.0), (-600.0, 600.0)],
+    'bounds': {
+        'lower_bounds': [-600.0, -600.0],
+        'upper_bounds': [600.0, 600.0],
+    },
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 2,
