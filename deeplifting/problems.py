@@ -6272,7 +6272,10 @@ levy_n13_config = {
 # Rastrigin
 rastrigin_config = {
     'objective': rastrigin,
-    'bounds': [(-5.12, 5.12), (-5.12, 5.12)],
+    'bounds': {
+        'lower_bounds': [-5.12, -5.12],
+        'upper_bounds': [5.12, 5.12],
+    },
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 2,
@@ -6281,7 +6284,10 @@ rastrigin_config = {
 # Schaffer N2
 schaffer_n2_config = {
     'objective': schaffer_n2,
-    'bounds': [(-100.0, 100.0), (-100.0, 100.0)],
+    'bounds': {
+        'lower_bounds': [-100.0, -100.0],
+        'upper_bounds': [100.0, 100.0],
+    },
     'max_iterations': 100,
     'global_minimum': 0.0,
     'dimensions': 2,
@@ -6290,7 +6296,10 @@ schaffer_n2_config = {
 # Schaffer N4
 schaffer_n4_config = {
     'objective': schaffer_n4,
-    'bounds': [(-100.0, 100.0), (-100.0, 100.0)],
+    'bounds': {
+        'lower_bounds': [-100.0, -100.0],
+        'upper_bounds': [100.0, 100.0],
+    },
     'max_iterations': 1000,
     'global_minimum': 0.292579,
     'dimensions': 2,
@@ -6299,7 +6308,10 @@ schaffer_n4_config = {
 # Schwefel
 schwefel_config = {
     'objective': schwefel,
-    'bounds': [(-500.0, 500.0), (-500.0, 500.0)],
+    'bounds': {
+        'lower_bounds': [-500.0, -500.0],
+        'upper_bounds': [500.0, 500.0],
+    },
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 2,
