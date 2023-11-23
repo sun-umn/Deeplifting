@@ -6227,7 +6227,10 @@ griewank_config = {
 # Holder Table
 holder_table_config = {
     'objective': holder_table,
-    'bounds': [(-10.0, 10.0), (-10.0, 10.0)],
+    'bounds': {
+        'lower_bounds': [-10.0, -10.0],
+        'upper_bounds': [10.0, 10.0],
+    },
     'max_iterations': 1000,
     'global_minimum': -19.2085,
     'dimensions': 2,
