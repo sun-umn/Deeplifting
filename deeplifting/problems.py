@@ -6151,6 +6151,7 @@ def lennard_jones(x, results=None, trial=None, version='numpy'):
 #     return result
 
 
+# Deeplifting Problems for Paper
 # Problem configurations
 # Ackley
 ackley_config = {
@@ -6161,6 +6162,30 @@ ackley_config = {
     },
     'max_iterations': 1000,
     'global_minimum': 0.0,
+    'dimensions': 2,
+}
+
+# Ackley 2
+ackley2_config = {
+    'objective': ackley2,
+    'bounds': {
+        'lower_bounds': [-32.0, -32.0],
+        'upper_bounds': [32.0, 32.0],
+    },
+    'max_iterations': 1000,
+    'global_minimum': -200,
+    'dimensions': 2,
+}
+
+# Ackley 3
+ackley3_config = {
+    'objective': ackley3,
+    'bounds': {
+        'lower_bounds': [-32.0, -32.0],
+        'upper_bounds': [32.0, 32.0],
+    },
+    'max_iterations': 1000,
+    'global_minimum': -195.62902823841935,
     'dimensions': 2,
 }
 
@@ -6185,6 +6210,18 @@ cross_in_tray_config = {
     },
     'max_iterations': 1000,
     'global_minimum': -2.06261,
+    'dimensions': 2,
+}
+
+# Cross-leg-table
+cross_leg_table_config = {
+    'objective': cross_leg_table,
+    'bounds': {
+        'lower_bounds': [-10.0, -10.0],
+        'upper_bounds': [10.0, 10.0],
+    },
+    'max_iterations': 1000,
+    'global_minimum': -1,
     'dimensions': 2,
 }
 
@@ -6938,22 +6975,6 @@ sine_envelope_config = {
     'bounds': [(-100, 100), (-100, 100)],
     'max_iterations': 1000,
     'global_minimum': 0.0,
-    'dimensions': 2,
-}
-
-ackley2_config = {
-    'objective': ackley2,
-    'bounds': [(-32, 32), (-32, 32)],
-    'max_iterations': 1000,
-    'global_minimum': -200,
-    'dimensions': 2,
-}
-
-ackley3_config = {
-    'objective': ackley3,
-    'bounds': [(-32, 32), (-32, 32)],
-    'max_iterations': 1000,
-    'global_minimum': -195.62902823841935,
     'dimensions': 2,
 }
 
