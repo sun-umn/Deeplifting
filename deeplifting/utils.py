@@ -426,11 +426,13 @@ def create_optimization_plot(
     objective = problem['objective']
 
     # Get the bounds for the problem
-    x_bounds, y_bounds = problem['bounds']
 
-    # Separate into the minimum and maximum bounds
-    x_min, x_max = x_bounds
-    y_min, y_max = y_bounds
+    # Get the upper bounds & lower bounds
+    lower_bounds = problem['bounds']['lower_bounds']
+    upper_bounds = problem['bounds']['upper_bounds']
+
+    x_min, y_min = lower_bounds
+    x_max, y_max = upper_bounds
 
     # Some of the problems that we are exploring do not
     # have bounds but we will want to plot them
