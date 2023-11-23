@@ -6248,7 +6248,10 @@ langermann_config = {
 # Levy
 levy_config = {
     'objective': levy,
-    'bounds': [(-10.0, 10.0), (-10.0, 10.0)],
+    'bounds': {
+        'lower_bounds': [-10.0, -10.0],
+        'upper_bounds': [10.0, 10.0],
+    },
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 2,
@@ -6257,7 +6260,10 @@ levy_config = {
 # Levy
 levy_n13_config = {
     'objective': levy_n13,
-    'bounds': [(-10.0, 10.0), (-10.0, 10.0)],
+    'bounds': {
+        'lower_bounds': [-10.0, -10.0],
+        'upper_bounds': [10.0, 10.0],
+    },
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 2,
