@@ -6660,7 +6660,7 @@ schwefel_500d_config = {
 
 schwefel_1000d_config = {
     'objective': ndschwefel,
-    'bounds': [(-500, 500)],  # Will use a single level bound and then expand
+    'bounds': {'lower_bounds': [-500.0] * 1000, 'upper_bounds': [500.0] * 1000},
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 1000,
