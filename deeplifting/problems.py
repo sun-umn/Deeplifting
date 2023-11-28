@@ -6189,6 +6189,18 @@ ackley3_config = {
     'dimensions': 2,
 }
 
+# Alpine N.1
+alpine1_config = {
+    'objective': alpine1,
+    'bounds': {
+        'lower_bounds': [-10.0, -10.0],
+        'upper_bounds': [10.0, 10.0],
+    },
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+}
+
 # Bukin N.6
 bukin_n6_config = {
     'objective': bukin_n6,
@@ -6303,6 +6315,18 @@ levy_n13_config = {
     },
     'max_iterations': 1000,
     'global_minimum': 0.0,
+    'dimensions': 2,
+}
+
+# Mathopt6
+mathopt6_config = {
+    'objective': mathopt6,
+    'bounds': {
+        'lower_bounds': [-3.0, -3.0],
+        'upper_bounds': [3.0, 3.0],
+    },
+    'max_iterations': 1000,
+    'global_minimum': -3.3069,
     'dimensions': 2,
 }
 
@@ -6925,14 +6949,6 @@ kriging_peaks_red500_config = {
     'dimensions': 2,
 }
 
-mathopt6_config = {
-    'objective': mathopt6,
-    'bounds': [(-3, 3), (-3, 3)],
-    'max_iterations': 1000,
-    'global_minimum': -3.3069,
-    'dimensions': 2,
-}
-
 quantum_config = {
     'objective': quantum,
     'bounds': [(1, 10), (1, 10)],
@@ -6954,14 +6970,6 @@ damavandi_config = {
     'bounds': [(0, 14), (0, 14)],
     'max_iterations': 1000,
     'global_minimum': 0,
-    'dimensions': 2,
-}
-
-cross_leg_table_config = {
-    'objective': cross_leg_table,
-    'bounds': [(-10, 10), (-10, 10)],
-    'max_iterations': 1000,
-    'global_minimum': -1,
     'dimensions': 2,
 }
 
@@ -7042,14 +7050,6 @@ adjiman_config = {
     'bounds': [(-1, 2), (-1, 1)],
     'max_iterations': 1000,
     'global_minimum': -2.02181,
-    'dimensions': 2,
-}
-
-alpine1_config = {
-    'objective': alpine1,
-    'bounds': [(-10, 10), (-10, 10)],
-    'max_iterations': 1000,
-    'global_minimum': 0,
     'dimensions': 2,
 }
 
