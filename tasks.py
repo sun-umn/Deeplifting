@@ -981,7 +981,7 @@ def find_best_architecture_task(
             main_directory = '/home/jusun/dever120/Deeplifting'
             deeplifting_directory = (
                 'experiments/3b39b4fb-0520-4795-aaba-a8eab24ff8fd/'
-                f'{directory}/deeplifting-pygranso'
+                f'{directory}/{problem_name}'
             )
             filename = os.path.join(
                 main_directory,

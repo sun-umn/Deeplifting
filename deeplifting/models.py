@@ -458,11 +458,10 @@ class AlignmentLayer(nn.Module):
 
     def __init__(self, output_size):  # noqa
         super(AlignmentLayer, self).__init__()
-        # self.amplitude = nn.Parameter(torch.pi * torch.ones(1), requires_grad=True)
-        self.alignment = nn.Parameter(torch.ones(output_size))
+        self.alignment = nn.Parameter(torch.randn(output_size))
 
     def forward(self, x):  # noqa
-        return x * self.alignment
+        return x + self.alignment
 
 
 # Build a neural network that does not have skip connections
