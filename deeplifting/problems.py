@@ -6201,6 +6201,18 @@ alpine1_config = {
     'dimensions': 2,
 }
 
+# Alpine N.2
+alpine2_config = {
+    'objective': alpine2,
+    'bounds': {
+        'lower_bounds': [0.0, 0.0],
+        'upper_bounds': [10.0, 10.0],
+    },
+    'max_iterations': 1000,
+    'global_minimum': -7.885600,
+    'dimensions': 2,
+}
+
 # Bukin N.6
 bukin_n6_config = {
     'objective': bukin_n6,
@@ -7107,14 +7119,6 @@ alpine1_2500d_config = {
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2500,
-}
-
-alpine2_config = {
-    'objective': alpine2,
-    'bounds': [(0, 10), (0, 10)],
-    'max_iterations': 1000,
-    'global_minimum': -7.885600,
-    'dimensions': 2,
 }
 
 alpine2_10d_config = {
