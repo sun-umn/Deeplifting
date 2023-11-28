@@ -837,10 +837,12 @@ def find_best_architecture_task(
                 # Creates different weight intializations for the same starting point
                 # x0
                 for i in range(10, 110, 10):
+                    seed = (i + index) * i
                     print(f'Fitting point {x_start} - with weights {i}')
                     print(
                         f' - layers - {num_layers} - units - {units} - trial - {trial}'
                     )
+                    print(f'seed = {seed}')
 
                     # Deeplifting model with skip connections
                     model = ReLUDeepliftingMLP(
@@ -851,21 +853,23 @@ def find_best_architecture_task(
                         initial_layer_type=initial_layer_type,
                         include_weight_initialization=include_weight_initialization,
                         include_bn=include_bn,
-                        seed=i,
+                        seed=seed,
                     )
 
                     model = model.to(device=device, dtype=torch.double)
 
                     # Let's make sure that all methods have the same x0
                     # Test
-                    train_model_to_output(
-                        inputs=inputs,
-                        model=model,
-                        x0=x_start,
-                        epochs=5000,
-                        lr=1,
-                        tolerance=1e-3,
-                    )
+                    if include_weight_initialization:
+                        # This will train ONLY the alignment block
+                        train_model_to_output(
+                            inputs=inputs,
+                            model=model,
+                            x0=x_start,
+                            epochs=5000,
+                            lr=1,
+                            tolerance=1e-3,
+                        )
                     nvar = getNvarTorch(model.parameters())
 
                     # Setup a pygransoStruct for the algorithm
