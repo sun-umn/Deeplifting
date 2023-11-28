@@ -6357,7 +6357,10 @@ schwefel_config = {
 # Shubert
 shubert_config = {
     'objective': shubert,
-    'bounds': [(-10, 10), (-10, 10)],
+    'bounds': {
+        'lower_bounds': [-10.0, -10.0],
+        'upper_bounds': [10.0, 10.0],
+    },
     'max_iterations': 1000,
     'global_minimum': -186.7309,
     'dimensions': 2,
