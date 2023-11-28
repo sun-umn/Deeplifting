@@ -547,9 +547,16 @@ class ReLUDeepliftingMLP(nn.Module):
     def forward(self, inputs=None):
         x = inputs
 
+        # Initial input
+        x = self.layers[0](x)
+
         # Iterate over the layers to build the MLP
-        for i, layer in enumerate(self.layers):
-            x = layer(x)
+        for i, layer in enumerate(self.layers[:1]):
+            if i > 0:
+                x_new = layer(x)
+                x = x + x_new
+            else:
+                x = layer(x)
 
         # Put it through the output layer
         x = self.linear_output(x)
