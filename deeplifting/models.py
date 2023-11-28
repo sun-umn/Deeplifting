@@ -459,7 +459,7 @@ class AlignmentLayer(nn.Module):
     def __init__(self, output_size):  # noqa
         super(AlignmentLayer, self).__init__()
         # self.amplitude = nn.Parameter(torch.pi * torch.ones(1), requires_grad=True)
-        self.alignment = nn.Parameter(torch.rand(output_size))
+        self.alignment = nn.Parameter(torch.ones(output_size))
 
     def forward(self, x):  # noqa
         return x * self.alignment
@@ -563,8 +563,8 @@ class ReLUDeepliftingMLP(nn.Module):
         # Small layer to align the outputs of the neural network
         x = x.mean(axis=0)
 
-        out = self.alignment_layer(x)
-        out = self.output_activation_layer(out)
+        x = self.alignment_layer(x)
+        out = self.output_activation_layer(x)
 
         if self.bounds is not None:
             out = self.scaling_layer(out)
