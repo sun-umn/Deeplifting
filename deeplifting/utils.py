@@ -68,7 +68,9 @@ def build_model_complexity_plots(
     # Now create the heatmap with seaborn
     base_save_path = '/panfs/jay/groups/15/jusun/dever120/Deeplifting'
     image_results_path = f'image-results/{dimension}/deeplifting-pygranso/'
-    image_save_path = os.path.join(base_save_path, image_results_path, f'{problem}.png')
+    image_save_path = os.path.join(
+        base_save_path, image_results_path, f'{problem}-{weight_initialization}.png'
+    )
 
     # Set up figure and create image and save
     fig, ax = plt.subplots(1, 1, figsize=(10, 4))
