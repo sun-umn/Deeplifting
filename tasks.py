@@ -746,6 +746,12 @@ def find_best_architecture_task(
     # Get the available device
     device = get_devices()
 
+    # Weight initialization rounds
+    max_weight_trials = {
+        True: range(10, 20, 10),
+        False: range(10, 110, 10),
+    }
+
     if experimentation:
         # Enable wandb
         wandb.login(key='2080070c4753d0384b073105ed75e1f46669e4bf')
@@ -836,7 +842,7 @@ def find_best_architecture_task(
 
                 # Creates different weight intializations for the same starting point
                 # x0
-                for i in range(10, 110, 10):
+                for i in max_weight_trials[include_weight_initialization]:
                     seed = (i + index) * i
                     print(f'Fitting point {x_start} - with weights {i}')
                     print(
@@ -961,8 +967,9 @@ def find_best_architecture_task(
                     xs = json.dumps(dict(zip(columns, x_init)))
                     initial_values.append(xs)
 
-                    if hit == 1.0:
-                        break
+                    if include_weight_initialization:
+                        if hit == 1.0:
+                            break
 
             # Create the data from this run and save sequentially
             # Initialize results
