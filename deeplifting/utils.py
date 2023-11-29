@@ -18,7 +18,9 @@ from pygranso.pygransoStruct import pygransoStruct
 from torch.optim.lr_scheduler import OneCycleLR
 
 
-def build_model_complexity_plots(path: str, problem: str, dimension: str) -> None:
+def build_model_complexity_plots(
+    path: str, problem: str, weight_initialization: bool, dimension: str
+) -> None:
     """
     Function that will take as input a string path and a problem
     name and compile the results to create the success rate vs.
@@ -38,7 +40,7 @@ def build_model_complexity_plots(path: str, problem: str, dimension: str) -> Non
     Forgot the termination codes!
     At the moment this assumes low-dimension
     """
-    files = os.path.join(path, f'{problem}-relu-*')
+    files = os.path.join(path, f'{problem}-relu-*-{weight_initialization}*')
     problem_files = glob.glob(files)
     data = pd.read_parquet(problem_files)
 
