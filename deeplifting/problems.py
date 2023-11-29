@@ -6450,7 +6450,7 @@ ackley_1000d_config = {
     'bounds': {'lower_bounds': [-32.768] * 1000, 'upper_bounds': [32.768] * 1000},
     'max_iterations': 1000,
     'global_minimum': 0.0,
-    'dimensions': 1000,
+    'dimensions': 150,
 }
 
 ackley_2500d_config = {
