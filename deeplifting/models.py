@@ -29,11 +29,10 @@ class SinActivation(nn.Module):
 
     def __init__(self):  # noqa
         super(SinActivation, self).__init__()
-        self.scale = nn.Parameter(torch.ones(1), requires_grad=True)
-        self.shift = nn.Parameter(torch.randn(1), requires_grad=True)
+        self.scale = nn.Parameter(torch.pi * torch.ones(1), requires_grad=True)
 
     def forward(self, x):  # noqa
-        return torch.sin((x - self.shift) * self.scale)
+        return torch.sin(x * self.scale)
 
 
 class DeepliftingScalingBlock(nn.Module):
@@ -132,7 +131,7 @@ class AlignmentLayer(nn.Module):
         self.alignment = nn.Parameter(torch.randn(output_size))
 
     def forward(self, x):  # noqa
-        return x * self.alignment
+        return x - self.alignment
 
 
 # Build a neural network that does not have skip connections
@@ -241,11 +240,12 @@ class ReLUDeepliftingMLP(nn.Module):
             x = x.mean(axis=-1)
 
         # Small layer to align the outputs of the neural network
-        x = x.mean(axis=0)
+        x = x.sum(axis=0)
 
         x = self.alignment_layer(x)
         out = self.output_activation_layer(x)
 
         if self.bounds is not None:
             out = self.scaling_layer(out)
+
         return out
