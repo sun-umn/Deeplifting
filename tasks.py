@@ -908,7 +908,7 @@ def find_best_architecture_task(
                     # opts.halt_on_linesearch_bracket = False
 
                     opts.opt_tol = 1e-10
-                    opts.maxit = 1000
+                    opts.maxit = 200
 
                     # TODO: Clean up meaningless variables
                     results = None
