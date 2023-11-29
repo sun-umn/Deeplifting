@@ -27,11 +27,16 @@ class SinActivation(nn.Module):
     an activation function
     """
 
-    def __init__(self):  # noqa
+    def __init__(self, include_amplitude=False):  # noqa
         super(SinActivation, self).__init__()
-        self.scale = nn.Parameter(torch.pi * torch.ones(1), requires_grad=True)
+        self.include_amplitude = include_amplitude
+        self.amplitude = nn.Parameter(torch.pi * torch.rand(1), requires_grad=True)
+        self.scale = nn.Parameter(torch.pi * torch.rand(1), requires_grad=True)
 
     def forward(self, x):  # noqa
+        if self.include_amplitude:
+            return self.amplitude * torch.sin(x * self.scale)
+
         return torch.sin(x * self.scale)
 
 
@@ -87,8 +92,6 @@ class ReluDeepliftingBlock(nn.Module):
         # Define the Linear layer
         self.linear = nn.Linear(input_size, output_size)
 
-        # Let's actually make this configurable so we can run
-        # experiments with and without the weight initialization
         # Define a initlization scheme
         # initialize the weights
         # Also, we will only consider the ReLU activation layer
@@ -103,7 +106,6 @@ class ReluDeepliftingBlock(nn.Module):
         nn.init.zeros_(self.linear.bias)
 
         # Define the Batch Normalization layer
-        # self.batch_norm = nn.BatchNorm1d(output_size)
         self.batch_norm = nn.LayerNorm(output_size)
 
     def forward(self, x):
@@ -240,7 +242,7 @@ class ReLUDeepliftingMLP(nn.Module):
             x = x.mean(axis=-1)
 
         # Small layer to align the outputs of the neural network
-        x = x.sum(axis=0)
+        x = x.mean(axis=0)
 
         x = self.alignment_layer(x)
         out = self.output_activation_layer(x)
