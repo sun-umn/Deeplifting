@@ -784,6 +784,11 @@ def find_best_architecture_task(
     # Get the device (CPU for now)
     output_size = problem['dimensions']
 
+    # Maximum iterations for a problem
+    # Most problems converge quickly but some
+    # take a little longer
+    max_iterations = problem['max_iterations']
+
     # Setup list to store information
     objective_values = []
     initial_values = []
@@ -800,7 +805,7 @@ def find_best_architecture_task(
     maximum_num_layers = 10
 
     # Number of neurons
-    units_search = [256, 128, 64]
+    units_search = [256, 128, 64, 32]
 
     # Initial layer type
     input_dimension = 64
@@ -908,7 +913,7 @@ def find_best_architecture_task(
                     # opts.halt_on_linesearch_bracket = False
 
                     opts.opt_tol = 1e-10
-                    opts.maxit = 200
+                    opts.maxit = max_iterations
 
                     # TODO: Clean up meaningless variables
                     results = None
