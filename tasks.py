@@ -964,7 +964,15 @@ def find_best_architecture_task(
 
                     # Create initial values
                     columns = [f'x{i + 1}' for i in range(output_size)]
-                    xs = json.dumps(dict(zip(columns, x_init)))
+
+                    if include_weight_initialization:
+                        xs = json.dumps(
+                            dict(zip(columns, x_start.detach().cpu().numpy()))
+                        )
+                    else:
+                        xs = json.dumps(dict(zip(columns, x_init)))
+
+                    # Save the xs values
                     initial_values.append(xs)
 
                     if include_weight_initialization:
