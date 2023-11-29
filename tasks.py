@@ -789,6 +789,10 @@ def find_best_architecture_task(
     # take a little longer
     max_iterations = problem['max_iterations']
 
+    # Get the maximum number of trials
+    # for the problem
+    trials = problem['trials']
+
     # Setup list to store information
     objective_values = []
     initial_values = []
@@ -812,11 +816,7 @@ def find_best_architecture_task(
     initial_layer_type = 'linear'
     include_bn = True
 
-    # Maximum number of trials
-    # Let's actually try and do 50 - we will use the linear
-    # method
-    trials = 50
-
+    # Start the optimization process
     for num_layers in reversed(range(minimum_num_layers, maximum_num_layers + 1)):
         for units in units_search:
             # n-layer m neuron network

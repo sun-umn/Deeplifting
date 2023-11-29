@@ -6235,6 +6235,7 @@ cross_in_tray_config = {
     'max_iterations': 1000,
     'global_minimum': -2.06261,
     'dimensions': 2,
+    'trials': 50,
 }
 
 # Cross-leg-table
@@ -6451,6 +6452,7 @@ ackley_1000d_config = {
     'max_iterations': 150,
     'global_minimum': 0.0,
     'dimensions': 1000,
+    'trials': 15,
 }
 
 # Multi-Dimensional Problems #
