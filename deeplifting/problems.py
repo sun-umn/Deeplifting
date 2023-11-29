@@ -6498,7 +6498,7 @@ griewank_500d_config = {
 
 griewank_1000d_config = {
     'objective': ndgriewank,
-    'bounds': [(-600, 600)],  # Will use a single level bound and then expand
+    'bounds': {'lower_bounds': [-600.0] * 1000, 'upper_bounds': [600.0] * 1000},
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 1000,
