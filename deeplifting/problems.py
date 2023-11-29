@@ -6440,7 +6440,7 @@ ackley_100d_config = {
 ackley_500d_config = {
     'objective': ndackley,
     'bounds': {'lower_bounds': [-32.768] * 500, 'upper_bounds': [32.768] * 500},
-    'max_iterations': 1000,
+    'max_iterations': 150,
     'global_minimum': 0.0,
     'dimensions': 500,
 }
@@ -6451,14 +6451,6 @@ ackley_1000d_config = {
     'max_iterations': 150,
     'global_minimum': 0.0,
     'dimensions': 1000,
-}
-
-ackley_2500d_config = {
-    'objective': ndackley,
-    'bounds': [(-32.768, 32.768)],  # Will use a single level bound and then expand
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 2500,
 }
 
 # Multi-Dimensional Problems #
@@ -8507,7 +8499,6 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'ackley_100d': ackley_100d_config,
     'ackley_500d': ackley_500d_config,
     'ackley_1000d': ackley_1000d_config,
-    'ackley_2500d': ackley_2500d_config,
     # Alpine1 Series - Origin Solution
     'alpine1_3d': alpine1_3d_config,
     'alpine1_5d': alpine1_5d_config,
@@ -8515,7 +8506,6 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'alpine1_100d': alpine1_100d_config,
     'alpine1_500d': alpine1_500d_config,
     'alpine1_1000d': alpine1_1000d_config,
-    'alpine1_2500d': alpine1_2500d_config,
     # Chung-Reynolds Series - Origin Solution
     'chung_reyonlds_3d': chung_reynolds_3d_config,
     'chung_reynolds_5d': chung_reynolds_5d_config,
@@ -8523,7 +8513,6 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'chung_reynolds_100d': chung_reynolds_100d_config,
     'chung_reynolds_500d': chung_reynolds_500d_config,
     'chung_reynolds_1000d': chung_reynolds_1000d_config,
-    'chung_reynolds_2500d': chung_reynolds_2500d_config,
     # Griewank Series - Origin Solution
     'griewank_3d': griewank_3d_config,
     'griewank_5d': griewank_5d_config,
@@ -8531,7 +8520,6 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'griewank_100d': griewank_100d_config,
     'griewank_500d': griewank_500d_config,
     'griewank_1000d': griewank_1000d_config,
-    'griewank_2500d': griewank_2500d_config,
     # Layeb 4 Series - Non-origin solution
     'layeb4_3d': layeb4_3d_config,
     'layeb4_5d': layeb4_5d_config,
@@ -8539,7 +8527,6 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'layeb4_100d': layeb4_100d_config,
     'layeb4_500d': layeb4_500d_config,
     'layeb4_1000d': layeb4_1000d_config,
-    'layeb4_2500d': layeb4_2500d_config,
     # Levy Series - Non-origin solution
     'levy_3d': levy_3d_config,
     'levy_5d': levy_5d_config,
@@ -8547,7 +8534,6 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'levy_100d': levy_100d_config,
     'levy_500d': levy_500d_config,
     'levy_1000d': levy_1000d_config,
-    'levy_2500d': levy_2500d_config,
     # Qing Series - Non-origin solution
     'qing_3d': qing_3d_config,
     'qing_5d': qing_5d_config,
@@ -8555,7 +8541,6 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'qing_100d': qing_100d_config,
     'qing_500d': qing_500d_config,
     'qing_1000d': qing_1000d_config,
-    'qing_2500d': qing_2500d_config,
     # Rastrigin series - Origin Solution
     'rastrigin_3d': rastrigin_3d_config,
     'rastrigin_5d': rastrigin_5d_config,
@@ -8563,7 +8548,6 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'rastrigin_100d': rastrigin_100d_config,
     'rastrigin_500d': rastrigin_500d_config,
     'rastrigin_1000d': rastrigin_1000d_config,
-    'rastrigin_2500d': rastrigin_2500d_config,
     # Schewefel series - Non-origin solution
     'schwefel_3d': schwefel_3d_config,
     'schwefel_5d': schwefel_5d_config,
@@ -8571,7 +8555,6 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'schwefel_100d': schwefel_100d_config,
     'schwefel_500d': schwefel_500d_config,
     'schwefel_1000d': schwefel_1000d_config,
-    'schwefel_2500d': schwefel_2500d_config,
     # Lennard Jones
     'lennard_jones_6d': lennard_jones_6d_config,
     'lennard_jones_9d': lennard_jones_9d_config,
