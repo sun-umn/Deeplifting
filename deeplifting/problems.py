@@ -6448,9 +6448,9 @@ ackley_500d_config = {
 ackley_1000d_config = {
     'objective': ndackley,
     'bounds': {'lower_bounds': [-32.768] * 1000, 'upper_bounds': [32.768] * 1000},
-    'max_iterations': 1000,
+    'max_iterations': 150,
     'global_minimum': 0.0,
-    'dimensions': 150,
+    'dimensions': 1000,
 }
 
 ackley_2500d_config = {
