@@ -748,8 +748,8 @@ def find_best_architecture_task(
 
     # Weight initialization rounds
     max_weight_trials = {
-        True: range(10, 20, 10),
-        False: range(10, 110, 10),
+        False: range(10, 20, 10),
+        True: range(10, 110, 10),
     }
 
     if experimentation:
