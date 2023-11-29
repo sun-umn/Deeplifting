@@ -6793,14 +6793,7 @@ qing_1000d_config = {
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 1000,
-}
-
-qing_2500d_config = {
-    'objective': ndqing,
-    'bounds': [(-500, 500)],  # Will use a single level bound and then expand
-    'max_iterations': 1000,
-    'global_minimum': 0,
-    'dimensions': 2500,
+    'trials': 15,
 }
 
 # ex8_6_2 from MINLP
