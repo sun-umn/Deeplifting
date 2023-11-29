@@ -222,7 +222,7 @@ class ReLUDeepliftingMLP(nn.Module):
         x = self.layers[0](x)
 
         # Iterate over the layers to build the MLP
-        for i, layer in enumerate(self.layers[:1]):
+        for i, layer in enumerate(self.layers[1:]):
             # We need at least one output from the first hidden layer
             # before we can accumulate skip connections
             if i > 0:

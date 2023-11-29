@@ -834,7 +834,7 @@ def find_best_architecture_task(
                     inputs = inputs.to(device=device, dtype=torch.long)
 
                 elif initial_layer_type == 'linear':
-                    inputs = torch.randn(size=(input_dimension, units))
+                    inputs = torch.randn(size=(input_dimension, 5 * output_size))
                     inputs = inputs.to(device=device, dtype=torch.double)
 
                 else:
@@ -857,7 +857,7 @@ def find_best_architecture_task(
 
                     # Deeplifting model with skip connections
                     model = ReLUDeepliftingMLP(
-                        initial_hidden_size=units,
+                        initial_hidden_size=(5 * output_size),
                         hidden_sizes=hidden_sizes,
                         output_size=output_size,
                         bounds=bounds,
