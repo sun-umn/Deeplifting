@@ -816,7 +816,7 @@ def run_lbfgs_deeplifting(
     fn_evals = list(optimizer.state.items())[0][1]['func_evals']
 
     results = {
-        'f_init': f_init,
+        'f_init': f_init.detach().cpu().numpy(),
         'total_time': total_time,
         'f_final': f_final,
         'iterations': iterations,
