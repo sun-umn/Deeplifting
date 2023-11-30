@@ -773,7 +773,7 @@ def run_lbfgs_deeplifting(
 
         # If the difference between the current objective values
         # and the previous do no change over a period then exit
-        if torch.abs(updated_loss.detach().cpu().numpy() - current_loss) <= 1e-10:
+        if np.abs(updated_loss.detach().cpu().numpy() - current_loss) <= 1e-10:
             count += 1
         else:
             # If this is not true we need to restart the count
