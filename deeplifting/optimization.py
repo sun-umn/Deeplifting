@@ -747,7 +747,7 @@ def run_lbfgs_deeplifting(
 
             # The loss is the sum of the compliance
             outputs = model(inputs=model_inputs)
-            loss = objective(outputs, version='pytorch')
+            loss = objective(outputs)
 
             # Go through the backward pass and create the gradients
             loss.backward()
