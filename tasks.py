@@ -986,9 +986,9 @@ def find_best_architecture_task(
                     # Save the xs values
                     initial_values.append(xs)
 
-                    if include_weight_initialization:
-                        if hit == 1.0:
-                            break
+                    # if include_weight_initialization:
+                    #     if hit == 1.0:
+                    #         break
 
             # Create the data from this run and save sequentially
             # Initialize results
