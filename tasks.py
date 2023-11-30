@@ -40,7 +40,7 @@ from deeplifting.optimization import (
     run_pygranso_deeplifting,
 )
 from deeplifting.problems import HIGH_DIMENSIONAL_PROBLEMS_BY_NAME, PROBLEMS_BY_NAME
-from deeplifting.utils import Results, get_devices, initialize_vector
+from deeplifting.utils import Results, get_devices, initialize_vector, set_seed
 
 # Filter warnings
 warnings.filterwarnings('ignore')
@@ -565,7 +565,7 @@ def find_best_architecture_task(
 
     # Layers
     layers = reversed(range(minimum_num_layers, maximum_num_layers + 1))
-    layers = [34, 27, 23, 18, 14] + list(layers)
+    layers = [19, 16, 14, 12] + list(layers)
 
     # Number of neurons
     units_search = [256, 128, 64, 32]
@@ -591,6 +591,9 @@ def find_best_architecture_task(
             # but it may or may not converge so we can try different
             # weights
             for index, trial in enumerate(range(trials)):
+                # Set the seed
+                set_seed(trial)
+
                 # Fix the inputs for deeplifting
                 if initial_layer_type == 'embedding':
                     inputs = torch.randint(

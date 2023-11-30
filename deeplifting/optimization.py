@@ -707,9 +707,9 @@ def run_lbfgs_deeplifting(
     # This is a pytorch provided implementation
     optimizer = optim.LBFGS(
         model.parameters(),
-        lr=1.0,
-        history_size=100,
-        max_iter=50,
+        lr=0.1,
+        history_size=25,
+        max_iter=25,
         line_search_fn='strong_wolfe',
     )
 
@@ -737,7 +737,7 @@ def run_lbfgs_deeplifting(
     current_loss = f_init
 
     # Train the model
-    epochs = 10000
+    epochs = 1000
     model.train()
     for epoch in range(epochs):
 
@@ -790,7 +790,7 @@ def run_lbfgs_deeplifting(
             termination_code = 0
             break
 
-        if epoch % 1000 == 0:
+        if epoch % 50 == 0:
             print(
                 f'loss = {updated_loss.detach()},'
                 f' gradient_norm = {flat_grad.abs().max()}'
@@ -855,19 +855,20 @@ def run_adam_deeplifting(
     )
 
     # Total epochs
-    epochs = 10000
+    epochs = 500
 
     # Set up the LBFGS optimizer for the problem
     # This is a pytorch provided implementation
     optimizer = optim.Adam(
         model.parameters(),
-        lr=1e-4,
+        lr=1e-1,
+        amsgrad=True,
     )
 
     # Cosine annealing scheduler
     scheduler = optim.lr_scheduler.OneCycleLR(
         optimizer,
-        max_lr=1e-4,
+        max_lr=1e-1,
         epochs=epochs,
         steps_per_epoch=1,
         pct_start=0.0,
@@ -922,7 +923,7 @@ def run_adam_deeplifting(
         if epoch >= 10000 and delta < 1e-10:
             early_stopping_count += 1
 
-        if early_stopping_count == 10000:
+        if early_stopping_count == 100:
             termination_code = 0
             break
 
