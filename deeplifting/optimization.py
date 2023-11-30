@@ -786,7 +786,7 @@ def run_lbfgs_deeplifting(
             count = 0
             current_loss = updated_loss
 
-        if count > 1000:
+        if count > 100:
             termination_code = 0
             break
 
