@@ -80,7 +80,7 @@ def ackley(x, p=0.0, version='numpy'):
     return result
 
 
-def bukin_n6(x, results=None, trial=None, p=0.0, version='numpy'):
+def bukin_n6(x, p=0.0, version='numpy'):
     """
     Function that implements the Bukin Function N.6 in both
     numpy and pytorch and pyomo interface.
@@ -103,22 +103,10 @@ def bukin_n6(x, results=None, trial=None, p=0.0, version='numpy'):
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results if results and trial
-    # are provided
-    if results is not None and trial is not None:
-        build_2d_intermediate_results(
-            x1=x1,
-            x2=x2,
-            result=result,
-            version=version,
-            results=results,
-            trial=trial,
-        )
-
     return result
 
 
-def cross_in_tray(x, results=None, trial=None, version='numpy'):
+def cross_in_tray(x, version='numpy'):
     """
     Implementation of the 2D Cross-in-Tray function.
     This function has four identical global minima.
@@ -188,18 +176,6 @@ def cross_in_tray(x, results=None, trial=None, version='numpy'):
     else:
         raise ValueError(
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
-        )
-
-    # Fill in the intermediate results if results and trial
-    # are provided
-    if results is not None and trial is not None:
-        build_2d_intermediate_results(
-            x1=x1,
-            x2=x2,
-            result=result,
-            version=version,
-            results=results,
-            trial=trial,
         )
 
     return result
