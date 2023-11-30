@@ -823,7 +823,7 @@ def find_best_architecture_task_v2(
     save_path = os.path.join(
         '/home/jusun/dever120/Deeplifting',
         'experiments/3b39b4fb-0520-4795-aaba-a8eab24ff8fd/',
-        f'{directory}/deeplifting-pygranso',
+        f'{directory}/test',
     )
 
     # Get the problem information
@@ -873,7 +873,7 @@ def find_best_architecture_task_v2(
     include_bn = True
 
     # Start the optimization process
-    for num_layers in reversed(range(minimum_num_layers, maximum_num_layers + 1)):
+    for num_layers in layers:
         for units in units_search:
             # n-layer m neuron network
             hidden_sizes = (units,) * num_layers
@@ -969,7 +969,9 @@ def find_best_architecture_task_v2(
                     )
 
             # Create the data from this run and save sequentially
-            results.build_and_save_dataframe(save_path=save_path)
+            results.build_and_save_dataframe(
+                save_path=save_path, problem_name=problem_name
+            )
 
 
 if __name__ == "__main__":
