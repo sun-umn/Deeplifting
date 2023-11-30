@@ -92,7 +92,11 @@ class Results:
             <= solution_tolerance
         )
 
-        if self.method in ('deeplifting-pygranso', 'deeplifting-lbfgs'):
+        if self.method in (
+            'deeplifting-pygranso',
+            'deeplifting-lbfgs',
+            'deeplifting-adam',
+        ):
             # Get the neural network configuration information
             self.num_layers = problem_config['num_layers']
             self.num_neurons = problem_config['num_neurons']
@@ -126,7 +130,11 @@ class Results:
 
         user: Input is specific to the directory of the user
         """
-        if self.method in ('deeplifting-pygranso', 'deeplifting-lbfgs'):
+        if self.method in (
+            'deeplifting-pygranso',
+            'deeplifting-lbfgs',
+            'deeplifting-adam',
+        ):
             columns = [
                 'method',
                 'global_minimum',

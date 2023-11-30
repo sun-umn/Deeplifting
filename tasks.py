@@ -36,6 +36,7 @@ from deeplifting.optimization import run_pyomo  # noqa
 from deeplifting.optimization import (
     deeplifting_nd_fn,
     deeplifting_predictions,
+    run_adam_deeplifting,
     run_basinhopping,
     run_differential_evolution,
     run_dual_annealing,
@@ -951,6 +952,17 @@ def find_best_architecture_task_v2(
                     elif method == 'deeplifting-lbfgs':
                         # Run LBFGS Based Deeplifting
                         deeplifting_outputs = run_lbfgs_deeplifting(
+                            model=model,
+                            model_inputs=inputs,
+                            start_position=x_start,
+                            objective=fn,
+                            device=device,
+                            max_iterations=max_iterations,
+                        )
+
+                    elif method == 'deeplifting-adam':
+                        # Run LBFGS Based Deeplifting
+                        deeplifting_outputs = run_adam_deeplifting(
                             model=model,
                             model_inputs=inputs,
                             start_position=x_start,
