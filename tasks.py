@@ -507,7 +507,7 @@ def find_best_architecture_task(
     # for each point and we can study the variance
     max_weight_trials = {
         False: range(10, 20, 10),
-        True: range(10, 20, 10),
+        True: range(10, 210, 10),
     }
 
     if experimentation:
@@ -793,7 +793,7 @@ def find_best_architecture_task_v2(
     # for each point and we can study the variance
     max_weight_trials = {
         False: range(10, 20, 10),
-        True: range(10, 210, 10),
+        True: range(10, 20, 10),
     }
 
     if experimentation:
@@ -862,7 +862,7 @@ def find_best_architecture_task_v2(
 
     # Layers
     layers = reversed(range(minimum_num_layers, maximum_num_layers + 1))
-    layers = [101, 52, 34, 18] + list(layers)
+    layers = [52, 41, 34, 23, 18] + list(layers)
 
     # Number of neurons
     units_search = [256, 128, 64, 32]
