@@ -861,14 +861,14 @@ def run_adam_deeplifting(
     # This is a pytorch provided implementation
     optimizer = optim.Adam(
         model.parameters(),
-        lr=1e-1,
+        lr=1e-2,
         amsgrad=True,
     )
 
     # Cosine annealing scheduler
     scheduler = optim.lr_scheduler.OneCycleLR(
         optimizer,
-        max_lr=1e-1,
+        max_lr=1e-2,
         epochs=epochs,
         steps_per_epoch=1,
         pct_start=0.0,
@@ -916,11 +916,11 @@ def run_adam_deeplifting(
         outputs = model(inputs=model_inputs)
         updated_loss = objective(outputs)
 
-        if epoch % 1000 == 0:
+        if epoch % 10 == 0:
             print(f'loss = {updated_loss.detach()},')
 
         delta = np.abs(current_loss.item() - updated_loss.item())
-        if epoch >= 10000 and delta < 1e-10:
+        if epoch >= 100 and delta < 1e-10:
             early_stopping_count += 1
 
         if early_stopping_count == 100:
