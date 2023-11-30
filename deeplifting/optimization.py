@@ -737,7 +737,7 @@ def run_lbfgs_deeplifting(
     current_loss = f_init
 
     # Train the model
-    epochs = 100000
+    epochs = 10000
     model.train()
     for epoch in range(epochs):
 
