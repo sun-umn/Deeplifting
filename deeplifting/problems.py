@@ -6262,6 +6262,7 @@ drop_wave_config = {
     'max_iterations': 150,
     'global_minimum': -1.0,
     'dimensions': 2,
+    'trials': 50,
 }
 
 # Eggholder
@@ -6271,9 +6272,10 @@ eggholder_config = {
         'lower_bounds': [-512.0, -512.0],
         'upper_bounds': [512.0, 512.0],
     },
-    'max_iterations': 1000,
+    'max_iterations': 250,
     'global_minimum': -959.6407,
     'dimensions': 2,
+    'trials': 50,
 }
 
 # Griewank
@@ -6286,6 +6288,7 @@ griewank_config = {
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 2,
+    'trials': 50,
 }
 
 # Holder Table
