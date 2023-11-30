@@ -720,7 +720,6 @@ def run_lbfgs_deeplifting(
     model.eval()
     outputs = model(inputs=model_inputs)
     _, f_init = deeplifting_predictions(outputs, objective)
-    f_init = f_init.detach().cpu().numpy()
 
     # Start clocking on the training loop
     start = time.time()
@@ -773,7 +772,13 @@ def run_lbfgs_deeplifting(
 
         # If the difference between the current objective values
         # and the previous do no change over a period then exit
-        if np.abs(updated_loss.detach().cpu().numpy() - current_loss) <= 1e-10:
+        if (
+            np.abs(
+                updated_loss.detach().cpu().numpy()
+                - current_loss.detach().cpu().numpy()
+            )
+            <= 1e-10
+        ):
             count += 1
         else:
             # If this is not true we need to restart the count
