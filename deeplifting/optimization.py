@@ -913,7 +913,7 @@ def run_adam_deeplifting(
         loss.backward()
 
         outputs = model(inputs=model_inputs)
-        updated_loss = objective(outputs, version='pytorch')
+        updated_loss = objective(outputs)
 
         if epoch % 1000 == 0:
             print(f'loss = {updated_loss.detach()},')
