@@ -405,7 +405,7 @@ def eggholder(x, results=None, trial=None, version='numpy'):
     return result
 
 
-def griewank(x, results=None, trial=None, version='numpy'):
+def griewank(x, version='numpy'):
     """
     Implementation of the 2D Griewank function.
     This function has a global minimum at (x, y) = (0, 0).
@@ -444,18 +444,6 @@ def griewank(x, results=None, trial=None, version='numpy'):
     else:
         raise ValueError(
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
-        )
-
-    # Fill in the intermediate results if results and trial
-    # are provided
-    if results is not None and trial is not None:
-        build_2d_intermediate_results(
-            x1=x1,
-            x2=x2,
-            result=result,
-            version=version,
-            results=results,
-            trial=trial,
         )
 
     return result
