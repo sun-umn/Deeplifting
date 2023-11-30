@@ -855,7 +855,7 @@ def find_best_architecture_task_v2(
     global_minimum = problem['global_minimum']
 
     # Setup list to store information
-    results = Results(method='deeplifting')
+    results = Results(method=method)
 
     # Layer search
     minimum_num_layers = 2
