@@ -747,9 +747,11 @@ def find_best_architecture_task(
     device = get_devices()
 
     # Weight initialization rounds
+    # This will create 25 network initializations
+    # for each point and we can study the variance
     max_weight_trials = {
         False: range(10, 20, 10),
-        True: range(10, 110, 10),
+        True: range(10, 210, 10),
     }
 
     if experimentation:
@@ -807,6 +809,10 @@ def find_best_architecture_task(
     # Layer search
     minimum_num_layers = 2
     maximum_num_layers = 10
+
+    # Layers
+    layers = reversed(range(minimum_num_layers, maximum_num_layers + 1))
+    layers = [101, 52, 34, 18] + layers
 
     # Number of neurons
     units_search = [256, 128, 64, 32]
