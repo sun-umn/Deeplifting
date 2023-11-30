@@ -100,8 +100,10 @@ class Results:
             self.results.append(
                 (
                     global_minimum,
-                    f_init,
-                    f_final,
+                    np.round(
+                        f_init, 2
+                    ),  # Seems to be some issue with this at the moment
+                    np.round(f_final, 2),
                     total_time,
                     iterations,
                     fn_evals,
