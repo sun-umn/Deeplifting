@@ -6139,7 +6139,7 @@ ackley_config = {
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 2,
-    'trials': 2,
+    'trials': 50,
 }
 
 # Ackley 2
@@ -6152,6 +6152,7 @@ ackley2_config = {
     'max_iterations': 1000,
     'global_minimum': -200,
     'dimensions': 2,
+    'trials': 50,
 }
 
 # Ackley 3

@@ -795,7 +795,7 @@ def find_best_architecture_task_v2(
     # for each point and we can study the variance
     max_weight_trials = {
         False: range(10, 20, 10),
-        True: range(10, 210, 10),
+        True: range(10, 160, 10),
     }
 
     if experimentation:
