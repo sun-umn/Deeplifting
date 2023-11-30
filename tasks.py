@@ -568,7 +568,7 @@ def find_best_architecture_task(
 
     # Layers
     layers = reversed(range(minimum_num_layers, maximum_num_layers + 1))
-    layers = [52, 34, 27, 18] + layers
+    layers = [34, 27, 18] + layers
 
     # Number of neurons
     units_search = [256, 128, 64, 32]
