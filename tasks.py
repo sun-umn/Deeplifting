@@ -959,7 +959,7 @@ def find_best_architecture_task_v2(
                         )
 
                     else:
-                        raise ValueError('Method {method} is not a valid option!')
+                        raise ValueError(f'Method {method} is not a valid option!')
 
                     # Unpack results
                     f_init = deeplifting_outputs.get('f_init')
