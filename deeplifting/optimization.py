@@ -785,14 +785,14 @@ def run_lbfgs_deeplifting(
             count = 0
             current_loss = updated_loss
 
-        if count > 10000:
+        if count > 1000:
             termination_code = 0
             break
 
         if epoch % 1000 == 0:
             print(
                 f'loss = {updated_loss.detach()},'
-                f'gradient_norm = {flat_grad.abs().max()}'
+                f' gradient_norm = {flat_grad.abs().max()}'
             )
 
     # Maximum iterations reached
