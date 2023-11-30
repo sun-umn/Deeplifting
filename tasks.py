@@ -40,6 +40,7 @@ from deeplifting.optimization import (
     run_differential_evolution,
     run_dual_annealing,
     run_ipopt,
+    run_lbfgs_deeplifting,
     run_pygranso,
     run_pygranso_deeplifting,
 )
@@ -823,7 +824,7 @@ def find_best_architecture_task_v2(
     save_path = os.path.join(
         '/home/jusun/dever120/Deeplifting',
         'experiments/3b39b4fb-0520-4795-aaba-a8eab24ff8fd/',
-        f'{directory}/test',
+        f'{directory}/{method}',
     )
 
     # Get the problem information
@@ -935,25 +936,38 @@ def find_best_architecture_task_v2(
 
                     model = model.to(device=device, dtype=torch.double)
 
-                    # Run PyGranso Based Deeplifting
-                    pygranso_deeplifting_outputs = run_pygranso_deeplifting(
-                        model=model,
-                        model_inputs=inputs,
-                        start_position=x_start,
-                        objective=fn,
-                        device=device,
-                        max_iterations=max_iterations,
-                    )
+                    if method == 'deeplifting-pygranso':
+                        # Run PyGranso Based Deeplifting
+                        deeplifting_outputs = run_pygranso_deeplifting(
+                            model=model,
+                            model_inputs=inputs,
+                            start_position=x_start,
+                            objective=fn,
+                            device=device,
+                            max_iterations=max_iterations,
+                        )
+
+                    elif method == 'deeplifting-lbfgs':
+                        # Run LBFGS Based Deeplifting
+                        deeplifting_outputs = run_lbfgs_deeplifting(
+                            model=model,
+                            model_inputs=inputs,
+                            start_position=x_start,
+                            objective=fn,
+                            device=device,
+                            max_iterations=max_iterations,
+                        )
+
+                    else:
+                        raise ValueError('Method {method} is not a valid option!')
 
                     # Unpack results
-                    f_init = pygranso_deeplifting_outputs.get('f_init')
-                    f_final = pygranso_deeplifting_outputs.get('f_final')
-                    total_time = pygranso_deeplifting_outputs.get('total_time')
-                    iterations = pygranso_deeplifting_outputs.get('iterations')
-                    fn_evals = pygranso_deeplifting_outputs.get('fn_evals')
-                    termination_code = pygranso_deeplifting_outputs.get(
-                        'termination_code'
-                    )
+                    f_init = deeplifting_outputs.get('f_init')
+                    f_final = deeplifting_outputs.get('f_final')
+                    total_time = deeplifting_outputs.get('total_time')
+                    iterations = deeplifting_outputs.get('iterations')
+                    fn_evals = deeplifting_outputs.get('fn_evals')
+                    termination_code = deeplifting_outputs.get('termination_code')
 
                     # Append results
                     results.append_record(
@@ -966,6 +980,7 @@ def find_best_architecture_task_v2(
                         termination_code=termination_code,
                         problem_config=problem_config,
                         xs=xs,
+                        method=method,
                     )
 
             # Create the data from this run and save sequentially

@@ -7,6 +7,7 @@ from typing import Any, Callable, Dict
 import numpy as np
 import pandas as pd
 import torch
+import torch.optim as optim
 from cyipopt import minimize_ipopt
 from pygranso.private.getNvar import getNvarTorch
 from pygranso.pygranso import pygranso
@@ -676,162 +677,149 @@ def run_pygranso_deeplifting(
     return results
 
 
-# def run_lbfgs_deeplifting(
-#     problem: Dict,
-#     problem_name: str,
-#     trials: int,
-#     input_size=512,
-#     hidden_sizes=(512, 512, 512),
-#     activation='sine',
-#     output_activation='sine',
-#     agg_function='sum',
-#     include_bn=False,
-# ):
-#     """
-#     Function that runs our preimer method of deeplifting.
-#     The idea here is to reparmeterize an optimization objective
-#     so we can have better optimization and convergence. The difference
-#     with this version of deeplifting is we will use
-#     pytorch's built in LBFGS algorithm
-#     """
-#     # Get the device (CPU for now)
-#     output_size = problem['dimensions']
-#     device = get_devices()
-#     fn_values = []  # noqa
+def run_lbfgs_deeplifting(
+    model: ReLUDeepliftingMLP,
+    model_inputs: torch.Tensor,
+    start_position: torch.Tensor,
+    objective: Callable,
+    device: torch.device,
+    max_iterations: int,
+) -> Dict[str, Any]:
+    """
+    Function that runs our preimer method of deeplifting.
+    The idea here is to reparmeterize an optimization objective
+    so we can have better optimization and convergence. The difference
+    with this version of deeplifting is we will use
+    pytorch's built in LBFGS algorithm
+    """
+    # The first thing we do when training this model is align the
+    # outputs of the model with a randomly initialized starting position
+    train_model_to_output(
+        inputs=model_inputs,
+        model=model,
+        x0=start_position,
+        epochs=5000,
+        lr=1,
+        tolerance=1e-3,
+    )
 
-#     for trial in range(trials):
-#         set_seed(trial)
-#         # Objective function
-#         objective = problem['objective']
+    # Set up the LBFGS optimizer for the problem
+    # This is a pytorch provided implementation
+    optimizer = optim.LBFGS(
+        model.parameters(),
+        lr=1.0,
+        history_size=100,
+        max_iter=50,
+        line_search_fn='strong_wolfe',
+    )
 
-#         # Get the bounds of the problem
-#         if output_size <= 2:
-#             bounds = problem['bounds']
-#         else:
-#             bounds = problem['bounds']
+    # Let's keep the same steps as the other method defined
+    # (pygranso deeplifting)
 
-#             if len(bounds) > 1:
-#                 bounds = bounds
+    # Gather the starting information for the problem
+    model.eval()
+    outputs = model(inputs=model_inputs)
+    _, f_init = deeplifting_predictions(outputs, objective)
+    f_init = f_init.detach().cpu().numpy()
 
-#             else:
-#                 bounds = bounds * output_size
+    # Start clocking on the training loop
+    start = time.time()
 
-#         # Fix the inputs for deeplifting
-#         inputs = torch.randn(1, 5 * output_size)
-#         inputs = inputs.to(device=device, dtype=torch.double)
+    # Count for early exit
+    count = 0
 
-#         x0 = initialize_vector(size=output_size, bounds=bounds)
-#         x0 = torch.tensor(x0)
-#         x0 = x0.to(device=device, dtype=torch.double)
+    # Total iterations
+    iterations = 0
 
-#         # Deeplifting model with skip connections
-#         model = DeepliftingSkipMLP(
-#             input_size=input_size,
-#             hidden_sizes=hidden_sizes,
-#             output_size=output_size,
-#             bounds=bounds,
-#             skip_every_n=1,
-#             activation=activation,
-#             output_activation=output_activation,
-#             agg_function=agg_function,
-#             include_bn=include_bn,
-#             seed=trial,
-#         )
+    # Create terminations codes like pygranso
+    termination_code = None
 
-#         model = model.to(device=device, dtype=torch.double)
+    # Set current loss as well
+    current_loss = f_init
 
-#         # Let's make sure that all methods have the same x0
-#         print('Set weights to match x0')
-#         train_model_to_output(
-#             inputs=inputs, model=model, x0=x0, epochs=100000, lr=1e-4, tolerance=1e-3
-#         )
+    # Train the model
+    epochs = 100000
+    for epoch in range(epochs):
 
-#         # Set up the optimizer for the problem
-#         optimizer = optim.LBFGS(
-#             model.parameters(),
-#             lr=1.0,
-#             history_size=200,
-#             max_iter=50,
-#             line_search_fn='strong_wolfe',
-#         )
+        def closure():
+            # Zero out the gradients
+            optimizer.zero_grad()
 
-#         # Set up a training loop
-#         start = time.time()
+            # The loss is the sum of the compliance
+            outputs = model(inputs=model_inputs)
+            loss = objective(outputs, version='pytorch')
 
-#         # Get starting loss
-#         outputs = model(inputs=inputs)
-#         outputs = outputs.mean(axis=0)
-#         f_init = current_loss = objective(outputs, version='pytorch')
-#         print(f'Initial loss = {current_loss}')
+            # Go through the backward pass and create the gradients
+            loss.backward()
 
-#         count = 0
-#         for epoch in range(100000):
+            return loss
 
-#             def closure():
-#                 # Zero out the gradients
-#                 optimizer.zero_grad()
+        # Step through the optimzer to update the data with the gradients
+        optimizer.step(closure)
 
-#                 # The loss is the sum of the compliance
-#                 outputs = model(inputs=inputs)
-#                 outputs = outputs.mean(axis=0)
-#                 loss = objective(outputs, version='pytorch')
+        outputs = model(inputs=model_inputs)
+        updated_loss = objective(outputs)
 
-#                 # Go through the backward pass and create the gradients
-#                 loss.backward()
+        # Update the iteration count
+        iterations += 1
 
-#                 return loss
+        # Break loop if tolerance is met
+        # Under this condition we check the L_inf norm
+        flat_grad = optimizer._gather_flat_grad()  # type: ignore
+        opt_cond = flat_grad.abs().max() <= 1e-10  # Same tolerance as pygranso
+        if opt_cond:
+            termination_code = 0
+            break
 
-#             # Step through the optimzer to update the data with the gradients
-#             optimizer.step(closure)
+        # If the difference between the current objective values
+        # and the previous do no change over a period then exit
+        if torch.abs(updated_loss - current_loss) <= 1e-10:
+            count += 1
+        else:
+            # If this is not true we need to restart the count
+            count = 0
+            current_loss = updated_loss
 
-#             outputs = model(inputs=inputs)
-#             outputs = outputs.mean(axis=0)
-#             updated_loss = objective(outputs, version='pytorch')
+        if count > 10000:
+            termination_code = 0
+            break
 
-#             # Break loop if tolerance is met
-#             flat_grad = optimizer._gather_flat_grad()  # type: ignore
-#             opt_cond = flat_grad.abs().max() <= 1e-10
-#             if opt_cond:
-#                 break
+        if epoch % 1000 == 0:
+            print(
+                f'loss = {updated_loss.detach()},'
+                f'gradient_norm = {flat_grad.abs().max()}'
+            )
 
-#             if torch.abs(updated_loss - current_loss) <= 1e-10:
-#                 count += 1
-#             else:
-#                 current_loss = updated_loss
+    # Maximum iterations reached
+    if iterations >= len(range(epochs)):
+        termination_code = 4
 
-#             if count > 10000:
-#                 break
+    # Total time to run algorithm
+    end = time.time()
+    total_time = end - start
 
-#             if epoch % 1000 == 0:
-#                 print(
-#                     f'loss = {updated_loss.detach()},'
-#                     f'gradient_norm = {flat_grad.abs().max()}'
-#                 )
+    # Get final x we will also need to map
+    # it to the same bounds
+    model.eval()
+    outputs = model(inputs=model_inputs)
 
-#         end = time.time()
-#         total_time = end - start
+    # Get the final objective value
+    f_final = objective(outputs)
+    f_final = f_final.detach().cpu().numpy()
 
-#         # Get final x we will also need to map
-#         # it to the same bounds
-#         outputs = model(inputs=inputs)
-#         outputs = outputs.mean(axis=0)
-#         final_fn = objective(outputs, version='pytorch')
-#         f = final_fn.detach().cpu().numpy()
-#         xf = outputs.detach().cpu().numpy()
-#         data_point = tuple(xf.flatten()) + (
-#             float(f),
-#             float(f_init),
-#             'Deeplifting-LBFGS',
-#             total_time,
-#         )
-#         fn_values.append(data_point)
+    # Get total function evaluations
+    fn_evals = list(optimizer.state.items())[0][1]['func_evals']
 
-#         # Collect garbage and empty cache
-#         del (outputs, xf, f, data_point, final_fn)
-#         gc.collect()
-#         torch.cuda.empty_cache()
+    results = {
+        'f_init': f_init,
+        'total_time': total_time,
+        'f_final': f_final,
+        'iterations': iterations,
+        'fn_evals': fn_evals,
+        'termination_code': termination_code,
+    }
 
-#     return {'results': None, 'final_results': fn_values, 'callbacks': []}
+    return results
 
 
 # def run_adam_deeplifting(

@@ -63,7 +63,7 @@ class Results:
     across all of the different algorithms that we are using.
     """
 
-    def __init__(self, method='deeplifting'):
+    def __init__(self, method='deeplifting-pygranso'):
         self.method = method
         self.results = []
 
@@ -78,6 +78,7 @@ class Results:
         termination_code: int,
         problem_config: Dict[str, int],
         xs: str,
+        method: str,
     ) -> None:
         """
         Utility function that we can use to keep track
@@ -91,7 +92,7 @@ class Results:
             <= solution_tolerance
         )
 
-        if self.method == 'deeplifting':
+        if self.method in ('deeplifting-pygraso', 'deeplifting-lbfgs'):
             # Get the neural network configuration information
             self.num_layers = problem_config['num_layers']
             self.num_neurons = problem_config['num_neurons']
@@ -99,6 +100,7 @@ class Results:
             # Save all of the results to a list
             self.results.append(
                 (
+                    method,
                     global_minimum,
                     np.round(
                         f_init, 2
@@ -124,8 +126,9 @@ class Results:
 
         user: Input is specific to the directory of the user
         """
-        if self.method == 'deeplifting':
+        if self.method in ('deeplifting-pygraso', 'deeplifting-lbfgs'):
             columns = [
+                'method',
                 'global_minimum',
                 'f_init',
                 'f_final',
