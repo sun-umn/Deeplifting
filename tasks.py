@@ -2,7 +2,6 @@
 # stdlib
 import json
 import os
-import time
 import warnings
 from datetime import datetime
 
@@ -13,9 +12,6 @@ import numpy as np
 import pandas as pd
 import torch
 import wandb
-from pygranso.private.getNvar import getNvarTorch
-from pygranso.pygranso import pygranso
-from pygranso.pygransoStruct import pygransoStruct
 
 # first party
 from config import (
@@ -34,8 +30,6 @@ from config import (
 from deeplifting.models import ReLUDeepliftingMLP
 from deeplifting.optimization import run_pyomo  # noqa
 from deeplifting.optimization import (
-    deeplifting_nd_fn,
-    deeplifting_predictions,
     run_adam_deeplifting,
     run_basinhopping,
     run_differential_evolution,
@@ -46,12 +40,7 @@ from deeplifting.optimization import (
     run_pygranso_deeplifting,
 )
 from deeplifting.problems import HIGH_DIMENSIONAL_PROBLEMS_BY_NAME, PROBLEMS_BY_NAME
-from deeplifting.utils import (
-    Results,
-    get_devices,
-    initialize_vector,
-    train_model_to_output,
-)
+from deeplifting.utils import Results, get_devices, initialize_vector
 
 # Filter warnings
 warnings.filterwarnings('ignore')
@@ -484,6 +473,298 @@ def run_scip_task(problem_series, dimensionality, trials):
 
 # Adding a brand new task but will clean up code
 # TODO: Clean up code
+# @cli.command('find-best-deeplifting-architecture-v2')
+# @click.option('--problem_name', default='ackley')
+# @click.option('--method', default='pygranso')
+# @click.option('--dimensionality', default='low-dimensional')
+# @click.option('--experimentation', default=True)
+# @click.option('--include_weight_initialization', default=True)
+# def find_best_architecture_task(
+#     problem_name, method, dimensionality, experimentation, include_weight_initialization  # noqa
+# ):
+#     """
+#     Function that we will use to find the best architecture over multiple
+#     "hard" high-dimensional problems. We will aim to tackle a large dimensional
+#     space with this function, 2500+
+#     """
+#     # Set the number of threads to 1
+#     os.environ['OMP_NUM_THREADS'] = '1'
+
+#     # Get the available device
+#     device = get_devices()
+
+#     # Weight initialization rounds
+#     # This will create 25 network initializations
+#     # for each point and we can study the variance
+#     max_weight_trials = {
+#         False: range(10, 20, 10),
+#         True: range(10, 210, 10),
+#     }
+
+#     if experimentation:
+#         # Enable wandb
+#         wandb.login(key='2080070c4753d0384b073105ed75e1f46669e4bf')
+
+#         wandb.init(
+#             # set the wandb project where this run will be logged
+#             project="Deeplifting-HD",
+#             tags=[f'{method}', f'{problem_name}'],
+#         )
+
+#     # Setup the problem
+#     if dimensionality == 'low-dimensional':
+#         directory = 'low-dimension'
+#         PROBLEMS = PROBLEMS_BY_NAME
+
+#     elif dimensionality == 'high-dimensional':
+#         directory = 'high-dimension'
+#         PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
+
+#     else:
+#         raise ValueError(f'{dimensionality} is not valid!')
+#     problem = PROBLEMS[problem_name]
+
+#     # Objective function
+#     objective = problem['objective']
+
+#     # Bounds
+#     bounds = problem['bounds']
+
+#     # Get the device (CPU for now)
+#     output_size = problem['dimensions']
+
+#     # Maximum iterations for a problem
+#     # Most problems converge quickly but some
+#     # take a little longer
+#     max_iterations = problem['max_iterations']
+
+#     # Get the maximum number of trials
+#     # for the problem
+#     trials = problem['trials']
+
+#     # Setup list to store information
+#     objective_values = []
+#     initial_values = []
+#     indexes = []
+#     network_config = []
+#     results_df_list = []
+#     run_times = []
+#     iterations = []
+#     fn_evals = []
+#     termination_codes = []
+
+#     # Layer search
+#     minimum_num_layers = 2
+#     maximum_num_layers = 10
+
+#     # Layers
+#     layers = reversed(range(minimum_num_layers, maximum_num_layers + 1))
+#     layers = [34, 27, 18] + layers
+
+#     # Number of neurons
+#     units_search = [256, 128, 64, 32]
+
+#     # Initial layer type
+#     input_dimension = 64
+#     initial_layer_type = 'linear'
+#     include_bn = True
+
+#     # Start the optimization process
+#     for num_layers in reversed(range(minimum_num_layers, maximum_num_layers + 1)):
+#         for units in units_search:
+#             # n-layer m neuron network
+#             hidden_sizes = (units,) * num_layers
+
+#             # We have an observation that we can start at the same point
+#             # but it may or may not converge so we can try different
+#             # weights
+#             for index, trial in enumerate(range(trials)):
+#                 # Fix the inputs for deeplifting
+#                 if initial_layer_type == 'embedding':
+#                     inputs = torch.randint(
+#                         low=0, high=(units - 1), size=(input_dimension, units)
+#                     )
+#                     inputs = inputs.to(device=device, dtype=torch.long)
+
+#                 elif initial_layer_type == 'linear':
+#                     inputs = torch.randn(size=(input_dimension, 5 * output_size))
+#                     inputs = inputs.to(device=device, dtype=torch.double)
+
+#                 else:
+#                     raise ValueError(f'{initial_layer_type} is not an accepted type!')
+
+#                 # Initialization for other models
+#                 x_start = initialize_vector(size=output_size, bounds=bounds)
+#                 x_start = torch.tensor(x_start)
+#                 x_start = x_start.to(device=device, dtype=torch.double)
+
+#                 # Creates different weight intializations for the same starting point
+#                 # x0
+#                 for i in max_weight_trials[include_weight_initialization]:
+#                     seed = (i + index) * i
+#                     print(f'Fitting point {x_start} - with weights {i}')
+#                     print(
+#                         f' - layers - {num_layers} - units - {units} - trial - {trial}'  # noqa
+#                     )
+#                     print(f'seed = {seed}')
+
+#                     # Deeplifting model with skip connections
+#                     model = ReLUDeepliftingMLP(
+#                         initial_hidden_size=(5 * output_size),
+#                         hidden_sizes=hidden_sizes,
+#                         output_size=output_size,
+#                         bounds=bounds,
+#                         initial_layer_type=initial_layer_type,
+#                         include_weight_initialization=include_weight_initialization,
+#                         include_bn=include_bn,
+#                         seed=seed,
+#                     )
+
+#                     model = model.to(device=device, dtype=torch.double)
+
+#                     # Let's make sure that all methods have the same x0
+#                     # Test
+#                     if include_weight_initialization:
+#                         # This will train ONLY the alignment block
+#                         train_model_to_output(
+#                             inputs=inputs,
+#                             model=model,
+#                             x0=x_start,
+#                             epochs=5000,
+#                             lr=1,
+#                             tolerance=1e-3,
+#                         )
+#                     nvar = getNvarTorch(model.parameters())
+
+#                     # Setup a pygransoStruct for the algorithm
+#                     # options
+#                     opts = pygransoStruct()
+
+#                     # Print the model outputs and check against x0 also
+#                     # want to use a print out to make sure all models have
+#                     # the same starting point
+#                     model.eval()
+#                     outputs = model(inputs=inputs)
+
+#                     # Inital x0 - for neural network
+#                     x0 = (
+#                         torch.nn.utils.parameters_to_vector(model.parameters())
+#                         .detach()
+#                         .reshape(nvar, 1)
+#                         .to(device=device, dtype=torch.double)
+#                     )
+
+#                     # PyGranso options
+#                     opts.x0 = x0
+#                     opts.torch_device = device
+#                     opts.print_frequency = 1
+#                     opts.limited_mem_size = 100
+#                     opts.stat_l2_model = False
+#                     opts.double_precision = True
+
+#                     # opts.disable_terminationcode_6 = True
+#                     # opts.halt_on_linesearch_bracket = False
+
+#                     opts.opt_tol = 1e-10
+#                     opts.maxit = max_iterations
+
+#                     # TODO: Clean up meaningless variables
+#                     results = None
+#                     deeplifting_results = None
+
+#                     # Set up the function with the results
+#                     fn = lambda x: objective(  # noqa
+#                         x, results=results, trial=trial, version='pytorch'
+#                     )
+
+#                     # Get the objective value at the initial point
+#                     outputs = model(inputs=inputs)
+
+#                     # Get the initial value of the objective
+#                     init_fn = lambda x: objective(  # noqa
+#                         x, results=None, trial=0, version='pytorch'
+#                     )
+#                     x_init, f_init = deeplifting_predictions(outputs, init_fn)
+#                     f_init = f_init.detach().cpu().numpy()
+
+#                     # Combined function
+#                     comb_fn = lambda model: deeplifting_nd_fn(  # noqa
+#                         model,
+#                         fn,
+#                         trial,
+#                         output_size,
+#                         deeplifting_results,
+#                         inputs=inputs,
+#                     )  # noqa
+
+#                     # Run the main algorithm
+#                     model.train()
+#                     start = time.time()
+#                     soln = pygranso(var_spec=model, combined_fn=comb_fn, user_opts=opts)  # noqa
+#                     end = time.time()
+#                     total_time = end - start
+
+#                     # Hits
+#                     hit = int(
+#                         np.abs(problem['global_minimum'] - soln.best.f)
+#                         / np.abs(f_init - problem['global_minimum'])
+#                         <= 1e-4
+#                     )
+#                     objective_values.append(
+#                         (hit, f_init, problem['global_minimum'], soln.best.f)
+#                     )
+#                     indexes.append(index)
+#                     network_config.append((num_layers, units))
+#                     run_times.append(total_time)
+#                     iterations.append(soln.iters)
+#                     fn_evals.append(soln.fn_evals)
+#                     termination_codes.append(soln.termination_code)
+
+#                     # Create initial values
+#                     columns = [f'x{i + 1}' for i in range(output_size)]
+
+#                     if include_weight_initialization:
+#                         xs = json.dumps(
+#                             dict(zip(columns, x_start.detach().cpu().numpy()))
+#                         )
+#                     else:
+#                         xs = json.dumps(dict(zip(columns, x_init)))
+
+#                     # Save the xs values
+#                     initial_values.append(xs)
+
+#                     # if include_weight_initialization:
+#                     #     if hit == 1.0:
+#                     #         break
+
+#             # Create the data from this run and save sequentially
+#             # Initialize results
+#             results_df = pd.DataFrame(
+#                 np.asarray(objective_values),
+#                 columns=['success', 'f_init', 'global_minimum', 'f'],
+#             )
+#             results_df[['num_layers', 'units']] = network_config
+#             results_df['index'] = indexes
+#             results_df['total_time'] = run_times
+#             results_df['xs'] = initial_values
+#             results_df['termination_code'] = termination_codes
+
+#             # Save the results
+#             results_df_list.append(results_df)
+#             main_directory = '/home/jusun/dever120/Deeplifting'
+#             deeplifting_directory = (
+#                 'experiments/3b39b4fb-0520-4795-aaba-a8eab24ff8fd/'
+#                 f'{directory}/deeplifting-pygranso'
+#             )
+#             filename = os.path.join(
+#                 main_directory,
+#                 deeplifting_directory,
+#                 f'{problem_name}-relu-{num_layers}-{units}-'
+#                 f'{include_weight_initialization}.parquet',
+#             )
+#             results_df.to_parquet(filename)
+
+
 @cli.command('find-best-deeplifting-architecture-v2')
 @click.option('--problem_name', default='ackley')
 @click.option('--method', default='pygranso')
@@ -491,292 +772,6 @@ def run_scip_task(problem_series, dimensionality, trials):
 @click.option('--experimentation', default=True)
 @click.option('--include_weight_initialization', default=True)
 def find_best_architecture_task(
-    problem_name, method, dimensionality, experimentation, include_weight_initialization
-):
-    """
-    Function that we will use to find the best architecture over multiple
-    "hard" high-dimensional problems. We will aim to tackle a large dimensional
-    space with this function, 2500+
-    """
-    # Set the number of threads to 1
-    os.environ['OMP_NUM_THREADS'] = '1'
-
-    # Get the available device
-    device = get_devices()
-
-    # Weight initialization rounds
-    # This will create 25 network initializations
-    # for each point and we can study the variance
-    max_weight_trials = {
-        False: range(10, 20, 10),
-        True: range(10, 210, 10),
-    }
-
-    if experimentation:
-        # Enable wandb
-        wandb.login(key='2080070c4753d0384b073105ed75e1f46669e4bf')
-
-        wandb.init(
-            # set the wandb project where this run will be logged
-            project="Deeplifting-HD",
-            tags=[f'{method}', f'{problem_name}'],
-        )
-
-    # Setup the problem
-    if dimensionality == 'low-dimensional':
-        directory = 'low-dimension'
-        PROBLEMS = PROBLEMS_BY_NAME
-
-    elif dimensionality == 'high-dimensional':
-        directory = 'high-dimension'
-        PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
-
-    else:
-        raise ValueError(f'{dimensionality} is not valid!')
-    problem = PROBLEMS[problem_name]
-
-    # Objective function
-    objective = problem['objective']
-
-    # Bounds
-    bounds = problem['bounds']
-
-    # Get the device (CPU for now)
-    output_size = problem['dimensions']
-
-    # Maximum iterations for a problem
-    # Most problems converge quickly but some
-    # take a little longer
-    max_iterations = problem['max_iterations']
-
-    # Get the maximum number of trials
-    # for the problem
-    trials = problem['trials']
-
-    # Setup list to store information
-    objective_values = []
-    initial_values = []
-    indexes = []
-    network_config = []
-    results_df_list = []
-    run_times = []
-    iterations = []
-    fn_evals = []
-    termination_codes = []
-
-    # Layer search
-    minimum_num_layers = 2
-    maximum_num_layers = 10
-
-    # Layers
-    layers = reversed(range(minimum_num_layers, maximum_num_layers + 1))
-    layers = [34, 27, 18] + layers
-
-    # Number of neurons
-    units_search = [256, 128, 64, 32]
-
-    # Initial layer type
-    input_dimension = 64
-    initial_layer_type = 'linear'
-    include_bn = True
-
-    # Start the optimization process
-    for num_layers in reversed(range(minimum_num_layers, maximum_num_layers + 1)):
-        for units in units_search:
-            # n-layer m neuron network
-            hidden_sizes = (units,) * num_layers
-
-            # We have an observation that we can start at the same point
-            # but it may or may not converge so we can try different
-            # weights
-            for index, trial in enumerate(range(trials)):
-                # Fix the inputs for deeplifting
-                if initial_layer_type == 'embedding':
-                    inputs = torch.randint(
-                        low=0, high=(units - 1), size=(input_dimension, units)
-                    )
-                    inputs = inputs.to(device=device, dtype=torch.long)
-
-                elif initial_layer_type == 'linear':
-                    inputs = torch.randn(size=(input_dimension, 5 * output_size))
-                    inputs = inputs.to(device=device, dtype=torch.double)
-
-                else:
-                    raise ValueError(f'{initial_layer_type} is not an accepted type!')
-
-                # Initialization for other models
-                x_start = initialize_vector(size=output_size, bounds=bounds)
-                x_start = torch.tensor(x_start)
-                x_start = x_start.to(device=device, dtype=torch.double)
-
-                # Creates different weight intializations for the same starting point
-                # x0
-                for i in max_weight_trials[include_weight_initialization]:
-                    seed = (i + index) * i
-                    print(f'Fitting point {x_start} - with weights {i}')
-                    print(
-                        f' - layers - {num_layers} - units - {units} - trial - {trial}'
-                    )
-                    print(f'seed = {seed}')
-
-                    # Deeplifting model with skip connections
-                    model = ReLUDeepliftingMLP(
-                        initial_hidden_size=(5 * output_size),
-                        hidden_sizes=hidden_sizes,
-                        output_size=output_size,
-                        bounds=bounds,
-                        initial_layer_type=initial_layer_type,
-                        include_weight_initialization=include_weight_initialization,
-                        include_bn=include_bn,
-                        seed=seed,
-                    )
-
-                    model = model.to(device=device, dtype=torch.double)
-
-                    # Let's make sure that all methods have the same x0
-                    # Test
-                    if include_weight_initialization:
-                        # This will train ONLY the alignment block
-                        train_model_to_output(
-                            inputs=inputs,
-                            model=model,
-                            x0=x_start,
-                            epochs=5000,
-                            lr=1,
-                            tolerance=1e-3,
-                        )
-                    nvar = getNvarTorch(model.parameters())
-
-                    # Setup a pygransoStruct for the algorithm
-                    # options
-                    opts = pygransoStruct()
-
-                    # Print the model outputs and check against x0 also
-                    # want to use a print out to make sure all models have
-                    # the same starting point
-                    model.eval()
-                    outputs = model(inputs=inputs)
-
-                    # Inital x0 - for neural network
-                    x0 = (
-                        torch.nn.utils.parameters_to_vector(model.parameters())
-                        .detach()
-                        .reshape(nvar, 1)
-                        .to(device=device, dtype=torch.double)
-                    )
-
-                    # PyGranso options
-                    opts.x0 = x0
-                    opts.torch_device = device
-                    opts.print_frequency = 1
-                    opts.limited_mem_size = 100
-                    opts.stat_l2_model = False
-                    opts.double_precision = True
-
-                    # opts.disable_terminationcode_6 = True
-                    # opts.halt_on_linesearch_bracket = False
-
-                    opts.opt_tol = 1e-10
-                    opts.maxit = max_iterations
-
-                    # TODO: Clean up meaningless variables
-                    results = None
-                    deeplifting_results = None
-
-                    # Set up the function with the results
-                    fn = lambda x: objective(  # noqa
-                        x, results=results, trial=trial, version='pytorch'
-                    )
-
-                    # Get the objective value at the initial point
-                    outputs = model(inputs=inputs)
-
-                    # Get the initial value of the objective
-                    init_fn = lambda x: objective(  # noqa
-                        x, results=None, trial=0, version='pytorch'
-                    )
-                    x_init, f_init = deeplifting_predictions(outputs, init_fn)
-                    f_init = f_init.detach().cpu().numpy()
-
-                    # Combined function
-                    comb_fn = lambda model: deeplifting_nd_fn(  # noqa
-                        model,
-                        fn,
-                        trial,
-                        output_size,
-                        deeplifting_results,
-                        inputs=inputs,
-                    )  # noqa
-
-                    # Run the main algorithm
-                    model.train()
-                    start = time.time()
-                    soln = pygranso(var_spec=model, combined_fn=comb_fn, user_opts=opts)
-                    end = time.time()
-                    total_time = end - start
-
-                    # Hits
-                    hit = int(
-                        np.abs(problem['global_minimum'] - soln.best.f)
-                        / np.abs(f_init - problem['global_minimum'])
-                        <= 1e-4
-                    )
-                    objective_values.append(
-                        (hit, f_init, problem['global_minimum'], soln.best.f)
-                    )
-                    indexes.append(index)
-                    network_config.append((num_layers, units))
-                    run_times.append(total_time)
-                    iterations.append(soln.iters)
-                    fn_evals.append(soln.fn_evals)
-                    termination_codes.append(soln.termination_code)
-
-                    # Create initial values
-                    columns = [f'x{i + 1}' for i in range(output_size)]
-
-                    if include_weight_initialization:
-                        xs = json.dumps(
-                            dict(zip(columns, x_start.detach().cpu().numpy()))
-                        )
-                    else:
-                        xs = json.dumps(dict(zip(columns, x_init)))
-
-                    # Save the xs values
-                    initial_values.append(xs)
-
-                    # if include_weight_initialization:
-                    #     if hit == 1.0:
-                    #         break
-
-            # Create the data from this run and save sequentially
-            # Initialize results
-            results_df = pd.DataFrame(
-                np.asarray(objective_values),
-                columns=['success', 'f_init', 'global_minimum', 'f'],
-            )
-            results_df[['num_layers', 'units']] = network_config
-            results_df['index'] = indexes
-            results_df['total_time'] = run_times
-            results_df['xs'] = initial_values
-            results_df['termination_code'] = termination_codes
-
-            # Save the results
-            results_df_list.append(results_df)
-            main_directory = '/home/jusun/dever120/Deeplifting'
-            deeplifting_directory = (
-                'experiments/3b39b4fb-0520-4795-aaba-a8eab24ff8fd/'
-                f'{directory}/deeplifting-pygranso'
-            )
-            filename = os.path.join(
-                main_directory,
-                deeplifting_directory,
-                f'{problem_name}-relu-{num_layers}-{units}-'
-                f'{include_weight_initialization}.parquet',
-            )
-            results_df.to_parquet(filename)
-
-
-def find_best_architecture_task_v2(
     problem_name, method, dimensionality, experimentation, include_weight_initialization
 ):
     """
