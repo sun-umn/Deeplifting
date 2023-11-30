@@ -43,7 +43,7 @@ def build_2d_intermediate_results(x1, x2, result, version, results, trial):
     return results
 
 
-def ackley(x, results=None, trial=None, p=0.0, version='numpy'):
+def ackley(x, p=0.0, version='numpy'):
     """
     Function that implements the Ackley function in
     numpy, pytorch or pyomo interface. We will use this
@@ -75,18 +75,6 @@ def ackley(x, results=None, trial=None, p=0.0, version='numpy'):
     else:
         raise ValueError(
             "Unknown version specified. Available options are numpy, pyomo and pytorch."
-        )
-
-    # Fill in the intermediate results if results and trial
-    # are provided
-    if results is not None and trial is not None:
-        build_2d_intermediate_results(
-            x1=x1,
-            x2=x2,
-            result=result,
-            version=version,
-            results=results,
-            trial=trial,
         )
 
     return result

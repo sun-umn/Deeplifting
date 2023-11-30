@@ -1,13 +1,14 @@
 # stdlib
 import gc
 import time
-from typing import Dict
+from typing import Any, Callable, Dict
 
 # third party
 import numpy as np
 import pandas as pd
 import torch
 from cyipopt import minimize_ipopt
+from pygranso.private.getNvar import getNvarTorch
 from pygranso.pygranso import pygranso
 from pygranso.pygransoStruct import pygransoStruct
 from pyomo.environ import ConcreteModel, Objective, SolverFactory, Var, minimize
@@ -20,8 +21,10 @@ from deeplifting.utils import (
     DifferentialEvolutionCallback,
     DualAnnealingCallback,
     HaltLog,
+    PyGransoConfig,
     initialize_vector,
     set_seed,
+    train_model_to_output,
 )
 
 # from torch.optim.lr_scheduler import ReduceLROnPlateau
@@ -571,9 +574,6 @@ def deeplifting_predictions(x, objective):
 def deeplifting_nd_fn(
     model,
     objective,
-    trial,
-    dimensions,
-    deeplifting_results,
     inputs,
 ):
     """
@@ -597,11 +597,83 @@ def run_pygranso_deeplifting(
     model: ReLUDeepliftingMLP,
     model_inputs: torch.Tensor,
     start_position: torch.Tensor,
-) -> None:
+    objective: Callable,
+    device: torch.device,
+    max_iterations: int,
+) -> Dict[str, Any]:
     """
     Function that runs the pygranso version of deeplifting.
     """
-    pass
+    # The first thing we do when training this model is align the
+    # outputs of the model with a randomly initialized starting position
+    train_model_to_output(
+        inputs=model_inputs,
+        model=model,
+        x0=start_position,
+        epochs=5000,
+        lr=1,
+        tolerance=1e-3,
+    )
+
+    # Get the number of training variables for the model
+    nvar = getNvarTorch(model.parameters())
+
+    # Get the starting parameters for the neural network
+    x0 = (
+        torch.nn.utils.parameters_to_vector(model.parameters())
+        .detach()
+        .reshape(nvar, 1)
+        .to(device=device, dtype=torch.double)
+    )
+
+    # Gather the starting information for the problem
+    model.eval()
+    outputs = model(inputs=model_inputs)
+    _, f_init = deeplifting_predictions(outputs, objective)
+    f_init = f_init.detach().cpu().numpy()
+
+    # Build the combination function - a paradigm specific to
+    # PyGranso
+    comb_fn = lambda model: deeplifting_nd_fn(  # noqa
+        model=model,
+        objective=objective,
+        inputs=model_inputs,
+    )  # noqa
+
+    # Run the main algorithm
+    # Set up the PyGranso configuation
+    pygranso_config = PyGransoConfig(
+        device=device,
+        x0=x0,
+        max_iterations=max_iterations,
+    )
+
+    # Put the model back in training mode
+    model.train()
+
+    # Start the timer
+    start = time.time()
+
+    # Run PyGranso
+    soln = pygranso(var_spec=model, combined_fn=comb_fn, user_opts=pygranso_config.opts)
+
+    # Get the total time
+    end = time.time()
+    total_time = end - start
+
+    # We will run this iteratively. Every run of this function will
+    # be responsible for a single record towards analysis
+    results = {
+        'soln': soln,
+        'f_init': f_init,
+        'total_time': total_time,
+        'f_final': soln.best.f,
+        'iterations': soln.iters,
+        'fn_evals': soln.fn_evals,
+        'termination_code': soln.termination_code,
+    }
+
+    return results
 
 
 # def run_lbfgs_deeplifting(

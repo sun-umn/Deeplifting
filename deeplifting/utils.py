@@ -5,6 +5,7 @@ import os
 import random
 import uuid
 from functools import partial
+from typing import Dict
 
 # third party
 import matplotlib.pyplot as plt
@@ -16,6 +17,138 @@ import torch.nn as nn
 import torch.optim as optim
 from pygranso.pygransoStruct import pygransoStruct
 from torch.optim.lr_scheduler import OneCycleLR
+
+
+class PyGransoConfig:
+    """
+    Configuration class for the pygranso options. The
+    options stay fairly consistent and can be used mutiple times.
+    The things that we need to set are device, x0 and the maximum
+    number of iterations
+    """
+
+    def __init__(self, device, x0, max_iterations):
+        # Set up pygranso structure
+        self.opts = pygransoStruct()
+
+        # PyGranso options
+        self.opts.x0 = x0
+        self.opts.torch_device = device
+
+        # Keep the print freqency at 1 so we can
+        # view every iteration
+        self.opts.print_frequency = 1
+
+        # LBFGS lookback history size
+        self.opts.limited_mem_size = 100
+
+        # Set's the stopping criterion to either L2 or
+        # L_inf norm
+        self.opts.stat_l2_model = False
+        self.opts.double_precision = True
+
+        # Optimization tolerance and stopping criterion
+        self.opts.opt_tol = 1e-10
+
+        # Maximum number of iterations will be defined by the
+        # problem instance
+        self.opts.maxit = max_iterations
+
+
+class Results:
+    """
+    Function that combines and concatenates results and saves intermediate
+    information during a run.
+    TODO: All runs should have the same information so this should be useable
+    across all of the different algorithms that we are using.
+    """
+
+    def __init__(self, method='deeplifting'):
+        self.method = method
+        self.results = []
+
+    def append_record(
+        self,
+        global_minimum: float,
+        f_init: float,
+        f_final: float,
+        total_time: float,
+        iterations: int,
+        fn_evals: int,
+        termination_code: int,
+        problem_config: Dict[str, int],
+        xs: str,
+    ) -> None:
+        """
+        Utility function that we can use to keep track
+        of information that is contained in a record
+        """
+        solution_tolerance = 1e-4
+        # Based on the input information let's compute if the trial
+        # was a success or not
+        success = int(
+            np.abs(global_minimum - f_final) / np.abs(f_init - global_minimum)
+            <= solution_tolerance
+        )
+
+        if self.method == 'deeplifting':
+            # Get the neural network configuration information
+            self.num_layers = problem_config['num_layers']
+            self.num_neurons = problem_config['num_neurons']
+
+            # Save all of the results to a list
+            self.results.append(
+                (
+                    global_minimum,
+                    f_init,
+                    f_final,
+                    total_time,
+                    iterations,
+                    fn_evals,
+                    termination_code,
+                    self.num_layers,
+                    self.num_neurons,
+                    success,
+                )
+            )
+
+        else:
+            raise ValueError('Other methods coming soon!')
+
+    def build_and_save_dataframe(self, save_path: str, problem_name: str) -> None:
+        """
+        Method used to build a dataframe from the current
+        data in the lists and save it to a directory.
+
+        user: Input is specific to the directory of the user
+        """
+        if self.method == 'deeplifting':
+            columns = [
+                'global_minimum',
+                'f_init',
+                'f_final',
+                'total_time',
+                'iterations',
+                'fn_evals',
+                'termination_code',
+                'num_layers',
+                'num_neurons',
+                'success',
+            ]
+
+            # Set up the results dataframe
+            results_df = pd.DataFrame(self.results, columns=columns)
+
+            # Save the results
+            filename = os.path.join(
+                save_path,
+                f'{problem_name}-relu-{self.num_layers}-{self.num_neurons}-'
+                f'True.parquet',  # Weight initializaiton will always be true
+            )
+            results_df.to_parquet(filename)
+
+        else:
+            raise ValueError('Other methods coming soon!')
 
 
 def build_model_complexity_plots(
