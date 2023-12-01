@@ -37,7 +37,8 @@ class SinActivation(nn.Module):
         if self.include_amplitude:
             return self.amplitude * torch.sin(x * self.scale)
 
-        return torch.sin(x * self.scale)
+        # return torch.sin(x * self.scale)
+        return torch.sigmoid(x * self.scale)
 
 
 class DeepliftingScalingBlock(nn.Module):
@@ -68,7 +69,8 @@ class DeepliftingScalingBlock(nn.Module):
         a = torch.tensor(self.bounds['lower_bounds'])
         b = torch.tensor(self.bounds['upper_bounds'])
 
-        x = a + ((b - a) / 2.0 * (outputs + 1))
+        # x = a + ((b - a) / 2.0 * (outputs + 1))
+        x = a + ((b - a) * outputs)
 
         return x
 
@@ -172,6 +174,10 @@ class ReLUDeepliftingMLP(nn.Module):
 
         else:
             raise ValueError(f'{self.initial_layer_type} is not a valid option!')
+
+        # Initialization for initial layer
+        nn.init.orthogonal_(self.input_layer.weight)
+        nn.init.zeros_(self.input_layer.bias)
 
         self.layers.append(self.input_layer)
 

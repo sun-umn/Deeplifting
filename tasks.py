@@ -526,7 +526,7 @@ def find_best_architecture_task(
     save_path = os.path.join(
         '/home/jusun/dever120/Deeplifting',
         'experiments/3b39b4fb-0520-4795-aaba-a8eab24ff8fd/',
-        f'{directory}/{method}',
+        f'{directory}/test',
     )
 
     # Get the problem information
@@ -565,7 +565,7 @@ def find_best_architecture_task(
 
     # Layers
     layers = reversed(range(minimum_num_layers, maximum_num_layers + 1))
-    layers = [19, 16, 14, 12] + list(layers)
+    layers = list(layers)
 
     # Number of neurons
     units_search = [256, 128, 64, 32]
