@@ -473,7 +473,7 @@ def run_scip_task(problem_series, dimensionality, trials):
 
 @cli.command('find-best-deeplifting-architecture-v2')
 @click.option('--problem_name', default='ackley')
-@click.option('--method', default='pygranso')
+@click.option('--method', default='deeplifting-pygranso')
 @click.option('--dimensionality', default='low-dimensional')
 @click.option('--experimentation', default=True)
 @click.option('--include_weight_initialization', default=True)
@@ -483,7 +483,7 @@ def find_best_architecture_task(
     """
     Function that we will use to find the best architecture over multiple
     "hard" high-dimensional problems. We will aim to tackle a large dimensional
-    space with this function, 2500+
+    space with this function, 500+
     """
     # Set the number of threads to 1
     os.environ['OMP_NUM_THREADS'] = '1'
