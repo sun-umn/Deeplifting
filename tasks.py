@@ -38,6 +38,7 @@ from deeplifting.optimization import (
     run_lbfgs_deeplifting,
     run_pygranso,
     run_pygranso_deeplifting,
+    run_sgd_deeplifting,
 )
 from deeplifting.problems import HIGH_DIMENSIONAL_PROBLEMS_BY_NAME, PROBLEMS_BY_NAME
 from deeplifting.utils import Results, get_devices, initialize_vector, set_seed
@@ -886,13 +887,14 @@ def find_best_architecture_sgd_task(
                     model = model.to(device=device, dtype=torch.double)
 
                     # Run PyGranso Based Deeplifting
-                    deeplifting_outputs = run_pygranso_deeplifting(
+                    deeplifting_outputs = run_sgd_deeplifting(
                         model=model,
                         model_inputs=inputs,
                         start_position=x_start,
                         objective=fn,
                         device=device,
                         max_iterations=max_iterations,
+                        lr=lr,
                     )
 
                     # Unpack results
