@@ -21,6 +21,25 @@ def set_seed(seed):
     random.seed(seed)
 
 
+# Create a custom global normalization layer for pytorch
+class GlobalNormalization(nn.Module):
+    """
+    Class that computes the global normalization that we
+    saw in the structural optimization code
+    """
+
+    def __init__(self, epsilon=1e-6):  # noqa
+        super().__init__()
+        self.epsilon = epsilon
+
+    def forward(self, x):  # noqa
+        var, mean = torch.var_mean(x, unbiased=False)
+        net = x
+        net = net - mean
+        net = net * torch.rsqrt(var + self.epsilon)
+        return net
+
+
 class SinActivation(nn.Module):
     """
     Class that makes the sin function
@@ -30,8 +49,8 @@ class SinActivation(nn.Module):
     def __init__(self, include_amplitude=False):  # noqa
         super(SinActivation, self).__init__()
         self.include_amplitude = include_amplitude
-        self.amplitude = nn.Parameter(torch.pi * torch.rand(1), requires_grad=True)
-        self.scale = nn.Parameter(torch.pi * torch.rand(1), requires_grad=True)
+        self.amplitude = nn.Parameter(torch.pi, requires_grad=True)
+        self.scale = nn.Parameter(torch.pi, requires_grad=True)
 
     def forward(self, x):  # noqa
         if self.include_amplitude:
@@ -69,8 +88,7 @@ class DeepliftingScalingBlock(nn.Module):
         a = torch.tensor(self.bounds['lower_bounds'])
         b = torch.tensor(self.bounds['upper_bounds'])
 
-        # x = a + ((b - a) / 2.0 * (outputs + 1))
-        x = a + ((b - a) * outputs)
+        x = a + ((b - a) / 2.0 * (outputs + 1))
 
         return x
 
@@ -257,3 +275,68 @@ class ReLUDeepliftingMLP(nn.Module):
             out = self.scaling_layer(out)
 
         return out
+
+
+# Building a manual simple MLP for deeplifting to test with
+# SGD
+class DeepliftingSimpleMLP(nn.Module):
+    def __init__(
+        self,
+        initial_hidden_size,
+        hidden_sizes,
+        output_size,
+        bounds,
+        *,
+        include_weight_initialization=True,
+        include_bn=True,
+        initial_layer_type='embedding',
+        seed=0,
+    ):
+        super(DeepliftingSimpleMLP, self).__init__()
+
+        # Set the seed
+        set_seed(seed)
+
+        # Setup the first linear layer
+        self.linear1 - nn.Linear(hidden_sizes, hidden_sizes)
+        torch.nn.init.kaiming_uniform_(self.linear1.weight, nonlinearity='relu')
+        torch.nn.init.zeros_(self.linear1.bias)
+
+        # Set up a second linear layer
+        self.linear2 = nn.Linear(hidden_sizes, hidden_sizes)
+        torch.nn.init.kaiming_uniform_(self.linear2.weight, nonlinearity='relu')
+        torch.nn.init.zeros_(self.linear2.bias)
+
+        # Set up a third linear layer
+        self.linear3 = nn.Linear(hidden_sizes, output_size)
+        torch.nn.init.kaiming_uniform_(self.linear3.weight, nonlinearity='relu')
+        torch.nn.init.zeros_(self.linear3.bias)
+
+        # Final scaling layer
+        self.scaling_layer = DeepliftingScalingBlock(
+            bounds=bounds,
+            dimensions=output_size,
+        )
+
+        self.sine_activation = SinActivation()
+
+    def forward(self, inputs):
+        # First input layer
+        x = self.linear1(inputs)
+        x = nn.ReLU()(x)
+        x = GlobalNormalization()(x)
+
+        # Second input layer
+        x = self.linear2(x)
+        x = nn.ReLU()(x)
+        x = GlobalNormalization()(x)
+
+        # Third input layer
+        x = self.linear3(x)
+
+        # Push through the sine layer and the
+        # mapping
+        x = self.sine_activation(x)
+        x = self.scaling_layer(x)
+
+        return x
