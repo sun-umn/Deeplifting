@@ -107,6 +107,7 @@ class Results:
             self.results.append(
                 (
                     method,
+                    xs,
                     global_minimum,
                     np.round(
                         f_init, 2
@@ -141,6 +142,7 @@ class Results:
         ):
             columns = [
                 'method',
+                'start_position',
                 'global_minimum',
                 'f_init',
                 'f_final',
