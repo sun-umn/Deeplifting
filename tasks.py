@@ -917,6 +917,7 @@ def find_best_architecture_sgd_task(
                         problem_config=problem_config,
                         xs=xs,
                         method=method,
+                        lr=lr,
                     )
 
             # Create the data from this run and save sequentially
