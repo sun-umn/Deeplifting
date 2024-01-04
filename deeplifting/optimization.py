@@ -1021,6 +1021,10 @@ def run_sgd_deeplifting(
     # Set up a training loop
     start = time.time()
 
+    # Let's try using the minimum loss found during the
+    # optimization
+    losses = []
+
     # Train the model
     model.train()
     for epoch in range(epochs):
@@ -1033,6 +1037,7 @@ def run_sgd_deeplifting(
 
         # Go through the backward pass and create the gradients
         loss.backward()
+        losses.append(loss.item())
 
         # Step through the optimzer to update the data with the gradients
         optimizer.step()
@@ -1050,13 +1055,16 @@ def run_sgd_deeplifting(
 
     # Get final values
     outputs = model(inputs=model_inputs)
-    f_final = objective(outputs)
-    f_final = f_final.detach().cpu().numpy()
+    f_final = objective(outputs)  # noqa
+    f_final = f_final.detach().cpu().numpy()  # noqa
+
+    # F-min
+    f_min = np.min(np.array(losses))
 
     results = {
         'f_init': f_init.detach().cpu().numpy(),
         'total_time': total_time,
-        'f_final': f_final,
+        'f_final': f_min,
         'iterations': iterations,
         'fn_evals': None,  # Does not apply to this method
         'termination_code': termination_code,
