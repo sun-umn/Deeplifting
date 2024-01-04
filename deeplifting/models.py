@@ -56,8 +56,7 @@ class SinActivation(nn.Module):
         if self.include_amplitude:
             return self.amplitude * torch.sin(x * self.scale)
 
-        # return torch.sin(x * self.scale)
-        return torch.sigmoid(x * self.scale)
+        return torch.sin(x * self.scale)
 
 
 class DeepliftingScalingBlock(nn.Module):
