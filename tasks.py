@@ -785,11 +785,6 @@ def find_best_architecture_sgd_task(
     # Get the device (CPU for now)
     output_size = problem['dimensions']
 
-    # Maximum iterations for a problem
-    # Most problems converge quickly but some
-    # take a little longer
-    max_iterations = problem['max_iterations']
-
     # Get the maximum number of trials
     # for the problem
     trials = problem['trials']
@@ -893,7 +888,6 @@ def find_best_architecture_sgd_task(
                         start_position=x_start,
                         objective=fn,
                         device=device,
-                        max_iterations=max_iterations,
                         lr=lr,
                     )
 
