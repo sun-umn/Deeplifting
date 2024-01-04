@@ -16,7 +16,7 @@ from pyomo.environ import ConcreteModel, Objective, SolverFactory, Var, minimize
 from scipy.optimize import basinhopping, differential_evolution, dual_annealing
 
 # first party
-from deeplifting.models import ReLUDeepliftingMLP
+from deeplifting.models import DeepliftingSimpleMLP, ReLUDeepliftingMLP
 from deeplifting.problems import HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
 from deeplifting.utils import (
     DifferentialEvolutionCallback,
@@ -27,9 +27,6 @@ from deeplifting.utils import (
     set_seed,
     train_model_to_output,
 )
-
-# from torch.optim.lr_scheduler import ReduceLROnPlateau
-
 
 # Do NOT save intermediate paths for high dimensional problems
 EXCLUDE_PROBLEMS = list(HIGH_DIMENSIONAL_PROBLEMS_BY_NAME.keys())
@@ -930,6 +927,116 @@ def run_adam_deeplifting(
         # Step through the optimzer to update the data with the gradients
         optimizer.step()
         scheduler.step()
+
+        iterations += 1
+
+    # Maximum iterations reached
+    if iterations >= len(range(epochs)):
+        termination_code = 4
+
+    # Get the final results
+    end = time.time()
+    total_time = end - start  # noqa
+
+    # Get final values
+    outputs = model(inputs=model_inputs)
+    f_final = objective(outputs)
+    f_final = f_final.detach().cpu().numpy()
+
+    results = {
+        'f_init': f_init.detach().cpu().numpy(),
+        'total_time': total_time,
+        'f_final': f_final,
+        'iterations': iterations,
+        'fn_evals': None,  # Does not apply to this method
+        'termination_code': termination_code,
+    }
+
+    return results
+
+
+def run_sgd_deeplifting(
+    model: DeepliftingSimpleMLP,
+    model_inputs: torch.Tensor,
+    start_position: torch.Tensor,
+    objective: Callable,
+    device: torch.device,
+    max_iterations: int,
+    *,
+    lr: float = 1e-2,
+    momentum: float = 0.99,
+) -> Dict[str, Any]:
+    """
+    Function that runs our preimer method of deeplifting.
+    The idea here is to reparmeterize an optimization objective
+    so we can have better optimization and convergence. The difference
+    with this version of deeplifting is we will use
+    pytorch's built in Adam optimizer
+    """
+    # The first thing we do when training this model is align the
+    # outputs of the model with a randomly initialized starting position
+    # For now we will not worry about the alignment
+    # train_model_to_output(
+    #     inputs=model_inputs,
+    #     model=model,
+    #     x0=start_position,
+    #     epochs=5000,
+    #     lr=1,
+    #     tolerance=1e-3,
+    # )
+
+    # Total epochs
+    epochs = max_iterations
+
+    # Set up the LBFGS optimizer for the problem
+    # This is a pytorch provided implementation
+    optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum)
+
+    # Reduce learning rate on plateau
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer,
+        mode='min',
+        factor=0.1,
+        patience=100,
+        verbose=False,
+    )
+
+    # Let's keep the same steps as the other method defined
+    # (pygranso deeplifting)
+
+    # Gather the starting information for the problem
+    model.eval()
+    outputs = model(inputs=model_inputs)
+    _, f_init = deeplifting_predictions(outputs, objective)
+
+    # Start clocking on the training loop
+    start = time.time()
+
+    # Total iterations
+    iterations = 0
+
+    # Create terminations codes like pygranso
+    termination_code = None
+
+    # Set up a training loop
+    start = time.time()
+
+    # Train the model
+    model.train()
+    for epoch in range(epochs):
+        # Zero out the gradients
+        optimizer.zero_grad()
+
+        # The loss is the sum of the compliance
+        outputs = model(inputs=model_inputs)
+        loss = objective(outputs)
+
+        # Go through the backward pass and create the gradients
+        loss.backward()
+
+        # Step through the optimzer to update the data with the gradients
+        optimizer.step()
+        scheduler.step(loss)
 
         iterations += 1
 

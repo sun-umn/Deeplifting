@@ -79,6 +79,7 @@ class Results:
         problem_config: Dict[str, int],
         xs: str,
         method: str,
+        lr: float,
     ) -> None:
         """
         Utility function that we can use to keep track
@@ -96,6 +97,7 @@ class Results:
             'deeplifting-pygranso',
             'deeplifting-lbfgs',
             'deeplifting-adam',
+            'deeplifting-sgd',
         ):
             # Get the neural network configuration information
             self.num_layers = problem_config['num_layers']
@@ -117,6 +119,7 @@ class Results:
                     self.num_layers,
                     self.num_neurons,
                     success,
+                    lr,
                 )
             )
 
@@ -134,6 +137,7 @@ class Results:
             'deeplifting-pygranso',
             'deeplifting-lbfgs',
             'deeplifting-adam',
+            'deeplifting-sgd',
         ):
             columns = [
                 'method',
@@ -147,6 +151,7 @@ class Results:
                 'num_layers',
                 'num_neurons',
                 'success',
+                'learning_rate',
             ]
 
             # Set up the results dataframe

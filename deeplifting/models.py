@@ -298,7 +298,7 @@ class DeepliftingSimpleMLP(nn.Module):
         set_seed(seed)
 
         # Setup the first linear layer
-        self.linear1 - nn.Linear(hidden_sizes, hidden_sizes)
+        self.linear1 - nn.Linear(initial_hidden_size, hidden_sizes)
         torch.nn.init.kaiming_uniform_(self.linear1.weight, nonlinearity='relu')
         torch.nn.init.zeros_(self.linear1.bias)
 
@@ -338,5 +338,8 @@ class DeepliftingSimpleMLP(nn.Module):
         # mapping
         x = self.sine_activation(x)
         x = self.scaling_layer(x)
+
+        # Take the mean of the outputs
+        x = x.mean(axis=0).flatten()
 
         return x
