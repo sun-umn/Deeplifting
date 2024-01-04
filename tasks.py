@@ -711,7 +711,6 @@ def find_best_architecture_task(
 @click.option('--experimentation', default=True)
 def find_best_architecture_sgd_task(
     problem_name,
-    method,
     dimensionality,
     experimentation,
 ):
