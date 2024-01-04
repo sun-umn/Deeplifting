@@ -976,14 +976,14 @@ def run_sgd_deeplifting(
     # The first thing we do when training this model is align the
     # outputs of the model with a randomly initialized starting position
     # For now we will not worry about the alignment
-    # train_model_to_output(
-    #     inputs=model_inputs,
-    #     model=model,
-    #     x0=start_position,
-    #     epochs=5000,
-    #     lr=1,
-    #     tolerance=1e-3,
-    # )
+    train_model_to_output(
+        inputs=model_inputs,
+        model=model,
+        x0=start_position,
+        # epochs=5000,
+        # lr=1,
+        tolerance=1e-3,
+    )
 
     # Total epochs
     epochs = max_iterations
