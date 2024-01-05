@@ -131,12 +131,12 @@ class ReluDeepliftingBlock(nn.Module):
         # Linear layer
         x = self.linear(x)
 
+        # Activation function
+        x = self.activation_layer(x)
+
         if self.include_bn:
             # Batch Normalization
             x = self.batch_norm(x)
-
-        # Activation function
-        x = self.activation_layer(x)
 
         return x
 
