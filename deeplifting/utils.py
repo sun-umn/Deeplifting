@@ -102,6 +102,7 @@ class Results:
             # Get the neural network configuration information
             self.num_layers = problem_config['num_layers']
             self.num_neurons = problem_config['num_neurons']
+            self.lr = problem_config['lr']
 
             # Save all of the results to a list
             self.results.append(
@@ -160,11 +161,18 @@ class Results:
             results_df = pd.DataFrame(self.results, columns=columns)
 
             # Save the results
-            filename = os.path.join(
-                save_path,
-                f'{problem_name}-relu-{self.num_layers}-{self.num_neurons}-'
-                f'True.parquet',  # Weight initializaiton will always be true
-            )
+            if self.lr is None:
+                filename = os.path.join(
+                    save_path,
+                    f'{problem_name}-relu-{self.num_layers}-{self.num_neurons}-'
+                    f'.parquet',
+                )
+            else:
+                filename = os.path.join(
+                    save_path,
+                    f'{problem_name}-relu-{self.num_layers}-{self.num_neurons}-'
+                    f'lr-{self.lr}.parquet',
+                )
             results_df.to_parquet(filename)
 
         else:

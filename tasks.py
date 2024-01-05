@@ -827,6 +827,7 @@ def find_best_architecture_sgd_task(
                 problem_config = {
                     'num_layers': num_layers,
                     'num_neurons': units,
+                    'lr': lr,
                 }
 
                 # We have an observation that we can start at the same point
@@ -869,6 +870,7 @@ def find_best_architecture_sgd_task(
                         print(
                             f' - layers - {num_layers} - units'
                             f' - {units} - trial - {trial}'
+                            f' - lr {lr}'
                         )
                         print(f'seed = {seed}')
 
