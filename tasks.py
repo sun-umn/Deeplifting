@@ -813,7 +813,7 @@ def find_best_architecture_sgd_task(
     include_bn = True
 
     # Learning rates
-    learning_rates = [1e-4, 1e-5]
+    learning_rates = [1e-3, 1e-4, 1e-5]
 
     # Start the optimization process
     # Search over a specific learning rate
