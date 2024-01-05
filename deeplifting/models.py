@@ -125,7 +125,7 @@ class ReluDeepliftingBlock(nn.Module):
         nn.init.zeros_(self.linear.bias)
 
         # Define the Batch Normalization layer
-        self.batch_norm = nn.LayerNorm(output_size)
+        self.batch_norm = GlobalNormalization()
 
     def forward(self, x):
         # Linear layer
@@ -193,7 +193,7 @@ class ReLUDeepliftingMLP(nn.Module):
             raise ValueError(f'{self.initial_layer_type} is not a valid option!')
 
         # Initialization for initial layer
-        nn.init.orthogonal_(self.input_layer.weight)
+        nn.init.kaiming_uniform_(self.linear1.weight, nonlinearity='relu')
         nn.init.zeros_(self.input_layer.bias)
 
         self.layers.append(self.input_layer)
@@ -217,11 +217,7 @@ class ReLUDeepliftingMLP(nn.Module):
         # Initialize the weights for the input of the sine layer
         # initialize the weights
         if self.include_weight_initialization:
-            nn.init.kaiming_uniform_(
-                self.linear_output.weight,
-                mode='fan_in',
-                nonlinearity='relu',
-            )
+            nn.init.kaiming_uniform_(self.linear1.weight, nonlinearity='relu')
 
             # Initailize the bias to zero
             nn.init.zeros_(self.linear_output.bias)
@@ -249,8 +245,8 @@ class ReLUDeepliftingMLP(nn.Module):
             # We need at least one output from the first hidden layer
             # before we can accumulate skip connections
             if i > 0:
-                x_new = layer(x)
-                x = x + x_new
+                x = layer(x)
+                # x = x + x_new
             else:
                 # Output for the initial layer
                 x = layer(x)
