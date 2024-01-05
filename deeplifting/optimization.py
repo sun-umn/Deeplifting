@@ -16,7 +16,7 @@ from pyomo.environ import ConcreteModel, Objective, SolverFactory, Var, minimize
 from scipy.optimize import basinhopping, differential_evolution, dual_annealing
 
 # first party
-from deeplifting.models import DeepliftingSimpleMLP, ReLUDeepliftingMLP
+from deeplifting.models import ReLUDeepliftingMLP
 from deeplifting.problems import HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
 from deeplifting.utils import (
     DifferentialEvolutionCallback,
@@ -956,7 +956,7 @@ def run_adam_deeplifting(
 
 
 def run_sgd_deeplifting(
-    model: DeepliftingSimpleMLP,
+    model: ReLUDeepliftingMLP,
     model_inputs: torch.Tensor,
     start_position: torch.Tensor,
     objective: Callable,

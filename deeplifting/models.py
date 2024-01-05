@@ -264,11 +264,8 @@ class ReLUDeepliftingMLP(nn.Module):
             x = x.swapaxes(2, 1)
             x = x.mean(axis=-1)
 
-        # Small layer to align the outputs of the neural network
-        x = x.mean(axis=0)
-
-        x = self.alignment_layer(x)
         out = self.output_activation_layer(x)
+        out = out.mean(axis=0)
 
         if self.bounds is not None:
             out = self.scaling_layer(out)

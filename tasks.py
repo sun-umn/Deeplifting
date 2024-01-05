@@ -27,7 +27,7 @@ from config import (
     rastrigin_series,
     schwefel_series,
 )
-from deeplifting.models import DeepliftingSimpleMLP, ReLUDeepliftingMLP
+from deeplifting.models import ReLUDeepliftingMLP
 from deeplifting.optimization import run_pyomo  # noqa
 from deeplifting.optimization import (
     run_adam_deeplifting,
@@ -737,7 +737,7 @@ def find_best_architecture_sgd_task(
     # for each point and we can study the variance
     max_weight_trials = {
         False: range(10, 20, 10),
-        True: range(10, 160, 10),
+        True: range(10, 20, 10),
     }
 
     if experimentation:
@@ -804,7 +804,7 @@ def find_best_architecture_sgd_task(
     layers = list(layers)
 
     # Number of neurons
-    units_search = [32]
+    units_search = [32, 64, 128, 256]
 
     # Initial layer type
     input_dimension = 32
@@ -812,112 +812,116 @@ def find_best_architecture_sgd_task(
     include_bn = True
 
     # Learning rates
-    learning_rates = [1e-2, 1e-3, 1e-4, 1e-5]
+    learning_rates = [1e-3, 1e-4, 1e-5]
 
     # Start the optimization process
-    num_layers = 3
     for lr in learning_rates:
-        for units in units_search:
-            # n-layer m neuron network
-            hidden_sizes = units
+        for num_layers in layers:
+            for units in units_search:
+                # n-layer m neuron network
+                hidden_sizes = (units,) * num_layers
 
-            # Problem configuration in a dict
-            problem_config = {
-                'num_layers': num_layers,
-                'num_neurons': units,
-            }
+                # Problem configuration in a dict
+                problem_config = {
+                    'num_layers': num_layers,
+                    'num_neurons': units,
+                }
 
-            # We have an observation that we can start at the same point
-            # but it may or may not converge so we can try different
-            # weights
-            for index, trial in enumerate(range(trials)):
-                # Set the seed
-                set_seed(trial)
+                # We have an observation that we can start at the same point
+                # but it may or may not converge so we can try different
+                # weights
+                for index, trial in enumerate(range(trials)):
+                    # Set the seed
+                    set_seed(trial)
 
-                # Fix the inputs for deeplifting
-                if initial_layer_type == 'embedding':
-                    inputs = torch.randint(
-                        low=0, high=(units - 1), size=(input_dimension, units)
+                    # Fix the inputs for deeplifting
+                    if initial_layer_type == 'embedding':
+                        inputs = torch.randint(
+                            low=0, high=(units - 1), size=(input_dimension, units)
+                        )
+                        inputs = inputs.to(device=device, dtype=torch.long)
+
+                    elif initial_layer_type == 'linear':
+                        inputs = torch.rand(size=(input_dimension, 5 * output_size))
+                        inputs = inputs.to(device=device, dtype=torch.double)
+
+                    else:
+                        raise ValueError(
+                            f'{initial_layer_type} is not an accepted type!'
+                        )
+
+                    # Initialization for other models
+                    x_start = initialize_vector(size=output_size, bounds=bounds)
+                    x_start = torch.tensor(x_start)
+                    x_start = x_start.to(device=device, dtype=torch.double)
+
+                    # Build the xs for the outputs
+                    columns = [f'x{i + 1}' for i in range(output_size)]
+                    xs = json.dumps(dict(zip(columns, x_start.detach().cpu().numpy())))
+
+                    # Creates different weight intializations
+                    # for the same starting point x0
+                    for i in max_weight_trials[include_weight_initialization]:
+                        seed = (i + index) * i
+                        print(f'Fitting point {x_start} - with weights {i}')
+                        print(
+                            f' - layers - {num_layers} - units'
+                            f' - {units} - trial - {trial}'
+                        )
+                        print(f'seed = {seed}')
+
+                        # Deeplifting model with skip connections
+                        model = ReLUDeepliftingMLP(
+                            initial_hidden_size=(5 * output_size),
+                            hidden_sizes=hidden_sizes,
+                            output_size=output_size,
+                            bounds=bounds,
+                            initial_layer_type=initial_layer_type,
+                            include_weight_initialization=include_weight_initialization,
+                            include_bn=include_bn,
+                            seed=seed,
+                        )
+
+                        model = model.to(device=device, dtype=torch.double)
+
+                        # Run PyGranso Based Deeplifting
+                        deeplifting_outputs = run_sgd_deeplifting(
+                            model=model,
+                            model_inputs=inputs,
+                            start_position=x_start,
+                            objective=fn,
+                            device=device,
+                            max_iterations=100,
+                            lr=lr,
+                        )
+
+                        # Unpack results
+                        f_init = deeplifting_outputs.get('f_init')
+                        f_final = deeplifting_outputs.get('f_final')
+                        total_time = deeplifting_outputs.get('total_time')
+                        iterations = deeplifting_outputs.get('iterations')
+                        fn_evals = deeplifting_outputs.get('fn_evals')
+                        termination_code = deeplifting_outputs.get('termination_code')
+
+                        # Append results
+                        results.append_record(
+                            global_minimum=global_minimum,
+                            f_init=f_init,
+                            f_final=f_final,
+                            total_time=total_time,
+                            iterations=iterations,
+                            fn_evals=fn_evals,
+                            termination_code=termination_code,
+                            problem_config=problem_config,
+                            xs=xs,
+                            method=method,
+                            lr=lr,
+                        )
+
+                    # Create the data from this run and save sequentially
+                    results.build_and_save_dataframe(
+                        save_path=save_path, problem_name=problem_name
                     )
-                    inputs = inputs.to(device=device, dtype=torch.long)
-
-                elif initial_layer_type == 'linear':
-                    inputs = torch.rand(size=(input_dimension, 5 * output_size))
-                    inputs = inputs.to(device=device, dtype=torch.double)
-
-                else:
-                    raise ValueError(f'{initial_layer_type} is not an accepted type!')
-
-                # Initialization for other models
-                x_start = initialize_vector(size=output_size, bounds=bounds)
-                x_start = torch.tensor(x_start)
-                x_start = x_start.to(device=device, dtype=torch.double)
-
-                # Build the xs for the outputs
-                columns = [f'x{i + 1}' for i in range(output_size)]
-                xs = json.dumps(dict(zip(columns, x_start.detach().cpu().numpy())))
-
-                # Creates different weight intializations for the same starting point
-                # x0
-                for i in max_weight_trials[include_weight_initialization]:
-                    seed = (i + index) * i
-                    print(f'Fitting point {x_start} - with weights {i}')
-                    print(
-                        f' - layers - {num_layers} - units - {units} - trial - {trial}'
-                    )
-                    print(f'seed = {seed}')
-
-                    # Deeplifting model with skip connections
-                    model = DeepliftingSimpleMLP(
-                        initial_hidden_size=(5 * output_size),
-                        hidden_sizes=hidden_sizes,
-                        output_size=output_size,
-                        bounds=bounds,
-                        initial_layer_type=initial_layer_type,
-                        include_weight_initialization=include_weight_initialization,
-                        include_bn=include_bn,
-                        seed=seed,
-                    )
-
-                    model = model.to(device=device, dtype=torch.double)
-
-                    # Run PyGranso Based Deeplifting
-                    deeplifting_outputs = run_sgd_deeplifting(
-                        model=model,
-                        model_inputs=inputs,
-                        start_position=x_start,
-                        objective=fn,
-                        device=device,
-                        lr=lr,
-                    )
-
-                    # Unpack results
-                    f_init = deeplifting_outputs.get('f_init')
-                    f_final = deeplifting_outputs.get('f_final')
-                    total_time = deeplifting_outputs.get('total_time')
-                    iterations = deeplifting_outputs.get('iterations')
-                    fn_evals = deeplifting_outputs.get('fn_evals')
-                    termination_code = deeplifting_outputs.get('termination_code')
-
-                    # Append results
-                    results.append_record(
-                        global_minimum=global_minimum,
-                        f_init=f_init,
-                        f_final=f_final,
-                        total_time=total_time,
-                        iterations=iterations,
-                        fn_evals=fn_evals,
-                        termination_code=termination_code,
-                        problem_config=problem_config,
-                        xs=xs,
-                        method=method,
-                        lr=lr,
-                    )
-
-            # Create the data from this run and save sequentially
-            results.build_and_save_dataframe(
-                save_path=save_path, problem_name=problem_name
-            )
 
 
 if __name__ == "__main__":
