@@ -1057,12 +1057,12 @@ def run_sgd_deeplifting(
     f_final = f_final.detach().cpu().numpy()  # noqa
 
     # F-min
-    f_min = np.min(np.array(losses))
+    f_min = np.min(np.array(losses))  # noqa
 
     results = {
         'f_init': f_init.detach().cpu().numpy(),
         'total_time': total_time,
-        'f_final': f_min,
+        'f_final': f_final,
         'iterations': iterations,
         'fn_evals': None,  # Does not apply to this method
         'termination_code': termination_code,
