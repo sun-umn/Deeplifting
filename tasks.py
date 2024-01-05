@@ -797,15 +797,15 @@ def find_best_architecture_sgd_task(
 
     # Layer search
     minimum_num_layers = 2
-    maximum_num_layers = 3
+    maximum_num_layers = 5
 
     # Layers
     layers = reversed(range(minimum_num_layers, maximum_num_layers + 1))
     layers = list(layers)
-    # layers = [24, 19, 13, 10] + layers
+    layers = [24, 19, 13, 10] + layers
 
     # Number of neurons
-    units_search = [32]
+    units_search = [32, 64, 128, 192]
 
     # Initial layer type
     input_dimension = 32
