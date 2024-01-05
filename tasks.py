@@ -801,7 +801,7 @@ def find_best_architecture_sgd_task(
 
     # Layers
     layers = reversed(range(minimum_num_layers, maximum_num_layers + 1))
-    # layers = list(layers)
+    layers = list(layers)
     # layers = [24, 19, 13, 10] + layers
 
     # Number of neurons
@@ -813,7 +813,7 @@ def find_best_architecture_sgd_task(
     include_bn = True
 
     # Learning rates
-    learning_rates = [1e-4]
+    learning_rates = [1e-4, 1e-5]
 
     # Start the optimization process
     # Search over a specific learning rate
