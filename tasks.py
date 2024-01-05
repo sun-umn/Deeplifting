@@ -921,10 +921,10 @@ def find_best_architecture_sgd_task(
                             lr=lr,
                         )
 
-                    # Create the data from this run and save sequentially
-                    results.build_and_save_dataframe(
-                        save_path=save_path, problem_name=problem_name
-                    )
+                # Create the data from this run and save sequentially
+                results.build_and_save_dataframe(
+                    save_path=save_path, problem_name=problem_name
+                )
 
 
 if __name__ == "__main__":
