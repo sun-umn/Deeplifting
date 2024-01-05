@@ -193,7 +193,7 @@ class ReLUDeepliftingMLP(nn.Module):
             raise ValueError(f'{self.initial_layer_type} is not a valid option!')
 
         # Initialization for initial layer
-        nn.init.kaiming_uniform_(self.linear1.weight, nonlinearity='relu')
+        nn.init.kaiming_uniform_(self.input_layer.weight, nonlinearity='relu')
         nn.init.zeros_(self.input_layer.bias)
 
         self.layers.append(self.input_layer)
@@ -239,6 +239,8 @@ class ReLUDeepliftingMLP(nn.Module):
 
         # Initial input
         x = self.layers[0](x)
+        x = nn.ReLU()(x)
+        x = GlobalNormalization()(x)
 
         # Iterate over the layers to build the MLP
         for i, layer in enumerate(self.layers[1:]):
