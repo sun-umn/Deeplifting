@@ -263,10 +263,14 @@ class ReLUDeepliftingMLP(nn.Module):
             x = x.mean(axis=-1)
 
         out = self.output_activation_layer(x)
-        out = out.mean(axis=0)
 
         if self.bounds is not None:
+            # Might disable this for example for a problem
+            # like SVM where we are not sure about the bounds
             out = self.scaling_layer(out)
+
+        # final output layer
+        out = out.mean(axis=0).flatten()
 
         return out
 
