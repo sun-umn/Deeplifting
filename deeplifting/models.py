@@ -245,8 +245,8 @@ class ReLUDeepliftingMLP(nn.Module):
             # We need at least one output from the first hidden layer
             # before we can accumulate skip connections
             if i > 0:
-                x = layer(x)
-                # x = x + x_new
+                x_new = layer(x)
+                x = x + x_new
             else:
                 # Output for the initial layer
                 x = layer(x)
