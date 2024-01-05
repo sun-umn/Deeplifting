@@ -737,7 +737,7 @@ def find_best_architecture_sgd_task(
     # for each point and we can study the variance
     max_weight_trials = {
         False: range(10, 20, 10),
-        True: range(10, 20, 10),
+        True: range(10, 160, 10),
     }
 
     if experimentation:
@@ -797,14 +797,15 @@ def find_best_architecture_sgd_task(
 
     # Layer search
     minimum_num_layers = 2
-    maximum_num_layers = 10
+    maximum_num_layers = 3
 
     # Layers
     layers = reversed(range(minimum_num_layers, maximum_num_layers + 1))
-    layers = list(layers)
+    # layers = list(layers)
+    # layers = [24, 19, 13, 10] + layers
 
     # Number of neurons
-    units_search = [32, 64, 128, 256]
+    units_search = [32]
 
     # Initial layer type
     input_dimension = 32
@@ -815,6 +816,7 @@ def find_best_architecture_sgd_task(
     learning_rates = [1e-3, 1e-4, 1e-5]
 
     # Start the optimization process
+    # Search over a specific learning rate
     for lr in learning_rates:
         for num_layers in layers:
             for units in units_search:
@@ -891,7 +893,6 @@ def find_best_architecture_sgd_task(
                             start_position=x_start,
                             objective=fn,
                             device=device,
-                            max_iterations=100,
                             lr=lr,
                         )
 
