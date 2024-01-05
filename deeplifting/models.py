@@ -217,7 +217,7 @@ class ReLUDeepliftingMLP(nn.Module):
         # Initialize the weights for the input of the sine layer
         # initialize the weights
         if self.include_weight_initialization:
-            nn.init.kaiming_uniform_(self.linear1.weight, nonlinearity='relu')
+            nn.init.kaiming_uniform_(self.linear_output.weight, nonlinearity='relu')
 
             # Initailize the bias to zero
             nn.init.zeros_(self.linear_output.bias)
