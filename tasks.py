@@ -614,6 +614,10 @@ def find_best_architecture_task(
 
                 # Initialization for other models
                 x_start = initialize_vector(size=output_size, bounds=bounds)
+
+                # Let's also put the starting distance
+                distance = np.mean((x_start - problem['global_x']) ** 2)
+
                 x_start = torch.tensor(x_start)
                 x_start = x_start.to(device=device, dtype=torch.double)
 
@@ -704,6 +708,7 @@ def find_best_architecture_task(
                         method=method,
                         lr=lr,
                         objective_values=objective_values,
+                        distance=distance,
                     )
 
             # Create the data from this run and save sequentially
@@ -863,6 +868,10 @@ def find_best_architecture_sgd_task(
 
                     # Initialization for other models
                     x_start = initialize_vector(size=output_size, bounds=bounds)
+
+                    # Let's also put the starting distance
+                    distance = np.mean((x_start - problem['global_x']) ** 2)
+
                     x_start = torch.tensor(x_start)
                     x_start = x_start.to(device=device, dtype=torch.double)
 
@@ -929,6 +938,7 @@ def find_best_architecture_sgd_task(
                             method=method,
                             lr=lr,
                             objective_values=objective_values,
+                            distance=distance,
                         )
 
                 # Create the data from this run and save sequentially

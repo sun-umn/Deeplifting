@@ -81,6 +81,7 @@ class Results:
         method: str,
         lr: float,
         objective_values: np.ndarray,
+        distance: float,
     ) -> None:
         """
         Utility function that we can use to keep track
@@ -124,6 +125,7 @@ class Results:
                     success,
                     lr,
                     objective_values,
+                    distance,
                 )
             )
 
@@ -158,6 +160,7 @@ class Results:
                 'success',
                 'learning_rate',
                 'objective_values',
+                'distance',
             ]
 
             # Set up the results dataframe
