@@ -251,7 +251,10 @@ def build_model_complexity_plots(
 
 
 def create_unique_experiment_directory():
-    # Generate a UUID
+    """
+    Generate a UUID
+    """
+
     unique_id = str(uuid.uuid4())
 
     # Define the path to the experiments folder and the new UUID directory
@@ -321,6 +324,10 @@ def set_seed(seed):
 
 
 def initialize_vector(size, bounds):
+    """
+    Function to initialize a random point of optimization
+    for different algorithms
+    """
     if bounds is not None:
         # Get the upper and lower bounds
         lower_bounds = bounds['lower_bounds']
@@ -342,7 +349,7 @@ def initialize_vector(size, bounds):
 
 def train_model_to_output(inputs, model, x0, epochs=10000, lr=1e-4, tolerance=1e-3):
     """
-    This function takes a model, input tensor, and target output (x0),
+    Function takes a model, input tensor, and target output (x0),
     and trains the model's output layer to produce x0 for the given input.
 
     Parameters:
@@ -414,6 +421,10 @@ def train_model_to_output(inputs, model, x0, epochs=10000, lr=1e-4, tolerance=1e
 
 
 def add_jitter(points, jitter_amount=0.05):
+    """
+    Function that adds a small amount of noise with main
+    use case for a scatter plot
+    """
     jitter = np.random.uniform(-jitter_amount, jitter_amount, points.shape)
     return points + jitter
 
@@ -642,6 +653,11 @@ def get_devices():
 
 
 class DifferentialEvolutionCallback(object):
+    """
+    Callback to save intermediate results for
+    Differential Evolution
+    """
+
     def __init__(self):
         self.x_history = []
         self.convergence_history = []

@@ -907,7 +907,7 @@ def find_best_architecture_sgd_task(
                         iterations = deeplifting_outputs.get('iterations')
                         fn_evals = deeplifting_outputs.get('fn_evals')
                         termination_code = deeplifting_outputs.get('termination_code')
-                        objective_values = deeplifting_outputs.get('objective')
+                        objective_values = deeplifting_outputs.get('objective_values')
 
                         # Append results
                         results.append_record(
