@@ -27,7 +27,7 @@ class PyGransoConfig:
     number of iterations
     """
 
-    def __init__(self, device, x0, max_iterations):
+    def __init__(self, device, x0, max_iterations, printing=False):
         # Set up pygranso structure
         self.opts = pygransoStruct()
 
@@ -37,7 +37,13 @@ class PyGransoConfig:
 
         # Keep the print freqency at 1 so we can
         # view every iteration
-        self.opts.print_frequency = 1
+        if printing:
+            self.opts.print_frequency = 1
+
+        else:
+            # Use this option to turn off printing
+            # TODO: May want to observe the t (step size)
+            self.opts.print_level = 0
 
         # LBFGS lookback history size
         self.opts.limited_mem_size = 100
