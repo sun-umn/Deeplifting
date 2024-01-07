@@ -1066,7 +1066,7 @@ def run_sgd_deeplifting(
         'iterations': iterations,
         'fn_evals': None,  # Does not apply to this method
         'termination_code': termination_code,
-        'objective': np.array(losses),
+        'objective_values': np.array(losses),
     }
 
     return results

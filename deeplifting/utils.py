@@ -80,7 +80,7 @@ class Results:
         xs: str,
         method: str,
         lr: float,
-        objective: np.ndarray,
+        objective_values: np.ndarray,
     ) -> None:
         """
         Utility function that we can use to keep track
@@ -123,7 +123,7 @@ class Results:
                     self.num_neurons,
                     success,
                     lr,
-                    objective,
+                    objective_values,
                 )
             )
 
@@ -157,7 +157,7 @@ class Results:
                 'num_neurons',
                 'success',
                 'learning_rate',
-                'objective',
+                'objective_values',
             ]
 
             # Set up the results dataframe
