@@ -589,6 +589,7 @@ def find_best_architecture_task(
             problem_config = {
                 'num_layers': num_layers,
                 'num_neurons': units,
+                'lr': lr,
             }
 
             # We have an observation that we can start at the same point
