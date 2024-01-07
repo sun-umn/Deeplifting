@@ -668,6 +668,11 @@ class DifferentialEvolutionCallback(object):
 
 
 class DualAnnealingCallback(object):
+    """
+    Call back to save intermediate results for
+    Dual Annealing
+    """
+
     def __init__(self):
         self.x_history = []
         self.f_history = []
