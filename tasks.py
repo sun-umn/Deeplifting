@@ -472,12 +472,12 @@ def run_scip_task(problem_series, dimensionality, trials):
         problem_performance_df.to_parquet(f'{path}/{dimensionality}.parquet')
 
 
-# @cli.command('find-best-deeplifting-architecture-v2')
-# @click.option('--problem_name', default='ackley')
-# @click.option('--method', default='deeplifting-pygranso')
-# @click.option('--dimensionality', default='low-dimensional')
-# @click.option('--experimentation', default=True)
-# @click.option('--include_weight_initialization', default=True)
+@cli.command('find-best-deeplifting-architecture-v2')
+@click.option('--problem_name', default='ackley')
+@click.option('--method', default='deeplifting-pygranso')
+@click.option('--dimensionality', default='low-dimensional')
+@click.option('--experimentation', default=True)
+@click.option('--include_weight_initialization', default=True)
 def find_best_architecture_task(
     problem_name, method, dimensionality, experimentation, include_weight_initialization
 ):
@@ -497,23 +497,15 @@ def find_best_architecture_task(
     # for each point and we can study the variance
     max_weight_trials = {
         False: range(10, 20, 10),
-        True: range(10, 20, 10),
+        True: range(10, 160, 10),
     }
-
-    if experimentation:
-        # Enable wandb
-        wandb.login(key='2080070c4753d0384b073105ed75e1f46669e4bf')
-
-        wandb.init(
-            # set the wandb project where this run will be logged
-            project="Deeplifting-HD",
-            tags=[f'{method}', f'{problem_name}'],
-        )
 
     # Setup the problem
     if dimensionality == 'low-dimensional':
         directory = 'low-dimension'
         PROBLEMS = PROBLEMS_BY_NAME
+        API_KEY = '2080070c4753d0384b073105ed75e1f46669e4bf'
+        PROJECT_NAME = 'Deeplifting-LD'
 
     elif dimensionality == 'high-dimensional':
         directory = 'high-dimension'
@@ -522,12 +514,22 @@ def find_best_architecture_task(
     else:
         raise ValueError(f'{dimensionality} is not valid!')
 
+    if experimentation:
+        # Enable wandb
+        wandb.login(key=API_KEY)
+
+        wandb.init(
+            # set the wandb project where this run will be logged
+            project=PROJECT_NAME,
+            tags=[f'{method}', f'{problem_name}'],
+        )
+
     # Main directory to save data
     # This will be different for each user
     save_path = os.path.join(
         '/home/jusun/dever120/Deeplifting',
         'experiments/3b39b4fb-0520-4795-aaba-a8eab24ff8fd/',
-        f'{directory}/test',
+        f'{directory}/deeplifting-pygranso',
     )
 
     # Get the problem information
@@ -718,10 +720,10 @@ def find_best_architecture_task(
             )
 
 
-# @cli.command('find-best-deeplifting-architecture-sgd')
-# @click.option('--problem_name', default='ackley')
-# @click.option('--dimensionality', default='low-dimensional')
-# @click.option('--experimentation', default=True)
+@cli.command('find-best-deeplifting-architecture-sgd')
+@click.option('--problem_name', default='ackley')
+@click.option('--dimensionality', default='low-dimensional')
+@click.option('--experimentation', default=True)
 def find_best_architecture_sgd_task(
     problem_name,
     dimensionality,
@@ -781,7 +783,7 @@ def find_best_architecture_sgd_task(
     save_path = os.path.join(
         '/home/jusun/dever120/Deeplifting',
         'experiments/3b39b4fb-0520-4795-aaba-a8eab24ff8fd/',
-        f'{directory}/test',
+        f'{directory}/deeplifting-sgd',
     )
 
     # Get the problem information
