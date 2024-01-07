@@ -667,12 +667,8 @@ def run_pygranso_deeplifting(
     # obtained by calling get_log_fn()
     log = get_log_fn()
 
-    # Final structure
-    indexes = (pd.Series(log.fn_evals).cumsum() - 1).values.tolist()
-
     # Get the objective values
     objective_values = np.array(log.f)
-    objective_values = objective_values[indexes]
 
     # Get the total time
     end = time.time()
