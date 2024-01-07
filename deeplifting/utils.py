@@ -420,9 +420,9 @@ def train_model_to_output(inputs, model, x0, epochs=10000, lr=1e-4, tolerance=1e
 
     print(f'Final L2 distance {l2_distance:.4e}')
 
-    # Unfreeze all layers
-    for parameters in model.parameters():
-        parameters.requires_grad = True
+    # # Unfreeze all layers
+    # for parameters in model.parameters():
+    #     parameters.requires_grad = True
 
     del (optimizer, scheduler, outputs)
     gc.collect()
