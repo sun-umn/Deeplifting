@@ -472,12 +472,12 @@ def run_scip_task(problem_series, dimensionality, trials):
         problem_performance_df.to_parquet(f'{path}/{dimensionality}.parquet')
 
 
-@cli.command('find-best-deeplifting-architecture-v2')
-@click.option('--problem_name', default='ackley')
-@click.option('--method', default='deeplifting-pygranso')
-@click.option('--dimensionality', default='low-dimensional')
-@click.option('--experimentation', default=True)
-@click.option('--include_weight_initialization', default=True)
+# @cli.command('find-best-deeplifting-architecture-v2')
+# @click.option('--problem_name', default='ackley')
+# @click.option('--method', default='deeplifting-pygranso')
+# @click.option('--dimensionality', default='low-dimensional')
+# @click.option('--experimentation', default=True)
+# @click.option('--include_weight_initialization', default=True)
 def find_best_architecture_task(
     problem_name, method, dimensionality, experimentation, include_weight_initialization
 ):
@@ -562,19 +562,21 @@ def find_best_architecture_task(
 
     # Layer search
     minimum_num_layers = 2
-    maximum_num_layers = 10
+    maximum_num_layers = 5
 
     # Layers
     layers = reversed(range(minimum_num_layers, maximum_num_layers + 1))
     layers = list(layers)
+    layers = [24, 19, 13, 10] + layers
 
     # Number of neurons
-    units_search = [256, 128, 64, 32]
+    units_search = [192, 128, 64, 32]
 
     # Initial layer type
-    input_dimension = 64
+    input_dimension = 32
     initial_layer_type = 'linear'
     include_bn = True
+    lr = 1.0  # Define defualt Pygranso learning rate to be 1.0
 
     # Start the optimization process
     for num_layers in layers:
@@ -685,6 +687,7 @@ def find_best_architecture_task(
                     iterations = deeplifting_outputs.get('iterations')
                     fn_evals = deeplifting_outputs.get('fn_evals')
                     termination_code = deeplifting_outputs.get('termination_code')
+                    objective_values = deeplifting_outputs.get('objective_values')
 
                     # Append results
                     results.append_record(
@@ -698,6 +701,8 @@ def find_best_architecture_task(
                         problem_config=problem_config,
                         xs=xs,
                         method=method,
+                        lr=lr,
+                        objective_values=objective_values,
                     )
 
             # Create the data from this run and save sequentially
@@ -799,12 +804,12 @@ def find_best_architecture_sgd_task(
 
     # Layer search
     minimum_num_layers = 2
-    maximum_num_layers = 3
+    maximum_num_layers = 5
 
     # Layers
     layers = reversed(range(minimum_num_layers, maximum_num_layers + 1))
     layers = list(layers)
-    # layers = [24, 19, 13, 10] + layers
+    layers = [24, 19, 13, 10] + layers
 
     # Number of neurons
     units_search = [192, 128, 64, 32]

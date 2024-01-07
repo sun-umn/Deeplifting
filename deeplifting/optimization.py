@@ -652,8 +652,27 @@ def run_pygranso_deeplifting(
     # Start the timer
     start = time.time()
 
+    # Initiate halt log
+    mHLF_obj = HaltLog()
+    halt_log_fn, get_log_fn = mHLF_obj.makeHaltLogFunctions(max_iterations)
+
+    #  Set PyGRANSO's logging function in opts
+    pygranso_config.opts.halt_log_fn = halt_log_fn
+
     # Run PyGranso
     soln = pygranso(var_spec=model, combined_fn=comb_fn, user_opts=pygranso_config.opts)
+
+    # GET THE HISTORY OF ITERATES
+    # Even if an error is thrown, the log generated until the error can be
+    # obtained by calling get_log_fn()
+    log = get_log_fn()
+
+    # Final structure
+    indexes = (pd.Series(log.fn_evals).cumsum() - 1).values.tolist()
+
+    # Get the objective values
+    objective_values = np.array(log.f)
+    objective_values = objective_values[indexes]
 
     # Get the total time
     end = time.time()
@@ -669,6 +688,7 @@ def run_pygranso_deeplifting(
         'iterations': soln.iters,
         'fn_evals': soln.fn_evals,
         'termination_code': soln.termination_code,
+        'objective_values': objective_values,
     }
 
     return results
@@ -961,7 +981,7 @@ def run_sgd_deeplifting(
     start_position: torch.Tensor,
     objective: Callable,
     device: torch.device,
-    max_iterations: int = 50,
+    max_iterations: int = 5000,
     *,
     lr: float = 1e-2,
     momentum: float = 0.99,
