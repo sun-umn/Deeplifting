@@ -706,10 +706,10 @@ def find_best_architecture_task(
             )
 
 
-@cli.command('find-best-deeplifting-architecture-sgd')
-@click.option('--problem_name', default='ackley')
-@click.option('--dimensionality', default='low-dimensional')
-@click.option('--experimentation', default=True)
+# @cli.command('find-best-deeplifting-architecture-sgd')
+# @click.option('--problem_name', default='ackley')
+# @click.option('--dimensionality', default='low-dimensional')
+# @click.option('--experimentation', default=True)
 def find_best_architecture_sgd_task(
     problem_name,
     dimensionality,
