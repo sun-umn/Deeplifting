@@ -740,20 +740,12 @@ def find_best_architecture_sgd_task(
         True: range(10, 160, 10),
     }
 
-    if experimentation:
-        # Enable wandb
-        wandb.login(key='2080070c4753d0384b073105ed75e1f46669e4bf')
-
-        wandb.init(
-            # set the wandb project where this run will be logged
-            project="Deeplifting-HD",
-            tags=[f'{method}', f'{problem_name}'],
-        )
-
     # Setup the problem
     if dimensionality == 'low-dimensional':
         directory = 'low-dimension'
         PROBLEMS = PROBLEMS_BY_NAME
+        API_KEY = '2080070c4753d0384b073105ed75e1f46669e4bf'
+        PROJECT_NAME = 'Deeplifting-LD'
 
     elif dimensionality == 'high-dimensional':
         directory = 'high-dimension'
@@ -761,6 +753,16 @@ def find_best_architecture_sgd_task(
 
     else:
         raise ValueError(f'{dimensionality} is not valid!')
+
+    if experimentation:
+        # Enable wandb
+        wandb.login(key=API_KEY)
+
+        wandb.init(
+            # set the wandb project where this run will be logged
+            project=PROJECT_NAME,
+            tags=[f'{method}', f'{problem_name}'],
+        )
 
     # Main directory to save data
     # This will be different for each user
@@ -797,12 +799,12 @@ def find_best_architecture_sgd_task(
 
     # Layer search
     minimum_num_layers = 2
-    maximum_num_layers = 5
+    maximum_num_layers = 3
 
     # Layers
     layers = reversed(range(minimum_num_layers, maximum_num_layers + 1))
     layers = list(layers)
-    layers = [24, 19, 13, 10] + layers
+    # layers = [24, 19, 13, 10] + layers
 
     # Number of neurons
     units_search = [192, 128, 64, 32]
@@ -905,6 +907,7 @@ def find_best_architecture_sgd_task(
                         iterations = deeplifting_outputs.get('iterations')
                         fn_evals = deeplifting_outputs.get('fn_evals')
                         termination_code = deeplifting_outputs.get('termination_code')
+                        objective = deeplifting_outputs.get('objective')
 
                         # Append results
                         results.append_record(
@@ -919,6 +922,7 @@ def find_best_architecture_sgd_task(
                             xs=xs,
                             method=method,
                             lr=lr,
+                            objective=objective,
                         )
 
                 # Create the data from this run and save sequentially

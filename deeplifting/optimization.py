@@ -961,7 +961,7 @@ def run_sgd_deeplifting(
     start_position: torch.Tensor,
     objective: Callable,
     device: torch.device,
-    max_iterations: int = 5000,
+    max_iterations: int = 50,
     *,
     lr: float = 1e-2,
     momentum: float = 0.99,
@@ -1066,6 +1066,7 @@ def run_sgd_deeplifting(
         'iterations': iterations,
         'fn_evals': None,  # Does not apply to this method
         'termination_code': termination_code,
+        'objective': np.array(losses),
     }
 
     return results
