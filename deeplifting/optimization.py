@@ -711,8 +711,6 @@ def run_lbfgs_deeplifting(
         inputs=model_inputs,
         model=model,
         x0=start_position,
-        epochs=5000,
-        lr=1,
         tolerance=1e-3,
     )
 
