@@ -510,6 +510,8 @@ def find_best_architecture_task(
     elif dimensionality == 'high-dimensional':
         directory = 'high-dimension'
         PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
+        API_KEY = '2080070c4753d0384b073105ed75e1f46669e4bf'
+        PROJECT_NAME = 'Deeplifting-HD'
 
     else:
         raise ValueError(f'{dimensionality} is not valid!')
@@ -569,7 +571,7 @@ def find_best_architecture_task(
     # Layers
     layers = reversed(range(minimum_num_layers, maximum_num_layers + 1))
     layers = list(layers)
-    layers = [24, 19, 13, 10] + layers
+    layers = [13, 10, 7] + layers
 
     # Number of neurons
     units_search = [192, 128, 64, 32]
