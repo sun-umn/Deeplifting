@@ -8193,10 +8193,15 @@ lennard_jones_6d_config = {
 # Lennard Jones Setup
 lennard_jones_9d_config = {
     'objective': lennard_jones,
-    'bounds': [(-4.0, 4.0)],
+    'bounds': {
+        'lower_bounds': [-4.0] * 9,
+        'upper_bounds': [4.0] * 9,
+    },
     'max_iterations': 1000,
     'global_minimum': -3.0,
     'dimensions': 3 * 3,
+    'global_x': np.array([0.0] * 9),
+    'trials': 5,
 }
 
 # Lennard Jones Setup
@@ -8210,26 +8215,41 @@ lennard_jones_12d_config = {
 
 lennard_jones_15d_config = {
     'objective': lennard_jones,
-    'bounds': [(-4.0, 4.0)],
+    'bounds': {
+        'lower_bounds': [-4.0] * 15,
+        'upper_bounds': [4.0] * 15,
+    },
     'max_iterations': 1000,
     'global_minimum': -9.103852,
     'dimensions': 3 * 5,
+    'global_x': np.array([0.0] * 15),
+    'trials': 5,
 }
 
 lennard_jones_18d_config = {
     'objective': lennard_jones,
-    'bounds': [(-4.0, 4.0)],
+    'bounds': {
+        'lower_bounds': [-4.0] * 18,
+        'upper_bounds': [4.0] * 18,
+    },
     'max_iterations': 1000,
     'global_minimum': -12.712062,
     'dimensions': 3 * 6,
+    'global_x': np.array([0.0] * 18),
+    'trials': 25,
 }
 
 lennard_jones_21d_config = {
     'objective': lennard_jones,
-    'bounds': [(-4.0, 4.0)],
+    'bounds': {
+        'lower_bounds': [-4.0] * 21,
+        'upper_bounds': [4.0] * 21,
+    },
     'max_iterations': 1000,
     'global_minimum': -16.505384,
     'dimensions': 3 * 7,
+    'global_x': np.array([0.0] * 21),
+    'trials': 25,
 }
 
 lennard_jones_24d_config = {
