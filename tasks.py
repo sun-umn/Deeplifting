@@ -746,7 +746,7 @@ def find_best_architecture_sgd_task(
     # for each point and we can study the variance
     max_weight_trials = {
         False: range(10, 20, 10),
-        True: range(10, 160, 10),
+        True: range(10, 110, 10),
     }
 
     # Setup the problem
