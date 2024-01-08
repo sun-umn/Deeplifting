@@ -565,13 +565,7 @@ def find_best_architecture_task(
     results = Results(method=method)
 
     # Layer search
-    minimum_num_layers = 2
-    maximum_num_layers = 5
-
-    # Layers
-    layers = reversed(range(minimum_num_layers, maximum_num_layers + 1))
-    layers = list(layers)
-    layers = [13, 10, 7] + layers
+    layers = [2, 3, 4, 5, 7, 10, 13]
 
     # Number of neurons
     units_search = [192, 128, 64, 32]
@@ -813,13 +807,7 @@ def find_best_architecture_sgd_task(
     results = Results(method=method)
 
     # Layer search
-    minimum_num_layers = 2
-    maximum_num_layers = 5
-
-    # Layers
-    layers = reversed(range(minimum_num_layers, maximum_num_layers + 1))
-    layers = list(layers)
-    layers = [13, 10, 7] + layers
+    layers = [2, 3, 4, 5, 7, 10, 13]
 
     # Number of neurons
     units_search = [192, 128, 64, 32]
