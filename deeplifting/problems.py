@@ -8325,6 +8325,19 @@ lennard_jones_45d_config = {
     'trials': 25,
 }
 
+lennard_jones_114d_config = {
+    'objective': lennard_jones,
+    'bounds': {
+        'lower_bounds': [-4.0] * 114,
+        'upper_bounds': [4.0] * 114,
+    },
+    'max_iterations': 1000,
+    'global_minimum': -173.928427,
+    'dimensions': 3 * 38,
+    'global_x': np.array([0.0] * 114),
+    'trials': 25,
+}
+
 lennard_jones_225d_config = {
     'objective': lennard_jones,
     'bounds': {
