@@ -4155,6 +4155,9 @@ def nd_deb1(x, results=None, trial=None, version='numpy'):
 
 # nd Deb 3 fn
 def deb3(x, results, trial, version='numpy'):
+    """
+    Deb3 test optimzation function
+    """
     x = x.flatten()
     d = len(x)
     if version == 'numpy':
@@ -8207,10 +8210,15 @@ lennard_jones_9d_config = {
 # Lennard Jones Setup
 lennard_jones_12d_config = {
     'objective': lennard_jones,
-    'bounds': [(-4.0, 4.0)],
+    'bounds': {
+        'lower_bounds': [-4.0] * 12,
+        'upper_bounds': [4.0] * 12,
+    },
     'max_iterations': 1000,
     'global_minimum': -6.0,
     'dimensions': 3 * 4,
+    'global_x': np.array([0.0] * 12),
+    'trials': 5,
 }
 
 lennard_jones_15d_config = {
@@ -8236,7 +8244,7 @@ lennard_jones_18d_config = {
     'global_minimum': -12.712062,
     'dimensions': 3 * 6,
     'global_x': np.array([0.0] * 18),
-    'trials': 25,
+    'trials': 5,
 }
 
 lennard_jones_21d_config = {
@@ -8249,31 +8257,46 @@ lennard_jones_21d_config = {
     'global_minimum': -16.505384,
     'dimensions': 3 * 7,
     'global_x': np.array([0.0] * 21),
-    'trials': 25,
+    'trials': 5,
 }
 
 lennard_jones_24d_config = {
     'objective': lennard_jones,
-    'bounds': [(-4.0, 4.0)],
+    'bounds': {
+        'lower_bounds': [-4.0] * 24,
+        'upper_bounds': [4.0] * 24,
+    },
     'max_iterations': 1000,
     'global_minimum': -19.821489,
     'dimensions': 3 * 8,
+    'global_x': np.array([0.0] * 24),
+    'trials': 5,
 }
 
 lennard_jones_27d_config = {
     'objective': lennard_jones,
-    'bounds': [(-4.0, 4.0)],
+    'bounds': {
+        'lower_bounds': [-4.0] * 27,
+        'upper_bounds': [4.0] * 27,
+    },
     'max_iterations': 1000,
     'global_minimum': -24.113360,
     'dimensions': 3 * 9,
+    'global_x': np.array([0.0] * 27),
+    'trials': 5,
 }
 
 lennard_jones_30d_config = {
     'objective': lennard_jones,
-    'bounds': [(-4.0, 4.0)],
+    'bounds': {
+        'lower_bounds': [-4.0] * 30,
+        'upper_bounds': [4.0] * 30,
+    },
     'max_iterations': 1000,
     'global_minimum': -28.422532,
     'dimensions': 3 * 10,
+    'global_x': np.array([0.0] * 30),
+    'trials': 5,
 }
 
 lennard_jones_39d_config = {
