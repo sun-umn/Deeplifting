@@ -8163,13 +8163,31 @@ layeb8_config = {
     'dimensions': 2,
 }
 
+ackley_config = {
+    'objective': ackley,
+    'bounds': {
+        'lower_bounds': [-32.768, -32.768],
+        'upper_bounds': [32.768, 32.768],
+    },
+    'max_iterations': 1000,
+    'global_minimum': 0.0,
+    'dimensions': 2,
+    'global_x': np.array([0.0, 0.0]),
+    'trials': 50,
+}
+
 # Lennard Jones Setup
 lennard_jones_6d_config = {
     'objective': lennard_jones,
-    'bounds': [(-4.0, 4.0)],
+    'bounds': {
+        'lower_bounds': [-4.0] * 6,
+        'upper_bounds': [4.0] * 6,
+    },
     'max_iterations': 1000,
     'global_minimum': -1.0,
     'dimensions': 3 * 2,
+    'global_x': np.array([0.0] * 6),
+    'trials': 5,
 }
 
 # Lennard Jones Setup

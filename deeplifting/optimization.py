@@ -672,6 +672,10 @@ def run_pygranso_deeplifting(
     end = time.time()
     total_time = end - start
 
+    # Debugging
+    print(soln.best.f)
+    print(model(inputs=model_inputs).flatten())
+
     # We will run this iteratively. Every run of this function will
     # be responsible for a single record towards analysis
     results = {

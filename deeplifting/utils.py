@@ -27,7 +27,7 @@ class PyGransoConfig:
     number of iterations
     """
 
-    def __init__(self, device, x0, max_iterations, printing=False):
+    def __init__(self, device, x0, max_iterations, printing=True):
         # Set up pygranso structure
         self.opts = pygransoStruct()
 
