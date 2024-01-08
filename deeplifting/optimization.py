@@ -844,6 +844,8 @@ def run_adam_deeplifting(
     objective: Callable,
     device: torch.device,
     max_iterations: int,
+    *,
+    lr: float = 1e-2,
 ) -> Dict[str, Any]:
     """
     Function that runs our preimer method of deeplifting.
@@ -858,29 +860,27 @@ def run_adam_deeplifting(
         inputs=model_inputs,
         model=model,
         x0=start_position,
-        epochs=5000,
-        lr=1,
         tolerance=1e-3,
     )
 
     # Total epochs
-    epochs = 500
+    epochs = 5000
 
     # Set up the LBFGS optimizer for the problem
     # This is a pytorch provided implementation
     optimizer = optim.Adam(
         model.parameters(),
-        lr=1e-2,
+        lr=lr,
         amsgrad=True,
     )
 
-    # Cosine annealing scheduler
-    scheduler = optim.lr_scheduler.OneCycleLR(
+    # Reduce learning rate on plateau
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
         optimizer,
-        max_lr=1e-2,
-        epochs=epochs,
-        steps_per_epoch=1,
-        pct_start=0.0,
+        mode='min',
+        factor=0.9,
+        patience=100,
+        verbose=False,
     )
 
     # Let's keep the same steps as the other method defined
@@ -900,14 +900,12 @@ def run_adam_deeplifting(
     # Create terminations codes like pygranso
     termination_code = None
 
-    # Set current loss as well
-    current_loss = f_init
-
     # Set up a training loop
     start = time.time()
 
-    # Set up for early stopping
-    early_stopping_count = 0
+    # Let's try using the minimum loss found during the
+    # optimization
+    losses = []
 
     # Train the model
     model.train()
@@ -921,24 +919,11 @@ def run_adam_deeplifting(
 
         # Go through the backward pass and create the gradients
         loss.backward()
-
-        outputs = model(inputs=model_inputs)
-        updated_loss = objective(outputs)
-
-        if epoch % 10 == 0:
-            print(f'loss = {updated_loss.detach()},')
-
-        delta = np.abs(current_loss.item() - updated_loss.item())
-        if epoch >= 100 and delta < 1e-10:
-            early_stopping_count += 1
-
-        if early_stopping_count == 100:
-            termination_code = 0
-            break
+        losses.append(loss.item())
 
         # Step through the optimzer to update the data with the gradients
         optimizer.step()
-        scheduler.step()
+        scheduler.step(loss)
 
         iterations += 1
 
@@ -952,8 +937,11 @@ def run_adam_deeplifting(
 
     # Get final values
     outputs = model(inputs=model_inputs)
-    f_final = objective(outputs)
-    f_final = f_final.detach().cpu().numpy()
+    f_final = objective(outputs)  # noqa
+    f_final = f_final.detach().cpu().numpy()  # noqa
+
+    # F-min
+    f_min = np.min(np.array(losses))  # noqa
 
     results = {
         'f_init': f_init.detach().cpu().numpy(),
@@ -962,6 +950,7 @@ def run_adam_deeplifting(
         'iterations': iterations,
         'fn_evals': None,  # Does not apply to this method
         'termination_code': termination_code,
+        'objective_values': np.array(losses),
     }
 
     return results
