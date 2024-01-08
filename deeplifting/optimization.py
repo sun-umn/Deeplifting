@@ -674,7 +674,7 @@ def run_pygranso_deeplifting(
 
     # Debugging
     print(soln.best.f)
-    print(model(inputs=model_inputs).flatten())
+    print(f'final x {model(inputs=model_inputs).flatten()}')
 
     # We will run this iteratively. Every run of this function will
     # be responsible for a single record towards analysis
