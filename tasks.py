@@ -472,12 +472,12 @@ def run_scip_task(problem_series, dimensionality, trials):
         problem_performance_df.to_parquet(f'{path}/{dimensionality}.parquet')
 
 
-@cli.command('find-best-deeplifting-architecture-v2')
-@click.option('--problem_name', default='ackley')
-@click.option('--method', default='deeplifting-pygranso')
-@click.option('--dimensionality', default='low-dimensional')
-@click.option('--experimentation', default=True)
-@click.option('--include_weight_initialization', default=True)
+# @cli.command('find-best-deeplifting-architecture-v2')
+# @click.option('--problem_name', default='ackley')
+# @click.option('--method', default='deeplifting-pygranso')
+# @click.option('--dimensionality', default='low-dimensional')
+# @click.option('--experimentation', default=True)
+# @click.option('--include_weight_initialization', default=True)
 def find_best_architecture_task(
     problem_name, method, dimensionality, experimentation, include_weight_initialization
 ):
