@@ -8166,19 +8166,6 @@ layeb8_config = {
     'dimensions': 2,
 }
 
-ackley_config = {
-    'objective': ackley,
-    'bounds': {
-        'lower_bounds': [-32.768, -32.768],
-        'upper_bounds': [32.768, 32.768],
-    },
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 2,
-    'global_x': np.array([0.0, 0.0]),
-    'trials': 50,
-}
-
 # Lennard Jones Setup
 lennard_jones_6d_config = {
     'objective': lennard_jones,
@@ -8190,7 +8177,7 @@ lennard_jones_6d_config = {
     'global_minimum': -1.0,
     'dimensions': 3 * 2,
     'global_x': np.array([0.0] * 6),
-    'trials': 5,
+    'trials': 25,
 }
 
 # Lennard Jones Setup
@@ -8204,7 +8191,7 @@ lennard_jones_9d_config = {
     'global_minimum': -3.0,
     'dimensions': 3 * 3,
     'global_x': np.array([0.0] * 9),
-    'trials': 5,
+    'trials': 25,
 }
 
 # Lennard Jones Setup
@@ -8218,7 +8205,7 @@ lennard_jones_12d_config = {
     'global_minimum': -6.0,
     'dimensions': 3 * 4,
     'global_x': np.array([0.0] * 12),
-    'trials': 5,
+    'trials': 25,
 }
 
 lennard_jones_15d_config = {
@@ -8231,7 +8218,7 @@ lennard_jones_15d_config = {
     'global_minimum': -9.103852,
     'dimensions': 3 * 5,
     'global_x': np.array([0.0] * 15),
-    'trials': 5,
+    'trials': 25,
 }
 
 lennard_jones_18d_config = {
@@ -8244,7 +8231,7 @@ lennard_jones_18d_config = {
     'global_minimum': -12.712062,
     'dimensions': 3 * 6,
     'global_x': np.array([0.0] * 18),
-    'trials': 5,
+    'trials': 25,
 }
 
 lennard_jones_21d_config = {
@@ -8257,7 +8244,7 @@ lennard_jones_21d_config = {
     'global_minimum': -16.505384,
     'dimensions': 3 * 7,
     'global_x': np.array([0.0] * 21),
-    'trials': 5,
+    'trials': 25,
 }
 
 lennard_jones_24d_config = {
@@ -8270,7 +8257,7 @@ lennard_jones_24d_config = {
     'global_minimum': -19.821489,
     'dimensions': 3 * 8,
     'global_x': np.array([0.0] * 24),
-    'trials': 5,
+    'trials': 25,
 }
 
 lennard_jones_27d_config = {
@@ -8283,7 +8270,7 @@ lennard_jones_27d_config = {
     'global_minimum': -24.113360,
     'dimensions': 3 * 9,
     'global_x': np.array([0.0] * 27),
-    'trials': 5,
+    'trials': 25,
 }
 
 lennard_jones_30d_config = {
@@ -8296,39 +8283,59 @@ lennard_jones_30d_config = {
     'global_minimum': -28.422532,
     'dimensions': 3 * 10,
     'global_x': np.array([0.0] * 30),
-    'trials': 5,
+    'trials': 25,
 }
 
 lennard_jones_39d_config = {
     'objective': lennard_jones,
-    'bounds': [(-4.0, 4.0)],
+    'bounds': {
+        'lower_bounds': [-4.0] * 39,
+        'upper_bounds': [4.0] * 39,
+    },
     'max_iterations': 1000,
     'global_minimum': -44.326801,
     'dimensions': 3 * 13,
+    'global_x': np.array([0.0] * 39),
+    'trials': 25,
 }
 
 lennard_jones_42d_config = {
     'objective': lennard_jones,
-    'bounds': [(-4.0, 4.0)],
+    'bounds': {
+        'lower_bounds': [-4.0] * 42,
+        'upper_bounds': [4.0] * 42,
+    },
     'max_iterations': 1000,
     'global_minimum': -47.845157,
     'dimensions': 3 * 14,
+    'global_x': np.array([0.0] * 42),
+    'trials': 25,
 }
 
 lennard_jones_45d_config = {
     'objective': lennard_jones,
-    'bounds': [(-4.0, 4.0)],
+    'bounds': {
+        'lower_bounds': [-4.0] * 45,
+        'upper_bounds': [4.0] * 45,
+    },
     'max_iterations': 1000,
     'global_minimum': -52.322627,
     'dimensions': 3 * 15,
+    'global_x': np.array([0.0] * 45),
+    'trials': 25,
 }
 
 lennard_jones_225d_config = {
     'objective': lennard_jones,
-    'bounds': [(-4.0, 4.0)],
+    'bounds': {
+        'lower_bounds': [-4.0] * 225,
+        'upper_bounds': [4.0] * 225,
+    },
     'max_iterations': 1000,
     'global_minimum': -397.492331,
     'dimensions': 3 * 75,
+    'global_x': np.array([0.0] * 225),
+    'trials': 25,
 }
 
 PROBLEMS_BY_NAME = {

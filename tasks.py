@@ -472,12 +472,12 @@ def run_scip_task(problem_series, dimensionality, trials):
         problem_performance_df.to_parquet(f'{path}/{dimensionality}.parquet')
 
 
-# @cli.command('find-best-deeplifting-architecture-v2')
-# @click.option('--problem_name', default='ackley')
-# @click.option('--method', default='deeplifting-pygranso')
-# @click.option('--dimensionality', default='low-dimensional')
-# @click.option('--experimentation', default=True)
-# @click.option('--include_weight_initialization', default=True)
+@cli.command('find-best-deeplifting-architecture-v2')
+@click.option('--problem_name', default='ackley')
+@click.option('--method', default='deeplifting-pygranso')
+@click.option('--dimensionality', default='low-dimensional')
+@click.option('--experimentation', default=True)
+@click.option('--include_weight_initialization', default=True)
 def find_best_architecture_task(
     problem_name, method, dimensionality, experimentation, include_weight_initialization
 ):
@@ -497,7 +497,7 @@ def find_best_architecture_task(
     # for each point and we can study the variance
     max_weight_trials = {
         False: range(10, 20, 10),
-        True: range(10, 20, 10),
+        True: range(10, 110, 10),
     }
 
     # Setup the problem
@@ -565,10 +565,10 @@ def find_best_architecture_task(
     results = Results(method=method)
 
     # Layer search
-    layers = [2, 3]
+    layers = [2, 3, 4, 5, 7, 10, 13]
 
     # Number of neurons
-    units_search = [32]
+    units_search = [192, 128, 64, 32]
 
     # Initial layer type
     input_dimension = 32
