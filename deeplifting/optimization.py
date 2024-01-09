@@ -843,7 +843,7 @@ def run_adam_deeplifting(
     start_position: torch.Tensor,
     objective: Callable,
     device: torch.device,
-    max_iterations: int,
+    max_iterations: int = 5000,
     *,
     lr: float = 1e-2,
 ) -> Dict[str, Any]:
@@ -864,7 +864,7 @@ def run_adam_deeplifting(
     )
 
     # Total epochs
-    epochs = 5000
+    epochs = max_iterations
 
     # Set up the LBFGS optimizer for the problem
     # This is a pytorch provided implementation
@@ -879,7 +879,7 @@ def run_adam_deeplifting(
         optimizer,
         mode='min',
         factor=0.9,
-        patience=100,
+        patience=1,
         verbose=False,
     )
 
@@ -995,8 +995,8 @@ def run_sgd_deeplifting(
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
         optimizer,
         mode='min',
-        factor=0.1,
-        patience=100,
+        factor=0.9,
+        patience=1,
         verbose=False,
     )
 

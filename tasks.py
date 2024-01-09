@@ -939,10 +939,10 @@ def find_best_architecture_sgd_task(
                 )
 
 
-@cli.command('find-best-deeplifting-architecture-adam')
-@click.option('--problem_name', default='ackley')
-@click.option('--dimensionality', default='low-dimensional')
-@click.option('--experimentation', default=True)
+# @cli.command('find-best-deeplifting-architecture-adam')
+# @click.option('--problem_name', default='ackley')
+# @click.option('--dimensionality', default='low-dimensional')
+# @click.option('--experimentation', default=True)
 def find_best_architecture_adam_task(
     problem_name,
     dimensionality,
@@ -1002,7 +1002,7 @@ def find_best_architecture_adam_task(
     save_path = os.path.join(
         '/home/jusun/dever120/Deeplifting',
         'experiments/3b39b4fb-0520-4795-aaba-a8eab24ff8fd/',
-        f'{directory}/deeplifting-sgd',
+        f'{directory}/deeplifting-adam',
     )
 
     # Get the problem information
@@ -1031,10 +1031,10 @@ def find_best_architecture_adam_task(
     results = Results(method=method)
 
     # Layer search
-    layers = [2, 3, 4, 5, 7, 10, 13]
+    layers = [2, 3]
 
     # Number of neurons
-    units_search = [192, 128, 64, 32]
+    units_search = [32]
 
     # Initial layer type
     input_dimension = 32
@@ -1042,7 +1042,7 @@ def find_best_architecture_adam_task(
     include_bn = True
 
     # Learning rates
-    learning_rates = [1.0, 1e-2, 1e-3]
+    learning_rates = [1.0]
 
     # Start the optimization process
     # Search over a specific learning rate
