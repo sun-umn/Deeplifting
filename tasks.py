@@ -715,10 +715,10 @@ def find_best_architecture_task(
             )
 
 
-# @cli.command('find-best-deeplifting-architecture-sgd')
-# @click.option('--problem_name', default='ackley')
-# @click.option('--dimensionality', default='low-dimensional')
-# @click.option('--experimentation', default=True)
+@cli.command('find-best-deeplifting-architecture-sgd')
+@click.option('--problem_name', default='ackley')
+@click.option('--dimensionality', default='low-dimensional')
+@click.option('--experimentation', default=True)
 def find_best_architecture_sgd_task(
     problem_name,
     dimensionality,
@@ -807,10 +807,10 @@ def find_best_architecture_sgd_task(
     results = Results(method=method)
 
     # Layer search
-    layers = [2, 3]
+    layers = [2, 3, 4, 5, 7, 10, 13]
 
     # Number of neurons
-    units_search = [32]
+    units_search = [192, 128, 64, 32]
 
     # Initial layer type
     input_dimension = 32
