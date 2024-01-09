@@ -759,6 +759,8 @@ def find_best_architecture_sgd_task(
     elif dimensionality == 'high-dimensional':
         directory = 'high-dimension'
         PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
+        API_KEY = '2080070c4753d0384b073105ed75e1f46669e4bf'
+        PROJECT_NAME = 'Deeplifting-HD'
 
     else:
         raise ValueError(f'{dimensionality} is not valid!')
@@ -818,7 +820,7 @@ def find_best_architecture_sgd_task(
     include_bn = True
 
     # Learning rates
-    learning_rates = [1e-3, 1e-4, 1e-5]
+    learning_rates = [1e-4, 1e-5]
 
     # Start the optimization process
     # Search over a specific learning rate
@@ -939,10 +941,10 @@ def find_best_architecture_sgd_task(
                 )
 
 
-# @cli.command('find-best-deeplifting-architecture-adam')
-# @click.option('--problem_name', default='ackley')
-# @click.option('--dimensionality', default='low-dimensional')
-# @click.option('--experimentation', default=True)
+@cli.command('find-best-deeplifting-architecture-adam')
+@click.option('--problem_name', default='ackley')
+@click.option('--dimensionality', default='low-dimensional')
+@click.option('--experimentation', default=True)
 def find_best_architecture_adam_task(
     problem_name,
     dimensionality,
@@ -957,7 +959,7 @@ def find_best_architecture_adam_task(
     os.environ['OMP_NUM_THREADS'] = '1'
 
     # Method
-    method = 'deeplifting-sgd'
+    method = 'deeplifting-adam'
 
     # Get the available device
     device = get_devices()
@@ -983,6 +985,8 @@ def find_best_architecture_adam_task(
     elif dimensionality == 'high-dimensional':
         directory = 'high-dimension'
         PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
+        API_KEY = '2080070c4753d0384b073105ed75e1f46669e4bf'
+        PROJECT_NAME = 'Deeplifting-HD'
 
     else:
         raise ValueError(f'{dimensionality} is not valid!')
@@ -1031,10 +1035,10 @@ def find_best_architecture_adam_task(
     results = Results(method=method)
 
     # Layer search
-    layers = [2, 3]
+    layers = [2, 3, 4, 5, 7, 10, 13]
 
     # Number of neurons
-    units_search = [32]
+    units_search = [192, 128, 64, 32]
 
     # Initial layer type
     input_dimension = 32
