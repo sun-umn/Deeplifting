@@ -8344,7 +8344,7 @@ lennard_jones_225d_config = {
         'lower_bounds': [-4.0] * 225,
         'upper_bounds': [4.0] * 225,
     },
-    'max_iterations': 1000,
+    'max_iterations': 5000,
     'global_minimum': -397.492331,
     'dimensions': 3 * 75,
     'global_x': np.array([0.0] * 225),
@@ -8603,5 +8603,6 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'lennard_jones_39d': lennard_jones_39d_config,
     'lennard_jones_42d': lennard_jones_42d_config,
     'lennard_jones_45d': lennard_jones_45d_config,
+    'lennard_jones_114d': lennard_jones_114d_config,
     'lennard_jones_225d': lennard_jones_225d_config,
 }
