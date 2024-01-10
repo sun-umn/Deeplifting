@@ -38,7 +38,7 @@ class PyGransoConfig:
         # Keep the print freqency at 1 so we can
         # view every iteration
         if printing:
-            self.opts.print_frequency = 1
+            self.opts.print_frequency = 10
 
         else:
             # Use this option to turn off printing
