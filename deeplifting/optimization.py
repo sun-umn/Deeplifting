@@ -962,7 +962,7 @@ def run_sgd_deeplifting(
     start_position: torch.Tensor,
     objective: Callable,
     device: torch.device,
-    max_iterations: int = 2000,
+    max_iterations: int = 10000,
     *,
     lr: float = 1e-2,
     momentum: float = 0.99,
@@ -995,7 +995,7 @@ def run_sgd_deeplifting(
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
         optimizer,
         mode='min',
-        factor=0.5,
+        factor=0.99,
         patience=1,
         verbose=False,
     )
