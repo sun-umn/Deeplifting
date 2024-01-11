@@ -6185,6 +6185,8 @@ bukin_n6_config = {
 }
 
 # Cross-in-Tray
+# TODO: Still trying to decide what to do when there are
+# multiple global minima
 cross_in_tray_config = {
     'objective': cross_in_tray,
     'bounds': {
@@ -6194,6 +6196,7 @@ cross_in_tray_config = {
     'max_iterations': 1000,
     'global_minimum': -2.06261,
     'dimensions': 2,
+    'global_x': np.array([0.0, 0.0]),
     'trials': 50,
 }
 
