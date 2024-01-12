@@ -1035,7 +1035,7 @@ def find_best_architecture_adam_task(
     results = Results(method=method)
 
     # Layer search
-    layers = [10, 13]
+    layers = [2, 3, 4, 5, 7, 10, 13]
 
     # Number of neurons
     units_search = [192, 128, 64, 32]
