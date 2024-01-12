@@ -6222,6 +6222,7 @@ drop_wave_config = {
     'max_iterations': 150,
     'global_minimum': -1.0,
     'dimensions': 2,
+    'global_x': np.array([0.0, 0.0]),
     'trials': 50,
 }
 
@@ -6235,6 +6236,7 @@ eggholder_config = {
     'max_iterations': 250,
     'global_minimum': -959.6407,
     'dimensions': 2,
+    'global_x': np.array([512.0, 404.2319]),
     'trials': 50,
 }
 
