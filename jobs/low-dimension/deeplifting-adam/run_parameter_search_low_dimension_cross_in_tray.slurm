@@ -8,4 +8,4 @@
 #SBATCH -p apollo_agate
 cd /home/jusun/dever120/Deeplifting
 export PATH=/home/jusun/dever120/miniconda3/envs/deeplifting/bin:$PATH
-python -m tasks find-best-deeplifting-architecture-adam --problem_name='ackley'
+python -m tasks find-best-deeplifting-architecture-adam --problem_name='cross_in_tray'
