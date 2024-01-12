@@ -809,7 +809,7 @@ def find_best_architecture_sgd_task(
     results = Results(method=method)
 
     # Layer search
-    layers = [2, 3, 4, 5, 7, 10, 13]
+    layers = [2]
 
     # Number of neurons
     units_search = [192]
@@ -820,7 +820,7 @@ def find_best_architecture_sgd_task(
     include_bn = True
 
     # Learning rates
-    learning_rates = [1e-4]
+    learning_rates = [1e-3]
 
     # Start the optimization process
     # Search over a specific learning rate
