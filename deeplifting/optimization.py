@@ -989,13 +989,13 @@ def run_sgd_deeplifting(
 
     # Set up the LBFGS optimizer for the problem
     # This is a pytorch provided implementation
-    optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum)
+    optimizer = optim.SGD(model.parameters(), lr=lr)
 
     # Reduce learning rate on plateau
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
         optimizer,
         mode='min',
-        factor=0.99,
+        factor=0.9,
         patience=1,
         verbose=False,
     )
