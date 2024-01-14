@@ -97,7 +97,7 @@ class Results:
         # Based on the input information let's compute if the trial
         # was a success or not
         success = int(
-            np.abs(global_minimum - f_final) / np.abs(f_init - global_minimum)
+            np.abs((global_minimum - f_final) / (global_minimum - f_init))
             <= solution_tolerance
         )
 
@@ -119,9 +119,9 @@ class Results:
                     xs,
                     global_minimum,
                     np.round(
-                        f_init, 2
+                        f_init, 6
                     ),  # Seems to be some issue with this at the moment
-                    np.round(f_final, 2),
+                    np.round(f_final, 6),
                     total_time,
                     iterations,
                     fn_evals,
