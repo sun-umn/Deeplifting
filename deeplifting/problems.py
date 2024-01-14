@@ -6251,7 +6251,7 @@ griewank_config = {
     'global_minimum': 0.0,
     'dimensions': 2,
     'global_x': np.array([0.0, 0.0]),
-    'trials': 1,
+    'trials': 50,
 }
 
 # Holder Table
@@ -6264,6 +6264,8 @@ holder_table_config = {
     'max_iterations': 1000,
     'global_minimum': -19.2085,
     'dimensions': 2,
+    'global_x': np.array([8.05502, 9.66459]),
+    'trials': 50,
 }
 
 # Langermann
