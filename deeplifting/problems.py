@@ -6342,6 +6342,8 @@ schaffer_n2_config = {
     'max_iterations': 100,
     'global_minimum': 0.0,
     'dimensions': 2,
+    'global_x': np.array([0.0, 0.0]),
+    'trials': 50,
 }
 
 # Schaffer N4
@@ -6354,6 +6356,8 @@ schaffer_n4_config = {
     'max_iterations': 1000,
     'global_minimum': 0.292579,
     'dimensions': 2,
+    'global_x': np.array([0.0, 1.253115]),
+    'trials': 50,
 }
 
 # Schwefel
