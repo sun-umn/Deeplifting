@@ -6384,6 +6384,8 @@ shubert_config = {
     'max_iterations': 1000,
     'global_minimum': -186.7309,
     'dimensions': 2,
+    'global_x': np.array([0.0, 0.0]),  # Not correct global_x,
+    'trials': 50,
 }
 
 # Multi-Dimensional Problems #
