@@ -6302,6 +6302,8 @@ levy_n13_config = {
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 2,
+    'global_x': np.array([1.0, 1.0]),
+    'trials': 50,
 }
 
 # Mathopt6
@@ -6326,6 +6328,8 @@ rastrigin_config = {
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 2,
+    'global_x': np.array([0.0, 0.0]),
+    'trials': 50,
 }
 
 # Schaffer N2
