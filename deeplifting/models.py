@@ -106,7 +106,7 @@ class ReluDeepliftingBlock(nn.Module):
         self.include_bn = include_bn
 
         # ReLU activation layer
-        self.activation_layer = nn.LeakyReLU()
+        self.activation_layer = nn.ReLU()
 
         # Define the Linear layer
         self.linear = nn.Linear(input_size, output_size)
@@ -239,7 +239,7 @@ class ReLUDeepliftingMLP(nn.Module):
 
         # Initial input
         x = self.layers[0](x)
-        x = nn.LeakyReLU()(x)
+        x = nn.ReLU()(x)
         x = GlobalNormalization()(x)
 
         # Iterate over the layers to build the MLP
