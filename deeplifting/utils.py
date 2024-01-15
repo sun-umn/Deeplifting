@@ -54,7 +54,7 @@ class PyGransoConfig:
         self.opts.double_precision = True
 
         # Optimization tolerance and stopping criterion
-        self.opts.opt_tol = 1e-10
+        self.opts.opt_tol = 1e-12
 
         # Maximum number of iterations will be defined by the
         # problem instance
