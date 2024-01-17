@@ -63,6 +63,7 @@ def run_algorithm_comparison_task(dimensionality, trials):
     2. Dual Annealing
     3. Differential Evolution
     4. PyGRANSO
+    5. Test
     """
     print('Run Algorithms!')
     run = neptune.init_run(  # noqa
