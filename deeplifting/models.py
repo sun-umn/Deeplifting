@@ -51,7 +51,7 @@ class SinActivation(nn.Module):
         self.include_amplitude = include_amplitude
 
         # Changing to Omega 0 from torch.pi
-        self.amplitude = nn.Parameter(torch.tensor(30.0), requires_grad=True)
+        self.amplitude = nn.Parameter(torch.pi * torch.tensor(1), requires_grad=True)
         self.scale = nn.Parameter(torch.pi * torch.tensor(1), requires_grad=True)
 
     def forward(self, x):  # noqa
@@ -108,7 +108,7 @@ class ReluDeepliftingBlock(nn.Module):
         self.include_bn = include_bn
 
         # ReLU activation layer
-        self.activation_layer = nn.SiLU()
+        self.activation_layer = nn.ReLU()
 
         # Define the Linear layer
         self.linear = nn.Linear(input_size, output_size)
@@ -301,8 +301,8 @@ class ReLUDeepliftingMLP(nn.Module):
 
         # Initial input
         x = self.layers[0](x)
-        x = nn.SiLU()(x)
-        x = GlobalNormalization()(x)
+        x = nn.ReLU()(x)
+        # x = GlobalNormalization()(x)
 
         # Iterate over the layers to build the MLP
         for i, layer in enumerate(self.layers[1:]):
