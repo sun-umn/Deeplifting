@@ -176,8 +176,9 @@ class SineDeepliftingBlock(nn.Module):
         # Also, we will only consider the ReLU activation layer
         if include_weight_init:
             nn.init.uniform_(
-                -np.sqrt(6 / self.input_size) / self.omega_0,
-                np.sqrt(6 / self.input_size) / self.omega_0,
+                self.linear.weight,
+                a=-np.sqrt(6 / self.input_size) / self.omega_0,
+                b=np.sqrt(6 / self.input_size) / self.omega_0,
             )
 
             # Initailize the bias to zero
@@ -373,7 +374,11 @@ class SineDeepliftingMLP(nn.Module):
             raise ValueError(f'{self.initial_layer_type} is not a valid option!')
 
         # Initialization for initial layer
-        nn.init.uniform_(-1 / self.initial_hidden_size, 1 / self.initial_hidden_size)
+        nn.init.uniform_(
+            self.input_layer.weight,
+            a=(-1 / self.initial_hidden_size),
+            b=(1 / self.initial_hidden_size),
+        )
         nn.init.zeros_(self.input_layer.bias)
 
         self.layers.append(self.input_layer)
@@ -398,8 +403,9 @@ class SineDeepliftingMLP(nn.Module):
         # initialize the weights
         if self.include_weight_initialization:
             nn.init.uniform_(
-                -np.sqrt(6 / hidden_sizes[-1]) / self.omega_0,
-                np.sqrt(6 / hidden_sizes[-1]) / self.omega_0,
+                self.linear_output.weight,
+                a=-np.sqrt(6 / hidden_sizes[-1]) / self.omega_0,
+                b=np.sqrt(6 / hidden_sizes[-1]) / self.omega_0,
             )
 
             # Initailize the bias to zero
