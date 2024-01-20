@@ -228,7 +228,7 @@ class ReLUDeepliftingMLP(nn.Module):
         bounds,
         *,
         include_weight_initialization=True,
-        include_bn=False,
+        include_bn=True,
         initial_layer_type='embedding',
         seed=0,
     ):
@@ -302,7 +302,7 @@ class ReLUDeepliftingMLP(nn.Module):
         # Initial input
         x = self.layers[0](x)
         x = nn.ReLU()(x)
-        # x = GlobalNormalization()(x)
+        x = GlobalNormalization()(x)
 
         # Iterate over the layers to build the MLP
         for i, layer in enumerate(self.layers[1:]):
