@@ -6373,7 +6373,7 @@ schwefel_config = {
     'global_minimum': 0.0,
     'dimensions': 2,
     'global_x': np.array([420.9687, 420.9687]),
-    'trials': 50,
+    'trials': 10,
 }
 
 # Shubert

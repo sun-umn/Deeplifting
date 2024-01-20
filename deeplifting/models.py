@@ -49,7 +49,9 @@ class SinActivation(nn.Module):
     def __init__(self, include_amplitude=False):  # noqa
         super(SinActivation, self).__init__()
         self.include_amplitude = include_amplitude
-        self.amplitude = nn.Parameter(torch.pi * torch.tensor(1), requires_grad=True)
+
+        # Changing to Omega 0 from torch.pi
+        self.amplitude = nn.Parameter(torch.tensor(30.0), requires_grad=True)
         self.scale = nn.Parameter(torch.pi * torch.tensor(1), requires_grad=True)
 
     def forward(self, x):  # noqa
