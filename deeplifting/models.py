@@ -148,7 +148,12 @@ class SineDeepliftingBlock(nn.Module):
     """
 
     def __init__(
-        self, input_size, output_size, include_weight_init=True, include_bn=False
+        self,
+        input_size,
+        output_size,
+        include_weight_init=True,
+        include_bn=False,
+        omega_0=30.0,
     ):
         super(SineDeepliftingBlock, self).__init__()
         # Define the activation
@@ -160,16 +165,23 @@ class SineDeepliftingBlock(nn.Module):
         # Define the Linear layer
         self.linear = nn.Linear(input_size, output_size)
 
+        # Omega 0 defined in SIREN paper
+        self.omega_0 = omega_0
+
+        # in features
+        self.input_size = input_size
+
         # Define a initlization scheme
         # initialize the weights
         # Also, we will only consider the ReLU activation layer
         if include_weight_init:
-            nn.init.orthogonal_(
-                self.linear.weight,
+            nn.init.uniform_(
+                -np.sqrt(6 / self.input_size) / self.omega_0,
+                np.sqrt(6 / self.input_size) / self.omega_0,
             )
 
-        # Initailize the bias to zero
-        nn.init.zeros_(self.linear.bias)
+            # Initailize the bias to zero
+            nn.init.zeros_(self.linear.bias)
 
         # Define the Batch Normalization layer
         self.batch_norm = GlobalNormalization()
@@ -346,6 +358,9 @@ class SineDeepliftingMLP(nn.Module):
         self.initial_layer_type = initial_layer_type
         self.include_weight_initialization = include_weight_initialization
 
+        # Self Omega 0 from SIREN paper
+        self.omega_0 = 30.0
+
         # The first input layer
         if self.initial_layer_type == 'embedding':
             self.input_layer = nn.Embedding(self.initial_hidden_size, hidden_sizes[0])
@@ -358,7 +373,7 @@ class SineDeepliftingMLP(nn.Module):
             raise ValueError(f'{self.initial_layer_type} is not a valid option!')
 
         # Initialization for initial layer
-        nn.init.orthogonal_(self.input_layer.weight)
+        nn.init.uniform_(-1 / self.initial_hidden_size, 1 / self.initial_hidden_size)
         nn.init.zeros_(self.input_layer.bias)
 
         self.layers.append(self.input_layer)
@@ -382,7 +397,10 @@ class SineDeepliftingMLP(nn.Module):
         # Initialize the weights for the input of the sine layer
         # initialize the weights
         if self.include_weight_initialization:
-            nn.init.orthogonal_(self.linear_output.weight)
+            nn.init.uniform_(
+                -np.sqrt(6 / hidden_sizes[-1]) / self.omega_0,
+                np.sqrt(6 / hidden_sizes[-1]) / self.omega_0,
+            )
 
             # Initailize the bias to zero
             nn.init.zeros_(self.linear_output.bias)

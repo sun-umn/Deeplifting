@@ -1131,7 +1131,7 @@ def find_best_architecture_adam_task(
     layers = [2, 3, 4, 5, 7, 10, 13]
 
     # Number of neurons
-    units_search = [192, 128, 64, 32]
+    units_search = [512, 256, 192, 128, 64, 32]
 
     # Initial layer type
     input_dimension = 32
