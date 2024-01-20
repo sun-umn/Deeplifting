@@ -103,7 +103,7 @@ def run_dual_annealing(
     res_temp: float = 2e-5,
     vis: float = 2.62,
     acpt: float = -5.0,
-):
+) -> pd.DataFrame:
     """
     Function that runs dual annealing for a
     specified optimization problem
