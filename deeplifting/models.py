@@ -150,7 +150,7 @@ class SineDeepliftingBlock(nn.Module):
     def __init__(
         self, input_size, output_size, include_weight_init=True, include_bn=False
     ):
-        super(ReluDeepliftingBlock, self).__init__()
+        super(SineDeepliftingBlock, self).__init__()
         # Define the activation
         self.include_bn = include_bn
 
@@ -404,7 +404,7 @@ class SineDeepliftingMLP(nn.Module):
 
         # Initial input
         x = self.layers[0](x)
-        x = nn.SiLU()(x)
+        x = SinActivation()(x)
         x = GlobalNormalization()(x)
 
         # Iterate over the layers to build the MLP
