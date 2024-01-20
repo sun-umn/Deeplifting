@@ -8,4 +8,4 @@
 #SBATCH -p apollo_agate
 cd /home/jusun/dever120/Deeplifting
 export PATH=/home/jusun/dever120/miniconda3/envs/deeplifting/bin:$PATH
-python -m tasks run-dual-annealing-task --problem_name='ackley' --dimensionality=='low-dimensional'
+python -m tasks run-dual-annealing-task --problem_name='ackley' --dimensionality='low-dimensional'
