@@ -6169,6 +6169,8 @@ alpine2_config = {
     'max_iterations': 1000,
     'global_minimum': -7.885600,
     'dimensions': 2,
+    'global_x': np.array([7.917, 7.917]),
+    'trials': 50,
 }
 
 # Bukin N.6
