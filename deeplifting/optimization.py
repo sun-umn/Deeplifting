@@ -1,5 +1,6 @@
 # stdlib
 import gc
+import json
 import time
 from typing import Any, Callable, Dict
 
@@ -95,7 +96,13 @@ def run_ipopt(problem: Dict, trials: int):
 
 
 def run_dual_annealing(
-    problem: Dict, trials: int, init_temp=5230, res_temp=2e-5, vis=2.62, acpt=-5.0
+    problem: Dict,
+    trials: int,
+    maxiter: int = 1000,
+    init_temp: int = 5230,
+    res_temp: float = 2e-5,
+    vis: float = 2.62,
+    acpt: float = -5.0,
 ):
     """
     Function that runs dual annealing for a
@@ -108,37 +115,13 @@ def run_dual_annealing(
     dimensions = problem['dimensions']
 
     # Get the bounds of the problem
-    if dimensions <= 2:
-        bounds = problem['bounds']
-    else:
-        bounds = problem['bounds']
+    bounds = problem['bounds']
+    upper_bounds = bounds['upper_bounds']
+    lower_bounds = bounds['lower_bounds']
+    list_bounds = list(zip(lower_bounds, upper_bounds))
 
-        if len(bounds) > 1:
-            bounds = bounds
-
-        else:
-            bounds = bounds * dimensions
-
-    # Some of the problems may be unbounded but dual annealing
-    # and differential evolution need to have bounds provided
-    updated_bounds = []
-    for constr in bounds:
-        a, b = constr
-        if a is None:
-            a = -1e6
-        if b is None:
-            b = 1e6
-        updated_bounds.append((a, b))
-
-    # Get the maximum iterations
-    max_iterations = problem['max_iterations']
-
-    # Save the results
-    # We will store the optimization steps here
-    results = np.zeros((trials, max_iterations * 10, dimensions + 1)) * np.nan
-    fn_values = []
-    callbacks = []
-
+    # Run the trials and save the results
+    trial_results = []
     for trial in range(trials):
         # Set a random seed
         np.random.seed(trial)
@@ -146,10 +129,14 @@ def run_dual_annealing(
         # Initial point
         x0 = initialize_vector(size=dimensions, bounds=bounds)
 
+        columns = [f'x{i + 1}' for i in range(dimensions)]
+        xs = json.dumps(dict(zip(columns, x0)))
+
         # Set up the function with the results
-        fn = lambda x: objective(  # noqa
-            x, results=results, trial=trial, version='numpy'
-        )
+        fn = lambda x: objective(x, version='numpy')  # noqa
+
+        # Get the initial objective galue
+        f_init = fn(x0)
 
         # Callback
         callback = DualAnnealingCallback()
@@ -162,9 +149,9 @@ def run_dual_annealing(
         start_time = time.time()
         result = dual_annealing(
             fn,
-            updated_bounds,
+            list_bounds,
             x0=x0,
-            maxiter=1000,
+            maxiter=maxiter,
             initial_temp=init_temp,
             restart_temp_ratio=res_temp,
             visit=vis,
@@ -174,13 +161,21 @@ def run_dual_annealing(
 
         end_time = time.time()
         total_time = end_time - start_time
-        x_tuple = tuple(x for x in result.x)
-        fn_values.append(x_tuple + (result.fun, 'Dual Annealing', total_time))
 
-        # Append callback results
-        callbacks.append(callback)
+        results = {
+            'xs': xs,
+            'initial_temp': init_temp,
+            'f_init': f_init,
+            'total_time': total_time,
+            'f_final': result.fun,
+            'iterations': result.nit,
+            'fn_evals': result.nfev,  # Does not apply to this method
+            'termination_code': result.status,
+            'objective_values': np.array(callback.f_history),
+        }
+        trial_results.append(results)
 
-    return {'results': results, 'final_results': fn_values, 'callbacks': callbacks}
+    return pd.DataFrame(trial_results)
 
 
 def run_basinhopping(problem: Dict, trials: int):

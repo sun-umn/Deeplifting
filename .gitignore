@@ -15,3 +15,5 @@ wandb/*
 .neptune
 .virtual_documents/
 LJ_data*
+
+*.ipynb
