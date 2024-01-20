@@ -4,6 +4,8 @@ import json
 import os
 import warnings
 from datetime import datetime
+from functools import partial
+from itertools import product
 
 # third party
 import click
@@ -11,6 +13,7 @@ import neptune
 import numpy as np
 import pandas as pd
 import torch
+import tqdm
 import wandb
 
 # first party
@@ -50,6 +53,95 @@ warnings.filterwarnings('ignore')
 @click.group()
 def cli():  # noqa
     pass
+
+
+@cli.command('run-dual-annealing-task')
+@click.option('--problem_name', default='ackley')
+@click.option('--dimensionality', default='low-dimensional')
+@click.option('--experimentation', default=True)
+def run_dual_annealing_task(
+    problem_name: str, dimensionality: str, experimentation: bool
+) -> None:
+    """
+    Function to run the dual annealing task for a single
+    problem
+    """
+    # Setup the problem
+    if dimensionality == 'low-dimensional':
+        directory = 'low-dimension'
+        PROBLEMS = PROBLEMS_BY_NAME
+        API_KEY = '2080070c4753d0384b073105ed75e1f46669e4bf'
+        PROJECT_NAME = 'Deeplifting-LD'
+
+    elif dimensionality == 'high-dimensional':
+        directory = 'high-dimension'
+        PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
+        API_KEY = '2080070c4753d0384b073105ed75e1f46669e4bf'
+        PROJECT_NAME = 'Deeplifting-HD'
+
+    else:
+        raise ValueError(f'{dimensionality} is not valid!')
+
+    if experimentation:
+        # Enable wandb
+        wandb.login(key=API_KEY)
+
+        wandb.init(
+            # set the wandb project where this run will be logged
+            project=PROJECT_NAME,
+            tags=['dual-annealing', f'{problem_name}'],
+        )
+
+    # Create the save path for this task
+    save_path = os.path.join(
+        '/home/jusun/dever120/Deeplifting',
+        'experiments/3b39b4fb-0520-4795-aaba-a8eab24ff8fd/',
+        f'{directory}/dual_annealing',
+    )
+
+    # Setup the problem
+    problem = PROBLEMS[problem_name]
+
+    # Get the known minimum
+    global_minimum = problem['global_minimum']
+
+    # Get the number of trails
+    trials = 50
+
+    # Max iterations search space
+    maxiters_space = [500, 750, 1000, 5000, 10000]
+    init_temp_space = [1, 500, 1000, 5000, 7500, 10000]
+
+    # Next add dual annealing
+    parameters = list(product(maxiters_space, init_temp_space))
+
+    # Run dual annealing for different parameters
+    dual_annealing_fn = partial(run_dual_annealing, problem=problem)
+    dual_annleaing_results_list = []
+    for maxiter, init_temp in tqdm.tqdm(parameters):
+        dual_annealing_outputs = dual_annealing_fn(
+            trials=trials, maxiter=maxiter, init_temp=init_temp
+        )
+        dual_annleaing_results_list.append(dual_annealing_outputs)
+
+    # Concat all results
+    dual_annleaing_results = pd.concat(dual_annleaing_results_list)
+    dual_annleaing_results['global_minimum'] = global_minimum
+
+    # Compute the success rate
+    numerator = np.abs(
+        dual_annleaing_results['f_final'] - dual_annleaing_results['global_minimum']
+    )
+    denominator = np.abs(
+        dual_annleaing_results['f_init'] - dual_annleaing_results['global_minimum']
+    )
+
+    # Set up success
+    dual_annleaing_results['success'] = numerator / denominator
+
+    # Save the results
+    save_file_name = os.path.join(save_path, f'{problem_name}-dual-annealing.parquet')
+    dual_annleaing_results.to_parquet(save_file_name)
 
 
 @cli.command('run-algorithm-comparisons')
