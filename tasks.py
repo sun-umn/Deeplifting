@@ -137,7 +137,7 @@ def run_dual_annealing_task(
     )
 
     # Set up success
-    dual_annleaing_results['success'] = numerator / denominator
+    dual_annleaing_results['success'] = ((numerator / denominator) <= 1e-4).astype(int)
 
     # Save the results
     save_file_name = os.path.join(save_path, f'{problem_name}-dual-annealing.parquet')
