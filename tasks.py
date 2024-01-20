@@ -30,7 +30,7 @@ from config import (
     rastrigin_series,
     schwefel_series,
 )
-from deeplifting.models import ReLUDeepliftingMLP
+from deeplifting.models import ReLUDeepliftingMLP, SineDeepliftingMLP
 from deeplifting.optimization import run_pyomo  # noqa
 from deeplifting.optimization import (
     run_adam_deeplifting,
@@ -96,7 +96,7 @@ def run_dual_annealing_task(
     save_path = os.path.join(
         '/home/jusun/dever120/Deeplifting',
         'experiments/3b39b4fb-0520-4795-aaba-a8eab24ff8fd/',
-        f'{directory}/dual_annealing',
+        f'{directory}/dual-annealing',
     )
 
     # Setup the problem
@@ -727,7 +727,7 @@ def find_best_architecture_task(
                     print(f'seed = {seed}')
 
                     # Deeplifting model with skip connections
-                    model = ReLUDeepliftingMLP(
+                    model = SineDeepliftingMLP(
                         initial_hidden_size=(5 * output_size),
                         hidden_sizes=hidden_sizes,
                         output_size=output_size,
