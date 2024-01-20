@@ -6238,7 +6238,7 @@ eggholder_config = {
     'global_minimum': -959.6407,
     'dimensions': 2,
     'global_x': np.array([512.0, 404.2319]),
-    'trials': 50,
+    'trials': 10,
 }
 
 # Griewank
