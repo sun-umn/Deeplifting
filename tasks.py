@@ -727,7 +727,7 @@ def find_best_architecture_task(
                     print(f'seed = {seed}')
 
                     # Deeplifting model with skip connections
-                    model = SineDeepliftingMLP(
+                    model = ReLUDeepliftingMLP(
                         initial_hidden_size=(5 * output_size),
                         hidden_sizes=hidden_sizes,
                         output_size=output_size,
@@ -979,7 +979,7 @@ def find_best_architecture_sgd_task(
                         print(f'seed = {seed}')
 
                         # Deeplifting model with skip connections
-                        model = ReLUDeepliftingMLP(
+                        model = SineDeepliftingMLP(
                             initial_hidden_size=(5 * output_size),
                             hidden_sizes=hidden_sizes,
                             output_size=output_size,

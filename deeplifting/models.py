@@ -228,7 +228,7 @@ class ReLUDeepliftingMLP(nn.Module):
         bounds,
         *,
         include_weight_initialization=True,
-        include_bn=True,
+        include_bn=False,
         initial_layer_type='embedding',
         seed=0,
     ):
@@ -438,8 +438,8 @@ class SineDeepliftingMLP(nn.Module):
             # We need at least one output from the first hidden layer
             # before we can accumulate skip connections
             if i > 0:
-                x = layer(x)
-                # x = x + x_new
+                x_new = layer(x)
+                x = x + x_new
             else:
                 # Output for the initial layer
                 x = layer(x)
