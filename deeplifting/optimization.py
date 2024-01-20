@@ -597,14 +597,14 @@ def run_pygranso_deeplifting(
     """
     Function that runs the pygranso version of deeplifting.
     """
-    # The first thing we do when training this model is align the
-    # outputs of the model with a randomly initialized starting position
-    train_model_to_output(
-        inputs=model_inputs,
-        model=model,
-        x0=start_position,
-        tolerance=1e-3,
-    )
+    # # The first thing we do when training this model is align the
+    # # outputs of the model with a randomly initialized starting position
+    # train_model_to_output(
+    #     inputs=model_inputs,
+    #     model=model,
+    #     x0=start_position,
+    #     tolerance=1e-3,
+    # )
 
     # Get the number of training variables for the model
     nvar = getNvarTorch(model.parameters())
