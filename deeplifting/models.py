@@ -155,7 +155,7 @@ class SineDeepliftingBlock(nn.Module):
         self.include_bn = include_bn
 
         # ReLU activation layer
-        self.activation_layer = nn.SinActivation()
+        self.activation_layer = SinActivation()
 
         # Define the Linear layer
         self.linear = nn.Linear(input_size, output_size)
