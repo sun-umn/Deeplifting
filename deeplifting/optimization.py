@@ -347,73 +347,34 @@ def run_differential_evolution(
     return {'results': results, 'final_results': fn_values, 'callbacks': callbacks}
 
 
-def pygranso_fn(X_struct, objective, bounds):
+def pygranso_nd_fn(X_struct, objective, bounds):
     """
     Function to run PyGranso without a neural
     network approximation to the inputs
     """
-    x1, x2 = X_struct.x1, X_struct.x2
-    x = torch.cat((x1, x2))
+    # list comprehensions more performant?
+    x_values = [value for key, value in X_struct.__dict__.items()]
+
+    # Need to iterate over the struct to get the values
+    x = torch.stack(x_values).flatten()
+
+    # Get the bounds from the dictionary
+    a = torch.tensor(bounds['lower_bounds'])
+    b = torch.tensor(bounds['upper_bounds'])
+
+    # Get the scaled x-values
+    x = torch.sin(x)
+    x = a + ((b - a) / 2.0 * (x + 1))
+
     f = objective(x)
 
     # Setup the bounds for the inequality
     # a <= x <= b
     # -> a - x <= 0
     # -> x - b <= 0
-    x1_bounds, x2_bounds = bounds
-    a1, b1 = x1_bounds
-    a2, b2 = x2_bounds
-
-    c1 = a1 - x1
-    c2 = x1 - b1
-    c3 = a2 - x2
-    c4 = x2 - b2
-
     # Inequality constraints
-    ci = pygransoStruct()
-    ci.c1 = c1
-    ci.c2 = c2
-    ci.c3 = c3
-    ci.c4 = c4
-
-    # Equality constraints
-    ce = None
-
-    return f, ci, ce
-
-
-def pygranso_nd_fn(X_struct, objective, bounds):
-    """
-    Function to run PyGranso without a neural
-    network approximation to the inputs
-    """
-    x_values = []
-    for key, value in X_struct.__dict__.items():
-        x_values.append(value)
-    x = torch.stack(x_values)
-
-    # Box constraints
-    if len(bounds) > 2:
-        a, b = bounds[0]
-        x_scaled = a + (b - a) / 2.0 * (torch.sin(x) + 1)
-    else:
-        scaled_x_values = []
-        for index, constr in enumerate(bounds):
-            a, b = constr
-            x_constr = a + (b - a) / 2.0 * (torch.sin(x[index]) + 1)
-            scaled_x_values.append(x_constr)
-        x_scaled = torch.stack(scaled_x_values)
-
-    f = objective(x_scaled)
-
-    # # Setup the bounds for the inequality
-    # # a <= x <= b
-    # # -> a - x <= 0
-    # # -> x - b <= 0
-    # # Inequality constraints
-    # # In some cases all of the bounds will be
-    # # None so we will need to set the ci struct
-    # # to None
+    # In some cases all of the bounds will be
+    # None so we will need to set the ci struct to None
     ci = None
 
     # # TODO: I will leave this for now but it was not working - is there
