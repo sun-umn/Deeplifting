@@ -111,6 +111,7 @@ class Results:
             self.num_layers = problem_config['num_layers']
             self.num_neurons = problem_config['num_neurons']
             self.lr = problem_config['lr']
+            self.input_dimension = problem_config['input_dimension']
 
             # Save all of the results to a list
             self.results.append(
@@ -183,7 +184,7 @@ class Results:
                 filename = os.path.join(
                     save_path,
                     f'{problem_name}-relu-{self.num_layers}-{self.num_neurons}-'
-                    f'lr-{self.lr}.parquet',
+                    f'lr-{self.lr}-input-dim-{self.input_dimension}.parquet',
                 )
             results_df.to_parquet(filename)
 
