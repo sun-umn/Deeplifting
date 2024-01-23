@@ -669,7 +669,6 @@ def find_best_architecture_task(
     input_dimensions = [1, 2, 16, 32]
 
     # Initial layer type
-    input_dimension = 32
     initial_layer_type = 'linear'
     include_bn = True
     lr = 1.0  # Define defualt Pygranso learning rate to be 1.0
@@ -730,7 +729,7 @@ def find_best_architecture_task(
                 seed = (i + index) * i
                 print(f'Fitting point {x_start} - with weights {i}')
                 print(f' - layers - {num_layers} - units - {units} - trial - {trial}')
-                print(f'seed = {seed}')
+                print(f' - input dimension {input_dimension} - seed = {seed}')
 
                 # Deeplifting model with skip connections
                 model = ReLUDeepliftingMLP(
