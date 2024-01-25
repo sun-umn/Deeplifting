@@ -666,7 +666,7 @@ def find_best_architecture_task(
     # NOTE: Breakthrough that the size of the input dimension
     # has a direct impact on the models ability to find a global
     # solution so we will investigate this as well
-    input_dimensions = [1, 2, 16, 32]
+    input_dimensions = [32]
 
     # Initial layer type
     initial_layer_type = 'linear'
