@@ -654,9 +654,6 @@ def find_best_architecture_task(
     # Get the global minimum
     global_minimum = problem['global_minimum']
 
-    # Setup list to store information
-    results = Results(method=method)
-
     # Layer search
     layers = [2, 3, 4, 5, 7, 10, 13]
 
@@ -688,6 +685,9 @@ def find_best_architecture_task(
             'lr': lr,
             'input_dimension': input_dimension,
         }
+
+        # Setup list to store information
+        results = Results(method=method)
 
         # We have an observation that we can start at the same point
         # but it may or may not converge so we can try different
