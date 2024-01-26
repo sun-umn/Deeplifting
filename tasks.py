@@ -668,13 +668,13 @@ def find_best_architecture_task(
     # Initial layer type
     initial_layer_type = 'linear'
     include_bn = True
-    lr = 1.0  # Define defualt Pygranso learning rate to be 1.0
+    learning_rates = [1.0]  # Define defualt Pygranso learning rate to be 1.0
 
     # Configs
-    configuration = product(layers, units_search, input_dimensions)
+    configuration = product(learning_rates, layers, units_search, input_dimensions)
 
     # Start the optimization process
-    for num_layers, units, input_dimension in configuration:
+    for lr, num_layers, units, input_dimension in configuration:
         # n-layer m neuron network
         hidden_sizes = (units,) * num_layers
 
@@ -1134,133 +1134,134 @@ def find_best_architecture_adam_task(
     layers = [2, 3, 4, 5, 7, 10, 13]
 
     # Number of neurons
-    units_search = [512, 256, 192, 128, 64, 32]
+    units_search = [192, 128, 64, 32]
+
+    # NOTE: Breakthrough that the size of the input dimension
+    # has a direct impact on the models ability to find a global
+    # solution so we will investigate this as well
+    input_dimensions = [1, 2, 16, 32]
 
     # Initial layer type
-    input_dimension = 32
     initial_layer_type = 'linear'
     include_bn = True
+    learning_rates = [1.0]  # Define defualt Pygranso learning rate to be 1.0
 
-    # Learning rates
-    learning_rates = [1.0]
+    # Configs
+    configuration = product(learning_rates, layers, units_search, input_dimensions)
 
     # Start the optimization process
-    # Search over a specific learning rate
-    for lr in learning_rates:
-        for num_layers in layers:
-            for units in units_search:
-                # n-layer m neuron network
-                hidden_sizes = (units,) * num_layers
+    for lr, num_layers, units, input_dimension in configuration:
+        # n-layer m neuron network
+        hidden_sizes = (units,) * num_layers
 
-                # Problem configuration in a dict
-                problem_config = {
-                    'num_layers': num_layers,
-                    'num_neurons': units,
-                    'lr': lr,
-                }
+        # Problem configuration in a dict
+        problem_config = {
+            'num_layers': num_layers,
+            'num_neurons': units,
+            'lr': lr,
+        }
 
-                # We have an observation that we can start at the same point
-                # but it may or may not converge so we can try different
-                # weights
-                for index, trial in enumerate(range(trials)):
-                    # Set the seed
-                    set_seed(trial)
+        # Setup list to store information
+        results = Results(method=method)
 
-                    # Fix the inputs for deeplifting
-                    if initial_layer_type == 'embedding':
-                        inputs = torch.randint(
-                            low=0, high=(units - 1), size=(input_dimension, units)
-                        )
-                        inputs = inputs.to(device=device, dtype=torch.long)
+        # We have an observation that we can start at the same point
+        # but it may or may not converge so we can try different
+        # weights
+        for index, trial in enumerate(range(trials)):
+            # Set the seed
+            set_seed(trial)
 
-                    elif initial_layer_type == 'linear':
-                        inputs = torch.rand(size=(input_dimension, 5 * output_size))
-                        inputs = inputs.to(device=device, dtype=torch.double)
-
-                    else:
-                        raise ValueError(
-                            f'{initial_layer_type} is not an accepted type!'
-                        )
-
-                    # Initialization for other models
-                    x_start = initialize_vector(size=output_size, bounds=bounds)
-
-                    # Let's also put the starting distance
-                    distance = np.mean((x_start - problem['global_x']) ** 2)
-
-                    x_start = torch.tensor(x_start)
-                    x_start = x_start.to(device=device, dtype=torch.double)
-
-                    # Build the xs for the outputs
-                    columns = [f'x{i + 1}' for i in range(output_size)]
-                    xs = json.dumps(dict(zip(columns, x_start.detach().cpu().numpy())))
-
-                    # Creates different weight intializations
-                    # for the same starting point x0
-                    for i in max_weight_trials[include_weight_initialization]:
-                        seed = (i + index) * i
-                        print(f'Fitting point {x_start} - with weights {i}')
-                        print(
-                            f' - layers - {num_layers} - units'
-                            f' - {units} - trial - {trial}'
-                            f' - lr {lr}'
-                        )
-                        print(f'seed = {seed}')
-
-                        # Deeplifting model with skip connections
-                        model = ReLUDeepliftingMLP(
-                            initial_hidden_size=(5 * output_size),
-                            hidden_sizes=hidden_sizes,
-                            output_size=output_size,
-                            bounds=bounds,
-                            initial_layer_type=initial_layer_type,
-                            include_weight_initialization=include_weight_initialization,
-                            include_bn=include_bn,
-                            seed=seed,
-                        )
-
-                        model = model.to(device=device, dtype=torch.double)
-
-                        # Run PyGranso Based Deeplifting
-                        deeplifting_outputs = run_adam_deeplifting(
-                            model=model,
-                            model_inputs=inputs,
-                            start_position=x_start,
-                            objective=fn,
-                            device=device,
-                            lr=lr,
-                        )
-
-                        # Unpack results
-                        f_init = deeplifting_outputs.get('f_init')
-                        f_final = deeplifting_outputs.get('f_final')
-                        total_time = deeplifting_outputs.get('total_time')
-                        iterations = deeplifting_outputs.get('iterations')
-                        fn_evals = deeplifting_outputs.get('fn_evals')
-                        termination_code = deeplifting_outputs.get('termination_code')
-                        objective_values = deeplifting_outputs.get('objective_values')
-
-                        # Append results
-                        results.append_record(
-                            global_minimum=global_minimum,
-                            f_init=f_init,
-                            f_final=f_final,
-                            total_time=total_time,
-                            iterations=iterations,
-                            fn_evals=fn_evals,
-                            termination_code=termination_code,
-                            problem_config=problem_config,
-                            xs=xs,
-                            method=method,
-                            lr=lr,
-                            objective_values=objective_values,
-                            distance=distance,
-                        )
-
-                # Create the data from this run and save sequentially
-                results.build_and_save_dataframe(
-                    save_path=save_path, problem_name=problem_name
+            # Fix the inputs for deeplifting
+            if initial_layer_type == 'embedding':
+                inputs = torch.randint(
+                    low=0, high=(units - 1), size=(input_dimension, units)
                 )
+                inputs = inputs.to(device=device, dtype=torch.long)
+
+            elif initial_layer_type == 'linear':
+                inputs = torch.rand(size=(input_dimension, 5 * output_size))
+                inputs = inputs.to(device=device, dtype=torch.double)
+
+            else:
+                raise ValueError(f'{initial_layer_type} is not an accepted type!')
+
+            # Initialization for other models
+            x_start = initialize_vector(size=output_size, bounds=bounds)
+
+            # Let's also put the starting distance
+            distance = np.mean((x_start - problem['global_x']) ** 2)
+
+            x_start = torch.tensor(x_start)
+            x_start = x_start.to(device=device, dtype=torch.double)
+
+            # Build the xs for the outputs
+            columns = [f'x{i + 1}' for i in range(output_size)]
+            xs = json.dumps(dict(zip(columns, x_start.detach().cpu().numpy())))
+
+            # Creates different weight intializations
+            # for the same starting point x0
+            for i in max_weight_trials[include_weight_initialization]:
+                seed = (i + index) * i
+                print(f'Fitting point {x_start} - with weights {i}')
+                print(
+                    f' - layers - {num_layers} - units'
+                    f' - {units} - trial - {trial}'
+                    f' - lr {lr}'
+                )
+                print(f'seed = {seed}')
+
+                # Deeplifting model with skip connections
+                model = ReLUDeepliftingMLP(
+                    initial_hidden_size=(5 * output_size),
+                    hidden_sizes=hidden_sizes,
+                    output_size=output_size,
+                    bounds=bounds,
+                    initial_layer_type=initial_layer_type,
+                    include_weight_initialization=include_weight_initialization,
+                    include_bn=include_bn,
+                    seed=seed,
+                )
+
+                model = model.to(device=device, dtype=torch.double)
+
+                # Run PyGranso Based Deeplifting
+                deeplifting_outputs = run_adam_deeplifting(
+                    model=model,
+                    model_inputs=inputs,
+                    start_position=x_start,
+                    objective=fn,
+                    device=device,
+                    lr=lr,
+                )
+
+                # Unpack results
+                f_init = deeplifting_outputs.get('f_init')
+                f_final = deeplifting_outputs.get('f_final')
+                total_time = deeplifting_outputs.get('total_time')
+                iterations = deeplifting_outputs.get('iterations')
+                fn_evals = deeplifting_outputs.get('fn_evals')
+                termination_code = deeplifting_outputs.get('termination_code')
+                objective_values = deeplifting_outputs.get('objective_values')
+
+                # Append results
+                results.append_record(
+                    global_minimum=global_minimum,
+                    f_init=f_init,
+                    f_final=f_final,
+                    total_time=total_time,
+                    iterations=iterations,
+                    fn_evals=fn_evals,
+                    termination_code=termination_code,
+                    problem_config=problem_config,
+                    xs=xs,
+                    method=method,
+                    lr=lr,
+                    objective_values=objective_values,
+                    distance=distance,
+                )
+
+        # Create the data from this run and save sequentially
+        results.build_and_save_dataframe(save_path=save_path, problem_name=problem_name)
 
 
 if __name__ == "__main__":
