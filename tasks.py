@@ -1155,6 +1155,7 @@ def find_best_architecture_adam_task(
             'num_layers': num_layers,
             'num_neurons': units,
             'lr': lr,
+            'input_dimension': input_dimension,
         }
 
         # Setup list to store information
