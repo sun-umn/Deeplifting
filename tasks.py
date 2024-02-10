@@ -210,6 +210,7 @@ def run_basinhopping_task(
     basinhopping_fn = partial(run_basinhopping, problem=problem)
     basinhopping_results_list = []
     for niter, T in tqdm.tqdm(parameters):
+        print(f'Running basinhopping parameters: niter={niter}; T={T}')
         basinhopping_outputs = basinhopping_fn(trials=trials, niter=niter, T=T)
         basinhopping_results_list.append(basinhopping_outputs)
 
