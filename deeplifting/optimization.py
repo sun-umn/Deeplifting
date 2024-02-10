@@ -256,11 +256,22 @@ def run_basinhopping(problem: Dict, trials: int, niter: int, T: float) -> pd.Dat
 
 
 def run_differential_evolution(
-    problem: Dict, trials: int, strat='best1bin', mut=0.5, recomb=0.7
-):
+    problem: Dict,
+    trials: int,
+    maxiter: int = 1000,
+    popsize: int = 15,
+    mutation: float = 0.5,
+    recombination: float = 0.7,
+) -> pd.DataFrame:
     """
     Function that runs differential evolution for a
     specified optimization problem
+
+    The documentations states that in order to increase the likelihood
+    of finding a global minimum use:
+    1. high popsize values
+    2. high mutation
+    3. lower recombination
     """
     # Objective function
     objective = problem['objective']
@@ -269,44 +280,13 @@ def run_differential_evolution(
     dimensions = problem['dimensions']
 
     # Get the bounds of the problem
-    if dimensions <= 2:
-        bounds = problem['bounds']
-    else:
-        bounds = problem['bounds']
+    bounds = problem['bounds']
+    upper_bounds = bounds['upper_bounds']
+    lower_bounds = bounds['lower_bounds']
+    list_bounds = list(zip(lower_bounds, upper_bounds))
 
-        if len(bounds) > 1:
-            bounds = bounds
-
-        else:
-            bounds = bounds * dimensions
-
-    # Some of the problems may be unbounded but dual annealing
-    # and differential evolution need to have bounds provided
-    updated_bounds = []
-    near_zero_bounds = []
-    for constr in bounds:
-        a, b = constr
-        if a is None:
-            a = float(-1e20)
-        if b is None:
-            b = float(1e20)
-        updated_bounds.append((a, b))
-
-    # Need to modify x0 for problems like ex8_6_2
-    for index, constr in enumerate(updated_bounds):
-        a, b = constr
-        if (a == -1e-6) or (b == 1e-6):
-            near_zero_bounds.append(index)
-
-    # Get the maximum iterations
-    max_iterations = problem['max_iterations']
-
-    # Save the results
-    # We will store the optimization steps here
-    results = np.zeros((trials, max_iterations * 10, dimensions + 1)) * np.nan
-    fn_values = []
-    callbacks = []
-
+    # Iterate over the different starting positions
+    trial_results = []
     for trial in range(trials):
         # Set a random seed
         np.random.seed(trial)
@@ -314,39 +294,51 @@ def run_differential_evolution(
         # Initial point
         x0 = initialize_vector(size=dimensions, bounds=bounds)
 
-        # Callback
-        callback = DifferentialEvolutionCallback()
-
-        # Let's record the initial result
-        # We will use the context -1 to indicate the initial search
-        callback.record_intermediate_data(x0, -1)
+        columns = [f'x{i + 1}' for i in range(dimensions)]
+        xs = json.dumps(dict(zip(columns, x0)))
 
         # Set up the function with the results
-        fn = lambda x: objective(  # noqa
-            x, results=results, trial=trial, version='numpy'
-        )
+        fn = lambda x: objective(x, version='numpy')  # noqa
+
+        # Get the initial objective galue
+        f_init = fn(x0)
+
+        # Callback
+        callback = DifferentialEvolutionCallback()
 
         # Get the result
         start_time = time.time()
         result = differential_evolution(
             fn,
-            updated_bounds,
+            list_bounds,
             x0=x0,
-            maxiter=1000,
-            strategy=strat,
-            mutation=mut,
-            recombination=recomb,
-            callback=callback.record_intermediate_data,
+            maxiter=maxiter,
+            popsize=popsize,
+            mutation=mutation,
+            recombination=recombination,
+            callback=callback,
+            workers=1,  # Important because we want to turn off multiprocessing
         )
+
         end_time = time.time()
         total_time = end_time - start_time
-        x_tuple = tuple(x for x in result.x)
-        fn_values.append(x_tuple + (result.fun, 'Differential Evolution', total_time))
 
-        # Append callback results
-        callbacks.append(callback)
+        results = {
+            'xs': xs,
+            'popsize': popsize,
+            'mutation': mutation,
+            'recombination': recombination,
+            'f_init': f_init,
+            'total_time': total_time,
+            'f_final': result.fun,
+            'iterations': result.nit,
+            'fn_evals': result.nfev,
+            'termination_code': result.lowest_optimization_result.status,
+            'objective_values': None,
+        }
+        trial_results.append(results)
 
-    return {'results': results, 'final_results': fn_values, 'callbacks': callbacks}
+    return pd.DataFrame(trial_results)
 
 
 def pygranso_nd_fn(X_struct, objective, bounds):

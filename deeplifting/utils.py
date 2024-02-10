@@ -689,9 +689,8 @@ class DifferentialEvolutionCallback:
         self.x_history = []
         self.convergence_history = []
 
-    def record_intermediate_data(self, xk, convergence):
-        self.x_history.append(xk)
-        self.convergence_history.append(convergence)
+    def callback(self, intermediate_result):
+        pass
 
 
 class DualAnnealingCallback:
