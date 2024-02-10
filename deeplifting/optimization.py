@@ -323,6 +323,9 @@ def run_differential_evolution(
         end_time = time.time()
         total_time = end_time - start_time
 
+        # NOTE: For differential evolution there is no status returned
+        # only success = True / False. So I will turn this into the status
+        # by turning it into an int
         results = {
             'xs': xs,
             'popsize': popsize,
@@ -333,7 +336,7 @@ def run_differential_evolution(
             'f_final': result.fun,
             'iterations': result.nit,
             'fn_evals': result.nfev,
-            'termination_code': result.lowest_optimization_result.status,
+            'termination_code': int(result.success),
             'objective_values': np.array(callback.f_history),
         }
         trial_results.append(results)
