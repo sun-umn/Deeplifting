@@ -392,7 +392,7 @@ def run_ipopt_task(
     save_path = os.path.join(
         '/home/jusun/dever120/Deeplifting',
         'experiments/3b39b4fb-0520-4795-aaba-a8eab24ff8fd/',
-        f'{directory}/IPOPT',
+        f'{directory}/ipopt',
     )
 
     # Setup the problem
