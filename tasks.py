@@ -360,7 +360,7 @@ def run_ipopt_task(
     Function to run the IPOPT task for a single
     problem
     """
-    print(f'Differential-Evolution for {problem_name}')
+    print(f'IPOPT for {problem_name}')
 
     # Setup the problem
     if dimensionality == 'low-dimensional':

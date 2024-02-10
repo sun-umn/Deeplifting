@@ -78,7 +78,10 @@ def run_ipopt(problem: Dict, trials: int) -> pd.DataFrame:
         # Call IPOPT
         start_time = time.time()
         result = minimize_ipopt(
-            fn, x0, bounds=list_bounds, callback=callback.record_intermediate_data
+            fn,
+            x0,
+            bounds=list_bounds,
+            intermediate_callback=callback.record_intermediate_data,
         )
 
         end_time = time.time()
