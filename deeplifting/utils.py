@@ -687,10 +687,19 @@ class DifferentialEvolutionCallback:
 
     def __init__(self):
         self.x_history = []
+        self.f_history = []
         self.convergence_history = []
 
-    def callback(self, intermediate_result):
-        pass
+    def record_intermediate_data(self, intermediate_result):
+        # Get the values from OptimizedResult
+        x = intermediate_result.x
+        f = intermediate_result.fun
+        convergence = intermediate_result.convergence
+
+        # Now append the values to the list
+        self.x_history.append(x)
+        self.f_history.append(f)
+        self.convergence_history.append(convergence)
 
 
 class DualAnnealingCallback:

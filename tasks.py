@@ -292,13 +292,18 @@ def run_differential_evolution_task(
     global_minimum = problem['global_minimum']
 
     # Get the number of trails
-    trials = 50
+    trials = 2
 
-    # Max iterations search space
-    maxiters_space = [100, 500, 750, 1000, 5000, 10000]
-    popsize_space = [15, 20, 35, 50, 100]
-    mutation_space = [(0.5, 1.0), (0.5, 2), (0.5, 5), (0.5, 10)]
-    recombination_space = [0.7, 0.5, 0.1, 0.05]
+    # # Max iterations search space
+    # maxiters_space = [100, 500, 750, 1000, 5000, 10000]
+    # popsize_space = [15, 20, 35, 50, 100]
+    # mutation_space = [(0.5, 1.0), (0.5, 2), (0.5, 5), (0.5, 10)]
+    # recombination_space = [0.7, 0.5, 0.1, 0.05]
+
+    maxiters_space = [100]
+    popsize_space = [15]
+    mutation_space = [(0.5, 1.0)]
+    recombination_space = [0.7]
 
     # Next add dual annealing
     parameters = list(

@@ -316,7 +316,7 @@ def run_differential_evolution(
             popsize=popsize,
             mutation=mutation,
             recombination=recombination,
-            callback=callback,
+            callback=callback.record_intermediate_data,
             workers=1,  # Important because we want to turn off multiprocessing
         )
 
@@ -334,7 +334,7 @@ def run_differential_evolution(
             'iterations': result.nit,
             'fn_evals': result.nfev,
             'termination_code': result.lowest_optimization_result.status,
-            'objective_values': None,
+            'objective_values': np.array(callback.f_history),
         }
         trial_results.append(results)
 
