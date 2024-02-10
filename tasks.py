@@ -67,6 +67,8 @@ def run_dual_annealing_task(
     Function to run the dual annealing task for a single
     problem
     """
+    print(f'Dual-Annealing for {problem_name}')
+
     # Setup the problem
     if dimensionality == 'low-dimensional':
         directory = 'low-dimension'
@@ -110,7 +112,7 @@ def run_dual_annealing_task(
     trials = 50
 
     # Max iterations search space
-    maxiters_space = [500, 750, 1000, 5000, 10000]
+    maxiters_space = [100, 500, 750, 1000, 5000, 10000]
     init_temp_space = [1, 500, 1000, 5000, 7500, 10000]
 
     # Next add dual annealing
@@ -120,6 +122,8 @@ def run_dual_annealing_task(
     dual_annealing_fn = partial(run_dual_annealing, problem=problem)
     dual_annleaing_results_list = []
     for maxiter, init_temp in tqdm.tqdm(parameters):
+        print(f'Running dual-annealing parameters: maxiter={maxiter}; ')
+        print(f'init_temp={init_temp}')
         dual_annealing_outputs = dual_annealing_fn(
             trials=trials, maxiter=maxiter, init_temp=init_temp
         )
@@ -157,6 +161,8 @@ def run_basinhopping_task(
     Function to run the basinhopping task for a single
     problem
     """
+    print(f'Basinhopping for {problem_name}')
+
     # Setup the problem
     if dimensionality == 'low-dimensional':
         directory = 'low-dimension'
@@ -199,9 +205,12 @@ def run_basinhopping_task(
     # Get the number of trails
     trials = 50
 
-    # Max iterations search space
-    maxiters_space = [500, 750, 1000, 5000, 10000]
-    T_space = [0.5, 1.0, 2.5, 5.0, 10.0]
+    # # Max iterations search space
+    # maxiters_space = [100, 500, 750, 1000, 5000, 10000]
+    # T_space = [0.5, 1.0, 2.5, 5.0, 10.0]
+
+    maxiters_space = [100]
+    T_space = [0.5]
 
     # Next add dual annealing
     parameters = list(product(maxiters_space, T_space))
