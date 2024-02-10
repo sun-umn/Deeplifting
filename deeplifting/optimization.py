@@ -170,7 +170,7 @@ def run_dual_annealing(
             'total_time': total_time,
             'f_final': result.fun,
             'iterations': result.nit,
-            'fn_evals': result.nfev,  # Does not apply to this method
+            'fn_evals': result.nfev,
             'termination_code': result.status,
             'objective_values': np.array(callback.f_history),
         }
@@ -246,8 +246,8 @@ def run_basinhopping(problem: Dict, trials: int, niter: int, T: float) -> pd.Dat
             'total_time': total_time,
             'f_final': result.fun,
             'iterations': result.nit,
-            'fn_evals': result.nfev,  # Does not apply to this method
-            'termination_code': result.status,
+            'fn_evals': result.nfev,
+            'termination_code': result.lowest_optimization_result.status,
             'objective_values': np.array(callback.f_history),
         }
         trial_results.append(results)
