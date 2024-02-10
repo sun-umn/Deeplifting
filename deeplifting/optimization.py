@@ -24,6 +24,7 @@ from deeplifting.utils import (
     DifferentialEvolutionCallback,
     DualAnnealingCallback,
     HaltLog,
+    IPOPTCallback,
     PyGransoConfig,
     initialize_vector,
     set_seed,
@@ -38,38 +39,22 @@ def run_ipopt(problem: Dict, trials: int):
     """
     Function that runs IPOPT on one of our test
     functions for deeplifting.
-
-    TODO: In the documentation there are ways to improve
-    IPOPT by using the gradient, jacobian and hessian
-    information we will implement that with jax
-    but may need to rework some of our test functions
     """
     # Objective function
     objective = problem['objective']
 
-    # Get the maximum iterations
-    max_iterations = problem['max_iterations']
-
-    # Get dimensions of the problem
+    # Get the number of dimensions
     dimensions = problem['dimensions']
 
     # Get the bounds of the problem
-    if dimensions <= 2:
-        bounds = problem['bounds']
-    else:
-        bounds = problem['bounds']
-
-        if len(bounds) > 1:
-            bounds = bounds
-
-        else:
-            bounds = bounds * dimensions
+    bounds = problem['bounds']
+    upper_bounds = bounds['upper_bounds']
+    lower_bounds = bounds['lower_bounds']
+    list_bounds = list(zip(lower_bounds, upper_bounds))
 
     # Save the results
     # We will store the optimization steps here
-    results = np.zeros((trials, max_iterations, dimensions + 1)) * np.nan
-    fn_values = []
-
+    trial_results = []
     for trial in range(trials):
         # Set the random seed
         set_seed(trial)
@@ -78,22 +63,40 @@ def run_ipopt(problem: Dict, trials: int):
         # TODO: Need to provide a better starting point here
         x0 = initialize_vector(size=dimensions, bounds=bounds)
 
+        columns = [f'x{i + 1}' for i in range(dimensions)]
+        xs = json.dumps(dict(zip(columns, x0)))
+
         # Get the objective
-        fn = lambda x: objective(  # noqa
-            x, results=results, trial=trial, version='numpy'
-        )  # noqa
+        fn = lambda x: objective(x, version='numpy')  # noqa  # noqa
+
+        # Get the initial objective galue
+        f_init = fn(x0)
+
+        # Callback
+        callback = IPOPTCallback()
 
         # Call IPOPT
         start_time = time.time()
-        result = minimize_ipopt(fn, x0, bounds=bounds)
+        result = minimize_ipopt(
+            fn, x0, bounds=list_bounds, callback=callback.record_intermediate_data
+        )
 
         end_time = time.time()
         total_time = end_time - start_time
 
-        x_tuple = tuple(x for x in result.x)
-        fn_values.append(x_tuple + (result.fun, 'IPOPT', total_time))
+        results = {
+            'xs': xs,
+            'f_init': f_init,
+            'total_time': total_time,
+            'f_final': result.fun,
+            'iterations': result.nit,
+            'fn_evals': result.nfev,
+            'termination_code': result.status,
+            'objective_values': np.array(callback.f_history),
+        }
+        trial_results.append(results)
 
-    return {'results': results, 'final_results': fn_values}
+    return pd.DataFrame(trial_results)
 
 
 def run_dual_annealing(

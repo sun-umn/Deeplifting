@@ -704,7 +704,7 @@ class DifferentialEvolutionCallback:
 
 class DualAnnealingCallback:
     """
-    Call back to save intermediate results for
+    Callback to save intermediate results for
     Dual Annealing
     """
 
@@ -717,6 +717,32 @@ class DualAnnealingCallback:
         self.x_history.append(x)
         self.f_history.append(f)
         self.context_history.append(algorithm_context)
+
+
+class IPOPTCallback:
+    """
+    Callback to save intermediate results for
+    IPOPT
+    """
+
+    def __init__(self):
+        self.x_history = []
+        self.f_history = []
+
+    def record_intermediate_data(
+        self,
+        alg_mod,
+        iter_count,
+        obj_value,
+        inf_pr,
+        inf_du,
+        mu,
+        d_norm,
+        regularization_size,
+        alpha_du,
+        alpha_pr,
+    ):
+        pass
 
 
 class HaltLog:
