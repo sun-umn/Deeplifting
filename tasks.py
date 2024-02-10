@@ -238,11 +238,11 @@ def run_basinhopping_task(
     basinhopping_results.to_parquet(save_file_name)
 
 
-# # Differential Evolution
-# @cli.command('run-differential-evolution-task')
-# @click.option('--problem_name', default='ackley')
-# @click.option('--dimensionality', default='low-dimensional')
-# @click.option('--experimentation', default=True)
+# Differential Evolution
+@cli.command('run-differential-evolution-task')
+@click.option('--problem_name', default='ackley')
+@click.option('--dimensionality', default='low-dimensional')
+@click.option('--experimentation', default=True)
 def run_differential_evolution_task(
     problem_name: str, dimensionality: str, experimentation: bool
 ) -> None:
@@ -294,16 +294,11 @@ def run_differential_evolution_task(
     # Get the number of trails
     trials = 2
 
-    # # Max iterations search space
-    # maxiters_space = [100, 500, 750, 1000, 5000, 10000]
-    # popsize_space = [15, 20, 35, 50, 100]
-    # mutation_space = [(0.5, 1.0), (0.5, 2), (0.5, 5), (0.5, 10)]
-    # recombination_space = [0.7, 0.5, 0.1, 0.05]
-
-    maxiters_space = [100]
-    popsize_space = [15]
-    mutation_space = [(0.5, 1.0)]
-    recombination_space = [0.7]
+    # Max iterations search space
+    maxiters_space = [100, 500, 750, 1000, 5000, 10000]
+    popsize_space = [15, 20, 35, 50, 100]
+    mutation_space = [(0.5, 1.0), (0.5, 2), (0.5, 5), (0.5, 10)]
+    recombination_space = [0.7, 0.5, 0.1, 0.05]
 
     # Next add dual annealing
     parameters = list(
