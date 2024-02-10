@@ -35,7 +35,7 @@ from deeplifting.utils import (
 EXCLUDE_PROBLEMS = list(HIGH_DIMENSIONAL_PROBLEMS_BY_NAME.keys())
 
 
-def run_ipopt(problem: Dict, trials: int):
+def run_ipopt(problem: Dict, trials: int) -> pd.DataFrame:
     """
     Function that runs IPOPT on one of our test
     functions for deeplifting.
