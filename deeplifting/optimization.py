@@ -223,12 +223,16 @@ def run_basinhopping(problem: Dict, trials: int, niter: int, T: float) -> pd.Dat
 
         # Get the result
         start_time = time.time()
+
+        # NOTE: Bounds uses minimizer kwards
+        minimizer_kwargs = {'bounds': list_bounds}
+
         result = basinhopping(
             fn,
-            list_bounds,
             x0=x0,
             niter=niter,
             T=T,
+            minimizer_kwargs=minimizer_kwargs,
             callback=callback.record_intermediate_data,
         )
 
