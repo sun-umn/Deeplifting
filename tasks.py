@@ -55,6 +55,7 @@ def cli():  # noqa
     pass
 
 
+# Dual Annealing
 @cli.command('run-dual-annealing-task')
 @click.option('--problem_name', default='ackley')
 @click.option('--dimensionality', default='low-dimensional')
@@ -142,6 +143,96 @@ def run_dual_annealing_task(
     # Save the results
     save_file_name = os.path.join(save_path, f'{problem_name}-dual-annealing.parquet')
     dual_annleaing_results.to_parquet(save_file_name)
+
+
+# Dual Annealing
+@cli.command('run-basinhopping-task')
+@click.option('--problem_name', default='ackley')
+@click.option('--dimensionality', default='low-dimensional')
+@click.option('--experimentation', default=True)
+def run_basinhopping_task(
+    problem_name: str, dimensionality: str, experimentation: bool
+) -> None:
+    """
+    Function to run the basinhopping task for a single
+    problem
+    """
+    # Setup the problem
+    if dimensionality == 'low-dimensional':
+        directory = 'low-dimension'
+        PROBLEMS = PROBLEMS_BY_NAME
+        API_KEY = '2080070c4753d0384b073105ed75e1f46669e4bf'
+        PROJECT_NAME = 'Deeplifting-LD'
+
+    elif dimensionality == 'high-dimensional':
+        directory = 'high-dimension'
+        PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
+        API_KEY = '2080070c4753d0384b073105ed75e1f46669e4bf'
+        PROJECT_NAME = 'Deeplifting-HD'
+
+    else:
+        raise ValueError(f'{dimensionality} is not valid!')
+
+    if experimentation:
+        # Enable wandb
+        wandb.login(key=API_KEY)
+
+        wandb.init(
+            # set the wandb project where this run will be logged
+            project=PROJECT_NAME,
+            tags=['basinhopping', f'{problem_name}'],
+        )
+
+    # Create the save path for this task
+    save_path = os.path.join(
+        '/home/jusun/dever120/Deeplifting',
+        'experiments/3b39b4fb-0520-4795-aaba-a8eab24ff8fd/',
+        f'{directory}/basinhopping',
+    )
+
+    # Setup the problem
+    problem = PROBLEMS[problem_name]
+
+    # Get the known minimum
+    global_minimum = problem['global_minimum']
+
+    # Get the number of trails
+    trials = 50
+
+    # Max iterations search space
+    maxiters_space = [500, 750, 1000, 5000, 10000]
+    temp_space = [0.5, 1.0, 2.5, 5.0, 10.0]
+
+    # Next add dual annealing
+    parameters = list(product(maxiters_space, temp_space))
+
+    # Run dual annealing for different parameters
+    basinhopping_fn = partial(run_basinhopping, problem=problem)
+    basinhopping_results_list = []
+    for niter, temp in tqdm.tqdm(parameters):
+        basinhopping_outputs = basinhopping_fn(
+            trials=trials, niter=niter, tempurature=temp
+        )
+        basinhopping_results_list.append(basinhopping_outputs)
+
+    # Concat all results
+    basinhopping_results = pd.concat(basinhopping_results_list)
+    basinhopping_results['global_minimum'] = global_minimum
+
+    # Compute the success rate
+    numerator = np.abs(
+        basinhopping_results['f_final'] - basinhopping_results['global_minimum']
+    )
+    denominator = np.abs(
+        basinhopping_results['f_init'] - basinhopping_results['global_minimum']
+    )
+
+    # Set up success
+    basinhopping_results['success'] = ((numerator / denominator) <= 1e-4).astype(int)
+
+    # Save the results
+    save_file_name = os.path.join(save_path, f'{problem_name}-basinhopping.parquet')
+    basinhopping_results.to_parquet(save_file_name)
 
 
 @cli.command('run-algorithm-comparisons')
