@@ -145,11 +145,11 @@ def run_dual_annealing_task(
     dual_annleaing_results.to_parquet(save_file_name)
 
 
-# Dual Annealing
-@cli.command('run-basinhopping-task')
-@click.option('--problem_name', default='ackley')
-@click.option('--dimensionality', default='low-dimensional')
-@click.option('--experimentation', default=True)
+# Basinhopping
+# @cli.command('run-basinhopping-task')
+# @click.option('--problem_name', default='ackley')
+# @click.option('--dimensionality', default='low-dimensional')
+# @click.option('--experimentation', default=True)
 def run_basinhopping_task(
     problem_name: str, dimensionality: str, experimentation: bool
 ) -> None:
@@ -201,18 +201,16 @@ def run_basinhopping_task(
 
     # Max iterations search space
     maxiters_space = [500, 750, 1000, 5000, 10000]
-    temp_space = [0.5, 1.0, 2.5, 5.0, 10.0]
+    T_space = [0.5, 1.0, 2.5, 5.0, 10.0]
 
     # Next add dual annealing
-    parameters = list(product(maxiters_space, temp_space))
+    parameters = list(product(maxiters_space, T_space))
 
     # Run dual annealing for different parameters
     basinhopping_fn = partial(run_basinhopping, problem=problem)
     basinhopping_results_list = []
-    for niter, temp in tqdm.tqdm(parameters):
-        basinhopping_outputs = basinhopping_fn(
-            trials=trials, niter=niter, tempurature=temp
-        )
+    for niter, T in tqdm.tqdm(parameters):
+        basinhopping_outputs = basinhopping_fn(trials=trials, niter=niter, T=T)
         basinhopping_results_list.append(basinhopping_outputs)
 
     # Concat all results

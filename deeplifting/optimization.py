@@ -179,9 +179,7 @@ def run_dual_annealing(
     return pd.DataFrame(trial_results)
 
 
-def run_basinhopping(
-    problem: Dict, trials: int, niter: int, temperature: float
-) -> pd.DataFrame:
+def run_basinhopping(problem: Dict, trials: int, niter: int, T: float) -> pd.DataFrame:
     """
     Function that runs basinhopping for a
     specified optimization problem
@@ -230,7 +228,7 @@ def run_basinhopping(
             list_bounds,
             x0=x0,
             niter=niter,
-            T=temperature,
+            T=T,
             callback=callback.record_intermediate_data,
         )
 
@@ -239,7 +237,7 @@ def run_basinhopping(
 
         results = {
             'xs': xs,
-            'T': temperature,
+            'T': T,
             'f_init': f_init,
             'total_time': total_time,
             'f_final': result.fun,
