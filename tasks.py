@@ -292,7 +292,7 @@ def run_differential_evolution_task(
     global_minimum = problem['global_minimum']
 
     # Get the number of trails
-    trials = 2
+    trials = 50
 
     # Max iterations search space
     maxiters_space = [100, 500, 750, 1000, 5000, 10000]
