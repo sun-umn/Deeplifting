@@ -22,7 +22,6 @@ from config import (
     alpine_series,
     chung_reynolds_series,
     griewank_series,
-    high_dimensional_problem_names,
     lennard_jones_series,
     levy_series,
     low_dimensional_problem_names,
@@ -35,9 +34,7 @@ from deeplifting.optimization import run_pyomo  # noqa
 from deeplifting.optimization import (
     run_adam_deeplifting,
     run_basinhopping,
-    run_differential_evolution,
     run_dual_annealing,
-    run_ipopt,
     run_lbfgs_deeplifting,
     run_pygranso,
     run_pygranso_deeplifting,
@@ -150,10 +147,10 @@ def run_dual_annealing_task(
 
 
 # Basinhopping
-# @cli.command('run-basinhopping-task')
-# @click.option('--problem_name', default='ackley')
-# @click.option('--dimensionality', default='low-dimensional')
-# @click.option('--experimentation', default=True)
+@cli.command('run-basinhopping-task')
+@click.option('--problem_name', default='ackley')
+@click.option('--dimensionality', default='low-dimensional')
+@click.option('--experimentation', default=True)
 def run_basinhopping_task(
     problem_name: str, dimensionality: str, experimentation: bool
 ) -> None:
@@ -205,12 +202,9 @@ def run_basinhopping_task(
     # Get the number of trails
     trials = 50
 
-    # # Max iterations search space
-    # maxiters_space = [100, 500, 750, 1000, 5000, 10000]
-    # T_space = [0.5, 1.0, 2.5, 5.0, 10.0]
-
-    maxiters_space = [100]
-    T_space = [0.5]
+    # Max iterations search space
+    maxiters_space = [100, 500, 750, 1000, 5000, 10000]
+    T_space = [0.5, 1.0, 2.5, 5.0, 10.0]
 
     # Next add dual annealing
     parameters = list(product(maxiters_space, T_space))
@@ -241,234 +235,6 @@ def run_basinhopping_task(
     # Save the results
     save_file_name = os.path.join(save_path, f'{problem_name}-basinhopping.parquet')
     basinhopping_results.to_parquet(save_file_name)
-
-
-@cli.command('run-algorithm-comparisons')
-@click.option('--dimensionality', default='low-dimensional')
-@click.option('--trials', default=10)
-def run_algorithm_comparison_task(dimensionality, trials):
-    """
-    Function that will run the competing algorithms to Deeplifting.
-    The current competitor models are:
-    1. IPOPT
-    2. Dual Annealing
-    3. Differential Evolution
-    4. PyGRANSO
-    5. Test
-    """
-    print('Run Algorithms!')
-    run = neptune.init_run(  # noqa
-        project="dever120/Deeplifting",
-        api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzYmIwMTUyNC05YmZmLTQ1NzctOTEyNS1kZTIxYjU5NjY5YjAifQ==",  # noqa
-    )  # your credentials
-    run['sys/tags'].add(['algorithm-compare', dimensionality])
-
-    print('Run Algorithms!')
-
-    if dimensionality == 'low-dimensional':
-        problem_names = low_dimensional_problem_names
-        PROBLEMS = PROBLEMS_BY_NAME
-    elif dimensionality == 'high-dimensional':
-        problem_names = high_dimensional_problem_names
-        PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
-    else:
-        raise ValueError('Option for dimensionality does not exist!')
-
-    # One experiment date
-    experiment_date = datetime.today().strftime('%Y-%m-%d-%H')
-
-    for problem_name in problem_names:
-        print(problem_name)
-        problem_performance_list = []
-
-        # Setup the problem
-        problem = PROBLEMS[problem_name]
-
-        # Get the known minimum
-        minimum_value = problem['global_minimum']
-
-        # Get the dimensions
-        dimensions = problem['dimensions']
-
-        # Create column names
-        x_columns = [f'x{i + 1}' for i in range(dimensions)]
-        columns = x_columns + ['f', 'algorithm', 'time']
-
-        # First run IPOPT
-        print('Running IPOPT')
-        outputs_ipopt = run_ipopt(problem, trials=trials)
-
-        # Get the final results for all IPOPT runs
-        ipopt_results = pd.DataFrame(outputs_ipopt['final_results'], columns=columns)
-        ipopt_results['problem_name'] = problem_name
-        ipopt_results['hits'] = np.where(
-            np.abs(ipopt_results['f'] - minimum_value) <= 1e-4, 1, 0
-        )
-        ipopt_results['dimensions'] = dimensions
-
-        # Add IPOPT to the problem_performance_list
-        problem_performance_list.append(ipopt_results)
-
-        # Next add dual annealing
-        print('Running Dual Annealing')
-        outputs_dual_annealing = run_dual_annealing(problem, trials=trials)
-
-        # Get the final results for all dual annealing runs
-        dual_annleaing_results = pd.DataFrame(
-            outputs_dual_annealing['final_results'], columns=columns
-        )
-        dual_annleaing_results['problem_name'] = problem_name
-        dual_annleaing_results['hits'] = np.where(
-            np.abs(dual_annleaing_results['f'] - minimum_value) <= 1e-4, 1, 0
-        )
-        dual_annleaing_results['dimensions'] = dimensions
-
-        # Add dual annealing to the problem_performance_list
-        problem_performance_list.append(dual_annleaing_results)
-
-        # Next add differential evolution
-        print('Running Differential Evolution')
-        outputs_differential_evolution = run_differential_evolution(
-            problem, trials=trials
-        )
-
-        # Get the final results for all differential evolution runs
-        differential_evolution_results = pd.DataFrame(
-            outputs_differential_evolution['final_results'], columns=columns
-        )
-        differential_evolution_results['problem_name'] = problem_name
-        differential_evolution_results['hits'] = np.where(
-            np.abs(differential_evolution_results['f'] - minimum_value) <= 1e-4, 1, 0
-        )
-        differential_evolution_results['dimensions'] = dimensions
-
-        # Add differential evolution to the problem_performance_list
-        problem_performance_list.append(differential_evolution_results)
-
-        if dimensionality == 'low-dimensional':
-            # NOTE: PyGranso takes a lot of power to run locally
-            # and was not sustainable on my computer should be run
-            # on MSI. Low dimensions should be okay though.
-
-            # Next add pygranso
-            print('Running PyGranso!')
-            outputs_pygranso = run_pygranso(problem, trials=trials)
-
-            # Get the final results for all differential evolution runs
-            pygranso_results = pd.DataFrame(
-                outputs_pygranso['final_results'], columns=columns
-            )
-            pygranso_results['problem_name'] = problem_name
-            pygranso_results['hits'] = np.where(
-                np.abs(pygranso_results['f'] - minimum_value) <= 1e-4, 1, 0
-            )
-            pygranso_results['dimensions'] = dimensions
-
-            # Add differential evolution to the problem_performance_list
-            problem_performance_list.append(pygranso_results)
-
-        # Next add basin hopping
-        print('Running Basin Hopping')
-        outputs_bh = run_basinhopping(problem, trials=trials)
-
-        # Get the final results for all basinhoppin runs
-        bh_results = pd.DataFrame(outputs_bh['final_results'], columns=columns)
-        bh_results['problem_name'] = problem_name
-        bh_results['hits'] = np.where(
-            np.abs(bh_results['f'] - minimum_value) <= 1e-4, 1, 0
-        )
-        bh_results['dimensions'] = dimensions
-
-        # Add differential evolution to the problem_performance_list
-        problem_performance_list.append(bh_results)
-
-        # Concatenate all of the data at the end of each problem because
-        # we can save intermediate results
-        problem_performance_df = pd.concat(problem_performance_list, ignore_index=True)
-        problem_performance_df['global_minimum'] = minimum_value
-        path = f'./algorithm_compare_results/{dimensionality}/{experiment_date}-{problem_name}'  # noqa
-        if not os.path.exists(path):
-            os.makedirs(path)
-
-        problem_performance_df.to_parquet(f'{path}/{dimensionality}.parquet')
-
-
-# @cli.command('create-trajectory-plot')
-# def run_create_trajectory_plot():
-#     """
-#     Function that will run each of the models and create a
-#     "trajectory plot" for the paper. Every function now has the ability
-#     to observe the intermediate trajectory of the optimization with the
-#     exception of IPOPT (we need to use a completely different API).
-#     With this information we can plot the trajectory of the optimization
-#     """
-#     print('Create trajectory plot!')
-#     # Problem set up
-#     problem_name = 'cross_in_tray'
-#     trials = 1
-#     index = 0
-#     problem = PROBLEMS_BY_NAME[problem_name]
-
-#     # First run IPOPT
-#     outputs_ipopt = run_ipopt(problem, trials=trials)
-#     ipopt_trajectory_data = outputs_ipopt['results'][index, :, :]
-
-#     # For IPOPT we need to manually get the data
-#     mask = ~np.isnan(ipopt_trajectory_data).any(axis=1)
-#     ipopt_trajectory_data = ipopt_trajectory_data[mask]
-#     midpoint = len(ipopt_trajectory_data) // 2
-#     ipopt_trajectory_data = ipopt_trajectory_data[[0, midpoint, -1], :2]
-#     ipopt_trajectory_data = ipopt_trajectory_data.tolist()
-
-#     # Next add dual annealing
-#     outputs_dual_annealing = run_dual_annealing(problem, trials=trials)
-#     dual_annealing_trajectory_data = outputs_dual_annealing['callbacks'][
-#         index
-#     ].x_history
-
-#     # Next add differential evolution
-#     outputs_differential_evolution = run_differential_evolution(problem, trials=trials)  # noqa
-#     differential_evolution_trajectory_data = outputs_differential_evolution[
-#         'callbacks'
-#     ][index].x_history
-
-#     # Next add pygranso
-#     outputs_pygranso = run_pygranso(problem, trials=trials)
-#     pygranso_trajectory_data = outputs_pygranso['callbacks'][index]
-
-#     # Run deeplifting
-#     outputs_deeplifting = run_deeplifting(
-#         problem, problem_name=problem_name, trials=trials
-#     )
-#     deeplifting_trajectory_data = outputs_deeplifting['callbacks'][index]
-
-#     # Create models and trajectories
-#     trajectories = [
-#         deeplifting_trajectory_data.tolist(),
-#         ipopt_trajectory_data,
-#         dual_annealing_trajectory_data,
-#         differential_evolution_trajectory_data,
-#         pygranso_trajectory_data,
-#     ]
-
-#     models = [
-#         'Deeplifting',
-#         'IPOPT',
-#         'Dual Annealing',
-#         'Differential Evolution',
-#         'PyGranso',
-#     ]
-
-#     # plot the data
-#     fig = create_contour_plot(
-#         problem_name=problem_name,
-#         problem=problem,
-#         models=models,
-#         trajectories=trajectories,
-#         colormap='Greys',
-#     )
-
-#     fig.savefig('./images/trajectory.png', bbox_inches='tight', pad_inches=0.05)
 
 
 @cli.command('run-pygranso')
