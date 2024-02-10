@@ -275,7 +275,7 @@ def run_differential_evolution_task(
         wandb.init(
             # set the wandb project where this run will be logged
             project=PROJECT_NAME,
-            tags=['basinhopping', f'{problem_name}'],
+            tags=['differential-evolution', f'{problem_name}'],
         )
 
     # Create the save path for this task
@@ -297,7 +297,7 @@ def run_differential_evolution_task(
     # Max iterations search space
     maxiters_space = [100, 500, 750, 1000, 5000, 10000]
     popsize_space = [15, 20, 35, 50, 100]
-    mutation_space = [(0.5, 1.0), (0.5, 2), (0.5, 5), (0.5, 10)]
+    mutation_space = [(0.5, 1.0), (0.5, 1.25), (0.5, 1.5), (0.5, 1.90)]
     recombination_space = [0.7, 0.5, 0.1, 0.05]
 
     # Next add dual annealing
