@@ -662,7 +662,24 @@ def get_devices():
     return device
 
 
-class DifferentialEvolutionCallback(object):
+class BasinHoppingCallback:
+    """
+    Callback to save intermediate results for
+    Basinhopping
+    """
+
+    def __init__(self):
+        self.x_history = []
+        self.f_history = []
+        self.accecpt_history = []
+
+    def record_intermediate_data(self, x, f, accept):
+        self.x_history.append(x)
+        self.f_history.append(f)
+        self.accecpt_history.append(accept)
+
+
+class DifferentialEvolutionCallback:
     """
     Callback to save intermediate results for
     Differential Evolution
@@ -677,7 +694,7 @@ class DifferentialEvolutionCallback(object):
         self.convergence_history.append(convergence)
 
 
-class DualAnnealingCallback(object):
+class DualAnnealingCallback:
     """
     Call back to save intermediate results for
     Dual Annealing

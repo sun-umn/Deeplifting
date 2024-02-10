@@ -20,6 +20,7 @@ from scipy.optimize import basinhopping, differential_evolution, dual_annealing
 from deeplifting.models import ReLUDeepliftingMLP
 from deeplifting.problems import HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
 from deeplifting.utils import (
+    BasinHoppingCallback,
     DifferentialEvolutionCallback,
     DualAnnealingCallback,
     HaltLog,
@@ -178,7 +179,9 @@ def run_dual_annealing(
     return pd.DataFrame(trial_results)
 
 
-def run_basinhopping(problem: Dict, trials: int):
+def run_basinhopping(
+    problem: Dict, trials: int, niter: int, temperature: float
+) -> pd.DataFrame:
     """
     Function that runs basinhopping for a
     specified optimization problem
@@ -190,37 +193,13 @@ def run_basinhopping(problem: Dict, trials: int):
     dimensions = problem['dimensions']
 
     # Get the bounds of the problem
-    if dimensions <= 2:
-        bounds = problem['bounds']
-    else:
-        bounds = problem['bounds']
+    bounds = problem['bounds']
+    upper_bounds = bounds['upper_bounds']
+    lower_bounds = bounds['lower_bounds']
+    list_bounds = list(zip(lower_bounds, upper_bounds))
 
-        if len(bounds) > 1:
-            bounds = bounds
-
-        else:
-            bounds = bounds * dimensions
-
-    # Some of the problems may be unbounded but dual annealing
-    # and differential evolution need to have bounds provided
-    updated_bounds = []
-    for constr in bounds:
-        a, b = constr
-        if a is None:
-            a = -1e6
-        if b is None:
-            b = 1e6
-        updated_bounds.append((a, b))
-
-    # Get the maximum iterations
-    max_iterations = problem['max_iterations']
-
-    # Save the results
-    # We will store the optimization steps here
-    results = np.zeros((trials, max_iterations * 10, dimensions + 1)) * np.nan
-    fn_values = []
-    callbacks = []
-
+    # Run the trials and save the results
+    trial_results = []
     for trial in range(trials):
         # Set a random seed
         np.random.seed(trial)
@@ -228,29 +207,50 @@ def run_basinhopping(problem: Dict, trials: int):
         # Initial point
         x0 = initialize_vector(size=dimensions, bounds=bounds)
 
-        # Set up the function with the results
-        fn = lambda x: objective(  # noqa
-            x, results=results, trial=trial, version='numpy'
-        )
+        columns = [f'x{i + 1}' for i in range(dimensions)]
+        xs = json.dumps(dict(zip(columns, x0)))
 
-        minimizer_kwargs = {"method": "L-BFGS-B", "bounds": bounds}
+        # Set up the function with the results
+        fn = lambda x: objective(x, version='numpy')  # noqa
+
+        # Get the initial objective galue
+        f_init = fn(x0)
+
+        # Callback
+        callback = BasinHoppingCallback()
+
+        # Let's record the initial result
+        # We will use the context -1 to indicate the initial search
+        callback.record_intermediate_data(x0, fn(x0), -1)
 
         # Get the result
         start_time = time.time()
         result = basinhopping(
             fn,
+            list_bounds,
             x0=x0,
-            niter=1000,
-            minimizer_kwargs=minimizer_kwargs,
+            niter=niter,
+            T=temperature,
+            callback=callback.record_intermediate_data,
         )
 
         end_time = time.time()
         total_time = end_time - start_time
-        x_tuple = tuple(x for x in result.x)
-        fn_values.append(x_tuple + (result.fun, 'Basinhopping', total_time))
-        callbacks.append(0)
 
-    return {'results': results, 'final_results': fn_values, 'callbacks': callbacks}
+        results = {
+            'xs': xs,
+            'T': temperature,
+            'f_init': f_init,
+            'total_time': total_time,
+            'f_final': result.fun,
+            'iterations': result.nit,
+            'fn_evals': result.nfev,  # Does not apply to this method
+            'termination_code': result.status,
+            'objective_values': np.array(callback.f_history),
+        }
+        trial_results.append(results)
+
+    return pd.DataFrame(trial_results)
 
 
 def run_differential_evolution(
