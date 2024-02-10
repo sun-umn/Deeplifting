@@ -237,6 +237,16 @@ def run_basinhopping_task(
     basinhopping_results.to_parquet(save_file_name)
 
 
+@cli.command('run-differential-evolution-task')
+@click.option('--problem_name', default='ackley')
+@click.option('--dimensionality', default='low-dimensional')
+@click.option('--experimentation', default=True)
+def run_differential_evolution_task(
+    problem_name: str, dimensionality: str, experimentation: bool
+) -> None:
+    pass
+
+
 @cli.command('run-pygranso')
 @click.option('--problem_series', default='ackley')
 @click.option('--dimensionality', default='low-dimensional')
