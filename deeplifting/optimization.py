@@ -5,11 +5,13 @@ import time
 from typing import Any, Callable, Dict
 
 # third party
+import cyipopt
+import jax.numpy as jnp
 import numpy as np
 import pandas as pd
 import torch
 import torch.optim as optim
-from cyipopt import minimize_ipopt
+from jax import grad, jit
 from pygranso.private.getNvar import getNvarTorch
 from pygranso.pygranso import pygranso
 from pygranso.pygransoStruct import pygransoStruct
@@ -24,7 +26,6 @@ from deeplifting.utils import (
     DifferentialEvolutionCallback,
     DualAnnealingCallback,
     HaltLog,
-    IPOPTCallback,
     PyGransoConfig,
     initialize_vector,
     set_seed,
@@ -52,6 +53,46 @@ def run_ipopt(problem: Dict, trials: int) -> pd.DataFrame:
     lower_bounds = bounds['lower_bounds']
     list_bounds = list(zip(lower_bounds, upper_bounds))
 
+    # NOTE: With this setup we can extract the intermediate
+    # values for analysis
+    class IPOPTProblem:
+        def __init__(self, objective_fn):
+            self.objective_fn = objective_fn
+            self.iterations = []
+            self.f_history = []
+
+        def objective(self, x):
+            return self.objective_fn(x)
+
+        def gradient(self, x):
+            obj_jit = jit(self.objective_fn)
+            gradient = grad(obj_jit)
+            return gradient(x)
+
+        def constraints(self, x):
+            return jnp.zeros_like(x)
+
+        def intermediate(
+            self,
+            alg_mod,
+            iter_count,
+            obj_value,
+            inf_pr,
+            inf_du,
+            mu,
+            d_norm,
+            regularization_size,
+            alpha_du,
+            alpha_pr,
+            ls_trials,
+        ):
+            """
+            Function to save the history of the objective function values during
+            iteration and also save the number of iterations
+            """
+            self.f_history.append(obj_value)
+            self.iterations.append(iter_count)
+
     # Save the results
     # We will store the optimization steps here
     trial_results = []
@@ -67,35 +108,39 @@ def run_ipopt(problem: Dict, trials: int) -> pd.DataFrame:
         xs = json.dumps(dict(zip(columns, x0)))
 
         # Get the objective
-        fn = lambda x: objective(x, version='numpy')  # noqa  # noqa
+        fn = lambda x: objective(x, version='jax')  # noqa  # noqa
 
         # Get the initial objective galue
         f_init = fn(x0)
 
-        # Callback
-        callback = IPOPTCallback()
+        # IPOPT Problem
+        ipopt_problem = IPOPTProblem(objective_fn=fn)
+        nlp = cyipopt.Problem(
+            n=len(x0),
+            m=0,
+            problem_obj=ipopt_problem,
+            lb=list_bounds[0],
+            ub=list_bounds[1],
+        )
 
         # Call IPOPT
         start_time = time.time()
-        result = minimize_ipopt(
-            fn,
-            x0,
-            bounds=list_bounds,
-            intermediate_callback=callback.record_intermediate_data,
-        )
+
+        # Use the solve method
+        x, info = nlp.solve(x0)
 
         end_time = time.time()
         total_time = end_time - start_time
 
         results = {
             'xs': xs,
-            'f_init': f_init,
+            'f_init': float(f_init),
             'total_time': total_time,
-            'f_final': result.fun,
-            'iterations': result.nit,
-            'fn_evals': result.nfev,
-            'termination_code': result.status,
-            'objective_values': np.array(callback.f_history),
+            'f_final': info['obj_val'],
+            'iterations': len(ipopt_problem.iterations),
+            'fn_evals': len(ipopt_problem.iterations),
+            'termination_code': info['status'],
+            'objective_values': np.array(ipopt_problem.f_history),
         }
         trial_results.append(results)
 

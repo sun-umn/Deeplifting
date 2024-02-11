@@ -1,4 +1,5 @@
 # third party
+import jax.numpy as jnp
 import numpy as np
 import pyomo.environ as pyo
 import torch
@@ -61,10 +62,17 @@ def ackley(x, p=0.0, version='numpy'):
         sum_sq_term = -a * np.exp(-b * np.sqrt(0.5 * ((x1 - p) ** 2 + (x2 - p) ** 2)))
         cos_term = -np.exp(0.5 * (np.cos(c * (x1 - p)) + np.cos(c * (x2 - p))))
         result = sum_sq_term + cos_term + a + np.exp(1)
+
+    elif version == 'jax':
+        sum_sq_term = -a * jnp.exp(-b * jnp.sqrt(0.5 * ((x1 - p) ** 2 + (x2 - p) ** 2)))
+        cos_term = -jnp.exp(0.5 * (jnp.cos(c * (x1 - p)) + jnp.cos(c * (x2 - p))))
+        result = sum_sq_term + cos_term + a + np.exp(1)
+
     elif version == 'pyomo':
         sum_sq_term = -a * pyo.exp(-b * (0.5 * (x1**2 + x2**2) ** 0.5))
         cos_term = -pyo.exp(0.5 * (pyo.cos(c * x1) + pyo.cos(c * x2)))
         result = sum_sq_term + cos_term + a + np.e
+
     elif version == 'pytorch':
         sum_sq_term = -a * torch.exp(
             -b * torch.sqrt(0.5 * ((x1 - p) ** 2 + (x2 - p) ** 2))
