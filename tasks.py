@@ -65,8 +65,6 @@ def run_dual_annealing_task(
     Function to run the dual annealing task for a single
     problem
     """
-    print(f'Dual-Annealing for {problem_name}')
-
     # Setup the problem
     if dimensionality == 'low-dimensional':
         directory = 'low-dimension'
@@ -92,6 +90,8 @@ def run_dual_annealing_task(
             project=PROJECT_NAME,
             tags=['dual-annealing', f'{problem_name}'],
         )
+
+    print(f'Dual-Annealing for {problem_name}')
 
     # Create the save path for this task
     save_path = os.path.join(
@@ -161,8 +161,6 @@ def run_basinhopping_task(
     Function to run the basinhopping task for a single
     problem
     """
-    print(f'Basinhopping for {problem_name}')
-
     # Setup the problem
     if dimensionality == 'low-dimensional':
         directory = 'low-dimension'
@@ -188,6 +186,8 @@ def run_basinhopping_task(
             project=PROJECT_NAME,
             tags=['basinhopping', f'{problem_name}'],
         )
+
+    print(f'Basinhopping for {problem_name}')
 
     # Create the save path for this task
     save_path = os.path.join(
@@ -254,8 +254,6 @@ def run_differential_evolution_task(
     Function to run the differential evolution task for a single
     problem
     """
-    print(f'Differential-Evolution for {problem_name}')
-
     # Setup the problem
     if dimensionality == 'low-dimensional':
         directory = 'low-dimension'
@@ -281,6 +279,8 @@ def run_differential_evolution_task(
             project=PROJECT_NAME,
             tags=['differential-evolution', f'{problem_name}'],
         )
+
+    print(f'Differential-Evolution for {problem_name}')
 
     # Create the save path for this task
     save_path = os.path.join(
@@ -365,8 +365,6 @@ def run_ipopt_task(
     Function to run the IPOPT task for a single
     problem
     """
-    print(f'IPOPT for {problem_name}')
-
     # Setup the problem
     if dimensionality == 'low-dimensional':
         directory = 'low-dimension'
@@ -392,6 +390,8 @@ def run_ipopt_task(
             project=PROJECT_NAME,
             tags=['IPOPT', f'{problem_name}'],
         )
+
+    print(f'IPOPT for {problem_name}')
 
     # Create the save path for this task
     save_path = os.path.join(
@@ -442,8 +442,6 @@ def run_pygranso_task(
     Function that will run the competing algorithms to Deeplifting
     which is our NCVX method PyGranso
     """
-    print(f'PyGranso for {problem_name}')
-
     # Setup the problem
     if dimensionality == 'low-dimensional':
         directory = 'low-dimension'
@@ -469,6 +467,8 @@ def run_pygranso_task(
             project=PROJECT_NAME,
             tags=['PyGranso', f'{problem_name}'],
         )
+
+    print(f'PyGranso for {problem_name}')
 
     # Create the save path for this task
     save_path = os.path.join(
