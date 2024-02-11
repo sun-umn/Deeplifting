@@ -146,6 +146,8 @@ def run_dual_annealing_task(
     save_file_name = os.path.join(save_path, f'{problem_name}-dual-annealing.parquet')
     dual_annleaing_results.to_parquet(save_file_name)
 
+    print('Task completed! 🎉')
+
 
 # Basinhopping
 @cli.command('run-basinhopping-task')
@@ -236,6 +238,8 @@ def run_basinhopping_task(
     # Save the results
     save_file_name = os.path.join(save_path, f'{problem_name}-basinhopping.parquet')
     basinhopping_results.to_parquet(save_file_name)
+
+    print('Task completed! 🎉')
 
 
 # Differential Evolution
@@ -346,6 +350,8 @@ def run_differential_evolution_task(
     )
     differential_evolution_results.to_parquet(save_file_name)
 
+    print('Task completed! 🎉')
+
 
 # IPOPT
 @cli.command('run-ipopt-task')
@@ -421,6 +427,8 @@ def run_ipopt_task(
     # Save the results
     save_file_name = os.path.join(save_path, f'{problem_name}-ipopt.parquet')
     ipopt_results.to_parquet(save_file_name)
+
+    print('Task completed! 🎉')
 
 
 @cli.command('run-pygranso-task')
@@ -498,6 +506,8 @@ def run_pygranso_task(
     # Save the results
     save_file_name = os.path.join(save_path, f'{problem_name}-pygranso.parquet')
     pygranso_results.to_parquet(save_file_name)
+
+    print('Task completed! 🎉')
 
 
 @cli.command('run-algorithm-comparisons-scip')
