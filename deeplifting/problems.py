@@ -44,7 +44,7 @@ def build_2d_intermediate_results(x1, x2, result, version, results, trial):
     return results
 
 
-def ackley(x, p=0.0, version='numpy'):
+def ackley(x, version='numpy'):
     """
     Function that implements the Ackley function in
     numpy, pytorch or pyomo interface. We will use this
@@ -59,13 +59,13 @@ def ackley(x, p=0.0, version='numpy'):
     x1, x2 = x.flatten()
 
     if version == 'numpy':
-        sum_sq_term = -a * np.exp(-b * np.sqrt(0.5 * ((x1 - p) ** 2 + (x2 - p) ** 2)))
-        cos_term = -np.exp(0.5 * (np.cos(c * (x1 - p)) + np.cos(c * (x2 - p))))
+        sum_sq_term = -a * np.exp(-b * np.sqrt(0.5 * ((x1) ** 2 + (x2) ** 2)))
+        cos_term = -np.exp(0.5 * (np.cos(c * (x1)) + np.cos(c * (x2))))
         result = sum_sq_term + cos_term + a + np.exp(1)
 
     elif version == 'jax':
-        sum_sq_term = -a * jnp.exp(-b * jnp.sqrt(0.5 * ((x1 - p) ** 2 + (x2 - p) ** 2)))
-        cos_term = -jnp.exp(0.5 * (jnp.cos(c * (x1 - p)) + jnp.cos(c * (x2 - p))))
+        sum_sq_term = -a * jnp.exp(-b * jnp.sqrt(0.5 * ((x1) ** 2 + (x2) ** 2)))
+        cos_term = -jnp.exp(0.5 * (jnp.cos(c * (x1)) + jnp.cos(c * (x2))))
         result = sum_sq_term + cos_term + a + np.exp(1)
 
     elif version == 'pyomo':
@@ -74,15 +74,60 @@ def ackley(x, p=0.0, version='numpy'):
         result = sum_sq_term + cos_term + a + np.e
 
     elif version == 'pytorch':
-        sum_sq_term = -a * torch.exp(
-            -b * torch.sqrt(0.5 * ((x1 - p) ** 2 + (x2 - p) ** 2))
-        )
-        cos_term = -torch.exp(0.5 * (torch.cos(c * (x1 - p)) + torch.cos(c * (x2 - p))))
+        sum_sq_term = -a * torch.exp(-b * torch.sqrt(0.5 * ((x1) ** 2 + (x2) ** 2)))
+        cos_term = -torch.exp(0.5 * (torch.cos(c * (x1)) + torch.cos(c * (x2))))
         result = sum_sq_term + cos_term + a + torch.exp(torch.tensor(1.0))
 
     else:
         raise ValueError(
             "Unknown version specified. Available options are numpy, pyomo and pytorch."
+        )
+
+    return result
+
+
+def alpine2(x, version='numpy'):
+    """
+    Implementation of the Alpine2 function.
+    This is a 2-dimensional function with a global minimum of 2.808^2
+    at (7.917,7.917)
+
+    Parameters:
+        x: (x1, x2) this is a 2D problem
+    version : str
+        The version to use for the function's computation.
+        Options are 'numpy' and 'pytorch'.
+
+    Returns:
+    result : np.ndarray or torch.Tensor
+        The computed Damavandi function values
+        corresponding to the inputs (x1, x2).
+
+    Raises:
+    ValueError
+        If the version is not 'numpy' or 'pytorch'.
+
+    This is the correct version:
+    https://towardsdatascience.com/optimization-eye-pleasure-78-benchmark-test-functions-for-single-objective-optimization-92e7ed1d1f12  # noqa
+    """
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = -1.0 * (np.sqrt(x1) * np.sin(x1)) * (np.sqrt(x2) * np.sin(x2))
+
+    elif version == 'jax':
+        result = -1.0 * (jnp.sqrt(x1) * jnp.sin(x1)) * (jnp.sqrt(x2) * jnp.sin(x2))
+
+    elif version == 'pyomo':
+        result = -1.0 * (x1**0.5 * pyo.sin(x1)) * (x2**0.5 * pyo.sin(x2))
+
+    elif version == 'pytorch':
+        result = (
+            -1.0 * (torch.sqrt(x1) * torch.sin(x1)) * (torch.sqrt(x2) * torch.sin(x2))
+        )
+
+    else:
+        raise ValueError(
+            "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
         )
 
     return result
@@ -2790,59 +2835,6 @@ def alpine1(x, results=None, trial=None, version='numpy'):
     elif version == 'pytorch':
         result = torch.abs(x1 * torch.sin(x1) + 0.1 * x1) + torch.abs(
             x2 * torch.sin(x2) + 0.1 * x2
-        )
-    else:
-        raise ValueError(
-            "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
-        )
-
-    # Fill in the intermediate results if results and trial
-    # are provided
-    if results is not None and trial is not None:
-        build_2d_intermediate_results(
-            x1=x1,
-            x2=x2,
-            result=result,
-            version=version,
-            results=results,
-            trial=trial,
-        )
-
-    return result
-
-
-def alpine2(x, results=None, trial=None, version='numpy'):
-    """
-    Implementation of the Alpine2 function.
-    This is a 2-dimensional function with a global minimum of 2.808^2
-    at (7.917,7.917)
-
-    Parameters:
-        x: (x1, x2) this is a 2D problem
-    version : str
-        The version to use for the function's computation.
-        Options are 'numpy' and 'pytorch'.
-
-    Returns:
-    result : np.ndarray or torch.Tensor
-        The computed Damavandi function values
-        corresponding to the inputs (x1, x2).
-
-    Raises:
-    ValueError
-        If the version is not 'numpy' or 'pytorch'.
-
-    This is the correct version:
-    https://towardsdatascience.com/optimization-eye-pleasure-78-benchmark-test-functions-for-single-objective-optimization-92e7ed1d1f12  # noqa
-    """
-    x1, x2 = x.flatten()
-    if version == 'numpy':
-        result = -1.0 * (np.sqrt(x1) * np.sin(x1)) * (np.sqrt(x2) * np.sin(x2))
-    elif version == 'pyomo':
-        result = -1.0 * (x1**0.5 * pyo.sin(x1)) * (x2**0.5 * pyo.sin(x2))
-    elif version == 'pytorch':
-        result = (
-            -1.0 * (torch.sqrt(x1) * torch.sin(x1)) * (torch.sqrt(x2) * torch.sin(x2))
         )
     else:
         raise ValueError(
