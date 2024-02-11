@@ -413,7 +413,7 @@ def pygranso_nd_fn(X_struct, objective, bounds):
     b = torch.tensor(bounds['upper_bounds'])
 
     # Get the scaled x-values
-    x = torch.sin(x)
+    x = torch.tanh(x)
     x = a + ((b - a) / 2.0 * (x + 1))
 
     f = objective(x)
