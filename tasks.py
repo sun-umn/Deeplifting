@@ -348,11 +348,11 @@ def run_differential_evolution_task(
     differential_evolution_results.to_parquet(save_file_name)
 
 
-# # IPOPT
-# @cli.command('run-ipopt-task')
-# @click.option('--problem_name', default='ackley')
-# @click.option('--dimensionality', default='low-dimensional')
-# @click.option('--experimentation', default=True)
+# IPOPT
+@cli.command('run-ipopt-task')
+@click.option('--problem_name', default='ackley')
+@click.option('--dimensionality', default='low-dimensional')
+@click.option('--experimentation', default=True)
 def run_ipopt_task(
     problem_name: str, dimensionality: str, experimentation: bool
 ) -> None:
@@ -402,7 +402,7 @@ def run_ipopt_task(
     global_minimum = problem['global_minimum']
 
     # Get the number of trails
-    trials = 5
+    trials = 50
 
     # Run ipopt
     ipopt_results = run_ipopt(
