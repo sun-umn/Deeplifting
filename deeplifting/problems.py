@@ -6178,7 +6178,24 @@ alpine2_config = {
     'global_minimum': -7.885600,
     'dimensions': 2,
     'global_x': np.array([7.917, 7.917]),
-    'trials': 10,
+    'trials': 50,
+}
+
+# TODO: Bird is a function that has two global minima
+# (4.70104, 3.15294) & (-1.58214, -3.13024)
+# Still need to figure out how to use this information
+# For now global_x set to (0.0, 0.0)
+bird_config = {
+    'objective': bird,
+    'bounds': {
+        'lower_bounds': [-2 * np.pi, -2 * np.pi],
+        'upper_bounds': [2 * np.pi, 2 * np.pi],
+    },
+    'max_iterations': 1000,
+    'global_minimum': -106.764537,
+    'dimensions': 2,
+    'global_x': np.array([0.0, 0.0]),
+    'trials': 50,
 }
 
 # Bukin N.6
@@ -7175,14 +7192,6 @@ biggs_exp6_config = {
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 6,
-}
-
-bird_config = {
-    'objective': bird,
-    'bounds': [(-2 * np.pi, 2 * np.pi), (-2 * np.pi, 2 * np.pi)],
-    'max_iterations': 1000,
-    'global_minimum': -106.764537,
-    'dimensions': 2,
 }
 
 bohachevsky1_config = {
