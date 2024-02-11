@@ -63,6 +63,7 @@ def run_ipopt(problem: Dict, trials: int) -> pd.DataFrame:
             self.nfev = 0
 
         def objective(self, x):
+            self.nfev += 1
             return self.objective_fn(x)
 
         def gradient(self, x):
@@ -93,7 +94,6 @@ def run_ipopt(problem: Dict, trials: int) -> pd.DataFrame:
             """
             self.f_history.append(obj_value)
             self.iterations.append(iter_count)
-            self.nfev += ls_trials
 
     # Save the results
     # We will store the optimization steps here
