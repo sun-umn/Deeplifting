@@ -487,7 +487,7 @@ def run_pygranso(problem: Dict, trials: int):
 
         # Get the initial objective value
         f_init = fn(x0)
-        f_init = float(f_init.numpy()[0])
+        f_init = float(f_init)
 
         # Combined function
         comb_fn = lambda x: pygranso_nd_fn(x, fn, bounds)  # noqa
