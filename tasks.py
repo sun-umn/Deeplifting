@@ -24,7 +24,6 @@ from config import (
     griewank_series,
     lennard_jones_series,
     levy_series,
-    low_dimensional_problem_names,
     qing_series,
     rastrigin_series,
     schwefel_series,
@@ -424,100 +423,81 @@ def run_ipopt_task(
     ipopt_results.to_parquet(save_file_name)
 
 
-@cli.command('run-pygranso')
-@click.option('--problem_series', default='ackley')
-@click.option('--dimensionality', default='low-dimensional')
-@click.option('--trials', default=10)
-def run_pygranso_task(problem_series, dimensionality, trials):
+# @cli.command('run-pygranso-task')
+# @click.option('--problem_series', default='ackley')
+# @click.option('--dimensionality', default='low-dimensional')
+# @click.option('--trials', default=10)
+def run_pygranso_task(
+    problem_name: str, dimensionality: str, experimentation: bool
+) -> None:
     """
-    Function that will run the competing algorithms to Deeplifting.
-    The current competitor models are:
-    1. PyGRANSO
+    Function that will run the competing algorithms to Deeplifting
+    which is our NCVX method PyGranso
     """
-    print('Run Algorithms!')
-    run = neptune.init_run(  # noqa
-        project="dever120/Deeplifting",
-        api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzYmIwMTUyNC05YmZmLTQ1NzctOTEyNS1kZTIxYjU5NjY5YjAifQ==",  # noqa
-    )  # your credentials
-    run['sys/tags'].add(['pygranso', dimensionality])
+    print(f'PyGranso for {problem_name}')
 
-    # Get the problem list
-    if dimensionality == 'high-dimensional':
-        PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
-        if problem_series == 'ackley':
-            problem_names = ackley_series
-        elif problem_series == 'alpine1':
-            problem_names = alpine_series
-        elif problem_series == 'chung_reynolds':
-            problem_names = chung_reynolds_series
-        elif problem_series == 'griewank':
-            problem_names = griewank_series
-        elif problem_series == 'lennard_jones':
-            problem_names = lennard_jones_series
-        elif problem_series == 'levy':
-            problem_names = levy_series
-        elif problem_series == 'qing':
-            problem_names = qing_series
-        elif problem_series == 'rastrigin':
-            problem_names = rastrigin_series
-        elif problem_series == 'schwefel':
-            problem_names = schwefel_series
-    elif dimensionality == 'low-dimensional':
-        if problem_series != 'all':
-            raise ValueError('Can only run full list for this option!')
+    # Setup the problem
+    if dimensionality == 'low-dimensional':
+        directory = 'low-dimension'
         PROBLEMS = PROBLEMS_BY_NAME
-        problem_names = low_dimensional_problem_names
+        API_KEY = '2080070c4753d0384b073105ed75e1f46669e4bf'
+        PROJECT_NAME = 'Deeplifting-LD'
 
-    # Create the experiment date
-    experiment_date = datetime.today().strftime('%Y-%m-%d-%H')
-    for problem_name in problem_names:
-        print(problem_name)
-        problem_performance_list = []
+    elif dimensionality == 'high-dimensional':
+        directory = 'high-dimension'
+        PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
+        API_KEY = '2080070c4753d0384b073105ed75e1f46669e4bf'
+        PROJECT_NAME = 'Deeplifting-HD'
 
-        # Setup the problem
-        problem = PROBLEMS[problem_name]
+    else:
+        raise ValueError(f'{dimensionality} is not valid!')
 
-        # Get the known minimum
-        minimum_value = problem['global_minimum']
+    if experimentation:
+        # Enable wandb
+        wandb.login(key=API_KEY)
 
-        # Get the dimensions
-        dimensions = problem['dimensions']
-
-        # Create column names
-        x_columns = [f'x{i + 1}' for i in range(dimensions)]
-        columns = x_columns + ['f', 'algorithm', 'time']
-
-        # Next add pygranso
-        print('Running PyGranso!')
-        outputs_pygranso = run_pygranso(problem, trials=trials)
-
-        # Get the final results for all differential evolution runs
-        pygranso_results = pd.DataFrame(
-            outputs_pygranso['final_results'], columns=columns
+        wandb.init(
+            # set the wandb project where this run will be logged
+            project=PROJECT_NAME,
+            tags=['PyGranso', f'{problem_name}'],
         )
-        pygranso_results['problem_name'] = problem_name
-        pygranso_results['hits'] = np.where(
-            np.abs(pygranso_results['f'] - minimum_value) <= 1e-4, 1, 0
-        )
-        pygranso_results['dimensions'] = dimensions
 
-        # Add differential evolution to the problem_performance_list
-        problem_performance_list.append(pygranso_results)
+    # Create the save path for this task
+    save_path = os.path.join(
+        '/home/jusun/dever120/Deeplifting',
+        'experiments/3b39b4fb-0520-4795-aaba-a8eab24ff8fd/',
+        f'{directory}/pygranso',
+    )
 
-        # Print the results
-        hits = pygranso_results['hits'].mean()
-        average_time = pygranso_results['time'].mean()
-        print(f'Success Rate = {hits}')
-        print(f'Average time = {average_time}')
+    # Setup the problem
+    problem = PROBLEMS[problem_name]
 
-        # Concatenate all of the data at the end of each problem because
-        # we can save intermediate results
-        problem_performance_df = pd.concat(problem_performance_list, ignore_index=True)
-        path = f'./algorithm_compare_results/{experiment_date}-pygranso-{problem_name}'
-        if not os.path.exists(path):
-            os.makedirs(path)
+    # Get the known minimum
+    global_minimum = problem['global_minimum']
 
-        problem_performance_df.to_parquet(f'{path}/{dimensionality}.parquet')
+    # Get the number of trails
+    trials = 5
+
+    # Run ipopt
+    pygranso_results = run_pygranso(
+        problem=problem,
+        trials=trials,
+    )
+
+    pygranso_results['global_minimum'] = global_minimum
+
+    # Compute the success rate
+    numerator = np.abs(pygranso_results['f_final'] - pygranso_results['global_minimum'])
+    denominator = np.abs(
+        pygranso_results['f_init'] - pygranso_results['global_minimum']
+    )
+
+    # Set up success
+    pygranso_results['success'] = ((numerator / denominator) <= 1e-4).astype(int)
+
+    # Save the results
+    save_file_name = os.path.join(save_path, f'{problem_name}-pygranso.parquet')
+    pygranso_results.to_parquet(save_file_name)
 
 
 @cli.command('run-algorithm-comparisons-scip')

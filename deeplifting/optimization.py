@@ -418,30 +418,8 @@ def pygranso_nd_fn(X_struct, objective, bounds):
 
     f = objective(x)
 
-    # Setup the bounds for the inequality
-    # a <= x <= b
-    # -> a - x <= 0
-    # -> x - b <= 0
     # Inequality constraints
-    # In some cases all of the bounds will be
-    # None so we will need to set the ci struct to None
     ci = None
-
-    # # TODO: I will leave this for now but it was not working - is there
-    # # an implementation issue?
-    # if np.any(np.array(bounds).flatten() != None):  # noqa
-    #     ci = pygransoStruct()
-    #     for index, cnstr in enumerate(bounds):
-    #         a, b = cnstr
-    #         if a is None and b is None:
-    #             pass
-    #         elif a is None:
-    #             setattr(ci, f'ca{index}', a - x[index])
-    #         elif b is None:
-    #             setattr(ci, f'cb{index}', x[index] - b)
-    #         else:
-    #             setattr(ci, f'ca{index}', a - x[index])
-    #             setattr(ci, f'cb{index}', x[index] - b)
 
     # Equality constraints
     ce = None
@@ -456,18 +434,17 @@ def run_pygranso(problem: Dict, trials: int):
     """
     # Get the device (CPU for now)
     device = torch.device('cpu')
-    fn_values = []
-    interim_results = []
 
-    # Get the maximum iterations
-    max_iterations = problem['max_iterations']
+    # Objective function
+    objective = problem['objective']
 
-    # Get the number of dimensions for the problem
+    # Get the number of dimensions
     dimensions = problem['dimensions']
 
-    # results
-    results = np.zeros((trials, max_iterations * 100, dimensions + 1)) * np.nan
+    # Get the bounds of the problem
+    bounds = problem['bounds']
 
+    trial_results = []
     for trial in range(trials):
         # Seed everything
         set_seed(trial)
@@ -481,28 +458,22 @@ def run_pygranso(problem: Dict, trials: int):
         # options
         opts = pygransoStruct()
 
-        # Get the bounds of the problem
-        if dimensions <= 2:
-            bounds = problem['bounds']
-        else:
-            bounds = problem['bounds']
-
-            if len(bounds) > 1:
-                bounds = bounds
-
-            else:
-                bounds = bounds * dimensions
-
         # Create x0 based on the bounds
         # Initial point
         x0 = initialize_vector(size=dimensions, bounds=bounds)
+
+        # Create the initial xs before we turn into a torch
+        # tensor
+        columns = [f'x{i + 1}' for i in range(dimensions)]
+        xs = json.dumps(dict(zip(columns, x0)))
+
+        # Convert x0 into a torch tensor
         x0 = torch.tensor(x0).reshape(dimensions, 1)
         x0 = x0.to(device=device, dtype=torch.double)
 
         # Pygranso options
         opts.x0 = x0
         opts.torch_device = device
-        # opts.print_frequency = 100
         opts.print_level = 0
         opts.limited_mem_size = 5
         opts.stat_l2_model = False
@@ -511,13 +482,11 @@ def run_pygranso(problem: Dict, trials: int):
         opts.opt_tol = 1e-10
         opts.maxit = 2000
 
-        # Objective function
-        objective = problem['objective']
-
         # Set up the function with the results
-        fn = lambda x: objective(  # noqa
-            x, results=results, trial=trial, version='pytorch'
-        )
+        fn = lambda x: objective(x, version='pytorch')  # noqa
+
+        # Get the initial objective value
+        f_init = fn(x0)
 
         # Combined function
         comb_fn = lambda x: pygranso_nd_fn(x, fn, bounds)  # noqa
@@ -540,27 +509,37 @@ def run_pygranso(problem: Dict, trials: int):
         # obtained by calling get_log_fn()
         log = get_log_fn()
 
-        # Final structure
+        # indexes for completed iterations
         indexes = (pd.Series(log.fn_evals).cumsum() - 1).values.tolist()
 
-        # Index results
-        interim_results.append(results[trial, indexes, :dimensions])
+        # Get the f history
+        f_history = log.f[indexes]
 
         # Get final x we will also need to map
         # it to the same bounds
         x = soln.final.x.cpu().numpy().flatten()
 
+        # Final objective function value
         f = soln.final.f
-        b = soln.best.f
 
-        x_tuple = tuple(x)
-        fn_values.append(x_tuple + (f, 'PyGRANSO', total_time))
+        results = {
+            'xs': xs,
+            'f_init': f_init,
+            'total_time': total_time,
+            'f_final': f,
+            'iterations': soln.iterations,
+            'fn_evals': soln.nfev,
+            'termination_code': None,
+            'objective_values': np.array(f_history),
+        }
+        trial_results.append(results)
 
-        del (var_in, x0, opts, soln, x, f, b)
+        # Delete objects to free memory
+        del (var_in, x0, opts, soln, x, f)
         gc.collect()
         torch.cuda.empty_cache()
 
-    return {'results': None, 'final_results': fn_values, 'callbacks': interim_results}
+    return pd.DataFrame(trial_results)
 
 
 def deeplifting_predictions(x, objective):
