@@ -513,7 +513,7 @@ def run_pygranso(problem: Dict, trials: int):
         indexes = (pd.Series(log.fn_evals).cumsum() - 1).values.tolist()
 
         # Get the f history
-        f_history = np.array(log.f[indexes])
+        f_history = np.array(log.f)[indexes]
 
         # Get final x we will also need to map
         # it to the same bounds
