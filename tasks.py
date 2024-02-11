@@ -402,7 +402,7 @@ def run_ipopt_task(
     global_minimum = problem['global_minimum']
 
     # Get the number of trails
-    trials = 50
+    trials = 5
 
     # Run ipopt
     ipopt_results = run_ipopt(
