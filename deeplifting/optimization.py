@@ -517,7 +517,7 @@ def run_pygranso(problem: Dict, trials: int):
         x = soln.final.x.cpu().numpy().flatten()
 
         # Final objective function value
-        f = soln.final.f
+        f = float(soln.final.f.numpy()[0])
 
         results = {
             'xs': xs,
