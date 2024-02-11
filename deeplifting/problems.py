@@ -98,14 +98,22 @@ def bukin_n6(x, p=0.0, version='numpy'):
         term1 = 100 * np.sqrt(np.abs(x2 - 0.01 * x1**2))
         term2 = 0.01 * np.abs(x1 + 10)
         result = term1 + term2
+
+    elif version == 'jax':
+        term1 = 100 * jnp.sqrt(jnp.abs(x2 - 0.01 * x1**2))
+        term2 = 0.01 * jnp.abs(x1 + 10)
+        result = term1 + term2
+
     elif version == 'pyomo':
         term1 = 100 * np.abs(x2 - 0.01 * x1**2) ** 0.5
         term2 = 0.01 * np.abs(x1 + 10.0)
         result = term1 + term2
+
     elif version == 'pytorch':
         term1 = 100 * torch.sqrt(torch.abs((x2 - p) - 0.01 * (x1 - p) ** 2))
         term2 = 0.01 * torch.abs((x1 - p) + 10)
         result = term1 + term2
+
     else:
         raise ValueError(
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
