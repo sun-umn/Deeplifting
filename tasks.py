@@ -967,7 +967,7 @@ def find_best_architecture_sgd_task(
     # Initial layer type
     initial_layer_type = 'linear'
     include_bn = True
-    learning_rates = [1.0]  # Define defualt Pygranso learning rate to be 1.0
+    learning_rates = [1.0, 1e-1, 1e-2, 1e-3]
 
     # Configs
     configuration = product(learning_rates, layers, units_search, input_dimensions)
@@ -1192,7 +1192,7 @@ def find_best_architecture_adam_task(
     # Initial layer type
     initial_layer_type = 'linear'
     include_bn = True
-    learning_rates = [1.0]  # Define defualt Pygranso learning rate to be 1.0
+    learning_rates = [1.0, 1e-1, 1e-2, 1e-3]
 
     # Configs
     configuration = product(learning_rates, layers, units_search, input_dimensions)
