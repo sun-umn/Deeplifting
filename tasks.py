@@ -424,9 +424,9 @@ def run_ipopt_task(
 
 
 @cli.command('run-pygranso-task')
-@click.option('--problem_series', default='ackley')
+@click.option('--problem_name', default='ackley')
 @click.option('--dimensionality', default='low-dimensional')
-@click.option('--trials', default=10)
+@click.option('--experimentation', default=True)
 def run_pygranso_task(
     problem_name: str, dimensionality: str, experimentation: bool
 ) -> None:
