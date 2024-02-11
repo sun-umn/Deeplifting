@@ -60,6 +60,7 @@ def run_ipopt(problem: Dict, trials: int) -> pd.DataFrame:
             self.objective_fn = objective_fn
             self.iterations = []
             self.f_history = []
+            self.nfev = 0
 
         def objective(self, x):
             return self.objective_fn(x)
@@ -92,6 +93,7 @@ def run_ipopt(problem: Dict, trials: int) -> pd.DataFrame:
             """
             self.f_history.append(obj_value)
             self.iterations.append(iter_count)
+            self.nfev += ls_trials
 
     # Save the results
     # We will store the optimization steps here
@@ -138,7 +140,7 @@ def run_ipopt(problem: Dict, trials: int) -> pd.DataFrame:
             'total_time': total_time,
             'f_final': info['obj_val'],
             'iterations': len(ipopt_problem.iterations),
-            'fn_evals': len(ipopt_problem.iterations),
+            'fn_evals': ipopt_problem.nfev,
             'termination_code': info['status'],
             'objective_values': np.array(ipopt_problem.f_history),
         }
