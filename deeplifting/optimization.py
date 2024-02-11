@@ -509,11 +509,8 @@ def run_pygranso(problem: Dict, trials: int):
         # obtained by calling get_log_fn()
         log = get_log_fn()
 
-        # indexes for completed iterations
-        indexes = (pd.Series(log.fn_evals).cumsum() - 1).values.tolist()
-
         # Get the f history
-        f_history = np.array(log.f)[indexes]
+        f_history = np.array(log.f)
 
         # Get final x we will also need to map
         # it to the same bounds
@@ -527,7 +524,7 @@ def run_pygranso(problem: Dict, trials: int):
             'f_init': f_init,
             'total_time': total_time,
             'f_final': f,
-            'iterations': soln.iters,
+            'iterations': soln.iters + 1,
             'fn_evals': soln.fn_evals,
             'termination_code': soln.termination_code,
             'objective_values': f_history,
