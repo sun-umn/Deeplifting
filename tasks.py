@@ -423,10 +423,10 @@ def run_ipopt_task(
     ipopt_results.to_parquet(save_file_name)
 
 
-# @cli.command('run-pygranso-task')
-# @click.option('--problem_series', default='ackley')
-# @click.option('--dimensionality', default='low-dimensional')
-# @click.option('--trials', default=10)
+@cli.command('run-pygranso-task')
+@click.option('--problem_series', default='ackley')
+@click.option('--dimensionality', default='low-dimensional')
+@click.option('--trials', default=10)
 def run_pygranso_task(
     problem_name: str, dimensionality: str, experimentation: bool
 ) -> None:
@@ -476,7 +476,7 @@ def run_pygranso_task(
     global_minimum = problem['global_minimum']
 
     # Get the number of trails
-    trials = 5
+    trials = 50
 
     # Run ipopt
     pygranso_results = run_pygranso(
