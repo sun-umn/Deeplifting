@@ -20,7 +20,7 @@ from deeplifting.kriging_peaks.kriging_peaks_red import (
 def build_2d_intermediate_results(x1, x2, result, version, results, trial):
     """
     Global function that will build out the intermediate
-    results of our objective functions.
+    results of our objective functions
     """
     # Fill in the intermediate results
     iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
@@ -49,7 +49,7 @@ def ackley(x, version='numpy'):
     Function that implements the Ackley function in
     numpy, pytorch or pyomo interface. We will use this
     for our deeplifting experiments.
-    Note, that this version is the 2-D version only.
+    Note, that this version is the 2-D version only
     """
     a = 20
     b = 0.2
@@ -95,17 +95,17 @@ def alpine2(x, version='numpy'):
     Parameters:
         x: (x1, x2) this is a 2D problem
     version : str
-        The version to use for the function's computation.
-        Options are 'numpy' and 'pytorch'.
+        The version to use for the function's computation
+        Options are 'numpy' and 'pytorch'
 
     Returns:
     result : np.ndarray or torch.Tensor
         The computed Damavandi function values
-        corresponding to the inputs (x1, x2).
+        corresponding to the inputs (x1, x2)
 
     Raises:
     ValueError
-        If the version is not 'numpy' or 'pytorch'.
+        If the version is not 'numpy' or 'pytorch'
 
     This is the correct version:
     https://towardsdatascience.com/optimization-eye-pleasure-78-benchmark-test-functions-for-single-objective-optimization-92e7ed1d1f12  # noqa
@@ -123,6 +123,47 @@ def alpine2(x, version='numpy'):
     elif version == 'pytorch':
         result = (
             -1.0 * (torch.sqrt(x1) * torch.sin(x1)) * (torch.sqrt(x2) * torch.sin(x2))
+        )
+
+    else:
+        raise ValueError(
+            "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
+        )
+
+    return result
+
+
+def bird(x, version='numpy'):
+    """
+    Bird function in 2D
+    """
+    x1, x2 = x.flatten()
+    if version == 'numpy':
+        result = (
+            np.sin(x1) * np.exp(np.square(1 - np.cos(x2)))
+            + np.cos(x2) * np.exp(np.square(1 - np.sin(x1)))
+            + np.square(x1 - x2)
+        )
+
+    elif version == 'jax':
+        result = (
+            jnp.sin(x1) * jnp.exp(jnp.square(1 - jnp.cos(x2)))
+            + jnp.cos(x2) * np.exp(jnp.square(1 - jnp.sin(x1)))
+            + jnp.square(x1 - x2)
+        )
+
+    elif version == 'pyomo':
+        result = (
+            pyo.sin(x1) * pyo.exp((1 - pyo.cos(x2)) ** 2)
+            + pyo.cos(x2) * pyo.exp((1 - pyo.sin(x1)) ** 2)
+            + (x1 - x2) ** 2
+        )
+
+    elif version == 'pytorch':
+        result = (
+            torch.sin(x1) * torch.exp(torch.square(1 - torch.cos(x2)))
+            + torch.cos(x2) * torch.exp(torch.square(1 - torch.sin(x1)))
+            + torch.square(x1 - x2)
         )
 
     else:
@@ -3380,49 +3421,6 @@ def biggs_exp6(x, results, trial, version='numpy'):
 
     else:
         results[trial, iteration, :] = np.array((x1, x2, x3, x4, x5, x6, result))
-
-    return result
-
-
-def bird(x, results=None, trial=None, version='numpy'):
-    """
-    Bird function in 2D.
-    """
-    x1, x2 = x.flatten()
-    if version == 'numpy':
-        result = (
-            np.sin(x1) * np.exp(np.square(1 - np.cos(x2)))
-            + np.cos(x2) * np.exp(np.square(1 - np.sin(x1)))
-            + np.square(x1 - x2)
-        )
-    elif version == 'pyomo':
-        result = (
-            pyo.sin(x1) * pyo.exp((1 - pyo.cos(x2)) ** 2)
-            + pyo.cos(x2) * pyo.exp((1 - pyo.sin(x1)) ** 2)
-            + (x1 - x2) ** 2
-        )
-    elif version == 'pytorch':
-        result = (
-            torch.sin(x1) * torch.exp(torch.square(1 - torch.cos(x2)))
-            + torch.cos(x2) * torch.exp(torch.square(1 - torch.sin(x1)))
-            + torch.square(x1 - x2)
-        )
-    else:
-        raise ValueError(
-            "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
-        )
-
-    # Fill in the intermediate results if results and trial
-    # are provided
-    if results is not None and trial is not None:
-        build_2d_intermediate_results(
-            x1=x1,
-            x2=x2,
-            result=result,
-            version=version,
-            results=results,
-            trial=trial,
-        )
 
     return result
 
