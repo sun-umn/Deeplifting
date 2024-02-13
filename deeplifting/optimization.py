@@ -945,7 +945,7 @@ def run_sgd_deeplifting(
     start_position: torch.Tensor,
     objective: Callable,
     device: torch.device,
-    max_iterations: int = 3000,
+    max_iterations: int = 1500,
     *,
     lr: float = 1e-2,
     momentum: float = 0.99,

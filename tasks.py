@@ -28,7 +28,7 @@ from config import (
     rastrigin_series,
     schwefel_series,
 )
-from deeplifting.models import ReLUDeepliftingMLP, SineDeepliftingMLP
+from deeplifting.models import ReLUDeepliftingMLP
 from deeplifting.optimization import run_pyomo  # noqa
 from deeplifting.optimization import (
     run_adam_deeplifting,
@@ -1025,7 +1025,7 @@ def find_best_architecture_sgd_task(
                 print(f'seed = {seed}')
 
                 # Deeplifting model with skip connections
-                model = SineDeepliftingMLP(
+                model = ReLUDeepliftingMLP(
                     initial_hidden_size=(5 * output_size),
                     hidden_sizes=hidden_sizes,
                     output_size=output_size,
