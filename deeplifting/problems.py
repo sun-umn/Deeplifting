@@ -174,7 +174,7 @@ def bird(x, version='numpy'):
     return result
 
 
-def bukin_n6(x, p=0.0, version='numpy'):
+def bukin_n6(x, version='numpy'):
     """
     Function that implements the Bukin Function N.6 in both
     numpy and pytorch and pyomo interface.
@@ -196,8 +196,8 @@ def bukin_n6(x, p=0.0, version='numpy'):
         result = term1 + term2
 
     elif version == 'pytorch':
-        term1 = 100 * torch.sqrt(torch.abs((x2 - p) - 0.01 * (x1 - p) ** 2))
-        term2 = 0.01 * torch.abs((x1 - p) + 10)
+        term1 = 100 * torch.sqrt(torch.abs((x2) - 0.01 * (x1) ** 2))
+        term2 = 0.01 * torch.abs((x1) + 10)
         result = term1 + term2
 
     else:
@@ -245,6 +245,21 @@ def cross_in_tray(x, version='numpy'):
             )
             ** 0.1
         )
+
+    elif version == 'jax':
+        result = (
+            -0.0001
+            * (
+                jnp.abs(
+                    jnp.sin(x1)
+                    * jnp.sin(x2)
+                    * jnp.exp(np.abs(100 - jnp.sqrt(x1**2 + x2**2) / jnp.pi))
+                )
+                + 1
+            )
+            ** 0.1
+        )
+
     elif version == 'pyomo':
         result = (
             -0.0001
@@ -258,6 +273,7 @@ def cross_in_tray(x, version='numpy'):
             )
             ** 0.1
         )
+
     elif version == 'pytorch':
         result = (
             -0.0001
@@ -275,6 +291,7 @@ def cross_in_tray(x, version='numpy'):
             )
             ** 0.1
         )
+
     else:
         raise ValueError(
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
