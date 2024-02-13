@@ -6142,7 +6142,7 @@ ackley_config = {
     'global_minimum': 0.0,
     'dimensions': 2,
     'global_x': np.array([0.0, 0.0]),
-    'trials': 50,
+    'trials': 25,
 }
 
 # Ackley 2
@@ -6155,7 +6155,7 @@ ackley2_config = {
     'max_iterations': 1000,
     'global_minimum': -200,
     'dimensions': 2,
-    'trials': 50,
+    'trials': 25,
 }
 
 # Ackley 3
@@ -6168,6 +6168,7 @@ ackley3_config = {
     'max_iterations': 1000,
     'global_minimum': -195.62902823841935,
     'dimensions': 2,
+    'trials': 25,
 }
 
 # Alpine N.1
@@ -6181,7 +6182,7 @@ alpine1_config = {
     'global_minimum': 0,
     'dimensions': 2,
     'global_x': np.array([0.0, 0.0]),
-    'trials': 50,
+    'trials': 25,
 }
 
 # Alpine N.2
@@ -6195,7 +6196,7 @@ alpine2_config = {
     'global_minimum': -7.885600,
     'dimensions': 2,
     'global_x': np.array([7.917, 7.917]),
-    'trials': 50,
+    'trials': 25,
 }
 
 # TODO: Bird is a function that has two global minima
@@ -6212,7 +6213,7 @@ bird_config = {
     'global_minimum': -106.764537,
     'dimensions': 2,
     'global_x': np.array([0.0, 0.0]),
-    'trials': 50,
+    'trials': 25,
 }
 
 # Bukin N.6
@@ -6226,7 +6227,7 @@ bukin_n6_config = {
     'global_minimum': 0.0,
     'dimensions': 2,
     'global_x': np.array([-10.0, 1.0]),
-    'trials': 50,
+    'trials': 25,
 }
 
 # Cross-in-Tray
@@ -6242,7 +6243,7 @@ cross_in_tray_config = {
     'global_minimum': -2.06261,
     'dimensions': 2,
     'global_x': np.array([0.0, 0.0]),
-    'trials': 50,
+    'trials': 25,
 }
 
 # Cross-leg-table
@@ -6256,7 +6257,7 @@ cross_leg_table_config = {
     'global_minimum': -1,
     'dimensions': 2,
     'global_x': np.array([0.0, 0.0]),
-    'trials': 50,
+    'trials': 25,
 }
 
 # Drop Wave
