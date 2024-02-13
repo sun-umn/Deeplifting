@@ -148,7 +148,7 @@ def bird(x, version='numpy'):
     elif version == 'jax':
         result = (
             jnp.sin(x1) * jnp.exp(jnp.square(1 - jnp.cos(x2)))
-            + jnp.cos(x2) * np.exp(jnp.square(1 - jnp.sin(x1)))
+            + jnp.cos(x2) * jnp.exp(jnp.square(1 - jnp.sin(x1)))
             + jnp.square(x1 - x2)
         )
 
