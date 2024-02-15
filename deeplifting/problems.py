@@ -300,7 +300,7 @@ def cross_in_tray(x, version='numpy'):
     return result
 
 
-def cross_leg_table(x, results=None, trial=None, version='numpy'):
+def cross_leg_table(x, version='numpy'):
     """
     Implementation of the CrossLegTable problem from the infinity77 list.
     This is a 3-dimensional function with a global minimum of -1.0 at (0,0)
@@ -336,6 +336,25 @@ def cross_leg_table(x, results=None, trial=None, version='numpy'):
                 ** 0.1
             )
         )
+
+    elif version == 'jax':
+        result = -(
+            1
+            / (
+                (
+                    jnp.abs(
+                        jnp.exp(
+                            jnp.abs(100 - (((x1**2 + x2**2) ** 0.5) / (jnp.pi)))
+                        )
+                        * jnp.sin(x1)
+                        * jnp.sin(x2)
+                    )
+                    + 1
+                )
+                ** 0.1
+            )
+        )
+
     elif version == 'pyomo':
         result = -(
             1
@@ -351,6 +370,7 @@ def cross_leg_table(x, results=None, trial=None, version='numpy'):
                 ** 0.1
             )
         )
+
     elif version == 'pytorch':
         result = -(
             1
@@ -368,21 +388,10 @@ def cross_leg_table(x, results=None, trial=None, version='numpy'):
                 ** 0.1
             )
         )
+
     else:
         raise ValueError(
             "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
-        )
-
-    # Fill in the intermediate results if results and trial
-    # are provided
-    if results is not None and trial is not None:
-        build_2d_intermediate_results(
-            x1=x1,
-            x2=x2,
-            result=result,
-            version=version,
-            results=results,
-            trial=trial,
         )
 
     return result
@@ -6285,7 +6294,7 @@ eggholder_config = {
     'global_minimum': -959.6407,
     'dimensions': 2,
     'global_x': np.array([512.0, 404.2319]),
-    'trials': 10,
+    'trials': 5,
 }
 
 # Griewank
