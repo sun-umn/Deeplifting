@@ -6151,7 +6151,7 @@ ackley_config = {
     'global_minimum': 0.0,
     'dimensions': 2,
     'global_x': np.array([0.0, 0.0]),
-    'trials': 1,
+    'trials': 50,
     'name': 'ackley',
 }
 
