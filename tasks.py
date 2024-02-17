@@ -1379,7 +1379,12 @@ def test_parallel(
     learning_rates = [1.0, 1e-1, 1e-2]
 
     # Configs
-    configuration = product(learning_rates, layers, units_search, input_dimensions)
+    configuration = list(
+        product(learning_rates, layers, units_search, input_dimensions)
+    )
+    len(configuration)
+    len(configuration)
+
     print(f'Number of cpus {cpu_count()}')
     with Pool(cpu_count() - 2) as p:
         for _ in p.imap_unordered(test_imap_unordered, configuration):
