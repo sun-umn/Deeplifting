@@ -27,7 +27,7 @@ class PyGransoConfig:
     number of iterations
     """
 
-    def __init__(self, device, x0, max_iterations, printing=True):
+    def __init__(self, device, x0, max_iterations, printing=False):
         # Set up pygranso structure
         self.opts = pygransoStruct()
 
@@ -401,25 +401,25 @@ def train_model_to_output(inputs, model, x0, epochs=10000, lr=1e-4, tolerance=1e
         optimizer.step()  # Update parameters
         scheduler.step()
 
-        # Check L2 distance
-        l2_distance = torch.norm(outputs - x0, p=2).item()
+        # # Check L2 distance
+        # l2_distance = torch.norm(outputs - x0, p=2).item()
 
-        # Print loss and L2 distance every 100 epochs
-        if (epoch + 1) % 1000 == 0:
-            print(
-                f'Epoch [{epoch+1}/{epochs}], Loss: {loss.item():.4f}'
-                f', L2 Distance: {l2_distance:.4e}'
-            )
+    #     # Print loss and L2 distance every 100 epochs
+    #     if (epoch + 1) % 1000 == 0:
+    #         print(
+    #             f'Epoch [{epoch+1}/{epochs}], Loss: {loss.item():.4f}'
+    #             f', L2 Distance: {l2_distance:.4e}'
+    #         )
 
-        # Check the stopping criterion
-        if l2_distance < tolerance:
-            print(
-                f'Training converged at epoch {epoch+1} with'
-                f' L2 Distance: {l2_distance:.4e}'
-            )
-            break
+    #     # Check the stopping criterion
+    #     if l2_distance < tolerance:
+    #         print(
+    #             f'Training converged at epoch {epoch+1} with'
+    #             f' L2 Distance: {l2_distance:.4e}'
+    #         )
+    #         break
 
-    print(f'Final L2 distance {l2_distance:.4e}')
+    # print(f'Final L2 distance {l2_distance:.4e}')
 
     # # Unfreeze all layers
     # for parameters in model.parameters():

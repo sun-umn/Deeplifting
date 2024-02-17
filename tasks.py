@@ -1304,11 +1304,198 @@ def find_best_architecture_adam_task(
         results.build_and_save_dataframe(save_path=save_path, problem_name=problem_name)
 
 
-def f(inputs):
+def run_deeplifting_pygranso_parallel(inputs):
     """
-    Test
+    Run the deeplifting-pygranso function in parallel
     """
-    return inputs
+    # Inputs
+    lr = inputs[0]
+    num_layers = inputs[1]
+    units = inputs[2]
+    input_dimension = inputs[3]
+    problem = inputs[4]
+    save_path = inputs[5]
+
+    # Get the available device
+    device = get_devices()  # noqa
+
+    # Include weight initialization
+    include_weight_initialization = True  # noqa
+
+    # Weight initialization rounds
+    # This will create 25 network initializations
+    # for each point and we can study the variance
+    max_weight_trials = {  # noqa
+        False: range(10, 20, 10),
+        True: range(10, 20, 10),
+    }
+
+    # method
+    method = 'pygranso-deeplifting'
+
+    # Initial layer type
+    initial_layer_type = 'linear'  # noqa
+    include_bn = True  # noqa
+
+    # Problem name
+    problem_name = problem['name']
+
+    # Objective function
+    objective = problem['objective']
+
+    # Set up the function with pytorch option
+    fn = lambda x: objective(x, version='pytorch')  # noqa
+
+    # Bounds
+    bounds = problem['bounds']  # noqa
+
+    # Get the device (CPU for now)
+    output_size = problem['dimensions']  # noqa
+
+    # Get the maximum number of trials
+    # for the problem
+    trials = problem['trials']  # noqa
+
+    # Maximum iterations for a problem
+    # Most problems converge quickly but some
+    # take a little longer
+    max_iterations = problem['max_iterations']
+
+    # Get the global minimum
+    global_minimum = problem['global_minimum']  # noqa
+
+    # n-layer m neuron network
+    hidden_sizes = (units,) * num_layers
+
+    # Problem configuration in a dict
+    problem_config = {
+        'num_layers': num_layers,
+        'num_neurons': units,
+        'lr': lr,
+        'input_dimension': input_dimension,
+    }
+
+    # Setup list to store information
+    results = Results(method=method)
+
+    # We have an observation that we can start at the same point
+    # but it may or may not converge so we can try different
+    # weights
+    for index, trial in enumerate(range(trials)):
+        # Set the seed
+        set_seed(trial)
+
+        # Fix the inputs for deeplifting
+        if initial_layer_type == 'embedding':
+            inputs = torch.randint(
+                low=0, high=(units - 1), size=(input_dimension, units)
+            )
+            inputs = inputs.to(device=device, dtype=torch.long)
+
+        elif initial_layer_type == 'linear':
+            inputs = torch.randn(size=(input_dimension, 5 * output_size))
+            inputs = inputs.to(device=device, dtype=torch.double)
+
+        else:
+            raise ValueError(f'{initial_layer_type} is not an accepted type!')
+
+        # Initialization for other models
+        x_start = initialize_vector(size=output_size, bounds=bounds)
+
+        # Let's also put the starting distance
+        distance = np.mean((x_start - problem['global_x']) ** 2)
+
+        x_start = torch.tensor(x_start)
+        x_start = x_start.to(device=device, dtype=torch.double)
+
+        # Build the xs for the outputs
+        columns = [f'x{i + 1}' for i in range(output_size)]
+        xs = json.dumps(dict(zip(columns, x_start.detach().cpu().numpy())))
+
+        # Creates different weight intializations for the same starting point
+        # x0
+        for i in max_weight_trials[include_weight_initialization]:
+            seed = (i + index) * i
+
+            # Deeplifting model with skip connections
+            model = ReLUDeepliftingMLP(
+                initial_hidden_size=(5 * output_size),
+                hidden_sizes=hidden_sizes,
+                output_size=output_size,
+                bounds=bounds,
+                initial_layer_type=initial_layer_type,
+                include_weight_initialization=include_weight_initialization,
+                include_bn=include_bn,
+                seed=seed,
+            )
+
+            model = model.to(device=device, dtype=torch.double)
+
+            if method == 'deeplifting-pygranso':
+                # Run PyGranso Based Deeplifting
+                deeplifting_outputs = run_pygranso_deeplifting(
+                    model=model,
+                    model_inputs=inputs,
+                    start_position=x_start,
+                    objective=fn,
+                    device=device,
+                    max_iterations=max_iterations,
+                )
+
+            elif method == 'deeplifting-lbfgs':
+                # Run LBFGS Based Deeplifting
+                deeplifting_outputs = run_lbfgs_deeplifting(
+                    model=model,
+                    model_inputs=inputs,
+                    start_position=x_start,
+                    objective=fn,
+                    device=device,
+                    max_iterations=max_iterations,
+                )
+
+            elif method == 'deeplifting-adam':
+                # Run LBFGS Based Deeplifting
+                deeplifting_outputs = run_adam_deeplifting(
+                    model=model,
+                    model_inputs=inputs,
+                    start_position=x_start,
+                    objective=fn,
+                    device=device,
+                    max_iterations=max_iterations,
+                )
+
+            else:
+                raise ValueError(f'Method {method} is not a valid option!')
+
+            # Unpack results
+            f_init = deeplifting_outputs.get('f_init')
+            f_final = deeplifting_outputs.get('f_final')
+            total_time = deeplifting_outputs.get('total_time')
+            iterations = deeplifting_outputs.get('iterations')
+            fn_evals = deeplifting_outputs.get('fn_evals')
+            termination_code = deeplifting_outputs.get('termination_code')
+            objective_values = deeplifting_outputs.get('objective_values')
+
+            # Append results
+            results.append_record(
+                global_minimum=global_minimum,
+                f_init=f_init,
+                f_final=f_final,
+                total_time=total_time,
+                iterations=iterations,
+                fn_evals=fn_evals,
+                termination_code=termination_code,
+                problem_config=problem_config,
+                xs=xs,
+                method=method,
+                lr=lr,
+                objective_values=objective_values,
+                distance=distance,
+            )
+
+    # Create the data from this run and save sequentially
+    results.build_and_save_dataframe(save_path=save_path, problem_name=problem_name)
+    print('Deeplifting completed! 🎉')
 
 
 @cli.command('test-parallel')
@@ -1326,23 +1513,7 @@ def test_parallel(
     space with this function, 500+
     """
     os.environ['OMP_NUM_THREADS'] = '1'
-
-    # Method
-    method = 'deeplifting-adam'
-
-    # Get the available device
-    device = get_devices()  # noqa
-
-    # Include weight initialization
-    include_weight_initialization = True  # noqa
-
-    # Weight initialization rounds
-    # This will create 25 network initializations
-    # for each point and we can study the variance
-    max_weight_trials = {  # noqa
-        False: range(10, 20, 10),
-        True: range(10, 110, 10),
-    }
+    method = 'deeplifting-pygranso'
 
     # Setup the problem
     if dimensionality == 'low-dimensional':
@@ -1375,55 +1546,39 @@ def test_parallel(
     save_path = os.path.join(  # noqa
         '/home/jusun/dever120/Deeplifting',
         'experiments/3b39b4fb-0520-4795-aaba-a8eab24ff8fd/',
-        f'{directory}/deeplifting-adam',
+        f'{directory}/test',
     )
+    save_path = [save_path]
 
     # Get the problem information
     problem = PROBLEMS[problem_name]
-
-    # Objective function
-    objective = problem['objective']
-
-    # Set up the function with pytorch option
-    fn = lambda x: objective(x, version='pytorch')  # noqa
-
-    # Bounds
-    bounds = problem['bounds']  # noqa
-
-    # Get the device (CPU for now)
-    output_size = problem['dimensions']  # noqa
-
-    # Get the maximum number of trials
-    # for the problem
-    trials = problem['trials']  # noqa
-
-    # Get the global minimum
-    global_minimum = problem['global_minimum']  # noqa
+    problem = [problem]
 
     # Layer search
-    layers = [2, 3, 4, 5]
+    layers = [2, 3]
 
     # Number of neurons
-    units_search = [192, 128, 64, 32]
+    units_search = [64, 32]
 
     # NOTE: Breakthrough that the size of the input dimension
     # has a direct impact on the models ability to find a global
     # solution so we will investigate this as well
-    input_dimensions = [1, 2, 16, 32]
+    input_dimensions = [1, 2]
 
-    # Initial layer type
-    initial_layer_type = 'linear'  # noqa
-    include_bn = True  # noqa
-    learning_rates = [1.0, 1e-1, 1e-2]
+    # Learning rates
+    learning_rates = [1.0]
 
     # Configs
-    configuration = product(learning_rates, layers, units_search, input_dimensions)
+    configuration = product(
+        learning_rates, layers, units_search, input_dimensions, problem, save_path
+    )
     config = list(configuration)
+    print(f'There are {len(config)} configurations ✅')
 
     # Start ray process
-    pool = Pool(20)
-    for result in pool.map(f, config):
-        print(result)
+    pool = Pool(25)
+    for _ in tqdm.tqdm(pool.map(run_deeplifting_pygranso_parallel, config)):
+        pass
 
 
 if __name__ == "__main__":
