@@ -1308,6 +1308,7 @@ def test_imap_unordered(inputs):
     """
     Testing parallel functioning in MSI
     """
+    print('Test')
     print(inputs)
 
 
@@ -1382,12 +1383,13 @@ def test_parallel(
     configuration = list(
         product(learning_rates, layers, units_search, input_dimensions)
     )
+    config = list(configuration)
     len(configuration)
-    len(configuration)
+    len(config)
 
     print(f'Number of cpus {cpu_count()}')
     with Pool(cpu_count() - 2) as p:
-        for _ in p.imap_unordered(test_imap_unordered, configuration):
+        for _ in p.imap_unordered(test_imap_unordered, config):
             pass
 
 
