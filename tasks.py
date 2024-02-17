@@ -1388,8 +1388,8 @@ def test_parallel(
     len(config)
 
     print(f'Number of cpus {cpu_count()}')
-    with Pool(cpu_count() - 2) as p:
-        for _ in p.imap_unordered(test_imap_unordered, config):
+    with Pool(12) as p:
+        for _ in p.imap(test_imap_unordered, config):
             pass
 
 
