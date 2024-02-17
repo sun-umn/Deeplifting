@@ -1390,7 +1390,7 @@ def test_parallel(
 
     print(f'Number of cpus {cpu_count()}')
     with Pool(12) as p:
-        for _ in p.imap(test_imap_unordered, config):
+        for _ in tqdm.tqdm(p.imap(test_imap_unordered, config)):
             pass
 
 
