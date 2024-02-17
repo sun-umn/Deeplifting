@@ -1331,7 +1331,7 @@ def run_deeplifting_pygranso_parallel(inputs):
     }
 
     # method
-    method = 'pygranso-deeplifting'
+    method = 'deeplifting-pygranso'
 
     # Initial layer type
     initial_layer_type = 'linear'  # noqa
