@@ -1,6 +1,6 @@
 #!/bin/bash -l
-#SBATCH --time=24:00:00
-#SBATCH --ntasks-per-node=8
+#SBATCH --time=48:00:00
+#SBATCH --ntasks-per-node=64
 #SBATCH --mem=65g
 #SBATCH --tmp=20g
 #SBATCH --mail-type=ALL
