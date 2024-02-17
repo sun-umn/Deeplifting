@@ -1384,8 +1384,9 @@ def test_parallel(
         product(learning_rates, layers, units_search, input_dimensions)
     )
     config = list(configuration)
-    len(configuration)
-    len(config)
+    print(len(configuration))
+    print(len(config))
+    print(len(config))
 
     print(f'Number of cpus {cpu_count()}')
     with Pool(12) as p:
