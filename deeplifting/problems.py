@@ -6226,6 +6226,7 @@ bird_config = {
     'dimensions': 2,
     'global_x': np.array([0.0, 0.0]),
     'trials': 25,
+    'name': 'bird',
 }
 
 # Bukin N.6
