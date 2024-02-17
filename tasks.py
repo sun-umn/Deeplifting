@@ -1325,7 +1325,7 @@ def test_parallel(
     "hard" high-dimensional problems. We will aim to tackle a large dimensional
     space with this function, 500+
     """
-    pool = Pool()
+    pool = Pool(8)
     for result in pool.map(f, range(100)):
         print(result)
 
