@@ -2,6 +2,7 @@
 # stdlib
 import json
 import os
+import time
 import warnings
 from datetime import datetime
 from functools import partial
@@ -1555,15 +1556,15 @@ def test_parallel(
     problem = [problem]
 
     # Layer search
-    layers = [2, 3]
+    layers = [2, 3, 4, 5, 7, 10, 13]
 
     # Number of neurons
-    units_search = [64, 32]
+    units_search = [128, 64, 32, 16]
 
     # NOTE: Breakthrough that the size of the input dimension
     # has a direct impact on the models ability to find a global
     # solution so we will investigate this as well
-    input_dimensions = [1, 2]
+    input_dimensions = [1, 2, 16, 32]
 
     # Learning rates
     learning_rates = [1.0]
@@ -1576,9 +1577,12 @@ def test_parallel(
     print(f'There are {len(config)} configurations ✅')
 
     # Start ray process
+    start = time.time()
     pool = Pool(25)
     for _ in tqdm.tqdm(pool.map(run_deeplifting_pygranso_parallel, config)):
         pass
+    end = time.time()
+    print(f'Total time {end - start} ⏰')
 
 
 if __name__ == "__main__":
