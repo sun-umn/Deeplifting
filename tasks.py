@@ -1304,11 +1304,11 @@ def find_best_architecture_adam_task(
         results.build_and_save_dataframe(save_path=save_path, problem_name=problem_name)
 
 
-def f(index):
+def f(inputs):
     """
     Test
     """
-    return index
+    return inputs
 
 
 @cli.command('test-parallel')
@@ -1325,8 +1325,104 @@ def test_parallel(
     "hard" high-dimensional problems. We will aim to tackle a large dimensional
     space with this function, 500+
     """
+    os.environ['OMP_NUM_THREADS'] = '1'
+
+    # Method
+    method = 'deeplifting-adam'
+
+    # Get the available device
+    device = get_devices()  # noqa
+
+    # Include weight initialization
+    include_weight_initialization = True  # noqa
+
+    # Weight initialization rounds
+    # This will create 25 network initializations
+    # for each point and we can study the variance
+    max_weight_trials = {  # noqa
+        False: range(10, 20, 10),
+        True: range(10, 110, 10),
+    }
+
+    # Setup the problem
+    if dimensionality == 'low-dimensional':
+        directory = 'low-dimension'  # noqa
+        PROBLEMS = PROBLEMS_BY_NAME
+        API_KEY = '2080070c4753d0384b073105ed75e1f46669e4bf'
+        PROJECT_NAME = 'Deeplifting-LD'
+
+    elif dimensionality == 'high-dimensional':
+        directory = 'high-dimension'  # noqa
+        PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
+        API_KEY = '2080070c4753d0384b073105ed75e1f46669e4bf'
+        PROJECT_NAME = 'Deeplifting-HD'
+
+    else:
+        raise ValueError(f'{dimensionality} is not valid!')
+
+    if experimentation:
+        # Enable wandb
+        wandb.login(key=API_KEY)
+
+        wandb.init(
+            # set the wandb project where this run will be logged
+            project=PROJECT_NAME,
+            tags=[f'{method}', f'{problem_name}'],
+        )
+
+    # Main directory to save data
+    # This will be different for each user
+    save_path = os.path.join(  # noqa
+        '/home/jusun/dever120/Deeplifting',
+        'experiments/3b39b4fb-0520-4795-aaba-a8eab24ff8fd/',
+        f'{directory}/deeplifting-adam',
+    )
+
+    # Get the problem information
+    problem = PROBLEMS[problem_name]
+
+    # Objective function
+    objective = problem['objective']
+
+    # Set up the function with pytorch option
+    fn = lambda x: objective(x, version='pytorch')  # noqa
+
+    # Bounds
+    bounds = problem['bounds']  # noqa
+
+    # Get the device (CPU for now)
+    output_size = problem['dimensions']  # noqa
+
+    # Get the maximum number of trials
+    # for the problem
+    trials = problem['trials']  # noqa
+
+    # Get the global minimum
+    global_minimum = problem['global_minimum']  # noqa
+
+    # Layer search
+    layers = [2, 3, 4, 5]
+
+    # Number of neurons
+    units_search = [192, 128, 64, 32]
+
+    # NOTE: Breakthrough that the size of the input dimension
+    # has a direct impact on the models ability to find a global
+    # solution so we will investigate this as well
+    input_dimensions = [1, 2, 16, 32]
+
+    # Initial layer type
+    initial_layer_type = 'linear'  # noqa
+    include_bn = True  # noqa
+    learning_rates = [1.0, 1e-1, 1e-2]
+
+    # Configs
+    configuration = product(learning_rates, layers, units_search, input_dimensions)
+    config = list(configuration)
+
+    # Start ray process
     pool = Pool(20)
-    for result in pool.map(f, range(100)):
+    for result in pool.map(f, config):
         print(result)
 
 
