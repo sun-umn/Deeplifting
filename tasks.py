@@ -6,6 +6,7 @@ import warnings
 from datetime import datetime
 from functools import partial
 from itertools import product
+from multiprocessing import Pool, cpu_count
 
 # third party
 import click
@@ -1301,6 +1302,88 @@ def find_best_architecture_adam_task(
 
         # Create the data from this run and save sequentially
         results.build_and_save_dataframe(save_path=save_path, problem_name=problem_name)
+
+
+def test_imap_unordered(inputs):
+    """
+    Testing parallel functioning in MSI
+    """
+    print(inputs)
+
+
+@cli.command('test-parallel')
+@click.option('--problem_name', default='ackley')
+@click.option('--dimensionality', default='low-dimensional')
+@click.option('--experimentation', default=True)
+def test_parallel(
+    problem_name,
+    dimensionality,
+    experimentation,
+):
+    """
+    Function that we will use to find the best architecture over multiple
+    "hard" high-dimensional problems. We will aim to tackle a large dimensional
+    space with this function, 500+
+    """
+    # Set the number of threads to 1
+    os.environ['OMP_NUM_THREADS'] = '1'
+
+    # Method
+    method = 'deeplifting-adam'
+
+    # Setup the problem
+    if dimensionality == 'low-dimensional':
+        PROBLEMS = PROBLEMS_BY_NAME
+        API_KEY = '2080070c4753d0384b073105ed75e1f46669e4bf'
+        PROJECT_NAME = 'Deeplifting-LD'
+
+    elif dimensionality == 'high-dimensional':
+        PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
+        API_KEY = '2080070c4753d0384b073105ed75e1f46669e4bf'
+        PROJECT_NAME = 'Deeplifting-HD'
+
+    else:
+        raise ValueError(f'{dimensionality} is not valid!')
+
+    if experimentation:
+        # Enable wandb
+        wandb.login(key=API_KEY)
+
+        wandb.init(
+            # set the wandb project where this run will be logged
+            project=PROJECT_NAME,
+            tags=[f'{method}', f'{problem_name}'],
+        )
+
+    # Get the problem information
+    problem = PROBLEMS[problem_name]
+
+    # Objective function
+    objective = problem['objective']
+
+    # Set up the function with pytorch option
+    fn = lambda x: objective(x, version='pytorch')  # noqa
+
+    # Layer search
+    layers = [2, 3, 4, 5]
+
+    # Number of neurons
+    units_search = [192, 128, 64, 32]
+
+    # NOTE: Breakthrough that the size of the input dimension
+    # has a direct impact on the models ability to find a global
+    # solution so we will investigate this as well
+    input_dimensions = [1, 2, 16, 32]
+
+    # Initial layer type
+    learning_rates = [1.0, 1e-1, 1e-2]
+
+    # Configs
+    configuration = product(learning_rates, layers, units_search, input_dimensions)
+    print(f'Number of cpus {cpu_count()}')
+    with Pool(cpu_count() - 2) as p:
+        for _ in p.imap_unordered(test_imap_unordered, configuration):
+            pass
 
 
 if __name__ == "__main__":
