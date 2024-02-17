@@ -1328,7 +1328,7 @@ def run_deeplifting_pygranso_parallel(inputs):
     # for each point and we can study the variance
     max_weight_trials = {  # noqa
         False: range(10, 20, 10),
-        True: range(10, 120, 10),
+        True: range(10, 20, 10),
     }
 
     # method
