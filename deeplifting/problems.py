@@ -6166,6 +6166,7 @@ ackley2_config = {
     'global_minimum': -200,
     'dimensions': 2,
     'trials': 25,
+    'name': 'alpine2',
 }
 
 # Ackley 3
@@ -6207,6 +6208,7 @@ alpine2_config = {
     'dimensions': 2,
     'global_x': np.array([7.917, 7.917]),
     'trials': 25,
+    'name': 'alpine2',
 }
 
 # TODO: Bird is a function that has two global minima
