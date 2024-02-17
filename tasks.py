@@ -1578,7 +1578,7 @@ def test_parallel(
 
     # Start ray process
     start = time.time()
-    with Pool(8) as pool:
+    with Pool(16) as pool:
         for _ in tqdm.tqdm(pool.map(run_deeplifting_pygranso_parallel, config)):
             pass
     end = time.time()
