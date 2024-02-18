@@ -1306,7 +1306,7 @@ def find_best_architecture_adam_task(
         results.build_and_save_dataframe(save_path=save_path, problem_name=problem_name)
 
 
-def run_deeplifting_pygranso_parallel(inputs, debug=True):
+def run_deeplifting_pygranso_parallel(inputs, debug=False):
     """
     Run the deeplifting-pygranso function in parallel
     """
