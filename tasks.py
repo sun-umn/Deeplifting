@@ -1523,7 +1523,6 @@ def test_parallel(
     space with this function, 500+
     """
     print('Starting slurm output ⏳')
-    print(f'Number of cpus {cpu_count()}')
     os.environ['OMP_NUM_THREADS'] = '1'
     method = 'deeplifting-pygranso'
 
@@ -1554,6 +1553,7 @@ def test_parallel(
         )
 
     print('Starting job 🏁')
+    print(f'Number of cpus {cpu_count()}')
 
     # Main directory to save data
     # This will be different for each user
