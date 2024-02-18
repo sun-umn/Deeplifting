@@ -1310,7 +1310,13 @@ def run_deeplifting_pygranso_parallel(inputs, debug=False):
     Run the deeplifting-pygranso function in parallel
     """
 
-    if not debug:
+    if debug:
+        print(inputs)
+        print('\n')
+        print('Debugging 🐞')
+        print('\n')
+
+    else:
         # Inputs
         lr = inputs[0]
         num_layers = inputs[1]
@@ -1499,12 +1505,6 @@ def run_deeplifting_pygranso_parallel(inputs, debug=False):
         # Create the data from this run and save sequentially
         results.build_and_save_dataframe(save_path=save_path, problem_name=problem_name)
         print('Deeplifting completed! 🎉')
-
-    else:
-        print(inputs)
-        print('\n')
-        print('Debugging 🐞')
-        print('\n')
 
 
 @cli.command('test-parallel')
