@@ -1513,6 +1513,7 @@ def test_parallel(
     "hard" high-dimensional problems. We will aim to tackle a large dimensional
     space with this function, 500+
     """
+    print('Starting slurm output ⏳')
     os.environ['OMP_NUM_THREADS'] = '1'
     method = 'deeplifting-pygranso'
 
@@ -1541,6 +1542,8 @@ def test_parallel(
             project=PROJECT_NAME,
             tags=[f'{method}', f'{problem_name}'],
         )
+
+    print('Starting job 🏁')
 
     # Main directory to save data
     # This will be different for each user
