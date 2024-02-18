@@ -1,5 +1,6 @@
 # third party
-import jax.numpy as jnp
+# import jax.numpy as jnp
+# third party
 import numpy as np
 import pyomo.environ as pyo
 import torch
@@ -63,10 +64,10 @@ def ackley(x, version='numpy'):
         cos_term = -np.exp(0.5 * (np.cos(c * (x1)) + np.cos(c * (x2))))
         result = sum_sq_term + cos_term + a + np.exp(1)
 
-    elif version == 'jax':
-        sum_sq_term = -a * jnp.exp(-b * jnp.sqrt(0.5 * ((x1) ** 2 + (x2) ** 2)))
-        cos_term = -jnp.exp(0.5 * (jnp.cos(c * (x1)) + jnp.cos(c * (x2))))
-        result = sum_sq_term + cos_term + a + np.exp(1)
+    # elif version == 'jax':
+    #     sum_sq_term = -a * jnp.exp(-b * jnp.sqrt(0.5 * ((x1) ** 2 + (x2) ** 2)))
+    #     cos_term = -jnp.exp(0.5 * (jnp.cos(c * (x1)) + jnp.cos(c * (x2))))
+    #     result = sum_sq_term + cos_term + a + np.exp(1)
 
     elif version == 'pyomo':
         sum_sq_term = -a * pyo.exp(-b * (0.5 * (x1**2 + x2**2) ** 0.5))
@@ -114,8 +115,8 @@ def alpine2(x, version='numpy'):
     if version == 'numpy':
         result = -1.0 * (np.sqrt(x1) * np.sin(x1)) * (np.sqrt(x2) * np.sin(x2))
 
-    elif version == 'jax':
-        result = -1.0 * (jnp.sqrt(x1) * jnp.sin(x1)) * (jnp.sqrt(x2) * jnp.sin(x2))
+    # elif version == 'jax':
+    #     result = -1.0 * (jnp.sqrt(x1) * jnp.sin(x1)) * (jnp.sqrt(x2) * jnp.sin(x2))
 
     elif version == 'pyomo':
         result = -1.0 * (x1**0.5 * pyo.sin(x1)) * (x2**0.5 * pyo.sin(x2))
@@ -145,12 +146,12 @@ def bird(x, version='numpy'):
             + np.square(x1 - x2)
         )
 
-    elif version == 'jax':
-        result = (
-            jnp.sin(x1) * jnp.exp(jnp.square(1 - jnp.cos(x2)))
-            + jnp.cos(x2) * jnp.exp(jnp.square(1 - jnp.sin(x1)))
-            + jnp.square(x1 - x2)
-        )
+    # elif version == 'jax':
+    #     result = (
+    #         jnp.sin(x1) * jnp.exp(jnp.square(1 - jnp.cos(x2)))
+    #         + jnp.cos(x2) * jnp.exp(jnp.square(1 - jnp.sin(x1)))
+    #         + jnp.square(x1 - x2)
+    #     )
 
     elif version == 'pyomo':
         result = (
@@ -185,10 +186,10 @@ def bukin_n6(x, version='numpy'):
         term2 = 0.01 * np.abs(x1 + 10)
         result = term1 + term2
 
-    elif version == 'jax':
-        term1 = 100 * jnp.sqrt(jnp.abs(x2 - 0.01 * x1**2))
-        term2 = 0.01 * jnp.abs(x1 + 10)
-        result = term1 + term2
+    # elif version == 'jax':
+    #     term1 = 100 * jnp.sqrt(jnp.abs(x2 - 0.01 * x1**2))
+    #     term2 = 0.01 * jnp.abs(x1 + 10)
+    #     result = term1 + term2
 
     elif version == 'pyomo':
         term1 = 100 * np.abs(x2 - 0.01 * x1**2) ** 0.5
@@ -246,19 +247,19 @@ def cross_in_tray(x, version='numpy'):
             ** 0.1
         )
 
-    elif version == 'jax':
-        result = (
-            -0.0001
-            * (
-                jnp.abs(
-                    jnp.sin(x1)
-                    * jnp.sin(x2)
-                    * jnp.exp(np.abs(100 - jnp.sqrt(x1**2 + x2**2) / jnp.pi))
-                )
-                + 1
-            )
-            ** 0.1
-        )
+    # elif version == 'jax':
+    #     result = (
+    #         -0.0001
+    #         * (
+    #             jnp.abs(
+    #                 jnp.sin(x1)
+    #                 * jnp.sin(x2)
+    #                 * jnp.exp(np.abs(100 - jnp.sqrt(x1**2 + x2**2) / jnp.pi))
+    #             )
+    #             + 1
+    #         )
+    #         ** 0.1
+    #     )
 
     elif version == 'pyomo':
         result = (
@@ -337,23 +338,23 @@ def cross_leg_table(x, version='numpy'):
             )
         )
 
-    elif version == 'jax':
-        result = -(
-            1
-            / (
-                (
-                    jnp.abs(
-                        jnp.exp(
-                            jnp.abs(100 - (((x1**2 + x2**2) ** 0.5) / (jnp.pi)))
-                        )
-                        * jnp.sin(x1)
-                        * jnp.sin(x2)
-                    )
-                    + 1
-                )
-                ** 0.1
-            )
-        )
+    # elif version == 'jax':
+    #     result = -(
+    #         1
+    #         / (
+    #             (
+    #                 jnp.abs(
+    #                     jnp.exp(
+    #                         jnp.abs(100 - (((x1**2 + x2**2) ** 0.5) / (jnp.pi)))
+    #                     )
+    #                     * jnp.sin(x1)
+    #                     * jnp.sin(x2)
+    #                 )
+    #                 + 1
+    #             )
+    #             ** 0.1
+    #         )
+    #     )
 
     elif version == 'pyomo':
         result = -(

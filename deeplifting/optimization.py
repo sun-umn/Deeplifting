@@ -5,13 +5,10 @@ import time
 from typing import Any, Callable, Dict
 
 # third party
-import cyipopt
-import jax.numpy as jnp
 import numpy as np
 import pandas as pd
 import torch
 import torch.optim as optim
-from jax import grad, jit
 from pygranso.private.getNvar import getNvarTorch
 from pygranso.pygranso import pygranso
 from pygranso.pygransoStruct import pygransoStruct
@@ -32,121 +29,127 @@ from deeplifting.utils import (
     train_model_to_output,
 )
 
+# # third party
+# import cyipopt
+# import jax.numpy as jnp
+# from jax import grad, jit
+
+
 # Do NOT save intermediate paths for high dimensional problems
 EXCLUDE_PROBLEMS = list(HIGH_DIMENSIONAL_PROBLEMS_BY_NAME.keys())
 
 
-def run_ipopt(problem: Dict, trials: int) -> pd.DataFrame:
-    """
-    Function that runs IPOPT on one of our test
-    functions for deeplifting.
-    """
-    # Objective function
-    objective = problem['objective']
+# def run_ipopt(problem: Dict, trials: int) -> pd.DataFrame:
+#     """
+#     Function that runs IPOPT on one of our test
+#     functions for deeplifting.
+#     """
+#     # Objective function
+#     objective = problem['objective']
 
-    # Get the number of dimensions
-    dimensions = problem['dimensions']
+#     # Get the number of dimensions
+#     dimensions = problem['dimensions']
 
-    # Get the bounds of the problem
-    bounds = problem['bounds']
-    upper_bounds = bounds['upper_bounds']
-    lower_bounds = bounds['lower_bounds']
-    list_bounds = list(zip(lower_bounds, upper_bounds))
+#     # Get the bounds of the problem
+#     bounds = problem['bounds']
+#     upper_bounds = bounds['upper_bounds']
+#     lower_bounds = bounds['lower_bounds']
+#     list_bounds = list(zip(lower_bounds, upper_bounds))
 
-    # NOTE: With this setup we can extract the intermediate
-    # values for analysis
-    class IPOPTProblem:
-        def __init__(self, objective_fn):
-            self.objective_fn = objective_fn
-            self.iterations = []
-            self.f_history = []
-            self.nfev = 0
+#     # NOTE: With this setup we can extract the intermediate
+#     # values for analysis
+#     class IPOPTProblem:
+#         def __init__(self, objective_fn):
+#             self.objective_fn = objective_fn
+#             self.iterations = []
+#             self.f_history = []
+#             self.nfev = 0
 
-        def objective(self, x):
-            self.nfev += 1
-            return self.objective_fn(x)
+#         def objective(self, x):
+#             self.nfev += 1
+#             return self.objective_fn(x)
 
-        def gradient(self, x):
-            obj_jit = jit(self.objective_fn)
-            gradient = grad(obj_jit)
-            return gradient(x)
+#         def gradient(self, x):
+#             obj_jit = jit(self.objective_fn)
+#             gradient = grad(obj_jit)
+#             return gradient(x)
 
-        def constraints(self, x):
-            return jnp.zeros_like(x)
+#         def constraints(self, x):
+#             return jnp.zeros_like(x)
 
-        def intermediate(
-            self,
-            alg_mod,
-            iter_count,
-            obj_value,
-            inf_pr,
-            inf_du,
-            mu,
-            d_norm,
-            regularization_size,
-            alpha_du,
-            alpha_pr,
-            ls_trials,
-        ):
-            """
-            Function to save the history of the objective function values during
-            iteration and also save the number of iterations
-            """
-            self.f_history.append(obj_value)
-            self.iterations.append(iter_count)
+#         def intermediate(
+#             self,
+#             alg_mod,
+#             iter_count,
+#             obj_value,
+#             inf_pr,
+#             inf_du,
+#             mu,
+#             d_norm,
+#             regularization_size,
+#             alpha_du,
+#             alpha_pr,
+#             ls_trials,
+#         ):
+#             """
+#             Function to save the history of the objective function values during
+#             iteration and also save the number of iterations
+#             """
+#             self.f_history.append(obj_value)
+#             self.iterations.append(iter_count)
 
-    # Save the results
-    # We will store the optimization steps here
-    trial_results = []
-    for trial in range(trials):
-        # Set the random seed
-        set_seed(trial)
+#     # Save the results
+#     # We will store the optimization steps here
+#     trial_results = []
+#     for trial in range(trials):
+#         # Set the random seed
+#         set_seed(trial)
 
-        # Initial guess (starting point for IPOPT)
-        # TODO: Need to provide a better starting point here
-        x0 = initialize_vector(size=dimensions, bounds=bounds)
+#         # Initial guess (starting point for IPOPT)
+#         # TODO: Need to provide a better starting point here
+#         x0 = initialize_vector(size=dimensions, bounds=bounds)
 
-        columns = [f'x{i + 1}' for i in range(dimensions)]
-        xs = json.dumps(dict(zip(columns, x0)))
+#         columns = [f'x{i + 1}' for i in range(dimensions)]
+#         xs = json.dumps(dict(zip(columns, x0)))
 
-        # Get the objective
-        fn = lambda x: objective(x, version='jax')  # noqa  # noqa
+#         # Get the objective
+#         fn = lambda x: objective(x, version='jax')  # noqa  # noqa
 
-        # Get the initial objective galue
-        f_init = fn(x0)
+#         # Get the initial objective galue
+#         f_init = fn(x0)
 
-        # IPOPT Problem
-        ipopt_problem = IPOPTProblem(objective_fn=fn)
-        nlp = cyipopt.Problem(
-            n=len(x0),
-            m=0,
-            problem_obj=ipopt_problem,
-            lb=list_bounds[0],
-            ub=list_bounds[1],
-        )
+#         # IPOPT Problem
+#         ipopt_problem = IPOPTProblem(objective_fn=fn)
+#         nlp = cyipopt.Problem(
+#             n=len(x0),
+#             m=0,
+#             problem_obj=ipopt_problem,
+#             lb=list_bounds[0],
+#             ub=list_bounds[1],
+#         )
 
-        # Call IPOPT
-        start_time = time.time()
+#         # Call IPOPT
+#         start_time = time.time()
 
-        # Use the solve method
-        x, info = nlp.solve(x0)
+#         # Use the solve method
+#         x, info = nlp.solve(x0)
 
-        end_time = time.time()
-        total_time = end_time - start_time
+#         end_time = time.time()
+#         total_time = end_time - start_time
 
-        results = {
-            'xs': xs,
-            'f_init': float(f_init),
-            'total_time': total_time,
-            'f_final': info['obj_val'],
-            'iterations': len(ipopt_problem.iterations),
-            'fn_evals': ipopt_problem.nfev,
-            'termination_code': info['status'],
-            'objective_values': np.array(ipopt_problem.f_history),
-        }
-        trial_results.append(results)
+#         results = {
+#             'xs': xs,
+#             'f_init': float(f_init),
+#             'total_time': total_time,
+#             'f_final': info['obj_val'],
+#             'iterations': len(ipopt_problem.iterations),
+#             'fn_evals': ipopt_problem.nfev,
+#             'termination_code': info['status'],
+#             'objective_values': np.array(ipopt_problem.f_history),
+#         }
+#         trial_results.append(results)
 
-    return pd.DataFrame(trial_results)
+#     return pd.DataFrame(trial_results)
 
 
 def run_dual_annealing(
