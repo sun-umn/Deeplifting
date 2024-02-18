@@ -6241,6 +6241,7 @@ bukin_n6_config = {
     'dimensions': 2,
     'global_x': np.array([-10.0, 1.0]),
     'trials': 25,
+    'name': 'bukin_n6',
 }
 
 # Cross-in-Tray
@@ -6257,6 +6258,7 @@ cross_in_tray_config = {
     'dimensions': 2,
     'global_x': np.array([0.0, 0.0]),
     'trials': 25,
+    'name': 'cross_in_tray',
 }
 
 # Cross-leg-table
@@ -6271,6 +6273,7 @@ cross_leg_table_config = {
     'dimensions': 2,
     'global_x': np.array([0.0, 0.0]),
     'trials': 25,
+    'name': 'cross_leg_table',
 }
 
 # Drop Wave
@@ -6284,7 +6287,8 @@ drop_wave_config = {
     'global_minimum': -1.0,
     'dimensions': 2,
     'global_x': np.array([0.0, 0.0]),
-    'trials': 50,
+    'trials': 25,
+    'name': 'drop_wave',
 }
 
 # Eggholder
@@ -6298,7 +6302,8 @@ eggholder_config = {
     'global_minimum': -959.6407,
     'dimensions': 2,
     'global_x': np.array([512.0, 404.2319]),
-    'trials': 5,
+    'trials': 25,
+    'name': 'eggholder',
 }
 
 # Griewank

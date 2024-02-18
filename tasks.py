@@ -1500,7 +1500,7 @@ def run_deeplifting_pygranso_parallel(inputs):
 
 
 @cli.command('test-parallel')
-@click.option('--problem_name', default='bird')
+@click.option('--problem_name', default='eggholder')
 @click.option('--dimensionality', default='low-dimensional')
 @click.option('--experimentation', default=True)
 def test_parallel(
