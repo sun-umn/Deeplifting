@@ -16,7 +16,6 @@ import pandas as pd
 import torch
 import tqdm
 import wandb
-from ray.util.multiprocessing import Pool
 
 # first party
 from config import (
@@ -45,6 +44,9 @@ from deeplifting.optimization import (
 )
 from deeplifting.problems import HIGH_DIMENSIONAL_PROBLEMS_BY_NAME, PROBLEMS_BY_NAME
 from deeplifting.utils import Results, get_devices, initialize_vector, set_seed
+
+# from ray.util.multiprocessing import Pool
+
 
 # Filter warnings
 warnings.filterwarnings('ignore')
@@ -1581,9 +1583,9 @@ def test_parallel(
 
     # Start ray process
     start = time.time()
-    with Pool(8) as pool:
-        for _ in tqdm.tqdm(pool.map(run_deeplifting_pygranso_parallel, config)):
-            pass
+    # with Pool(8) as pool:
+    #     for _ in tqdm.tqdm(pool.map(run_deeplifting_pygranso_parallel, config)):
+    #         pass
     end = time.time()
     print(f'Total time {end - start} ⏰')
 
