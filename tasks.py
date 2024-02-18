@@ -7,6 +7,7 @@ import warnings
 from datetime import datetime
 from functools import partial
 from itertools import product
+from multiprocessing import cpu_count
 
 # third party
 import click
@@ -1522,6 +1523,7 @@ def test_parallel(
     space with this function, 500+
     """
     print('Starting slurm output ⏳')
+    print(f'Number of cpus {cpu_count()}')
     os.environ['OMP_NUM_THREADS'] = '1'
     method = 'deeplifting-pygranso'
 
