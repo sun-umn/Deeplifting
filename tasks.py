@@ -7,7 +7,7 @@ import warnings
 from datetime import datetime
 from functools import partial
 from itertools import product
-from multiprocessing import cpu_count
+from multiprocessing import Pool, cpu_count
 
 # third party
 import click
@@ -17,7 +17,6 @@ import pandas as pd
 import torch
 import tqdm
 import wandb
-from ray.util.multiprocessing import Pool
 
 # first party
 from config import (
@@ -38,7 +37,6 @@ from deeplifting.optimization import (
     run_basinhopping,
     run_differential_evolution,
     run_dual_annealing,
-    run_ipopt,
     run_lbfgs_deeplifting,
     run_pygranso,
     run_pygranso_deeplifting,
@@ -356,82 +354,82 @@ def run_differential_evolution_task(
     print('Task completed! 🎉')
 
 
-# IPOPT
-@cli.command('run-ipopt-task')
-@click.option('--problem_name', default='ackley')
-@click.option('--dimensionality', default='low-dimensional')
-@click.option('--experimentation', default=True)
-def run_ipopt_task(
-    problem_name: str, dimensionality: str, experimentation: bool
-) -> None:
-    """
-    Function to run the IPOPT task for a single
-    problem
-    """
-    # Setup the problem
-    if dimensionality == 'low-dimensional':
-        directory = 'low-dimension'
-        PROBLEMS = PROBLEMS_BY_NAME
-        API_KEY = '2080070c4753d0384b073105ed75e1f46669e4bf'
-        PROJECT_NAME = 'Deeplifting-LD'
+# # IPOPT
+# @cli.command('run-ipopt-task')
+# @click.option('--problem_name', default='ackley')
+# @click.option('--dimensionality', default='low-dimensional')
+# @click.option('--experimentation', default=True)
+# def run_ipopt_task(
+#     problem_name: str, dimensionality: str, experimentation: bool
+# ) -> None:
+#     """
+#     Function to run the IPOPT task for a single
+#     problem
+#     """
+#     # Setup the problem
+#     if dimensionality == 'low-dimensional':
+#         directory = 'low-dimension'
+#         PROBLEMS = PROBLEMS_BY_NAME
+#         API_KEY = '2080070c4753d0384b073105ed75e1f46669e4bf'
+#         PROJECT_NAME = 'Deeplifting-LD'
 
-    elif dimensionality == 'high-dimensional':
-        directory = 'high-dimension'
-        PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
-        API_KEY = '2080070c4753d0384b073105ed75e1f46669e4bf'
-        PROJECT_NAME = 'Deeplifting-HD'
+#     elif dimensionality == 'high-dimensional':
+#         directory = 'high-dimension'
+#         PROBLEMS = HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
+#         API_KEY = '2080070c4753d0384b073105ed75e1f46669e4bf'
+#         PROJECT_NAME = 'Deeplifting-HD'
 
-    else:
-        raise ValueError(f'{dimensionality} is not valid!')
+#     else:
+#         raise ValueError(f'{dimensionality} is not valid!')
 
-    if experimentation:
-        # Enable wandb
-        wandb.login(key=API_KEY)
+#     if experimentation:
+#         # Enable wandb
+#         wandb.login(key=API_KEY)
 
-        wandb.init(
-            # set the wandb project where this run will be logged
-            project=PROJECT_NAME,
-            tags=['IPOPT', f'{problem_name}'],
-        )
+#         wandb.init(
+#             # set the wandb project where this run will be logged
+#             project=PROJECT_NAME,
+#             tags=['IPOPT', f'{problem_name}'],
+#         )
 
-    print(f'IPOPT for {problem_name}')
+#     print(f'IPOPT for {problem_name}')
 
-    # Create the save path for this task
-    save_path = os.path.join(
-        '/home/jusun/dever120/Deeplifting',
-        'experiments/3b39b4fb-0520-4795-aaba-a8eab24ff8fd/',
-        f'{directory}/ipopt',
-    )
+#     # Create the save path for this task
+#     save_path = os.path.join(
+#         '/home/jusun/dever120/Deeplifting',
+#         'experiments/3b39b4fb-0520-4795-aaba-a8eab24ff8fd/',
+#         f'{directory}/ipopt',
+#     )
 
-    # Setup the problem
-    problem = PROBLEMS[problem_name]
+#     # Setup the problem
+#     problem = PROBLEMS[problem_name]
 
-    # Get the known minimum
-    global_minimum = problem['global_minimum']
+#     # Get the known minimum
+#     global_minimum = problem['global_minimum']
 
-    # Get the number of trails
-    trials = 50
+#     # Get the number of trails
+#     trials = 50
 
-    # Run ipopt
-    ipopt_results = run_ipopt(
-        problem=problem,
-        trials=trials,
-    )
+#     # Run ipopt
+#     ipopt_results = run_ipopt(
+#         problem=problem,
+#         trials=trials,
+#     )
 
-    ipopt_results['global_minimum'] = global_minimum
+#     ipopt_results['global_minimum'] = global_minimum
 
-    # Compute the success rate
-    numerator = np.abs(ipopt_results['f_final'] - ipopt_results['global_minimum'])
-    denominator = np.abs(ipopt_results['f_init'] - ipopt_results['global_minimum'])
+#     # Compute the success rate
+#     numerator = np.abs(ipopt_results['f_final'] - ipopt_results['global_minimum'])
+#     denominator = np.abs(ipopt_results['f_init'] - ipopt_results['global_minimum'])
 
-    # Set up success
-    ipopt_results['success'] = ((numerator / denominator) <= 1e-4).astype(int)
+#     # Set up success
+#     ipopt_results['success'] = ((numerator / denominator) <= 1e-4).astype(int)
 
-    # Save the results
-    save_file_name = os.path.join(save_path, f'{problem_name}-ipopt.parquet')
-    ipopt_results.to_parquet(save_file_name)
+#     # Save the results
+#     save_file_name = os.path.join(save_path, f'{problem_name}-ipopt.parquet')
+#     ipopt_results.to_parquet(save_file_name)
 
-    print('Task completed! 🎉')
+#     print('Task completed! 🎉')
 
 
 @cli.command('run-pygranso-task')
@@ -1306,7 +1304,7 @@ def find_best_architecture_adam_task(
         results.build_and_save_dataframe(save_path=save_path, problem_name=problem_name)
 
 
-def run_deeplifting_pygranso_parallel(inputs, debug=False):
+def run_deeplifting_pygranso_parallel(inputs, debug=True):
     """
     Run the deeplifting-pygranso function in parallel
     """
@@ -1337,7 +1335,7 @@ def run_deeplifting_pygranso_parallel(inputs, debug=False):
         # for each point and we can study the variance
         max_weight_trials = {  # noqa
             False: range(10, 20, 10),
-            True: range(10, 60, 10),
+            True: range(10, 120, 10),
         }
 
         # method
@@ -1509,7 +1507,7 @@ def run_deeplifting_pygranso_parallel(inputs, debug=False):
 
 
 @cli.command('test-parallel')
-@click.option('--problem_name', default='eggholder')
+@click.option('--problem_name', default='schwefel')
 @click.option('--dimensionality', default='low-dimensional')
 @click.option('--experimentation', default=True)
 def test_parallel(
@@ -1569,7 +1567,7 @@ def test_parallel(
     problem = [problem]
 
     # Layer search
-    layers = [2, 3, 4, 5, 7, 10, 13]
+    layers = [2, 3, 4, 5, 7, 10]
 
     # Number of neurons
     units_search = [128, 64, 32, 16]
@@ -1591,7 +1589,7 @@ def test_parallel(
 
     # Start ray process
     start = time.time()
-    with Pool(8) as pool:
+    with Pool(16) as pool:
         for _ in tqdm.tqdm(pool.imap(run_deeplifting_pygranso_parallel, config)):
             pass
     end = time.time()
