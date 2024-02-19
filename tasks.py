@@ -1558,7 +1558,7 @@ def test_parallel(
     save_path = os.path.join(  # noqa
         '/home/jusun/dever120/Deeplifting',
         'experiments/3b39b4fb-0520-4795-aaba-a8eab24ff8fd/',
-        f'{directory}/test',
+        f'{directory}/deeplifting-pygranso',
     )
     save_path = [save_path]
 
