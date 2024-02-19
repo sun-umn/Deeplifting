@@ -1335,7 +1335,7 @@ def run_deeplifting_pygranso_parallel(inputs, debug=False):
         # for each point and we can study the variance
         max_weight_trials = {  # noqa
             False: range(10, 20, 10),
-            True: range(10, 120, 10),
+            True: range(10, 110, 10),
         }
 
         # method
@@ -1558,7 +1558,7 @@ def test_parallel(
     save_path = os.path.join(  # noqa
         '/home/jusun/dever120/Deeplifting',
         'experiments/3b39b4fb-0520-4795-aaba-a8eab24ff8fd/',
-        f'{directory}/deeplifting-pygranso',
+        f'{directory}/{method}/group',
     )
     save_path = [save_path]
 
@@ -1575,7 +1575,7 @@ def test_parallel(
     # NOTE: Breakthrough that the size of the input dimension
     # has a direct impact on the models ability to find a global
     # solution so we will investigate this as well
-    input_dimensions = [1, 2, 16, 32]
+    input_dimensions = [1, 2, 4, 8]
 
     # Learning rates
     learning_rates = [1.0]
@@ -1589,7 +1589,7 @@ def test_parallel(
 
     # Start ray process
     start = time.time()
-    with Pool(16) as pool:
+    with Pool(8) as pool:
         for _ in tqdm.tqdm(pool.imap(run_deeplifting_pygranso_parallel, config)):
             pass
     end = time.time()

@@ -6452,7 +6452,8 @@ shubert_config = {
     'global_minimum': -186.7309,
     'dimensions': 2,
     'global_x': np.array([0.0, 0.0]),  # Not correct global_x,
-    'trials': 50,
+    'trials': 25,
+    'name': 'shubert',
 }
 
 # Multi-Dimensional Problems #
