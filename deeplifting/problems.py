@@ -398,7 +398,7 @@ def cross_leg_table(x, version='numpy'):
     return result
 
 
-def drop_wave(x, results=None, trial=None, version='numpy'):
+def drop_wave(x, version='numpy'):
     """
     Implementation of the 2D Drop-Wave function. This
     function has a global minimum at (x, y) = (0, 0).
@@ -426,29 +426,20 @@ def drop_wave(x, results=None, trial=None, version='numpy'):
         numerator = 1 + np.cos(12 * np.sqrt(x1**2 + x2**2))
         denominator = 0.5 * (x1**2 + x2**2) + 2
         result = -numerator / denominator
+
     elif version == 'pyomo':
         numerator = 1 + pyo.cos(12 * (x1**2 + x2**2) ** 0.5)
         denominator = 0.5 * (x1**2 + x2**2) + 2
         result = -numerator / denominator
+
     elif version == 'pytorch':
         numerator = 1 + torch.cos(12 * torch.sqrt(x1**2 + x2**2))
         denominator = 0.5 * (x1**2 + x2**2) + 2
         result = -numerator / denominator
+
     else:
         raise ValueError(
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
-        )
-
-    # Fill in the intermediate results if results and trial
-    # are provided
-    if results is not None and trial is not None:
-        build_2d_intermediate_results(
-            x1=x1,
-            x2=x2,
-            result=result,
-            version=version,
-            results=results,
-            trial=trial,
         )
 
     return result
@@ -6319,6 +6310,7 @@ griewank_config = {
     'dimensions': 2,
     'global_x': np.array([0.0, 0.0]),
     'trials': 25,
+    'name': 'griewank',
 }
 
 # Holder Table
@@ -6333,6 +6325,7 @@ holder_table_config = {
     'dimensions': 2,
     'global_x': np.array([8.05502, 9.66459]),
     'trials': 25,
+    'name': 'holder_table',
 }
 
 # Langermann
