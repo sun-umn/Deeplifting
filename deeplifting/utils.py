@@ -549,7 +549,7 @@ def create_contour_plot(problem_name, problem, models, trajectories, colormap='G
 
 
 def create_optimization_plot(
-    problem_name, problem, final_results, add_contour_plot=True, colormap='Wistia'
+    problem_name, problem, add_contour_plot=False, colormap='Wistia'
 ):
     """
     Function that will build out the plots and the solution
@@ -584,13 +584,8 @@ def create_optimization_plot(
     y = np.linspace(y_min, y_max, 1000)
     x, y = np.meshgrid(x, y)
 
-    # For the function inputs we need results and a trial
-    # Create dummy data
-    results = np.zeros((1, 1, 3))
-    trial = 0
-
     # Put objective function in a wrapper
-    objective_f = partial(objective, results=results, trial=trial, version='numpy')
+    objective_f = partial(objective, version='numpy')
 
     # Create a grid of vectors
     grid = np.stack((x, y), axis=-1)
@@ -624,16 +619,6 @@ def create_optimization_plot(
         # Plot the contour
         contour = ax2.contour(x, y, z, cmap=colormap)
         fig.colorbar(contour, ax=ax2)
-
-        # Add the minimum point
-        for result in final_results:
-            min_x, min_y, _, _, _ = result
-            ax2.plot(min_x, min_y, 'ko')  # plot the minimum point as a black dot
-
-        # Add title and labels
-        ax2.set_title(f'Contour Plot of the {problem_name} Function')
-        ax2.set_xlabel('X')
-        ax2.set_ylabel('Y')
 
     # Show the plots
     plt.tight_layout()
