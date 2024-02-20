@@ -594,7 +594,7 @@ def create_optimization_plot(
     z = np.apply_along_axis(objective_f, 2, grid)
 
     # Create a figure
-    fig = plt.figure(figsize=(10, 4.5))
+    fig = plt.figure(figsize=(10, 5))
 
     # Specify 3D plot
     if add_contour_plot:
