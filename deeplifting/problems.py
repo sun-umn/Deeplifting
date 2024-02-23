@@ -4,7 +4,6 @@
 import numpy as np
 import pyomo.environ as pyo
 import torch
-from problems_2d import Ackley
 from scipy.special import factorial, gamma
 
 # first party
@@ -17,6 +16,7 @@ from deeplifting.kriging_peaks.kriging_peaks_red import (
     kriging_peaks_red200,
     kriging_peaks_red500,
 )
+from deeplifting.problems_2d.ackley import Ackley
 
 
 def build_2d_intermediate_results(x1, x2, result, version, results, trial):
@@ -8435,7 +8435,7 @@ lennard_jones_225d_config = {
 }
 
 # Try importing from new setup
-ackley_config = Ackley.config()
+ackley_config = Ackley().config()
 
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
