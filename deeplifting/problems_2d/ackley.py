@@ -1,3 +1,6 @@
+# stdlib
+from typing import Any, Dict
+
 # third party
 import numpy as np
 import pyomo.environ as pyo
@@ -15,7 +18,7 @@ class Ackley:
     f(x) = 0
     """
 
-    def ackley(self, x, version='numpy'):
+    def objective(self, x, version='numpy') -> float:
         """
         Ackley method
         """
@@ -48,3 +51,23 @@ class Ackley:
             )
 
         return result
+
+    def config(self) -> Dict[str, Any]:
+        """
+        Configuration to run Ackley problem
+        """
+        config = {
+            'objective': self.objective,
+            'bounds': {
+                'lower_bounds': [-32.768, -32.768],
+                'upper_bounds': [32.768, 32.768],
+            },
+            'max_iterations': 1000,
+            'global_minimum': 0.0,
+            'dimensions': 2,
+            'global_x': np.array([0.0, 0.0]),
+            'trials': 25,
+            'name': 'ackley',
+        }
+
+        return config

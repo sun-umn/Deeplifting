@@ -4,6 +4,7 @@
 import numpy as np
 import pyomo.environ as pyo
 import torch
+from problems_2d import Ackley
 from scipy.special import factorial, gamma
 
 # first party
@@ -45,46 +46,47 @@ def build_2d_intermediate_results(x1, x2, result, version, results, trial):
     return results
 
 
-def ackley(x, version='numpy'):
-    """
-    Function that implements the Ackley function in
-    numpy, pytorch or pyomo interface. We will use this
-    for our deeplifting experiments.
-    Note, that this version is the 2-D version only
-    """
-    a = 20
-    b = 0.2
-    c = 2 * np.pi
+# def ackley(x, version='numpy'):
+#     """
+#     Function that implements the Ackley function in
+#     numpy, pytorch or pyomo interface. We will use this
+#     for our deeplifting experiments.
+#     Note, that this version is the 2-D version only
+#     """
+#     a = 20
+#     b = 0.2
+#     c = 2 * np.pi
 
-    # Get x1 & x2
-    x1, x2 = x.flatten()
+#     # Get x1 & x2
+#     x1, x2 = x.flatten()
 
-    if version == 'numpy':
-        sum_sq_term = -a * np.exp(-b * np.sqrt(0.5 * ((x1) ** 2 + (x2) ** 2)))
-        cos_term = -np.exp(0.5 * (np.cos(c * (x1)) + np.cos(c * (x2))))
-        result = sum_sq_term + cos_term + a + np.exp(1)
+#     if version == 'numpy':
+#         sum_sq_term = -a * np.exp(-b * np.sqrt(0.5 * ((x1) ** 2 + (x2) ** 2)))
+#         cos_term = -np.exp(0.5 * (np.cos(c * (x1)) + np.cos(c * (x2))))
+#         result = sum_sq_term + cos_term + a + np.exp(1)
 
-    # elif version == 'jax':
-    #     sum_sq_term = -a * jnp.exp(-b * jnp.sqrt(0.5 * ((x1) ** 2 + (x2) ** 2)))
-    #     cos_term = -jnp.exp(0.5 * (jnp.cos(c * (x1)) + jnp.cos(c * (x2))))
-    #     result = sum_sq_term + cos_term + a + np.exp(1)
+#     # elif version == 'jax':
+#     #     sum_sq_term = -a * jnp.exp(-b * jnp.sqrt(0.5 * ((x1) ** 2 + (x2) ** 2)))
+#     #     cos_term = -jnp.exp(0.5 * (jnp.cos(c * (x1)) + jnp.cos(c * (x2))))
+#     #     result = sum_sq_term + cos_term + a + np.exp(1)
 
-    elif version == 'pyomo':
-        sum_sq_term = -a * pyo.exp(-b * (0.5 * (x1**2 + x2**2) ** 0.5))
-        cos_term = -pyo.exp(0.5 * (pyo.cos(c * x1) + pyo.cos(c * x2)))
-        result = sum_sq_term + cos_term + a + np.e
+#     elif version == 'pyomo':
+#         sum_sq_term = -a * pyo.exp(-b * (0.5 * (x1**2 + x2**2) ** 0.5))
+#         cos_term = -pyo.exp(0.5 * (pyo.cos(c * x1) + pyo.cos(c * x2)))
+#         result = sum_sq_term + cos_term + a + np.e
 
-    elif version == 'pytorch':
-        sum_sq_term = -a * torch.exp(-b * torch.sqrt(0.5 * ((x1) ** 2 + (x2) ** 2)))
-        cos_term = -torch.exp(0.5 * (torch.cos(c * (x1)) + torch.cos(c * (x2))))
-        result = sum_sq_term + cos_term + a + torch.exp(torch.tensor(1.0))
+#     elif version == 'pytorch':
+#         sum_sq_term = -a * torch.exp(-b * torch.sqrt(0.5 * ((x1) ** 2 + (x2) ** 2)))
+#         cos_term = -torch.exp(0.5 * (torch.cos(c * (x1)) + torch.cos(c * (x2))))
+#         result = sum_sq_term + cos_term + a + torch.exp(torch.tensor(1.0))
 
-    else:
-        raise ValueError(
-            "Unknown version specified. Available options are numpy, pyomo and pytorch."
-        )
+#     else:
+#         raise ValueError(
+#             "Unknown version specified."
+#              "Available options are numpy, pyomo and pytorch."
+#         )
 
-    return result
+#     return result
 
 
 def alpine2(x, version='numpy'):
@@ -6131,21 +6133,21 @@ def lennard_jones(x, results=None, trial=None, version='numpy'):
 
 
 # Deeplifting Problems for Paper
-# Problem configurations
-# Ackley
-ackley_config = {
-    'objective': ackley,
-    'bounds': {
-        'lower_bounds': [-32.768, -32.768],
-        'upper_bounds': [32.768, 32.768],
-    },
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 2,
-    'global_x': np.array([0.0, 0.0]),
-    'trials': 25,
-    'name': 'ackley',
-}
+# # Problem configurations
+# # Ackley
+# ackley_config = {
+#     'objective': ackley,
+#     'bounds': {
+#         'lower_bounds': [-32.768, -32.768],
+#         'upper_bounds': [32.768, 32.768],
+#     },
+#     'max_iterations': 1000,
+#     'global_minimum': 0.0,
+#     'dimensions': 2,
+#     'global_x': np.array([0.0, 0.0]),
+#     'trials': 25,
+#     'name': 'ackley',
+# }
 
 # Ackley 2
 ackley2_config = {
@@ -8431,6 +8433,9 @@ lennard_jones_225d_config = {
     'global_x': np.array([0.0] * 225),
     'trials': 25,
 }
+
+# Try importing from new setup
+ackley_config = Ackley.config()
 
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
