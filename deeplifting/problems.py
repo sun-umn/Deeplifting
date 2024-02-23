@@ -6268,6 +6268,19 @@ cross_leg_table_config = {
     'name': 'cross_leg_table',
 }
 
+# Damavandi
+damavandi_config = {
+    'objective': damavandi,
+    'bounds': {'lower_bounds': [0.0, 0.0], 'upper_bounds': [14.0, 14.0]},
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+    'global_x': np.array([2.0, 2.0]),
+    'trials': 25,
+    'name': 'damavandi',
+}
+
+
 # Drop Wave
 drop_wave_config = {
     'objective': drop_wave,
@@ -7005,14 +7018,6 @@ quantum_config = {
 rosenbrock_config = {
     'objective': rosenbrock,
     'bounds': [(-10, 5), (-10, 10)],
-    'max_iterations': 1000,
-    'global_minimum': 0,
-    'dimensions': 2,
-}
-
-damavandi_config = {
-    'objective': damavandi,
-    'bounds': [(0, 14), (0, 14)],
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2,
