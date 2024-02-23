@@ -18,7 +18,7 @@ class Alpine2:
     at (7.917,7.917)
     """
 
-    def objective(x, version='numpy'):
+    def objective(self, x, version='numpy'):
         """
         Implementation of the Alpine2 function.
 
