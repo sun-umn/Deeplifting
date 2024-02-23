@@ -17,6 +17,7 @@ from deeplifting.kriging_peaks.kriging_peaks_red import (
     kriging_peaks_red500,
 )
 from deeplifting.problems_2d.ackley import Ackley
+from deeplifting.problems_2d.alpine2 import Alpine2
 
 
 def build_2d_intermediate_results(x1, x2, result, version, results, trial):
@@ -44,96 +45,6 @@ def build_2d_intermediate_results(x1, x2, result, version, results, trial):
         results[trial, iteration, :] = np.array((x1, x2, result))
 
     return results
-
-
-# def ackley(x, version='numpy'):
-#     """
-#     Function that implements the Ackley function in
-#     numpy, pytorch or pyomo interface. We will use this
-#     for our deeplifting experiments.
-#     Note, that this version is the 2-D version only
-#     """
-#     a = 20
-#     b = 0.2
-#     c = 2 * np.pi
-
-#     # Get x1 & x2
-#     x1, x2 = x.flatten()
-
-#     if version == 'numpy':
-#         sum_sq_term = -a * np.exp(-b * np.sqrt(0.5 * ((x1) ** 2 + (x2) ** 2)))
-#         cos_term = -np.exp(0.5 * (np.cos(c * (x1)) + np.cos(c * (x2))))
-#         result = sum_sq_term + cos_term + a + np.exp(1)
-
-#     # elif version == 'jax':
-#     #     sum_sq_term = -a * jnp.exp(-b * jnp.sqrt(0.5 * ((x1) ** 2 + (x2) ** 2)))
-#     #     cos_term = -jnp.exp(0.5 * (jnp.cos(c * (x1)) + jnp.cos(c * (x2))))
-#     #     result = sum_sq_term + cos_term + a + np.exp(1)
-
-#     elif version == 'pyomo':
-#         sum_sq_term = -a * pyo.exp(-b * (0.5 * (x1**2 + x2**2) ** 0.5))
-#         cos_term = -pyo.exp(0.5 * (pyo.cos(c * x1) + pyo.cos(c * x2)))
-#         result = sum_sq_term + cos_term + a + np.e
-
-#     elif version == 'pytorch':
-#         sum_sq_term = -a * torch.exp(-b * torch.sqrt(0.5 * ((x1) ** 2 + (x2) ** 2)))
-#         cos_term = -torch.exp(0.5 * (torch.cos(c * (x1)) + torch.cos(c * (x2))))
-#         result = sum_sq_term + cos_term + a + torch.exp(torch.tensor(1.0))
-
-#     else:
-#         raise ValueError(
-#             "Unknown version specified."
-#              "Available options are numpy, pyomo and pytorch."
-#         )
-
-#     return result
-
-
-def alpine2(x, version='numpy'):
-    """
-    Implementation of the Alpine2 function.
-    This is a 2-dimensional function with a global minimum of 2.808^2
-    at (7.917,7.917)
-
-    Parameters:
-        x: (x1, x2) this is a 2D problem
-    version : str
-        The version to use for the function's computation
-        Options are 'numpy' and 'pytorch'
-
-    Returns:
-    result : np.ndarray or torch.Tensor
-        The computed Damavandi function values
-        corresponding to the inputs (x1, x2)
-
-    Raises:
-    ValueError
-        If the version is not 'numpy' or 'pytorch'
-
-    This is the correct version:
-    https://towardsdatascience.com/optimization-eye-pleasure-78-benchmark-test-functions-for-single-objective-optimization-92e7ed1d1f12  # noqa
-    """
-    x1, x2 = x.flatten()
-    if version == 'numpy':
-        result = -1.0 * (np.sqrt(x1) * np.sin(x1)) * (np.sqrt(x2) * np.sin(x2))
-
-    # elif version == 'jax':
-    #     result = -1.0 * (jnp.sqrt(x1) * jnp.sin(x1)) * (jnp.sqrt(x2) * jnp.sin(x2))
-
-    elif version == 'pyomo':
-        result = -1.0 * (x1**0.5 * pyo.sin(x1)) * (x2**0.5 * pyo.sin(x2))
-
-    elif version == 'pytorch':
-        result = (
-            -1.0 * (torch.sqrt(x1) * torch.sin(x1)) * (torch.sqrt(x2) * torch.sin(x2))
-        )
-
-    else:
-        raise ValueError(
-            "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
-        )
-
-    return result
 
 
 def bird(x, version='numpy'):
@@ -6133,22 +6044,6 @@ def lennard_jones(x, results=None, trial=None, version='numpy'):
 
 
 # Deeplifting Problems for Paper
-# # Problem configurations
-# # Ackley
-# ackley_config = {
-#     'objective': ackley,
-#     'bounds': {
-#         'lower_bounds': [-32.768, -32.768],
-#         'upper_bounds': [32.768, 32.768],
-#     },
-#     'max_iterations': 1000,
-#     'global_minimum': 0.0,
-#     'dimensions': 2,
-#     'global_x': np.array([0.0, 0.0]),
-#     'trials': 25,
-#     'name': 'ackley',
-# }
-
 # Ackley 2
 ackley2_config = {
     'objective': ackley2,
@@ -6188,21 +6083,6 @@ alpine1_config = {
     'dimensions': 2,
     'global_x': np.array([0.0, 0.0]),
     'trials': 25,
-}
-
-# Alpine N.2
-alpine2_config = {
-    'objective': alpine2,
-    'bounds': {
-        'lower_bounds': [0.0, 0.0],
-        'upper_bounds': [10.0, 10.0],
-    },
-    'max_iterations': 1000,
-    'global_minimum': -7.885600,
-    'dimensions': 2,
-    'global_x': np.array([7.917, 7.917]),
-    'trials': 25,
-    'name': 'alpine2',
 }
 
 # TODO: Bird is a function that has two global minima
@@ -7159,14 +7039,6 @@ alpine1_2500d_config = {
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2500,
-}
-
-alpine2_10d_config = {
-    'objective': alpine2,
-    'bounds': [(0, 10)],
-    'max_iterations': 1000,
-    'global_minimum': -(2.808**10),
-    'dimensions': 10,
 }
 
 brad_config = {
@@ -8434,8 +8306,9 @@ lennard_jones_225d_config = {
     'trials': 25,
 }
 
-# Try importing from new setup
+# Problem Configurations
 ackley_config = Ackley().config()
+alpine2_config = Alpine2().config()
 
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
@@ -8492,7 +8365,6 @@ PROBLEMS_BY_NAME = {
     'adjiman': adjiman_config,
     'alpine1': alpine1_config,
     'alpine2': alpine2_config,
-    'alpine2_10d': alpine2_10d_config,
     'brad': brad_config,
     'bartels_conn': bartels_conn_config,
     'beale': beale_config,
