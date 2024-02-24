@@ -8059,10 +8059,15 @@ mishra11_5000d_config = {
 
 xinsheyang_n2_config = {
     'objective': xinsheyang_n2,
-    'bounds': [(-2 * np.pi, 2 * np.pi), (-2 * np.pi, 2 * np.pi)],
+    'bounds': {
+        'lower_bounds': [-2 * np.pi, -2 * np.pi],
+        'upper_bounds': [2 * np.pi, 2 * np.pi],
+    },
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2,
+    'global_x': np.array([0.0, 0.0]),
+    'trials': 25,
 }
 
 xinsheyang_n3_config = {
