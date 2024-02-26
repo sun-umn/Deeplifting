@@ -7,7 +7,6 @@ import pyomo.environ as pyo
 import torch
 
 
-# File for 2D Alpine2 test function
 class Alpine2:
     """
     Function that implements the Ackley function in
@@ -41,8 +40,8 @@ class Alpine2:
 
         else:
             raise ValueError(
-                'Unknown version specified. Available'
-                'options are numpy, pyomo and pytorch.'
+                'Unknown version specified.'
+                'Available options are numpy, pyomo and pytorch'
             )
 
         return result

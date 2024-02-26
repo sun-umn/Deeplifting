@@ -46,8 +46,8 @@ class Ackley:
 
         else:
             raise ValueError(
-                'Unknown version specified. Available'
-                'options are numpy, pyomo and pytorch.'
+                'Unknown version specified.'
+                'Available options are numpy, pyomo and pytorch'
             )
 
         return result

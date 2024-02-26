@@ -61,8 +61,6 @@ from deeplifting.problems import (
     griewank_config,
     holder_table,
     holder_table_config,
-    levy_n13,
-    levy_n13_config,
     mathopt6,
     mathopt6_config,
     rastrigin,
@@ -84,7 +82,7 @@ from deeplifting.problems import (
 )
 from deeplifting.problems_2d.ackley import Ackley
 from deeplifting.problems_2d.alpine2 import Alpine2
-from deeplifting.problems_2d.levy import Levy
+from deeplifting.problems_2d.levy import Levy, LevyN13
 
 
 def test_ackley_has_correct_global_minimum():
@@ -332,19 +330,21 @@ def test_levy_n13_has_correct_global_minimum():
     x*=(1.0, 1.0)
     f(x*) = 0
     """
+    levy_n13 = LevyN13()
+    levy_n13_config = levy_n13.config()
     global_minimum = levy_n13_config['global_minimum']
 
     # Test the numpy version
     x = np.array([1.0, 1.0])
-    result = levy_n13(x, version='numpy')
+    result = levy_n13.objective(x, version='numpy')
     assert math.isclose(result, global_minimum, abs_tol=1e-4)
 
-    result = levy_n13(x, version='pyomo')
+    result = levy_n13.objective(x, version='pyomo')
     assert math.isclose(result, global_minimum, abs_tol=1e-4)
 
     # Test the torch version
     x = torch.tensor([1.0, 1.0], dtype=torch.float64)
-    torch_result = levy_n13(x, version='pytorch').numpy()
+    torch_result = levy_n13.objective(x, version='pytorch').numpy()
     assert math.isclose(torch_result, global_minimum, abs_tol=1e-4)
 
 
