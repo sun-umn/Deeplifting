@@ -18,6 +18,7 @@ from deeplifting.kriging_peaks.kriging_peaks_red import (
 )
 from deeplifting.problems_2d.ackley import Ackley
 from deeplifting.problems_2d.alpine2 import Alpine2
+from deeplifting.problems_2d.levy import Levy
 
 
 def build_2d_intermediate_results(x1, x2, result, version, results, trial):
@@ -576,74 +577,6 @@ def langermann(x, results=None, trial=None, version='numpy'):
             + 3
             * torch.exp((-1 / np.pi) * (torch.square(x1 - 7) + torch.square(x2 - 9)))
             * torch.cos(np.pi * (torch.square(x1 - 7) + torch.square(x2 - 9)))
-        )
-
-    # Fill in the intermediate results if results and trial
-    # are provided
-    if results is not None and trial is not None:
-        build_2d_intermediate_results(
-            x1=x1,
-            x2=x2,
-            result=result,
-            version=version,
-            results=results,
-            trial=trial,
-        )
-
-    return result
-
-
-def levy(x, results=None, trial=None, version='numpy'):
-    """
-    Implementation of the 2D Levy function.
-    This function has a global minimum at x1 = x2 = 1.
-
-    Parameters:
-    x1 : np.ndarray or torch.Tensor
-        The x1 values (first dimension of the input space).
-    x2 : np.ndarray or torch.Tensor
-        The x2 values (second dimension of the input space).
-    version : str
-        The version to use for the function's computation.
-        Options are 'numpy' and 'pytorch'.
-
-    Returns:
-    result : np.ndarray or torch.Tensor
-        The computed Levy function values
-        corresponding to the inputs (x1, x2).
-
-    Raises:
-    ValueError
-        If the version is not 'numpy' or 'pytorch'.
-    """
-    x1, x2 = x.flatten()
-    if version == 'numpy':
-        w1 = 1 + (x1 - 1) / 4
-        w2 = 1 + (x2 - 1) / 4
-        result = (
-            np.sin(np.pi * w1) ** 2
-            + (w2 - 1) ** 2 * (1 + 10 * np.sin(np.pi * w2 + 1) ** 2)
-            + (w1 - 1) ** 2 * (1 + np.sin(2 * np.pi * w1) ** 2)
-        )
-    elif version == 'pyomo':
-        w1 = 1 + (x1 - 1) / 4
-        w2 = 1 + (x2 - 1) / 4
-        result = (
-            pyo.sin(np.pi * w1) ** 2
-            + (w2 - 1) ** 2 * (1 + 10 * pyo.sin(np.pi * w2 + 1) ** 2)
-            + (w1 - 1) ** 2 * (1 + pyo.sin(2 * np.pi * w1) ** 2)
-        )
-    elif version == 'pytorch':
-        w1 = 1 + (x1 - 1) / 4
-        w2 = 1 + (x2 - 1) / 4
-        result = (
-            torch.sin(torch.tensor(np.pi) * w1) ** 2
-            + (w2 - 1) ** 2 * (1 + 10 * torch.sin(torch.tensor(np.pi) * w2 + 1) ** 2)
-            + (w1 - 1) ** 2 * (1 + torch.sin(2 * torch.tensor(np.pi) * w1) ** 2)
-        )
-    else:
-        raise ValueError(
-            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
     # Fill in the intermediate results if results and trial
@@ -6233,20 +6166,6 @@ langermann_config = {
 }
 
 # Levy
-levy_config = {
-    'objective': levy,
-    'bounds': {
-        'lower_bounds': [-10.0, -10.0],
-        'upper_bounds': [10.0, 10.0],
-    },
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 2,
-    'global_x': np.array([1.0, 1.0]),
-    'trials': 50,
-}
-
-# Levy
 levy_n13_config = {
     'objective': levy_n13,
     'bounds': {
@@ -8314,6 +8233,7 @@ lennard_jones_225d_config = {
 # Problem Configurations
 ackley_config = Ackley().config()
 alpine2_config = Alpine2().config()
+levy_config = Levy().config()
 
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
