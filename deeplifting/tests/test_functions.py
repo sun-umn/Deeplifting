@@ -61,8 +61,6 @@ from deeplifting.problems import (
     griewank_config,
     holder_table,
     holder_table_config,
-    mathopt6,
-    mathopt6_config,
     rastrigin,
     rastrigin_config,
     rosenbrock,
@@ -83,6 +81,7 @@ from deeplifting.problems import (
 from deeplifting.problems_2d.ackley import Ackley
 from deeplifting.problems_2d.alpine2 import Alpine2
 from deeplifting.problems_2d.levy import Levy, LevyN13
+from deeplifting.problems_2d.mathopt6 import MathOpt6
 
 
 def test_ackley_has_correct_global_minimum():
@@ -513,19 +512,21 @@ def test_mathopt6_has_correct_global_minimum():
     x*=(-0.024399, 0.210612)
     f(x*) = -3.306869
     """
+    mathopt6 = MathOpt6()
+    mathopt6_config = mathopt6.config()
     global_minimum = mathopt6_config['global_minimum']
 
     # Test the numpy version
     x = np.array([-0.024399, 0.210612])
-    result = mathopt6(x, version='numpy')
+    result = mathopt6.objective(x, version='numpy')
     assert math.isclose(result, global_minimum, abs_tol=1e-4)
 
-    result = mathopt6(x, version='pyomo')
+    result = mathopt6.objective(x, version='pyomo')
     assert math.isclose(result, global_minimum, abs_tol=1e-4)
 
     # Test the torch version
     x = torch.tensor([-0.024399, 0.210612], dtype=torch.float64)
-    torch_result = mathopt6(x, version='pytorch').numpy()
+    torch_result = mathopt6.objective(x, version='pytorch').numpy()
     assert math.isclose(torch_result, global_minimum, abs_tol=1e-4)
 
 

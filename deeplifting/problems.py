@@ -19,6 +19,7 @@ from deeplifting.kriging_peaks.kriging_peaks_red import (
 from deeplifting.problems_2d.ackley import Ackley
 from deeplifting.problems_2d.alpine2 import Alpine2
 from deeplifting.problems_2d.levy import Levy, LevyN13
+from deeplifting.problems_2d.mathopt6 import MathOpt6
 
 
 def build_2d_intermediate_results(x1, x2, result, version, results, trial):
@@ -2144,75 +2145,6 @@ def ex8_1_6(x, results, trial, version='numpy'):
         results=results,
         trial=trial,
     )
-
-    return result
-
-
-def mathopt6(x, results=None, trial=None, version='numpy'):
-    """
-    Implementation of the mathopt6 function from the MINLP library.
-    This function has a global minimum of -3.306868. This
-    was found by COUENNE
-
-    Parameters:
-        x: (x1, x2) this is a 3D problem
-    version : str
-        The version to use for the function's computation.
-        Options are 'numpy' and 'pytorch'.
-
-    Returns:
-    result : np.ndarray or torch.Tensor
-        The computed Schwefel function values
-        corresponding to the inputs (x1, x2).
-
-    Raises:
-    ValueError
-        If the version is not 'numpy' or 'pytorch'.
-    """
-    x1, x2 = x.flatten()
-    if version == 'numpy':
-        result = (
-            np.exp(np.sin(50 * x1))
-            + np.sin(60 * np.exp(x2))
-            + np.sin(70 * np.sin(x1))
-            + np.sin(np.sin(80 * x2))
-            - np.sin(10 * x1 + 10 * x2)
-            + 0.25 * (x1**2 + x2**2)
-        )
-    elif version == 'pyomo':
-        result = (
-            pyo.exp(pyo.sin(50 * x1))
-            + pyo.sin(60 * pyo.exp(x2))
-            + pyo.sin(70 * pyo.sin(x1))
-            + pyo.sin(pyo.sin(80 * x2))
-            - pyo.sin(10 * x1 + 10 * x2)
-            + 0.25 * (x1**2 + x2**2)
-        )
-    elif version == 'pytorch':
-        result = (
-            torch.exp(torch.sin(50 * x1))
-            + torch.sin(60 * torch.exp(x2))
-            + torch.sin(70 * torch.sin(x1))
-            + torch.sin(torch.sin(80 * x2))
-            - torch.sin(10 * x1 + 10 * x2)
-            + 0.25 * (x1**2 + x2**2)
-        )
-    else:
-        raise ValueError(
-            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
-        )
-
-    # Fill in the intermediate results if results and trial
-    # are provided
-    if results is not None and trial is not None:
-        build_2d_intermediate_results(
-            x1=x1,
-            x2=x2,
-            result=result,
-            version=version,
-            results=results,
-            trial=trial,
-        )
 
     return result
 
@@ -6103,18 +6035,6 @@ langermann_config = {
     'dimensions': 2,
 }
 
-# Mathopt6
-mathopt6_config = {
-    'objective': mathopt6,
-    'bounds': {
-        'lower_bounds': [-3.0, -3.0],
-        'upper_bounds': [3.0, 3.0],
-    },
-    'max_iterations': 1000,
-    'global_minimum': -3.3069,
-    'dimensions': 2,
-}
-
 # Rastrigin
 rastrigin_config = {
     'objective': rastrigin,
@@ -8159,6 +8079,7 @@ ackley_config = Ackley().config()
 alpine2_config = Alpine2().config()
 levy_config = Levy().config()
 levy_n13_config = LevyN13().config()
+mathopt6_config = MathOpt6().config()
 
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
