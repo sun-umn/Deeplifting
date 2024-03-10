@@ -1304,7 +1304,7 @@ def find_best_architecture_adam_task(
         results.build_and_save_dataframe(save_path=save_path, problem_name=problem_name)
 
 
-def run_deeplifting_pygranso_parallel(inputs, debug=False):
+def run_deeplifting_parallel(inputs, debug=False):
     """
     Run the deeplifting-pygranso function in parallel
     """
@@ -1339,7 +1339,7 @@ def run_deeplifting_pygranso_parallel(inputs, debug=False):
         }
 
         # method
-        method = 'deeplifting-pygranso'
+        method = 'deeplifting-adam'
 
         # Initial layer type
         initial_layer_type = 'linear'  # noqa
@@ -1462,14 +1462,14 @@ def run_deeplifting_pygranso_parallel(inputs, debug=False):
                     )
 
                 elif method == 'deeplifting-adam':
-                    # Run LBFGS Based Deeplifting
+                    # Run Adam Based Deeplifting
                     deeplifting_outputs = run_adam_deeplifting(
                         model=model,
                         model_inputs=inputs,
                         start_position=x_start,
                         objective=fn,
                         device=device,
-                        max_iterations=max_iterations,
+                        lr=lr,
                     )
 
                 else:
@@ -1507,7 +1507,7 @@ def run_deeplifting_pygranso_parallel(inputs, debug=False):
 
 
 @cli.command('test-parallel')
-@click.option('--problem_name', default='schwefel')
+@click.option('--problem_name', default='damavandi')
 @click.option('--dimensionality', default='low-dimensional')
 @click.option('--experimentation', default=True)
 def test_parallel(
@@ -1522,7 +1522,7 @@ def test_parallel(
     """
     print('Starting slurm output ⏳')
     os.environ['OMP_NUM_THREADS'] = '1'
-    method = 'deeplifting-pygranso'
+    method = 'deeplifting-adam'
 
     # Setup the problem
     if dimensionality == 'low-dimensional':
@@ -1578,7 +1578,7 @@ def test_parallel(
     input_dimensions = [1, 2, 4, 8]
 
     # Learning rates
-    learning_rates = [1.0]
+    learning_rates = [1.0, 1e-1, 1e-2, 1e-3]
 
     # Configs
     configuration = product(
@@ -1590,7 +1590,7 @@ def test_parallel(
     # Start ray process
     start = time.time()
     with Pool(8) as pool:
-        for _ in tqdm.tqdm(pool.imap(run_deeplifting_pygranso_parallel, config)):
+        for _ in tqdm.tqdm(pool.imap(run_deeplifting_parallel, config)):
             pass
     end = time.time()
     print(f'Total time {end - start} ⏰')
