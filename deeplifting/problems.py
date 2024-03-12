@@ -16,10 +16,11 @@ from deeplifting.kriging_peaks.kriging_peaks_red import (
     kriging_peaks_red200,
     kriging_peaks_red500,
 )
-from deeplifting.problems_2d.ackley import Ackley
-from deeplifting.problems_2d.alpine2 import Alpine2
-from deeplifting.problems_2d.levy import Levy, LevyN13
-from deeplifting.problems_2d.mathopt6 import MathOpt6
+from deeplifting.problems_nd.ackley import Ackley
+from deeplifting.problems_nd.alpine2 import Alpine2
+from deeplifting.problems_nd.levy import Levy, LevyN13
+from deeplifting.problems_nd.mathopt6 import MathOpt6
+from deeplifting.problems_nd.rastrigin import Rastrigin
 
 
 def build_2d_intermediate_results(x1, x2, result, version, results, trial):
@@ -570,68 +571,6 @@ def langermann(x, results=None, trial=None, version='numpy'):
             + 3
             * torch.exp((-1 / np.pi) * (torch.square(x1 - 7) + torch.square(x2 - 9)))
             * torch.cos(np.pi * (torch.square(x1 - 7) + torch.square(x2 - 9)))
-        )
-
-    # Fill in the intermediate results if results and trial
-    # are provided
-    if results is not None and trial is not None:
-        build_2d_intermediate_results(
-            x1=x1,
-            x2=x2,
-            result=result,
-            version=version,
-            results=results,
-            trial=trial,
-        )
-
-    return result
-
-
-def rastrigin(x, results=None, trial=None, version='numpy'):
-    """
-    Implementation of the 2D Rastrigin function.
-    This function has a global minimum at x1 = x2 = 0.
-
-    Parameters:
-    x1 : np.ndarray or torch.Tensor
-        The x1 values (first dimension of the input space).
-    x2 : np.ndarray or torch.Tensor
-        The x2 values (second dimension of the input space).
-    version : str
-        The version to use for the function's computation.
-        Options are 'numpy' and 'pytorch'.
-
-    Returns:
-    result : np.ndarray or torch.Tensor
-        The computed Rastrigin function values
-        corresponding to the inputs (x1, x2).
-
-    Raises:
-    ValueError
-        If the version is not 'numpy' or 'pytorch'.
-    """
-    x1, x2 = x.flatten()
-    if version == 'numpy':
-        result = (
-            10 * 2
-            + (x1**2 - 10 * np.cos(2 * np.pi * x1))
-            + (x2**2 - 10 * np.cos(2 * np.pi * x2))
-        )
-    elif version == 'pyomo':
-        result = (
-            10 * 2
-            + (x1**2 - 10 * pyo.cos(2 * np.pi * x1))
-            + (x2**2 - 10 * pyo.cos(2 * np.pi * x2))
-        )
-    elif version == 'pytorch':
-        result = (
-            10 * 2
-            + (x1**2 - 10 * torch.cos(2 * torch.tensor(np.pi) * x1))
-            + (x2**2 - 10 * torch.cos(2 * torch.tensor(np.pi) * x2))
-        )
-    else:
-        raise ValueError(
-            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
     # Fill in the intermediate results if results and trial
@@ -2470,51 +2409,6 @@ def ackley3(x, results=None, trial=None, version='numpy'):
             results=results,
             trial=trial,
         )
-
-    return result
-
-
-def ndackley4(x, results, trial, version='numpy'):
-    """
-    Compute the Ackley4 function.
-
-    Args:
-    x: A d-dimensional array or tensor
-    version: A string, either 'numpy' or 'pytorch'
-
-    Returns:
-    result: Value of the Ackley function
-    """
-    x = x.flatten()
-    shifted_x = x.flatten()[1:]
-    x = x.flatten()[:-1]
-    if version == 'numpy':
-        result = np.sum(
-            np.exp(-0.2) * np.sqrt(np.square(x) + np.square(shifted_x))
-            + 3 * (np.cos(2 * x) + np.sin(2 * shifted_x))
-        )
-    elif version == 'pytorch':
-        result = np.sum(
-            torch.exp(-0.2) * torch.sqrt(torch.square(x) + torch.square(shifted_x))
-            + 3 * (torch.cos(2 * x) + torch.sin(2 * shifted_x))
-        )
-    else:
-        raise ValueError(
-            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
-        )
-
-    # Fill in the intermediate results
-    iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
-
-    if isinstance(result, torch.Tensor):
-        x_tuple = tuple(x.detach().cpu().numpy())
-        results[trial, iteration, :] = np.array(
-            x_tuple + (result.detach().cpu().numpy(),)
-        )
-
-    else:
-        x_tuple = tuple(x.flatten())
-        results[trial, iteration, :] = np.array(x_tuple + (result,))
 
     return result
 
@@ -5390,46 +5284,6 @@ def layeb8(x, results, trial, version='numpy'):
 # going to refactor some of the high dimensional problems chosen here.
 
 
-def ndackley(x, results=None, trial=None, version='numpy'):
-    """
-    Compute the Ackley function.
-
-    Args:
-    x: A d-dimensional array or tensor
-    version: A string, either 'numpy' or 'pytorch'
-
-    Returns:
-    result: Value of the Ackley function
-
-    Note: results will be passed with trial but never
-    used for nd function
-    """
-    a = 20
-    b = 0.2
-    c = 2 * np.pi
-
-    d = len(x)
-    x = x.flatten()
-
-    if version == 'numpy':
-        arg1 = -b * (1.0 / d * np.sum(np.square(x))) ** 0.5
-        arg2 = 1.0 / d * np.sum(np.cos(c * x))
-        result = -a * np.exp(arg1) - np.exp(arg2) + a + np.e
-    elif version == 'pyomo':
-        arg1 = -b * (1.0 / d * np.sum(x**2)) ** 0.5
-        values = [pyo.cos(c * value) for value in x]
-        arg2 = 1.0 / d * np.sum(values)
-        result = -a * pyo.exp(arg1) - pyo.exp(arg2) + a + np.e
-    elif version == 'pytorch':
-        arg1 = -b * torch.sqrt(1.0 / d * torch.sum(x**2))
-        arg2 = 1.0 / d * torch.sum(torch.cos(c * x))
-        result = -a * torch.exp(arg1) - torch.exp(arg2) + a + np.e
-    else:
-        raise ValueError("Invalid implementation: choose 'numpy' or 'pytorch'")
-
-    return result
-
-
 # nd Alpine1
 def ndalpine1(x, results=None, trial=None, version='numpy'):
     """
@@ -5621,34 +5475,6 @@ def ndqing(x, results=None, trial=None, version='numpy'):
         i = torch.arange(1, len(x) + 1)
         i = i.to(device=device)
         result = torch.sum((x**2 - i) ** 2)
-    else:
-        raise ValueError(
-            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
-        )
-
-    return result
-
-
-def ndrastrigin(x, results=None, trial=None, version='numpy'):
-    """
-    Implemention of the n-dimensional levy function
-
-    Args:
-    x: A d-dimensional array or tensor
-    version: A string, either 'numpy' or 'pytorch'
-
-    Returns:
-    result: Value of the Rastrigin function
-    """
-    x = x.flatten()
-    d = len(x)
-    if version == 'numpy':
-        result = 10 * d + np.sum(np.square(x) - 10 * np.cos(2 * np.pi * x))
-    elif version == 'pyomo':
-        values = [value**2 - 10 * pyo.cos(2.0 * np.pi * value) for value in x]
-        result = 10 * d + np.sum(values)
-    elif version == 'pytorch':
-        result = 10 * d + torch.sum(torch.square(x) - 10 * torch.cos(2 * np.pi * x))
     else:
         raise ValueError(
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
@@ -6006,20 +5832,6 @@ langermann_config = {
     'dimensions': 2,
 }
 
-# Rastrigin
-rastrigin_config = {
-    'objective': rastrigin,
-    'bounds': {
-        'lower_bounds': [-5.12, -5.12],
-        'upper_bounds': [5.12, 5.12],
-    },
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 2,
-    'global_x': np.array([0.0, 0.0]),
-    'trials': 50,
-}
-
 # Schaffer N2
 schaffer_n2_config = {
     'objective': schaffer_n2,
@@ -6076,58 +5888,6 @@ shubert_config = {
     'global_x': np.array([0.0, 0.0]),  # Not correct global_x,
     'trials': 25,
     'name': 'shubert',
-}
-
-# Multi-Dimensional Problems #
-ackley_3d_config = {
-    'objective': ndackley,
-    'bounds': {'lower_bounds': [-32.768] * 3, 'upper_bounds': [32.768] * 3},
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 3,
-}
-
-# Multi-Dimensional Problems #
-ackley_5d_config = {
-    'objective': ndackley,
-    'bounds': {'lower_bounds': [-32.768] * 5, 'upper_bounds': [32.768] * 5},
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 5,
-}
-
-# Multi-Dimensional Problems #
-ackley_30d_config = {
-    'objective': ndackley,
-    'bounds': {'lower_bounds': [-32.768] * 30, 'upper_bounds': [32.768] * 30},
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 30,
-}
-
-ackley_100d_config = {
-    'objective': ndackley,
-    'bounds': {'lower_bounds': [-32.768] * 100, 'upper_bounds': [32.768] * 100},
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 100,
-}
-
-ackley_500d_config = {
-    'objective': ndackley,
-    'bounds': {'lower_bounds': [-32.768] * 500, 'upper_bounds': [32.768] * 500},
-    'max_iterations': 150,
-    'global_minimum': 0.0,
-    'dimensions': 500,
-}
-
-ackley_1000d_config = {
-    'objective': ndackley,
-    'bounds': {'lower_bounds': [-32.768] * 1000, 'upper_bounds': [32.768] * 1000},
-    'max_iterations': 150,
-    'global_minimum': 0.0,
-    'dimensions': 1000,
-    'trials': 15,
 }
 
 # Multi-Dimensional Problems #
@@ -6304,64 +6064,6 @@ layeb4_2500d_config = {
     'global_minimum': 2499 * (np.log(1e-3) + 1),
     'dimensions': 2500,
 }
-
-# Multi-Dimensional Problems #
-rastrigin_3d_config = {
-    'objective': ndrastrigin,
-    'bounds': [(-5.12, 5.12)],  # Will use a single level bound and then expand
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 3,
-}
-
-rastrigin_5d_config = {
-    'objective': ndrastrigin,
-    'bounds': [(-5.12, 5.12)],  # Will use a single level bound and then expand
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 5,
-}
-
-rastrigin_30d_config = {
-    'objective': ndrastrigin,
-    'bounds': [(-5.12, 5.12)],  # Will use a single level bound and then expand
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 30,
-}
-
-rastrigin_100d_config = {
-    'objective': ndrastrigin,
-    'bounds': [(-5.12, 5.12)],  # Will use a single level bound and then expand
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 100,
-}
-
-rastrigin_500d_config = {
-    'objective': ndrastrigin,
-    'bounds': [(-5.12, 5.12)],  # Will use a single level bound and then expand
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 500,
-}
-
-rastrigin_1000d_config = {
-    'objective': ndrastrigin,
-    'bounds': [(-5.12, 5.12)],  # Will use a single level bound and then expand
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 1000,
-}
-
-rastrigin_2500d_config = {
-    'objective': ndrastrigin,
-    'bounds': [(-5.12, 5.12)],  # Will use a single level bound and then expand
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 2500,
-}
-
 
 schwefel_3d_config = {
     'objective': ndschwefel,
@@ -6653,62 +6355,6 @@ sine_envelope_config = {
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 2,
-}
-
-ackley4_config = {
-    'objective': ndackley4,
-    'bounds': [(-35, 35), (-35, 35)],
-    'max_iterations': 1000,
-    'global_minimum': -3.917275,
-    'dimensions': 2,
-}
-
-ackley4_10d_config = {
-    'objective': ndackley4,
-    'bounds': [(-35, 35)],
-    'max_iterations': 1000,
-    'global_minimum': -3.917275,
-    'dimensions': 10,
-}
-
-ackley4_50d_config = {
-    'objective': ndackley4,
-    'bounds': [(-35, 35)],
-    'max_iterations': 1000,
-    'global_minimum': -3.917275,
-    'dimensions': 50,
-}
-
-ackley4_100d_config = {
-    'objective': ndackley4,
-    'bounds': [(-35, 35)],
-    'max_iterations': 1000,
-    'global_minimum': -3.917275,
-    'dimensions': 100,
-}
-
-ackley4_500d_config = {
-    'objective': ndackley4,
-    'bounds': [(-35, 35)],
-    'max_iterations': 1000,
-    'global_minimum': -3.917275,
-    'dimensions': 500,
-}
-
-ackley4_1000d_config = {
-    'objective': ndackley4,
-    'bounds': [(-35, 35)],
-    'max_iterations': 1000,
-    'global_minimum': -3.917275,
-    'dimensions': 1000,
-}
-
-ackley4_5000d_config = {
-    'objective': ndackley4,
-    'bounds': [(-35, 35)],
-    'max_iterations': 1000,
-    'global_minimum': -3.917275,
-    'dimensions': 5000,
 }
 
 adjiman_config = {
@@ -8045,12 +7691,30 @@ lennard_jones_225d_config = {
     'trials': 25,
 }
 
-# Problem Configurations
+# 2D Problem Configurations
 ackley_config = Ackley().config()
 alpine2_config = Alpine2().config()
 levy_config = Levy().config()
 levy_n13_config = LevyN13().config()
 mathopt6_config = MathOpt6().config()
+rastrigin_config = Rastrigin().config()
+
+# ND Problem Configurations
+# ND Ackley
+ackley_3d_config = Ackley().config_nd(dimensions=3)
+ackley_5d_config = Ackley().config_nd(dimensions=5)
+ackley_30d_config = Ackley().config_nd(dimensions=30)
+ackley_100d_config = Ackley().config_nd(dimensions=100)
+ackley_500d_config = Ackley().config_nd(dimensions=500)
+ackley_1000d_config = Ackley().config_nd(dimensions=1000)
+
+# ND Rastrigin
+rastrigin_3d_config = Rastrigin().config_nd(dimensions=3)
+rastrigin_5d_config = Rastrigin().config_nd(dimensions=5)
+rastrigin_30d_config = Rastrigin().config_nd(dimensions=30)
+rastrigin_100d_config = Rastrigin().config_nd(dimensions=100)
+rastrigin_500d_config = Rastrigin().config_nd(dimensions=500)
+rastrigin_1000d_config = Rastrigin().config_nd(dimensions=1000)
 
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
@@ -8061,15 +7725,6 @@ PROBLEMS_BY_NAME = {
     'griewank': griewank_config,
     'holder_table': holder_table_config,
     'langermann': langermann_config,
-    'levy': levy_config,
-    'levy_n13': levy_n13_config,
-    'rastrigin': rastrigin_config,
-    'rastrigin_3d': rastrigin_3d_config,
-    'rastrigin_5d': rastrigin_3d_config,
-    'rastrigin_30d': rastrigin_30d_config,
-    'rastrigin_100d': rastrigin_100d_config,
-    'rastrigin_1000': rastrigin_1000d_config,
-    'rastrigin_2500d': rastrigin_2500d_config,
     'schaffer_n2': schaffer_n2_config,
     'schaffer_n4': schaffer_n4_config,
     'schwefel': schwefel_config,
@@ -8098,12 +7753,6 @@ PROBLEMS_BY_NAME = {
     'sine_envelope': sine_envelope_config,
     'ackley2': ackley2_config,
     'ackley3': ackley3_config,
-    'ackley4': ackley4_config,
-    'ackley4_10d': ackley4_10d_config,
-    'ackley4_100d': ackley4_100d_config,
-    'ackley4_500d': ackley4_500d_config,
-    'ackley4_1000d': ackley4_1000d_config,
-    'ackley4_5000d': ackley4_5000d_config,
     'adjiman': adjiman_config,
     'alpine1': alpine1_config,
     'alpine2': alpine2_config,

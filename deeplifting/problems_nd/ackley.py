@@ -26,24 +26,22 @@ class Ackley:
         b = 0.2
         c = 2 * np.pi
 
-        # Get x1 & x2
-        x1, x2 = x.flatten()
+        d = len(x)
+        x = x.flatten()
 
         if version == 'numpy':
-            sum_sq_term = -a * np.exp(-b * np.sqrt(0.5 * ((x1) ** 2 + (x2) ** 2)))
-            cos_term = -np.exp(0.5 * (np.cos(c * (x1)) + np.cos(c * (x2))))
-            result = sum_sq_term + cos_term + a + np.exp(1)
-
+            arg1 = -b * (1.0 / d * np.sum(np.square(x))) ** 0.5
+            arg2 = 1.0 / d * np.sum(np.cos(c * x))
+            result = -a * np.exp(arg1) - np.exp(arg2) + a + np.e
         elif version == 'pyomo':
-            sum_sq_term = -a * pyo.exp(-b * (0.5 * (x1**2 + x2**2) ** 0.5))
-            cos_term = -pyo.exp(0.5 * (pyo.cos(c * x1) + pyo.cos(c * x2)))
-            result = sum_sq_term + cos_term + a + np.e
-
+            arg1 = -b * (1.0 / d * np.sum(x**2)) ** 0.5
+            values = [pyo.cos(c * value) for value in x]
+            arg2 = 1.0 / d * np.sum(values)
+            result = -a * pyo.exp(arg1) - pyo.exp(arg2) + a + np.e
         elif version == 'pytorch':
-            sum_sq_term = -a * torch.exp(-b * torch.sqrt(0.5 * ((x1) ** 2 + (x2) ** 2)))
-            cos_term = -torch.exp(0.5 * (torch.cos(c * (x1)) + torch.cos(c * (x2))))
-            result = sum_sq_term + cos_term + a + torch.exp(torch.tensor(1.0))
-
+            arg1 = -b * torch.sqrt(1.0 / d * torch.sum(x**2))
+            arg2 = 1.0 / d * torch.sum(torch.cos(c * x))
+            result = -a * torch.exp(arg1) - torch.exp(arg2) + a + np.e
         else:
             raise ValueError(
                 'Unknown version specified.'
@@ -68,6 +66,26 @@ class Ackley:
             'global_x': np.array([0.0, 0.0]),
             'trials': 25,
             'name': 'ackley',
+        }
+
+        return config
+
+    def config_nd(self, dimensions) -> Dict[str, Any]:
+        """'
+        Method to create Ackley ND problems
+        """
+        config = {
+            'objective': self.objective,
+            'bounds': {
+                'lower_bounds': [-32.768] * dimensions,
+                'upper_bounds': [32.768] * dimensions,
+            },
+            'max_iterations': 1000,
+            'global_minimum': 0.0,
+            'dimensions': 2,
+            'global_x': np.array([0.0] * dimensions),
+            'trials': 15,
+            'name': f'ackley_{dimensions}d',
         }
 
         return config

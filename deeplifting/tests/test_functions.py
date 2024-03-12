@@ -61,8 +61,6 @@ from deeplifting.problems import (
     griewank_config,
     holder_table,
     holder_table_config,
-    rastrigin,
-    rastrigin_config,
     rosenbrock,
     rosenbrock_config,
     schaffer_n2,
@@ -78,10 +76,11 @@ from deeplifting.problems import (
     xinsheyang_n3,
     xinsheyang_n3_config,
 )
-from deeplifting.problems_2d.ackley import Ackley
-from deeplifting.problems_2d.alpine2 import Alpine2
-from deeplifting.problems_2d.levy import Levy, LevyN13
-from deeplifting.problems_2d.mathopt6 import MathOpt6
+from deeplifting.problems_nd.ackley import Ackley
+from deeplifting.problems_nd.alpine2 import Alpine2
+from deeplifting.problems_nd.levy import Levy, LevyN13
+from deeplifting.problems_nd.mathopt6 import MathOpt6
+from deeplifting.problems_nd.rastrigin import Rastrigin
 
 
 def test_ackley_has_correct_global_minimum():
@@ -356,19 +355,21 @@ def test_rastrigin_has_correct_global_minimum():
     x*=(0.0, 0.0)
     f(x*) = 0
     """
+    rastrigin = Rastrigin()
+    rastrigin_config = rastrigin.config()
     global_minimum = rastrigin_config['global_minimum']
 
     # Test the numpy version
     x = np.array([0.0, 0.0])
-    result = rastrigin(x, version='numpy')
+    result = rastrigin.objective(x, version='numpy')
     assert math.isclose(result, global_minimum, abs_tol=1e-4)
 
-    result = rastrigin(x, version='pyomo')
+    result = rastrigin.objective(x, version='pyomo')
     assert math.isclose(result, global_minimum, abs_tol=1e-4)
 
     # Test the torch version
     x = torch.tensor([0.0, 0.0], dtype=torch.float64)
-    torch_result = rastrigin(x, version='pytorch').numpy()
+    torch_result = rastrigin.objective(x, version='pytorch').numpy()
     assert math.isclose(torch_result, global_minimum, abs_tol=1e-4)
 
 
