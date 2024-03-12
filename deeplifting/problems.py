@@ -1,4 +1,6 @@
 # third party
+# import jax.numpy as jnp
+# third party
 import numpy as np
 import pyomo.environ as pyo
 import torch
@@ -14,12 +16,16 @@ from deeplifting.kriging_peaks.kriging_peaks_red import (
     kriging_peaks_red200,
     kriging_peaks_red500,
 )
+from deeplifting.problems_2d.ackley import Ackley
+from deeplifting.problems_2d.alpine2 import Alpine2
+from deeplifting.problems_2d.levy import Levy, LevyN13
+from deeplifting.problems_2d.mathopt6 import MathOpt6
 
 
 def build_2d_intermediate_results(x1, x2, result, version, results, trial):
     """
     Global function that will build out the intermediate
-    results of our objective functions.
+    results of our objective functions
     """
     # Fill in the intermediate results
     iteration = np.argmin(~np.any(np.isnan(results[trial]), axis=1))
@@ -43,56 +49,48 @@ def build_2d_intermediate_results(x1, x2, result, version, results, trial):
     return results
 
 
-def ackley(x, results=None, trial=None, p=0.0, version='numpy'):
+def bird(x, version='numpy'):
     """
-    Function that implements the Ackley function in
-    numpy, pytorch or pyomo interface. We will use this
-    for our deeplifting experiments.
-    Note, that this version is the 2-D version only.
+    Bird function in 2D
     """
-    a = 20
-    b = 0.2
-    c = 2 * np.pi
-
-    # Get x1 & x2
     x1, x2 = x.flatten()
-
     if version == 'numpy':
-        sum_sq_term = -a * np.exp(-b * np.sqrt(0.5 * ((x1 - p) ** 2 + (x2 - p) ** 2)))
-        cos_term = -np.exp(0.5 * (np.cos(c * (x1 - p)) + np.cos(c * (x2 - p))))
-        result = sum_sq_term + cos_term + a + np.exp(1)
-    elif version == 'pyomo':
-        sum_sq_term = -a * pyo.exp(-b * (0.5 * (x1**2 + x2**2) ** 0.5))
-        cos_term = -pyo.exp(0.5 * (pyo.cos(c * x1) + pyo.cos(c * x2)))
-        result = sum_sq_term + cos_term + a + np.e
-    elif version == 'pytorch':
-        sum_sq_term = -a * torch.exp(
-            -b * torch.sqrt(0.5 * ((x1 - p) ** 2 + (x2 - p) ** 2))
+        result = (
+            np.sin(x1) * np.exp(np.square(1 - np.cos(x2)))
+            + np.cos(x2) * np.exp(np.square(1 - np.sin(x1)))
+            + np.square(x1 - x2)
         )
-        cos_term = -torch.exp(0.5 * (torch.cos(c * (x1 - p)) + torch.cos(c * (x2 - p))))
-        result = sum_sq_term + cos_term + a + torch.exp(torch.tensor(1.0))
+
+    # elif version == 'jax':
+    #     result = (
+    #         jnp.sin(x1) * jnp.exp(jnp.square(1 - jnp.cos(x2)))
+    #         + jnp.cos(x2) * jnp.exp(jnp.square(1 - jnp.sin(x1)))
+    #         + jnp.square(x1 - x2)
+    #     )
+
+    elif version == 'pyomo':
+        result = (
+            pyo.sin(x1) * pyo.exp((1 - pyo.cos(x2)) ** 2)
+            + pyo.cos(x2) * pyo.exp((1 - pyo.sin(x1)) ** 2)
+            + (x1 - x2) ** 2
+        )
+
+    elif version == 'pytorch':
+        result = (
+            torch.sin(x1) * torch.exp(torch.square(1 - torch.cos(x2)))
+            + torch.cos(x2) * torch.exp(torch.square(1 - torch.sin(x1)))
+            + torch.square(x1 - x2)
+        )
 
     else:
         raise ValueError(
-            "Unknown version specified. Available options are numpy, pyomo and pytorch."
-        )
-
-    # Fill in the intermediate results if results and trial
-    # are provided
-    if results is not None and trial is not None:
-        build_2d_intermediate_results(
-            x1=x1,
-            x2=x2,
-            result=result,
-            version=version,
-            results=results,
-            trial=trial,
+            "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
         )
 
     return result
 
 
-def bukin_n6(x, results=None, trial=None, p=0.0, version='numpy'):
+def bukin_n6(x, version='numpy'):
     """
     Function that implements the Bukin Function N.6 in both
     numpy and pytorch and pyomo interface.
@@ -102,35 +100,31 @@ def bukin_n6(x, results=None, trial=None, p=0.0, version='numpy'):
         term1 = 100 * np.sqrt(np.abs(x2 - 0.01 * x1**2))
         term2 = 0.01 * np.abs(x1 + 10)
         result = term1 + term2
+
+    # elif version == 'jax':
+    #     term1 = 100 * jnp.sqrt(jnp.abs(x2 - 0.01 * x1**2))
+    #     term2 = 0.01 * jnp.abs(x1 + 10)
+    #     result = term1 + term2
+
     elif version == 'pyomo':
         term1 = 100 * np.abs(x2 - 0.01 * x1**2) ** 0.5
         term2 = 0.01 * np.abs(x1 + 10.0)
         result = term1 + term2
+
     elif version == 'pytorch':
-        term1 = 100 * torch.sqrt(torch.abs((x2 - p) - 0.01 * (x1 - p) ** 2))
-        term2 = 0.01 * torch.abs((x1 - p) + 10)
+        term1 = 100 * torch.sqrt(torch.abs((x2) - 0.01 * (x1) ** 2))
+        term2 = 0.01 * torch.abs((x1) + 10)
         result = term1 + term2
+
     else:
         raise ValueError(
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results if results and trial
-    # are provided
-    if results is not None and trial is not None:
-        build_2d_intermediate_results(
-            x1=x1,
-            x2=x2,
-            result=result,
-            version=version,
-            results=results,
-            trial=trial,
-        )
-
     return result
 
 
-def cross_in_tray(x, results=None, trial=None, version='numpy'):
+def cross_in_tray(x, version='numpy'):
     """
     Implementation of the 2D Cross-in-Tray function.
     This function has four identical global minima.
@@ -167,6 +161,21 @@ def cross_in_tray(x, results=None, trial=None, version='numpy'):
             )
             ** 0.1
         )
+
+    # elif version == 'jax':
+    #     result = (
+    #         -0.0001
+    #         * (
+    #             jnp.abs(
+    #                 jnp.sin(x1)
+    #                 * jnp.sin(x2)
+    #                 * jnp.exp(np.abs(100 - jnp.sqrt(x1**2 + x2**2) / jnp.pi))
+    #             )
+    #             + 1
+    #         )
+    #         ** 0.1
+    #     )
+
     elif version == 'pyomo':
         result = (
             -0.0001
@@ -180,6 +189,7 @@ def cross_in_tray(x, results=None, trial=None, version='numpy'):
             )
             ** 0.1
         )
+
     elif version == 'pytorch':
         result = (
             -0.0001
@@ -188,36 +198,23 @@ def cross_in_tray(x, results=None, trial=None, version='numpy'):
                     torch.sin(x1)
                     * torch.sin(x2)
                     * torch.exp(
-                        torch.abs(
-                            100 - torch.sqrt(x1**2 + x2**2) / torch.tensor(np.pi)
-                        )
+                        torch.abs(100 - torch.sqrt(x1**2 + x2**2) / torch.tensor(np.pi))
                     )
                     + 1
                 )
             )
             ** 0.1
         )
+
     else:
         raise ValueError(
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results if results and trial
-    # are provided
-    if results is not None and trial is not None:
-        build_2d_intermediate_results(
-            x1=x1,
-            x2=x2,
-            result=result,
-            version=version,
-            results=results,
-            trial=trial,
-        )
-
     return result
 
 
-def cross_leg_table(x, results=None, trial=None, version='numpy'):
+def cross_leg_table(x, version='numpy'):
     """
     Implementation of the CrossLegTable problem from the infinity77 list.
     This is a 3-dimensional function with a global minimum of -1.0 at (0,0)
@@ -253,6 +250,25 @@ def cross_leg_table(x, results=None, trial=None, version='numpy'):
                 ** 0.1
             )
         )
+
+    # elif version == 'jax':
+    #     result = -(
+    #         1
+    #         / (
+    #             (
+    #                 jnp.abs(
+    #                     jnp.exp(
+    #                         jnp.abs(100 - (((x1**2 + x2**2) ** 0.5) / (jnp.pi)))
+    #                     )
+    #                     * jnp.sin(x1)
+    #                     * jnp.sin(x2)
+    #                 )
+    #                 + 1
+    #             )
+    #             ** 0.1
+    #         )
+    #     )
+
     elif version == 'pyomo':
         result = -(
             1
@@ -268,15 +284,14 @@ def cross_leg_table(x, results=None, trial=None, version='numpy'):
                 ** 0.1
             )
         )
+
     elif version == 'pytorch':
         result = -(
             1
             / (
                 (
                     torch.abs(
-                        torch.exp(
-                            torch.abs(100 - (((x1**2 + x2**2) ** 0.5) / (np.pi)))
-                        )
+                        torch.exp(torch.abs(100 - (((x1**2 + x2**2) ** 0.5) / (np.pi))))
                         * torch.sin(x1)
                         * torch.sin(x2)
                     )
@@ -285,27 +300,16 @@ def cross_leg_table(x, results=None, trial=None, version='numpy'):
                 ** 0.1
             )
         )
+
     else:
         raise ValueError(
             "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
         )
 
-    # Fill in the intermediate results if results and trial
-    # are provided
-    if results is not None and trial is not None:
-        build_2d_intermediate_results(
-            x1=x1,
-            x2=x2,
-            result=result,
-            version=version,
-            results=results,
-            trial=trial,
-        )
-
     return result
 
 
-def drop_wave(x, results=None, trial=None, version='numpy'):
+def drop_wave(x, version='numpy'):
     """
     Implementation of the 2D Drop-Wave function. This
     function has a global minimum at (x, y) = (0, 0).
@@ -333,29 +337,20 @@ def drop_wave(x, results=None, trial=None, version='numpy'):
         numerator = 1 + np.cos(12 * np.sqrt(x1**2 + x2**2))
         denominator = 0.5 * (x1**2 + x2**2) + 2
         result = -numerator / denominator
+
     elif version == 'pyomo':
         numerator = 1 + pyo.cos(12 * (x1**2 + x2**2) ** 0.5)
         denominator = 0.5 * (x1**2 + x2**2) + 2
         result = -numerator / denominator
+
     elif version == 'pytorch':
         numerator = 1 + torch.cos(12 * torch.sqrt(x1**2 + x2**2))
         denominator = 0.5 * (x1**2 + x2**2) + 2
         result = -numerator / denominator
+
     else:
         raise ValueError(
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
-        )
-
-    # Fill in the intermediate results if results and trial
-    # are provided
-    if results is not None and trial is not None:
-        build_2d_intermediate_results(
-            x1=x1,
-            x2=x2,
-            result=result,
-            version=version,
-            results=results,
-            trial=trial,
         )
 
     return result
@@ -417,7 +412,7 @@ def eggholder(x, results=None, trial=None, version='numpy'):
     return result
 
 
-def griewank(x, results=None, trial=None, version='numpy'):
+def griewank(x, version='numpy'):
     """
     Implementation of the 2D Griewank function.
     This function has a global minimum at (x, y) = (0, 0).
@@ -444,9 +439,7 @@ def griewank(x, results=None, trial=None, version='numpy'):
     if version == 'numpy':
         result = 1 + ((x1**2 + x2**2) / 4000) - np.cos(x1) * np.cos(x2 / np.sqrt(2))
     elif version == 'pyomo':
-        result = (
-            1 + ((x1**2 + x2**2) / 4000) - pyo.cos(x1) * pyo.cos(x2 / (2) ** 0.5)
-        )
+        result = 1 + ((x1**2 + x2**2) / 4000) - pyo.cos(x1) * pyo.cos(x2 / (2) ** 0.5)
     elif version == 'pytorch':
         result = (
             1
@@ -456,18 +449,6 @@ def griewank(x, results=None, trial=None, version='numpy'):
     else:
         raise ValueError(
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
-        )
-
-    # Fill in the intermediate results if results and trial
-    # are provided
-    if results is not None and trial is not None:
-        build_2d_intermediate_results(
-            x1=x1,
-            x2=x2,
-            result=result,
-            version=version,
-            results=results,
-            trial=trial,
         )
 
     return result
@@ -499,9 +480,7 @@ def holder_table(x, results=None, trial=None, version='numpy'):
     x1, x2 = x.flatten()
     if version == 'numpy':
         result = -np.abs(
-            np.sin(x1)
-            * np.cos(x2)
-            * np.exp(np.abs(1 - np.sqrt(x1**2 + x2**2) / np.pi))
+            np.sin(x1) * np.cos(x2) * np.exp(np.abs(1 - np.sqrt(x1**2 + x2**2) / np.pi))
         )
     elif version == 'pyomo':
         result = -np.abs(
@@ -608,136 +587,6 @@ def langermann(x, results=None, trial=None, version='numpy'):
     return result
 
 
-def levy(x, results=None, trial=None, version='numpy'):
-    """
-    Implementation of the 2D Levy function.
-    This function has a global minimum at x1 = x2 = 1.
-
-    Parameters:
-    x1 : np.ndarray or torch.Tensor
-        The x1 values (first dimension of the input space).
-    x2 : np.ndarray or torch.Tensor
-        The x2 values (second dimension of the input space).
-    version : str
-        The version to use for the function's computation.
-        Options are 'numpy' and 'pytorch'.
-
-    Returns:
-    result : np.ndarray or torch.Tensor
-        The computed Levy function values
-        corresponding to the inputs (x1, x2).
-
-    Raises:
-    ValueError
-        If the version is not 'numpy' or 'pytorch'.
-    """
-    x1, x2 = x.flatten()
-    if version == 'numpy':
-        w1 = 1 + (x1 - 1) / 4
-        w2 = 1 + (x2 - 1) / 4
-        result = (
-            np.sin(np.pi * w1) ** 2
-            + (w2 - 1) ** 2 * (1 + 10 * np.sin(np.pi * w2 + 1) ** 2)
-            + (w1 - 1) ** 2 * (1 + np.sin(2 * np.pi * w1) ** 2)
-        )
-    elif version == 'pyomo':
-        w1 = 1 + (x1 - 1) / 4
-        w2 = 1 + (x2 - 1) / 4
-        result = (
-            pyo.sin(np.pi * w1) ** 2
-            + (w2 - 1) ** 2 * (1 + 10 * pyo.sin(np.pi * w2 + 1) ** 2)
-            + (w1 - 1) ** 2 * (1 + pyo.sin(2 * np.pi * w1) ** 2)
-        )
-    elif version == 'pytorch':
-        w1 = 1 + (x1 - 1) / 4
-        w2 = 1 + (x2 - 1) / 4
-        result = (
-            torch.sin(torch.tensor(np.pi) * w1) ** 2
-            + (w2 - 1) ** 2 * (1 + 10 * torch.sin(torch.tensor(np.pi) * w2 + 1) ** 2)
-            + (w1 - 1) ** 2 * (1 + torch.sin(2 * torch.tensor(np.pi) * w1) ** 2)
-        )
-    else:
-        raise ValueError(
-            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
-        )
-
-    # Fill in the intermediate results if results and trial
-    # are provided
-    if results is not None and trial is not None:
-        build_2d_intermediate_results(
-            x1=x1,
-            x2=x2,
-            result=result,
-            version=version,
-            results=results,
-            trial=trial,
-        )
-
-    return result
-
-
-def levy_n13(x, results=None, trial=None, version='numpy'):
-    """
-    Implementation of the 2D Levy N.13 function.
-    This function has a global minimum at x1 = x2 = 1.
-
-    Parameters:
-    x1 : np.ndarray or torch.Tensor
-        The x1 values (first dimension of the input space).
-    x2 : np.ndarray or torch.Tensor
-        The x2 values (second dimension of the input space).
-    version : str
-        The version to use for the function's computation.
-        Options are 'numpy' and 'pytorch'.
-
-    Returns:
-    result : np.ndarray or torch.Tensor
-        The computed Levy N.13 function values
-        corresponding to the inputs (x1, x2).
-
-    Raises:
-    ValueError
-        If the version is not 'numpy' or 'pytorch'.
-    """
-    x1, x2 = x.flatten()
-    if version == 'numpy':
-        result = (
-            np.sin(3 * np.pi * x1) ** 2
-            + (x1 - 1) ** 2 * (1 + (np.sin(3 * np.pi * x2)) ** 2)
-            + (x2 - 1) ** 2 * (1 + (np.sin(2 * np.pi * x2)) ** 2)
-        )
-    elif version == 'pyomo':
-        result = (
-            pyo.sin(3 * np.pi * x1) ** 2
-            + (x1 - 1) ** 2 * (1 + (pyo.sin(3 * np.pi * x2)) ** 2)
-            + (x2 - 1) ** 2 * (1 + (pyo.sin(2 * np.pi * x2)) ** 2)
-        )
-    elif version == 'pytorch':
-        result = (
-            torch.sin(3 * torch.tensor(np.pi) * x1) ** 2
-            + (x1 - 1) ** 2 * (1 + (torch.sin(3 * torch.tensor(np.pi) * x2)) ** 2)
-            + (x2 - 1) ** 2 * (1 + (torch.sin(2 * torch.tensor(np.pi) * x2)) ** 2)
-        )
-    else:
-        raise ValueError(
-            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
-        )
-
-    # Fill in the intermediate results if results and trial
-    # are provided
-    if results is not None and trial is not None:
-        build_2d_intermediate_results(
-            x1=x1,
-            x2=x2,
-            result=result,
-            version=version,
-            results=results,
-            trial=trial,
-        )
-
-    return result
-
-
 def rastrigin(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the 2D Rastrigin function.
@@ -827,20 +676,17 @@ def schaffer_n2(x, results=None, trial=None, version='numpy'):
     if version == 'numpy':
         result = (
             0.5
-            + (np.sin(x1**2 - x2**2) ** 2 - 0.5)
-            / (1 + 0.001 * (x1**2 + x2**2)) ** 2
+            + (np.sin(x1**2 - x2**2) ** 2 - 0.5) / (1 + 0.001 * (x1**2 + x2**2)) ** 2
         )
     elif version == 'pyomo':
         result = (
             0.5
-            + (pyo.sin(x1**2 - x2**2) ** 2 - 0.5)
-            / (1 + 0.001 * (x1**2 + x2**2)) ** 2
+            + (pyo.sin(x1**2 - x2**2) ** 2 - 0.5) / (1 + 0.001 * (x1**2 + x2**2)) ** 2
         )
     elif version == 'pytorch':
         result = (
             0.5
-            + (torch.sin(x1**2 - x2**2) ** 2 - 0.5)
-            / (1 + 0.001 * (x1**2 + x2**2)) ** 2
+            + (torch.sin(x1**2 - x2**2) ** 2 - 0.5) / (1 + 0.001 * (x1**2 + x2**2)) ** 2
         )
     else:
         raise ValueError(
@@ -2292,75 +2138,6 @@ def ex8_1_6(x, results, trial, version='numpy'):
     return result
 
 
-def mathopt6(x, results=None, trial=None, version='numpy'):
-    """
-    Implementation of the mathopt6 function from the MINLP library.
-    This function has a global minimum of -3.306868. This
-    was found by COUENNE
-
-    Parameters:
-        x: (x1, x2) this is a 3D problem
-    version : str
-        The version to use for the function's computation.
-        Options are 'numpy' and 'pytorch'.
-
-    Returns:
-    result : np.ndarray or torch.Tensor
-        The computed Schwefel function values
-        corresponding to the inputs (x1, x2).
-
-    Raises:
-    ValueError
-        If the version is not 'numpy' or 'pytorch'.
-    """
-    x1, x2 = x.flatten()
-    if version == 'numpy':
-        result = (
-            np.exp(np.sin(50 * x1))
-            + np.sin(60 * np.exp(x2))
-            + np.sin(70 * np.sin(x1))
-            + np.sin(np.sin(80 * x2))
-            - np.sin(10 * x1 + 10 * x2)
-            + 0.25 * (x1**2 + x2**2)
-        )
-    elif version == 'pyomo':
-        result = (
-            pyo.exp(pyo.sin(50 * x1))
-            + pyo.sin(60 * pyo.exp(x2))
-            + pyo.sin(70 * pyo.sin(x1))
-            + pyo.sin(pyo.sin(80 * x2))
-            - pyo.sin(10 * x1 + 10 * x2)
-            + 0.25 * (x1**2 + x2**2)
-        )
-    elif version == 'pytorch':
-        result = (
-            torch.exp(torch.sin(50 * x1))
-            + torch.sin(60 * torch.exp(x2))
-            + torch.sin(70 * torch.sin(x1))
-            + torch.sin(torch.sin(80 * x2))
-            - torch.sin(10 * x1 + 10 * x2)
-            + 0.25 * (x1**2 + x2**2)
-        )
-    else:
-        raise ValueError(
-            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
-        )
-
-    # Fill in the intermediate results if results and trial
-    # are provided
-    if results is not None and trial is not None:
-        build_2d_intermediate_results(
-            x1=x1,
-            x2=x2,
-            result=result,
-            version=version,
-            results=results,
-            trial=trial,
-        )
-
-    return result
-
-
 def quantum(x, results=None, trial=None, version='numpy'):
     """
     Implementation of the quantum function from the MINLP library.
@@ -2843,59 +2620,6 @@ def alpine1(x, results=None, trial=None, version='numpy'):
     return result
 
 
-def alpine2(x, results=None, trial=None, version='numpy'):
-    """
-    Implementation of the Alpine2 function.
-    This is a 2-dimensional function with a global minimum of 2.808^2
-    at (7.917,7.917)
-
-    Parameters:
-        x: (x1, x2) this is a 2D problem
-    version : str
-        The version to use for the function's computation.
-        Options are 'numpy' and 'pytorch'.
-
-    Returns:
-    result : np.ndarray or torch.Tensor
-        The computed Damavandi function values
-        corresponding to the inputs (x1, x2).
-
-    Raises:
-    ValueError
-        If the version is not 'numpy' or 'pytorch'.
-
-    This is the correct version:
-    https://towardsdatascience.com/optimization-eye-pleasure-78-benchmark-test-functions-for-single-objective-optimization-92e7ed1d1f12  # noqa
-    """
-    x1, x2 = x.flatten()
-    if version == 'numpy':
-        result = -1.0 * (np.sqrt(x1) * np.sin(x1)) * (np.sqrt(x2) * np.sin(x2))
-    elif version == 'pyomo':
-        result = -1.0 * (x1**0.5 * pyo.sin(x1)) * (x2**0.5 * pyo.sin(x2))
-    elif version == 'pytorch':
-        result = (
-            -1.0 * (torch.sqrt(x1) * torch.sin(x1)) * (torch.sqrt(x2) * torch.sin(x2))
-        )
-    else:
-        raise ValueError(
-            "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
-        )
-
-    # Fill in the intermediate results if results and trial
-    # are provided
-    if results is not None and trial is not None:
-        build_2d_intermediate_results(
-            x1=x1,
-            x2=x2,
-            result=result,
-            version=version,
-            results=results,
-            trial=trial,
-        )
-
-    return result
-
-
 def ndalpine2(x, results, trial, version='numpy'):
     """
     Compute the Alpine2 function.
@@ -3039,9 +2763,7 @@ def bartels_conn(x, results=None, trial=None, version='numpy'):
         )
     elif version == 'pyomo':
         result = (
-            np.abs(x1**2 + x2**2 + x1 * x2)
-            + np.abs(pyo.sin(x1))
-            + np.abs(pyo.cos(x2))
+            np.abs(x1**2 + x2**2 + x1 * x2) + np.abs(pyo.sin(x1)) + np.abs(pyo.cos(x2))
         )
     elif version == 'pytorch':
         result = (
@@ -3420,49 +3142,6 @@ def biggs_exp6(x, results, trial, version='numpy'):
 
     else:
         results[trial, iteration, :] = np.array((x1, x2, x3, x4, x5, x6, result))
-
-    return result
-
-
-def bird(x, results=None, trial=None, version='numpy'):
-    """
-    Bird function in 2D.
-    """
-    x1, x2 = x.flatten()
-    if version == 'numpy':
-        result = (
-            np.sin(x1) * np.exp(np.square(1 - np.cos(x2)))
-            + np.cos(x2) * np.exp(np.square(1 - np.sin(x1)))
-            + np.square(x1 - x2)
-        )
-    elif version == 'pyomo':
-        result = (
-            pyo.sin(x1) * pyo.exp((1 - pyo.cos(x2)) ** 2)
-            + pyo.cos(x2) * pyo.exp((1 - pyo.sin(x1)) ** 2)
-            + (x1 - x2) ** 2
-        )
-    elif version == 'pytorch':
-        result = (
-            torch.sin(x1) * torch.exp(torch.square(1 - torch.cos(x2)))
-            + torch.cos(x2) * torch.exp(torch.square(1 - torch.sin(x1)))
-            + torch.square(x1 - x2)
-        )
-    else:
-        raise ValueError(
-            "Unknown version specified. Available " "options are 'numpy' and 'pytorch'."
-        )
-
-    # Fill in the intermediate results if results and trial
-    # are provided
-    if results is not None and trial is not None:
-        build_2d_intermediate_results(
-            x1=x1,
-            x2=x2,
-            result=result,
-            version=version,
-            results=results,
-            trial=trial,
-        )
 
     return result
 
@@ -4203,6 +3882,9 @@ def nd_deb1(x, results=None, trial=None, version='numpy'):
 
 # nd Deb 3 fn
 def deb3(x, results, trial, version='numpy'):
+    """
+    Deb3 test optimzation function
+    """
     x = x.flatten()
     d = len(x)
     if version == 'numpy':
@@ -4494,9 +4176,7 @@ def el_attar(x, results, trial, version='numpy'):
     x1, x2 = x.flatten()
     if version == 'numpy' or version == 'pytorch':
         result = (
-            (x1**2 + x2 - 10) ** 2
-            + (x1 + x2**2 - 7) ** 2
-            + (x1**2 + x2**3 - 1) ** 2
+            (x1**2 + x2 - 10) ** 2 + (x1 + x2**2 - 7) ** 2 + (x1**2 + x2**3 - 1) ** 2
         )
     else:
         raise ValueError(
@@ -4525,9 +4205,7 @@ def el_attar(x, results, trial, version='numpy'):
 def egg_crate(x, results, trial, version='numpy'):
     x1, x2 = x.flatten()
     if version == 'numpy':
-        result = (
-            x1**2 + x2**2 + 25 * (np.square(np.sin(x1)) + np.square(np.sin(x2)))
-        )
+        result = x1**2 + x2**2 + 25 * (np.square(np.sin(x1)) + np.square(np.sin(x2)))
     elif version == 'pytorch':
         result = (
             x1**2
@@ -4776,8 +4454,7 @@ def helical_valley(x, results, trial, version='numpy'):
         else:
             theta = (1 / (2 * torch.pi)) * torch.atan(x1 / x2 + 0.5)
         result = 100 * (
-            torch.square(x2 - 10 * theta)
-            + torch.square(torch.sqrt(x1**2 + x2**2) - 1)
+            torch.square(x2 - 10 * theta) + torch.square(torch.sqrt(x1**2 + x2**2) - 1)
         ) + torch.square(x3)
     else:
         raise ValueError(
@@ -5362,9 +5039,7 @@ def mishra9(x, results, trial, version='numpy'):
         a = 2 * x1**3 + 5 * x1 * x2 + 4 * x3 - 2 * x1**2 * x3 - 18
         b = x1 + x2**3 + x1 * x3**2 - 22
         c = 8 * x1**2 + 2 * x2 * x3 + 2 * x2**2 + 3 * x2**3 - 52
-        result = (
-            a * (b**2) * c + a * b * (c**2) + b**2 + (x1 + x2 + x3) ** 2
-        ) ** 2
+        result = (a * (b**2) * c + a * b * (c**2) + b**2 + (x1 + x2 + x3) ** 2) ** 2
     else:
         raise ValueError(
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
@@ -5477,23 +5152,16 @@ def xinsheyang_n3(x, results=None, trial=None, version='numpy'):
     m = 5
     if version == 'numpy':
         component1 = np.exp(-((x1 / beta) ** (2 * m) + (x2 / beta) ** (2 * m)))
-        component2 = (
-            2 * np.exp(-(x1**2 + x2**2)) * np.cos(x1) ** 2 * np.cos(x2) ** 2
-        )
+        component2 = 2 * np.exp(-(x1**2 + x2**2)) * np.cos(x1) ** 2 * np.cos(x2) ** 2
         result = component1 - component2
     elif version == 'pyomo':
         component1 = pyo.exp(-((x1 / beta) ** (2 * m) + (x2 / beta) ** (2 * m)))
-        component2 = (
-            2 * pyo.exp(-(x1**2 + x2**2)) * pyo.cos(x1) ** 2 * pyo.cos(x2) ** 2
-        )
+        component2 = 2 * pyo.exp(-(x1**2 + x2**2)) * pyo.cos(x1) ** 2 * pyo.cos(x2) ** 2
         result = component1 - component2
     elif version == 'pytorch':
         component1 = torch.exp(-((x1 / beta) ** (2 * m) + (x2 / beta) ** (2 * m)))
         component2 = (
-            2
-            * torch.exp(-(x1**2 + x2**2))
-            * torch.cos(x1) ** 2
-            * torch.cos(x2) ** 2
+            2 * torch.exp(-(x1**2 + x2**2)) * torch.cos(x1) ** 2 * torch.cos(x2) ** 2
         )
         result = component1 - component2
     else:
@@ -5560,9 +5228,7 @@ def layeb3(x, results, trial, version='numpy'):
         result = np.abs(component1 * component2 + component3 + 1) ** -0.1
     elif version == 'pytorch':
         component1 = torch.sin(x1)
-        component2 = torch.exp(
-            torch.abs(100.0 - torch.sqrt(x1**2 + x2**2) / torch.pi)
-        )
+        component2 = torch.exp(torch.abs(100.0 - torch.sqrt(x1**2 + x2**2) / torch.pi))
         component3 = torch.sin(x2)
         result = torch.abs(component1 * component2 + component3 + 1) ** -0.1
     else:
@@ -6151,68 +5817,184 @@ def lennard_jones(x, results=None, trial=None, version='numpy'):
 #     return result
 
 
-# Problem configurations
-# Ackley
-ackley_config = {
-    'objective': ackley,
-    'bounds': [(-32.768, 32.768), (-32.768, 32.768)],
+# Deeplifting Problems for Paper
+# Ackley 2
+ackley2_config = {
+    'objective': ackley2,
+    'bounds': {
+        'lower_bounds': [-32.0, -32.0],
+        'upper_bounds': [32.0, 32.0],
+    },
     'max_iterations': 1000,
-    'global_minimum': 0.0,
+    'global_minimum': -200,
     'dimensions': 2,
+    'trials': 25,
+    'name': 'alpine2',
+}
+
+# Ackley 3
+ackley3_config = {
+    'objective': ackley3,
+    'bounds': {
+        'lower_bounds': [-32.0, -32.0],
+        'upper_bounds': [32.0, 32.0],
+    },
+    'max_iterations': 1000,
+    'global_minimum': -195.62902823841935,
+    'dimensions': 2,
+    'trials': 25,
+}
+
+# Alpine N.1
+alpine1_config = {
+    'objective': alpine1,
+    'bounds': {
+        'lower_bounds': [-10.0, -10.0],
+        'upper_bounds': [10.0, 10.0],
+    },
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+    'global_x': np.array([0.0, 0.0]),
+    'trials': 25,
+}
+
+# TODO: Bird is a function that has two global minima
+# (4.70104, 3.15294) & (-1.58214, -3.13024)
+# Still need to figure out how to use this information
+# For now global_x set to (0.0, 0.0)
+bird_config = {
+    'objective': bird,
+    'bounds': {
+        'lower_bounds': [-2 * np.pi, -2 * np.pi],
+        'upper_bounds': [2 * np.pi, 2 * np.pi],
+    },
+    'max_iterations': 1000,
+    'global_minimum': -106.764537,
+    'dimensions': 2,
+    'global_x': np.array([0.0, 0.0]),
+    'trials': 25,
+    'name': 'bird',
 }
 
 # Bukin N.6
 bukin_n6_config = {
     'objective': bukin_n6,
-    'bounds': [(-15.0, -5.0), (-3.0, 3.0)],
+    'bounds': {
+        'lower_bounds': [-15.0, -5.0],
+        'upper_bounds': [-3.0, 3.0],
+    },
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 2,
+    'global_x': np.array([-10.0, 1.0]),
+    'trials': 25,
+    'name': 'bukin_n6',
 }
 
 # Cross-in-Tray
+# TODO: Still trying to decide what to do when there are
+# multiple global minima
 cross_in_tray_config = {
     'objective': cross_in_tray,
-    'bounds': [(-10.0, 10.0), (-10.0, 10.0)],
+    'bounds': {
+        'lower_bounds': [-10.0, -10.0],
+        'upper_bounds': [10.0, 10.0],
+    },
     'max_iterations': 1000,
     'global_minimum': -2.06261,
     'dimensions': 2,
+    'global_x': np.array([0.0, 0.0]),
+    'trials': 25,
+    'name': 'cross_in_tray',
 }
+
+# Cross-leg-table
+cross_leg_table_config = {
+    'objective': cross_leg_table,
+    'bounds': {
+        'lower_bounds': [-10.0, -10.0],
+        'upper_bounds': [10.0, 10.0],
+    },
+    'max_iterations': 1000,
+    'global_minimum': -1,
+    'dimensions': 2,
+    'global_x': np.array([0.0, 0.0]),
+    'trials': 25,
+    'name': 'cross_leg_table',
+}
+
+# Damavandi
+damavandi_config = {
+    'objective': damavandi,
+    'bounds': {'lower_bounds': [0.0, 0.0], 'upper_bounds': [14.0, 14.0]},
+    'max_iterations': 1000,
+    'global_minimum': 0,
+    'dimensions': 2,
+    'global_x': np.array([2.0, 2.0]),
+    'trials': 25,
+    'name': 'damavandi',
+}
+
 
 # Drop Wave
 drop_wave_config = {
     'objective': drop_wave,
-    'bounds': [(-5.12, 5.12), (-5.12, 5.12)],
-    'max_iterations': 1000,
+    'bounds': {
+        'lower_bounds': [-5.12, -5.12],
+        'upper_bounds': [5.12, 5.12],
+    },
+    'max_iterations': 150,
     'global_minimum': -1.0,
     'dimensions': 2,
+    'global_x': np.array([0.0, 0.0]),
+    'trials': 25,
+    'name': 'drop_wave',
 }
 
 # Eggholder
 eggholder_config = {
     'objective': eggholder,
-    'bounds': [(-512.0, 512.0), (-512.0, 512.0)],
-    'max_iterations': 1000,
+    'bounds': {
+        'lower_bounds': [-512.0, -512.0],
+        'upper_bounds': [512.0, 512.0],
+    },
+    'max_iterations': 250,
     'global_minimum': -959.6407,
     'dimensions': 2,
+    'global_x': np.array([512.0, 404.2319]),
+    'trials': 25,
+    'name': 'eggholder',
 }
 
 # Griewank
 griewank_config = {
     'objective': griewank,
-    'bounds': [(-600.0, 600.0), (-600.0, 600.0)],
+    'bounds': {
+        'lower_bounds': [-600.0, -600.0],
+        'upper_bounds': [600.0, 600.0],
+    },
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 2,
+    'global_x': np.array([0.0, 0.0]),
+    'trials': 25,
+    'name': 'griewank',
 }
 
 # Holder Table
 holder_table_config = {
     'objective': holder_table,
-    'bounds': [(-10.0, 10.0), (-10.0, 10.0)],
+    'bounds': {
+        'lower_bounds': [-10.0, -10.0],
+        'upper_bounds': [10.0, 10.0],
+    },
     'max_iterations': 1000,
     'global_minimum': -19.2085,
     'dimensions': 2,
+    'global_x': np.array([8.05502, 9.66459]),
+    'trials': 25,
+    'name': 'holder_table',
 }
 
 # Langermann
@@ -6224,73 +6006,82 @@ langermann_config = {
     'dimensions': 2,
 }
 
-# Levy
-levy_config = {
-    'objective': levy,
-    'bounds': [(-10.0, 10.0), (-10.0, 10.0)],
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 2,
-}
-
-# Levy
-levy_n13_config = {
-    'objective': levy_n13,
-    'bounds': [(-10.0, 10.0), (-10.0, 10.0)],
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 2,
-}
-
 # Rastrigin
 rastrigin_config = {
     'objective': rastrigin,
-    'bounds': [(-5.12, 5.12), (-5.12, 5.12)],
+    'bounds': {
+        'lower_bounds': [-5.12, -5.12],
+        'upper_bounds': [5.12, 5.12],
+    },
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 2,
+    'global_x': np.array([0.0, 0.0]),
+    'trials': 50,
 }
 
 # Schaffer N2
 schaffer_n2_config = {
     'objective': schaffer_n2,
-    'bounds': [(-100.0, 100.0), (-100.0, 100.0)],
+    'bounds': {
+        'lower_bounds': [-100.0, -100.0],
+        'upper_bounds': [100.0, 100.0],
+    },
     'max_iterations': 100,
     'global_minimum': 0.0,
     'dimensions': 2,
+    'global_x': np.array([0.0, 0.0]),
+    'trials': 50,
 }
 
 # Schaffer N4
 schaffer_n4_config = {
     'objective': schaffer_n4,
-    'bounds': [(-100.0, 100.0), (-100.0, 100.0)],
+    'bounds': {
+        'lower_bounds': [-100.0, -100.0],
+        'upper_bounds': [100.0, 100.0],
+    },
     'max_iterations': 1000,
     'global_minimum': 0.292579,
     'dimensions': 2,
+    'global_x': np.array([0.0, 1.253115]),
+    'trials': 50,
 }
 
 # Schwefel
 schwefel_config = {
     'objective': schwefel,
-    'bounds': [(-500.0, 500.0), (-500.0, 500.0)],
+    'bounds': {
+        'lower_bounds': [-500.0, -500.0],
+        'upper_bounds': [500.0, 500.0],
+    },
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 2,
+    'global_x': np.array([420.9687, 420.9687]),
+    'trials': 25,
+    'name': 'schwefel',
 }
 
 # Shubert
 shubert_config = {
     'objective': shubert,
-    'bounds': [(-10, 10), (-10, 10)],
+    'bounds': {
+        'lower_bounds': [-10.0, -10.0],
+        'upper_bounds': [10.0, 10.0],
+    },
     'max_iterations': 1000,
     'global_minimum': -186.7309,
     'dimensions': 2,
+    'global_x': np.array([0.0, 0.0]),  # Not correct global_x,
+    'trials': 25,
+    'name': 'shubert',
 }
 
 # Multi-Dimensional Problems #
 ackley_3d_config = {
     'objective': ndackley,
-    'bounds': [(-32.768, 32.768)],  # Will use a single level bound and then expand
+    'bounds': {'lower_bounds': [-32.768] * 3, 'upper_bounds': [32.768] * 3},
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 3,
@@ -6299,7 +6090,7 @@ ackley_3d_config = {
 # Multi-Dimensional Problems #
 ackley_5d_config = {
     'objective': ndackley,
-    'bounds': [(-32.768, 32.768)],  # Will use a single level bound and then expand
+    'bounds': {'lower_bounds': [-32.768] * 5, 'upper_bounds': [32.768] * 5},
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 5,
@@ -6308,7 +6099,7 @@ ackley_5d_config = {
 # Multi-Dimensional Problems #
 ackley_30d_config = {
     'objective': ndackley,
-    'bounds': [(-32.768, 32.768)],  # Will use a single level bound and then expand
+    'bounds': {'lower_bounds': [-32.768] * 30, 'upper_bounds': [32.768] * 30},
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 30,
@@ -6316,7 +6107,7 @@ ackley_30d_config = {
 
 ackley_100d_config = {
     'objective': ndackley,
-    'bounds': [(-32.768, 32.768)],  # Will use a single level bound and then expand
+    'bounds': {'lower_bounds': [-32.768] * 100, 'upper_bounds': [32.768] * 100},
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 100,
@@ -6324,26 +6115,19 @@ ackley_100d_config = {
 
 ackley_500d_config = {
     'objective': ndackley,
-    'bounds': [(-32.768, 32.768)],  # Will use a single level bound and then expand
-    'max_iterations': 1000,
+    'bounds': {'lower_bounds': [-32.768] * 500, 'upper_bounds': [32.768] * 500},
+    'max_iterations': 150,
     'global_minimum': 0.0,
     'dimensions': 500,
 }
 
 ackley_1000d_config = {
     'objective': ndackley,
-    'bounds': [(-32.768, 32.768)],  # Will use a single level bound and then expand
-    'max_iterations': 1000,
+    'bounds': {'lower_bounds': [-32.768] * 1000, 'upper_bounds': [32.768] * 1000},
+    'max_iterations': 150,
     'global_minimum': 0.0,
     'dimensions': 1000,
-}
-
-ackley_2500d_config = {
-    'objective': ndackley,
-    'bounds': [(-32.768, 32.768)],  # Will use a single level bound and then expand
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 2500,
+    'trials': 15,
 }
 
 # Multi-Dimensional Problems #
@@ -6391,7 +6175,7 @@ griewank_500d_config = {
 
 griewank_1000d_config = {
     'objective': ndgriewank,
-    'bounds': [(-600, 600)],  # Will use a single level bound and then expand
+    'bounds': {'lower_bounds': [-600.0] * 1000, 'upper_bounds': [600.0] * 1000},
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 1000,
@@ -6621,7 +6405,7 @@ schwefel_500d_config = {
 
 schwefel_1000d_config = {
     'objective': ndschwefel,
-    'bounds': [(-500, 500)],  # Will use a single level bound and then expand
+    'bounds': {'lower_bounds': [-500.0] * 1000, 'upper_bounds': [500.0] * 1000},
     'max_iterations': 1000,
     'global_minimum': 0.0,
     'dimensions': 1000,
@@ -6678,18 +6462,11 @@ qing_500d_config = {
 
 qing_1000d_config = {
     'objective': ndqing,
-    'bounds': [(-500, 500)],  # Will use a single level bound and then expand
+    'bounds': {'lower_bounds': [-500.0] * 1000, 'upper_bounds': [500.0] * 1000},
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 1000,
-}
-
-qing_2500d_config = {
-    'objective': ndqing,
-    'bounds': [(-500, 500)],  # Will use a single level bound and then expand
-    'max_iterations': 1000,
-    'global_minimum': 0,
-    'dimensions': 2500,
+    'trials': 15,
 }
 
 # ex8_6_2 from MINLP
@@ -6846,14 +6623,6 @@ kriging_peaks_red500_config = {
     'dimensions': 2,
 }
 
-mathopt6_config = {
-    'objective': mathopt6,
-    'bounds': [(-3, 3), (-3, 3)],
-    'max_iterations': 1000,
-    'global_minimum': -3.3069,
-    'dimensions': 2,
-}
-
 quantum_config = {
     'objective': quantum,
     'bounds': [(1, 10), (1, 10)],
@@ -6870,22 +6639,6 @@ rosenbrock_config = {
     'dimensions': 2,
 }
 
-damavandi_config = {
-    'objective': damavandi,
-    'bounds': [(0, 14), (0, 14)],
-    'max_iterations': 1000,
-    'global_minimum': 0,
-    'dimensions': 2,
-}
-
-cross_leg_table_config = {
-    'objective': cross_leg_table,
-    'bounds': [(-10, 10), (-10, 10)],
-    'max_iterations': 1000,
-    'global_minimum': -1,
-    'dimensions': 2,
-}
-
 crowned_cross_config = {
     'objective': crowned_cross,
     'bounds': [(-10, 10), (-10, 10)],
@@ -6899,22 +6652,6 @@ sine_envelope_config = {
     'bounds': [(-100, 100), (-100, 100)],
     'max_iterations': 1000,
     'global_minimum': 0.0,
-    'dimensions': 2,
-}
-
-ackley2_config = {
-    'objective': ackley2,
-    'bounds': [(-32, 32), (-32, 32)],
-    'max_iterations': 1000,
-    'global_minimum': -200,
-    'dimensions': 2,
-}
-
-ackley3_config = {
-    'objective': ackley3,
-    'bounds': [(-32, 32), (-32, 32)],
-    'max_iterations': 1000,
-    'global_minimum': -195.62902823841935,
     'dimensions': 2,
 }
 
@@ -6982,14 +6719,6 @@ adjiman_config = {
     'dimensions': 2,
 }
 
-alpine1_config = {
-    'objective': alpine1,
-    'bounds': [(-10, 10), (-10, 10)],
-    'max_iterations': 1000,
-    'global_minimum': 0,
-    'dimensions': 2,
-}
-
 alpine1_3d_config = {
     'objective': ndalpine1,
     'bounds': [(-10, 10)],
@@ -7044,22 +6773,6 @@ alpine1_2500d_config = {
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2500,
-}
-
-alpine2_config = {
-    'objective': alpine2,
-    'bounds': [(0, 10), (0, 10)],
-    'max_iterations': 1000,
-    'global_minimum': -7.885600,
-    'dimensions': 2,
-}
-
-alpine2_10d_config = {
-    'objective': alpine2,
-    'bounds': [(0, 10)],
-    'max_iterations': 1000,
-    'global_minimum': -(2.808**10),
-    'dimensions': 10,
 }
 
 brad_config = {
@@ -7124,14 +6837,6 @@ biggs_exp6_config = {
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 6,
-}
-
-bird_config = {
-    'objective': bird,
-    'bounds': [(-2 * np.pi, 2 * np.pi), (-2 * np.pi, 2 * np.pi)],
-    'max_iterations': 1000,
-    'global_minimum': -106.764537,
-    'dimensions': 2,
 }
 
 bohachevsky1_config = {
@@ -8088,10 +7793,15 @@ mishra11_5000d_config = {
 
 xinsheyang_n2_config = {
     'objective': xinsheyang_n2,
-    'bounds': [(-2 * np.pi, 2 * np.pi), (-2 * np.pi, 2 * np.pi)],
+    'bounds': {
+        'lower_bounds': [-2 * np.pi, -2 * np.pi],
+        'upper_bounds': [2 * np.pi, 2 * np.pi],
+    },
     'max_iterations': 1000,
     'global_minimum': 0,
     'dimensions': 2,
+    'global_x': np.array([0.0, 0.0]),
+    'trials': 25,
 }
 
 xinsheyang_n3_config = {
@@ -8153,109 +7863,194 @@ layeb8_config = {
 # Lennard Jones Setup
 lennard_jones_6d_config = {
     'objective': lennard_jones,
-    'bounds': [(-4.0, 4.0)],
+    'bounds': {
+        'lower_bounds': [-4.0] * 6,
+        'upper_bounds': [4.0] * 6,
+    },
     'max_iterations': 1000,
     'global_minimum': -1.0,
     'dimensions': 3 * 2,
+    'global_x': np.array([0.0] * 6),
+    'trials': 25,
 }
 
 # Lennard Jones Setup
 lennard_jones_9d_config = {
     'objective': lennard_jones,
-    'bounds': [(-4.0, 4.0)],
+    'bounds': {
+        'lower_bounds': [-4.0] * 9,
+        'upper_bounds': [4.0] * 9,
+    },
     'max_iterations': 1000,
     'global_minimum': -3.0,
     'dimensions': 3 * 3,
+    'global_x': np.array([0.0] * 9),
+    'trials': 25,
 }
 
 # Lennard Jones Setup
 lennard_jones_12d_config = {
     'objective': lennard_jones,
-    'bounds': [(-4.0, 4.0)],
+    'bounds': {
+        'lower_bounds': [-4.0] * 12,
+        'upper_bounds': [4.0] * 12,
+    },
     'max_iterations': 1000,
     'global_minimum': -6.0,
     'dimensions': 3 * 4,
+    'global_x': np.array([0.0] * 12),
+    'trials': 25,
 }
 
 lennard_jones_15d_config = {
     'objective': lennard_jones,
-    'bounds': [(-4.0, 4.0)],
+    'bounds': {
+        'lower_bounds': [-4.0] * 15,
+        'upper_bounds': [4.0] * 15,
+    },
     'max_iterations': 1000,
     'global_minimum': -9.103852,
     'dimensions': 3 * 5,
+    'global_x': np.array([0.0] * 15),
+    'trials': 25,
 }
 
 lennard_jones_18d_config = {
     'objective': lennard_jones,
-    'bounds': [(-4.0, 4.0)],
+    'bounds': {
+        'lower_bounds': [-4.0] * 18,
+        'upper_bounds': [4.0] * 18,
+    },
     'max_iterations': 1000,
     'global_minimum': -12.712062,
     'dimensions': 3 * 6,
+    'global_x': np.array([0.0] * 18),
+    'trials': 25,
 }
 
 lennard_jones_21d_config = {
     'objective': lennard_jones,
-    'bounds': [(-4.0, 4.0)],
+    'bounds': {
+        'lower_bounds': [-4.0] * 21,
+        'upper_bounds': [4.0] * 21,
+    },
     'max_iterations': 1000,
     'global_minimum': -16.505384,
     'dimensions': 3 * 7,
+    'global_x': np.array([0.0] * 21),
+    'trials': 25,
 }
 
 lennard_jones_24d_config = {
     'objective': lennard_jones,
-    'bounds': [(-4.0, 4.0)],
+    'bounds': {
+        'lower_bounds': [-4.0] * 24,
+        'upper_bounds': [4.0] * 24,
+    },
     'max_iterations': 1000,
     'global_minimum': -19.821489,
     'dimensions': 3 * 8,
+    'global_x': np.array([0.0] * 24),
+    'trials': 25,
 }
 
 lennard_jones_27d_config = {
     'objective': lennard_jones,
-    'bounds': [(-4.0, 4.0)],
+    'bounds': {
+        'lower_bounds': [-4.0] * 27,
+        'upper_bounds': [4.0] * 27,
+    },
     'max_iterations': 1000,
     'global_minimum': -24.113360,
     'dimensions': 3 * 9,
+    'global_x': np.array([0.0] * 27),
+    'trials': 25,
 }
 
 lennard_jones_30d_config = {
     'objective': lennard_jones,
-    'bounds': [(-4.0, 4.0)],
+    'bounds': {
+        'lower_bounds': [-4.0] * 30,
+        'upper_bounds': [4.0] * 30,
+    },
     'max_iterations': 1000,
     'global_minimum': -28.422532,
     'dimensions': 3 * 10,
+    'global_x': np.array([0.0] * 30),
+    'trials': 25,
 }
 
 lennard_jones_39d_config = {
     'objective': lennard_jones,
-    'bounds': [(-4.0, 4.0)],
+    'bounds': {
+        'lower_bounds': [-4.0] * 39,
+        'upper_bounds': [4.0] * 39,
+    },
     'max_iterations': 1000,
     'global_minimum': -44.326801,
     'dimensions': 3 * 13,
+    'global_x': np.array([0.0] * 39),
+    'trials': 25,
 }
 
 lennard_jones_42d_config = {
     'objective': lennard_jones,
-    'bounds': [(-4.0, 4.0)],
+    'bounds': {
+        'lower_bounds': [-4.0] * 42,
+        'upper_bounds': [4.0] * 42,
+    },
     'max_iterations': 1000,
     'global_minimum': -47.845157,
     'dimensions': 3 * 14,
+    'global_x': np.array([0.0] * 42),
+    'trials': 25,
 }
 
 lennard_jones_45d_config = {
     'objective': lennard_jones,
-    'bounds': [(-4.0, 4.0)],
+    'bounds': {
+        'lower_bounds': [-4.0] * 45,
+        'upper_bounds': [4.0] * 45,
+    },
     'max_iterations': 1000,
     'global_minimum': -52.322627,
     'dimensions': 3 * 15,
+    'global_x': np.array([0.0] * 45),
+    'trials': 25,
+}
+
+lennard_jones_114d_config = {
+    'objective': lennard_jones,
+    'bounds': {
+        'lower_bounds': [-4.0] * 114,
+        'upper_bounds': [4.0] * 114,
+    },
+    'max_iterations': 1000,
+    'global_minimum': -173.928427,
+    'dimensions': 3 * 38,
+    'global_x': np.array([0.0] * 114),
+    'trials': 25,
 }
 
 lennard_jones_225d_config = {
     'objective': lennard_jones,
-    'bounds': [(-4.0, 4.0)],
-    'max_iterations': 1000,
+    'bounds': {
+        'lower_bounds': [-4.0] * 225,
+        'upper_bounds': [4.0] * 225,
+    },
+    'max_iterations': 5000,
     'global_minimum': -397.492331,
     'dimensions': 3 * 75,
+    'global_x': np.array([0.0] * 225),
+    'trials': 25,
 }
+
+# Problem Configurations
+ackley_config = Ackley().config()
+alpine2_config = Alpine2().config()
+levy_config = Levy().config()
+levy_n13_config = LevyN13().config()
+mathopt6_config = MathOpt6().config()
 
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
@@ -8312,7 +8107,6 @@ PROBLEMS_BY_NAME = {
     'adjiman': adjiman_config,
     'alpine1': alpine1_config,
     'alpine2': alpine2_config,
-    'alpine2_10d': alpine2_10d_config,
     'brad': brad_config,
     'bartels_conn': bartels_conn_config,
     'beale': beale_config,
@@ -8440,7 +8234,6 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'ackley_100d': ackley_100d_config,
     'ackley_500d': ackley_500d_config,
     'ackley_1000d': ackley_1000d_config,
-    'ackley_2500d': ackley_2500d_config,
     # Alpine1 Series - Origin Solution
     'alpine1_3d': alpine1_3d_config,
     'alpine1_5d': alpine1_5d_config,
@@ -8448,7 +8241,6 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'alpine1_100d': alpine1_100d_config,
     'alpine1_500d': alpine1_500d_config,
     'alpine1_1000d': alpine1_1000d_config,
-    'alpine1_2500d': alpine1_2500d_config,
     # Chung-Reynolds Series - Origin Solution
     'chung_reyonlds_3d': chung_reynolds_3d_config,
     'chung_reynolds_5d': chung_reynolds_5d_config,
@@ -8456,7 +8248,6 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'chung_reynolds_100d': chung_reynolds_100d_config,
     'chung_reynolds_500d': chung_reynolds_500d_config,
     'chung_reynolds_1000d': chung_reynolds_1000d_config,
-    'chung_reynolds_2500d': chung_reynolds_2500d_config,
     # Griewank Series - Origin Solution
     'griewank_3d': griewank_3d_config,
     'griewank_5d': griewank_5d_config,
@@ -8464,7 +8255,6 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'griewank_100d': griewank_100d_config,
     'griewank_500d': griewank_500d_config,
     'griewank_1000d': griewank_1000d_config,
-    'griewank_2500d': griewank_2500d_config,
     # Layeb 4 Series - Non-origin solution
     'layeb4_3d': layeb4_3d_config,
     'layeb4_5d': layeb4_5d_config,
@@ -8472,7 +8262,6 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'layeb4_100d': layeb4_100d_config,
     'layeb4_500d': layeb4_500d_config,
     'layeb4_1000d': layeb4_1000d_config,
-    'layeb4_2500d': layeb4_2500d_config,
     # Levy Series - Non-origin solution
     'levy_3d': levy_3d_config,
     'levy_5d': levy_5d_config,
@@ -8480,7 +8269,6 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'levy_100d': levy_100d_config,
     'levy_500d': levy_500d_config,
     'levy_1000d': levy_1000d_config,
-    'levy_2500d': levy_2500d_config,
     # Qing Series - Non-origin solution
     'qing_3d': qing_3d_config,
     'qing_5d': qing_5d_config,
@@ -8488,7 +8276,6 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'qing_100d': qing_100d_config,
     'qing_500d': qing_500d_config,
     'qing_1000d': qing_1000d_config,
-    'qing_2500d': qing_2500d_config,
     # Rastrigin series - Origin Solution
     'rastrigin_3d': rastrigin_3d_config,
     'rastrigin_5d': rastrigin_5d_config,
@@ -8496,7 +8283,6 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'rastrigin_100d': rastrigin_100d_config,
     'rastrigin_500d': rastrigin_500d_config,
     'rastrigin_1000d': rastrigin_1000d_config,
-    'rastrigin_2500d': rastrigin_2500d_config,
     # Schewefel series - Non-origin solution
     'schwefel_3d': schwefel_3d_config,
     'schwefel_5d': schwefel_5d_config,
@@ -8504,7 +8290,6 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'schwefel_100d': schwefel_100d_config,
     'schwefel_500d': schwefel_500d_config,
     'schwefel_1000d': schwefel_1000d_config,
-    'schwefel_2500d': schwefel_2500d_config,
     # Lennard Jones
     'lennard_jones_6d': lennard_jones_6d_config,
     'lennard_jones_9d': lennard_jones_9d_config,
@@ -8518,5 +8303,6 @@ HIGH_DIMENSIONAL_PROBLEMS_BY_NAME = {
     'lennard_jones_39d': lennard_jones_39d_config,
     'lennard_jones_42d': lennard_jones_42d_config,
     'lennard_jones_45d': lennard_jones_45d_config,
+    'lennard_jones_114d': lennard_jones_114d_config,
     'lennard_jones_225d': lennard_jones_225d_config,
 }

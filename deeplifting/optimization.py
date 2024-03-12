@@ -1,108 +1,166 @@
 # stdlib
 import gc
 import json
-import os
 import time
-from typing import Any, Dict, List
+from typing import Any, Callable, Dict
 
 # third party
 import numpy as np
 import pandas as pd
 import torch
 import torch.optim as optim
-from cyipopt import minimize_ipopt
 from pygranso.private.getNvar import getNvarTorch
 from pygranso.pygranso import pygranso
 from pygranso.pygransoStruct import pygransoStruct
 from pyomo.environ import ConcreteModel, Objective, SolverFactory, Var, minimize
 from scipy.optimize import basinhopping, differential_evolution, dual_annealing
-from torch.optim.lr_scheduler import OneCycleLR
 
 # first party
-from deeplifting.models import DeepliftingSkipMLP
+from deeplifting.models import ReLUDeepliftingMLP
 from deeplifting.problems import HIGH_DIMENSIONAL_PROBLEMS_BY_NAME
 from deeplifting.utils import (
+    BasinHoppingCallback,
     DifferentialEvolutionCallback,
     DualAnnealingCallback,
     HaltLog,
-    get_devices,
+    PyGransoConfig,
     initialize_vector,
     set_seed,
     train_model_to_output,
 )
 
-# from torch.optim.lr_scheduler import ReduceLROnPlateau
+# # third party
+# import cyipopt
+# import jax.numpy as jnp
+# from jax import grad, jit
 
 
 # Do NOT save intermediate paths for high dimensional problems
 EXCLUDE_PROBLEMS = list(HIGH_DIMENSIONAL_PROBLEMS_BY_NAME.keys())
 
 
-def run_ipopt(problem: Dict, trials: int):
-    """
-    Function that runs IPOPT on one of our test
-    functions for deeplifting.
+# def run_ipopt(problem: Dict, trials: int) -> pd.DataFrame:
+#     """
+#     Function that runs IPOPT on one of our test
+#     functions for deeplifting.
+#     """
+#     # Objective function
+#     objective = problem['objective']
 
-    TODO: In the documentation there are ways to improve
-    IPOPT by using the gradient, jacobian and hessian
-    information we will implement that with jax
-    but may need to rework some of our test functions
-    """
-    # Objective function
-    objective = problem['objective']
+#     # Get the number of dimensions
+#     dimensions = problem['dimensions']
 
-    # Get the maximum iterations
-    max_iterations = problem['max_iterations']
+#     # Get the bounds of the problem
+#     bounds = problem['bounds']
+#     upper_bounds = bounds['upper_bounds']
+#     lower_bounds = bounds['lower_bounds']
+#     list_bounds = list(zip(lower_bounds, upper_bounds))
 
-    # Get dimensions of the problem
-    dimensions = problem['dimensions']
+#     # NOTE: With this setup we can extract the intermediate
+#     # values for analysis
+#     class IPOPTProblem:
+#         def __init__(self, objective_fn):
+#             self.objective_fn = objective_fn
+#             self.iterations = []
+#             self.f_history = []
+#             self.nfev = 0
 
-    # Get the bounds of the problem
-    if dimensions <= 2:
-        bounds = problem['bounds']
-    else:
-        bounds = problem['bounds']
+#         def objective(self, x):
+#             self.nfev += 1
+#             return self.objective_fn(x)
 
-        if len(bounds) > 1:
-            bounds = bounds
+#         def gradient(self, x):
+#             obj_jit = jit(self.objective_fn)
+#             gradient = grad(obj_jit)
+#             return gradient(x)
 
-        else:
-            bounds = bounds * dimensions
+#         def constraints(self, x):
+#             return jnp.zeros_like(x)
 
-    # Save the results
-    # We will store the optimization steps here
-    results = np.zeros((trials, max_iterations, dimensions + 1)) * np.nan
-    fn_values = []
+#         def intermediate(
+#             self,
+#             alg_mod,
+#             iter_count,
+#             obj_value,
+#             inf_pr,
+#             inf_du,
+#             mu,
+#             d_norm,
+#             regularization_size,
+#             alpha_du,
+#             alpha_pr,
+#             ls_trials,
+#         ):
+#             """
+#             Function to save the history of the objective function values during
+#             iteration and also save the number of iterations
+#             """
+#             self.f_history.append(obj_value)
+#             self.iterations.append(iter_count)
 
-    for trial in range(trials):
-        # Set the random seed
-        set_seed(trial)
+#     # Save the results
+#     # We will store the optimization steps here
+#     trial_results = []
+#     for trial in range(trials):
+#         # Set the random seed
+#         set_seed(trial)
 
-        # Initial guess (starting point for IPOPT)
-        # TODO: Need to provide a better starting point here
-        x0 = initialize_vector(size=dimensions, bounds=bounds)
+#         # Initial guess (starting point for IPOPT)
+#         # TODO: Need to provide a better starting point here
+#         x0 = initialize_vector(size=dimensions, bounds=bounds)
 
-        # Get the objective
-        fn = lambda x: objective(  # noqa
-            x, results=results, trial=trial, version='numpy'
-        )  # noqa
+#         columns = [f'x{i + 1}' for i in range(dimensions)]
+#         xs = json.dumps(dict(zip(columns, x0)))
 
-        # Call IPOPT
-        start_time = time.time()
-        result = minimize_ipopt(fn, x0, bounds=bounds)
+#         # Get the objective
+#         fn = lambda x: objective(x, version='jax')  # noqa  # noqa
 
-        end_time = time.time()
-        total_time = end_time - start_time
+#         # Get the initial objective galue
+#         f_init = fn(x0)
 
-        x_tuple = tuple(x for x in result.x)
-        fn_values.append(x_tuple + (result.fun, 'IPOPT', total_time))
+#         # IPOPT Problem
+#         ipopt_problem = IPOPTProblem(objective_fn=fn)
+#         nlp = cyipopt.Problem(
+#             n=len(x0),
+#             m=0,
+#             problem_obj=ipopt_problem,
+#             lb=list_bounds[0],
+#             ub=list_bounds[1],
+#         )
 
-    return {'results': results, 'final_results': fn_values}
+#         # Call IPOPT
+#         start_time = time.time()
+
+#         # Use the solve method
+#         x, info = nlp.solve(x0)
+
+#         end_time = time.time()
+#         total_time = end_time - start_time
+
+#         results = {
+#             'xs': xs,
+#             'f_init': float(f_init),
+#             'total_time': total_time,
+#             'f_final': info['obj_val'],
+#             'iterations': len(ipopt_problem.iterations),
+#             'fn_evals': ipopt_problem.nfev,
+#             'termination_code': info['status'],
+#             'objective_values': np.array(ipopt_problem.f_history),
+#         }
+#         trial_results.append(results)
+
+#     return pd.DataFrame(trial_results)
 
 
 def run_dual_annealing(
-    problem: Dict, trials: int, init_temp=5230, res_temp=2e-5, vis=2.62, acpt=-5.0
-):
+    problem: Dict,
+    trials: int,
+    maxiter: int = 1000,
+    init_temp: int = 5230,
+    res_temp: float = 2e-5,
+    vis: float = 2.62,
+    acpt: float = -5.0,
+) -> pd.DataFrame:
     """
     Function that runs dual annealing for a
     specified optimization problem
@@ -114,37 +172,13 @@ def run_dual_annealing(
     dimensions = problem['dimensions']
 
     # Get the bounds of the problem
-    if dimensions <= 2:
-        bounds = problem['bounds']
-    else:
-        bounds = problem['bounds']
+    bounds = problem['bounds']
+    upper_bounds = bounds['upper_bounds']
+    lower_bounds = bounds['lower_bounds']
+    list_bounds = list(zip(lower_bounds, upper_bounds))
 
-        if len(bounds) > 1:
-            bounds = bounds
-
-        else:
-            bounds = bounds * dimensions
-
-    # Some of the problems may be unbounded but dual annealing
-    # and differential evolution need to have bounds provided
-    updated_bounds = []
-    for constr in bounds:
-        a, b = constr
-        if a is None:
-            a = -1e6
-        if b is None:
-            b = 1e6
-        updated_bounds.append((a, b))
-
-    # Get the maximum iterations
-    max_iterations = problem['max_iterations']
-
-    # Save the results
-    # We will store the optimization steps here
-    results = np.zeros((trials, max_iterations * 10, dimensions + 1)) * np.nan
-    fn_values = []
-    callbacks = []
-
+    # Run the trials and save the results
+    trial_results = []
     for trial in range(trials):
         # Set a random seed
         np.random.seed(trial)
@@ -152,10 +186,14 @@ def run_dual_annealing(
         # Initial point
         x0 = initialize_vector(size=dimensions, bounds=bounds)
 
+        columns = [f'x{i + 1}' for i in range(dimensions)]
+        xs = json.dumps(dict(zip(columns, x0)))
+
         # Set up the function with the results
-        fn = lambda x: objective(  # noqa
-            x, results=results, trial=trial, version='numpy'
-        )
+        fn = lambda x: objective(x, version='numpy')  # noqa
+
+        # Get the initial objective galue
+        f_init = fn(x0)
 
         # Callback
         callback = DualAnnealingCallback()
@@ -168,9 +206,9 @@ def run_dual_annealing(
         start_time = time.time()
         result = dual_annealing(
             fn,
-            updated_bounds,
+            list_bounds,
             x0=x0,
-            maxiter=1000,
+            maxiter=maxiter,
             initial_temp=init_temp,
             restart_temp_ratio=res_temp,
             visit=vis,
@@ -180,16 +218,24 @@ def run_dual_annealing(
 
         end_time = time.time()
         total_time = end_time - start_time
-        x_tuple = tuple(x for x in result.x)
-        fn_values.append(x_tuple + (result.fun, 'Dual Annealing', total_time))
 
-        # Append callback results
-        callbacks.append(callback)
+        results = {
+            'xs': xs,
+            'initial_temp': init_temp,
+            'f_init': f_init,
+            'total_time': total_time,
+            'f_final': result.fun,
+            'iterations': result.nit,
+            'fn_evals': result.nfev,
+            'termination_code': result.status,
+            'objective_values': np.array(callback.f_history),
+        }
+        trial_results.append(results)
 
-    return {'results': results, 'final_results': fn_values, 'callbacks': callbacks}
+    return pd.DataFrame(trial_results)
 
 
-def run_basinhopping(problem: Dict, trials: int):
+def run_basinhopping(problem: Dict, trials: int, niter: int, T: float) -> pd.DataFrame:
     """
     Function that runs basinhopping for a
     specified optimization problem
@@ -201,37 +247,13 @@ def run_basinhopping(problem: Dict, trials: int):
     dimensions = problem['dimensions']
 
     # Get the bounds of the problem
-    if dimensions <= 2:
-        bounds = problem['bounds']
-    else:
-        bounds = problem['bounds']
+    bounds = problem['bounds']
+    upper_bounds = bounds['upper_bounds']
+    lower_bounds = bounds['lower_bounds']
+    list_bounds = list(zip(lower_bounds, upper_bounds))
 
-        if len(bounds) > 1:
-            bounds = bounds
-
-        else:
-            bounds = bounds * dimensions
-
-    # Some of the problems may be unbounded but dual annealing
-    # and differential evolution need to have bounds provided
-    updated_bounds = []
-    for constr in bounds:
-        a, b = constr
-        if a is None:
-            a = -1e6
-        if b is None:
-            b = 1e6
-        updated_bounds.append((a, b))
-
-    # Get the maximum iterations
-    max_iterations = problem['max_iterations']
-
-    # Save the results
-    # We will store the optimization steps here
-    results = np.zeros((trials, max_iterations * 10, dimensions + 1)) * np.nan
-    fn_values = []
-    callbacks = []
-
+    # Run the trials and save the results
+    trial_results = []
     for trial in range(trials):
         # Set a random seed
         np.random.seed(trial)
@@ -239,37 +261,73 @@ def run_basinhopping(problem: Dict, trials: int):
         # Initial point
         x0 = initialize_vector(size=dimensions, bounds=bounds)
 
-        # Set up the function with the results
-        fn = lambda x: objective(  # noqa
-            x, results=results, trial=trial, version='numpy'
-        )
+        columns = [f'x{i + 1}' for i in range(dimensions)]
+        xs = json.dumps(dict(zip(columns, x0)))
 
-        minimizer_kwargs = {"method": "L-BFGS-B", "bounds": bounds}
+        # Set up the function with the results
+        fn = lambda x: objective(x, version='numpy')  # noqa
+
+        # Get the initial objective galue
+        f_init = fn(x0)
+
+        # Callback
+        callback = BasinHoppingCallback()
+
+        # Let's record the initial result
+        # We will use the context -1 to indicate the initial search
+        callback.record_intermediate_data(x0, fn(x0), -1)
 
         # Get the result
         start_time = time.time()
+
+        # NOTE: Bounds uses minimizer kwards
+        minimizer_kwargs = {'bounds': list_bounds}
+
         result = basinhopping(
             fn,
             x0=x0,
-            niter=1000,
+            niter=niter,
+            T=T,
             minimizer_kwargs=minimizer_kwargs,
+            callback=callback.record_intermediate_data,
         )
 
         end_time = time.time()
         total_time = end_time - start_time
-        x_tuple = tuple(x for x in result.x)
-        fn_values.append(x_tuple + (result.fun, 'Basinhopping', total_time))
-        callbacks.append(0)
 
-    return {'results': results, 'final_results': fn_values, 'callbacks': callbacks}
+        results = {
+            'xs': xs,
+            'T': T,
+            'f_init': f_init,
+            'total_time': total_time,
+            'f_final': result.fun,
+            'iterations': result.nit,
+            'fn_evals': result.nfev,
+            'termination_code': result.lowest_optimization_result.status,
+            'objective_values': np.array(callback.f_history),
+        }
+        trial_results.append(results)
+
+    return pd.DataFrame(trial_results)
 
 
 def run_differential_evolution(
-    problem: Dict, trials: int, strat='best1bin', mut=0.5, recomb=0.7
-):
+    problem: Dict,
+    trials: int,
+    maxiter: int = 1000,
+    popsize: int = 15,
+    mutation: float = 0.5,
+    recombination: float = 0.7,
+) -> pd.DataFrame:
     """
     Function that runs differential evolution for a
     specified optimization problem
+
+    The documentations states that in order to increase the likelihood
+    of finding a global minimum use:
+    1. high popsize values
+    2. high mutation
+    3. lower recombination
     """
     # Objective function
     objective = problem['objective']
@@ -278,44 +336,13 @@ def run_differential_evolution(
     dimensions = problem['dimensions']
 
     # Get the bounds of the problem
-    if dimensions <= 2:
-        bounds = problem['bounds']
-    else:
-        bounds = problem['bounds']
+    bounds = problem['bounds']
+    upper_bounds = bounds['upper_bounds']
+    lower_bounds = bounds['lower_bounds']
+    list_bounds = list(zip(lower_bounds, upper_bounds))
 
-        if len(bounds) > 1:
-            bounds = bounds
-
-        else:
-            bounds = bounds * dimensions
-
-    # Some of the problems may be unbounded but dual annealing
-    # and differential evolution need to have bounds provided
-    updated_bounds = []
-    near_zero_bounds = []
-    for constr in bounds:
-        a, b = constr
-        if a is None:
-            a = float(-1e20)
-        if b is None:
-            b = float(1e20)
-        updated_bounds.append((a, b))
-
-    # Need to modify x0 for problems like ex8_6_2
-    for index, constr in enumerate(updated_bounds):
-        a, b = constr
-        if (a == -1e-6) or (b == 1e-6):
-            near_zero_bounds.append(index)
-
-    # Get the maximum iterations
-    max_iterations = problem['max_iterations']
-
-    # Save the results
-    # We will store the optimization steps here
-    results = np.zeros((trials, max_iterations * 10, dimensions + 1)) * np.nan
-    fn_values = []
-    callbacks = []
-
+    # Iterate over the different starting positions
+    trial_results = []
     for trial in range(trials):
         # Set a random seed
         np.random.seed(trial)
@@ -323,74 +350,54 @@ def run_differential_evolution(
         # Initial point
         x0 = initialize_vector(size=dimensions, bounds=bounds)
 
-        # Callback
-        callback = DifferentialEvolutionCallback()
-
-        # Let's record the initial result
-        # We will use the context -1 to indicate the initial search
-        callback.record_intermediate_data(x0, -1)
+        columns = [f'x{i + 1}' for i in range(dimensions)]
+        xs = json.dumps(dict(zip(columns, x0)))
 
         # Set up the function with the results
-        fn = lambda x: objective(  # noqa
-            x, results=results, trial=trial, version='numpy'
-        )
+        fn = lambda x: objective(x, version='numpy')  # noqa
+
+        # Get the initial objective galue
+        f_init = fn(x0)
+
+        # Callback
+        callback = DifferentialEvolutionCallback()
 
         # Get the result
         start_time = time.time()
         result = differential_evolution(
             fn,
-            updated_bounds,
+            list_bounds,
             x0=x0,
-            maxiter=1000,
-            strategy=strat,
-            mutation=mut,
-            recombination=recomb,
+            maxiter=maxiter,
+            popsize=popsize,
+            mutation=mutation,
+            recombination=recombination,
             callback=callback.record_intermediate_data,
+            workers=1,  # Important because we want to turn off multiprocessing
         )
+
         end_time = time.time()
         total_time = end_time - start_time
-        x_tuple = tuple(x for x in result.x)
-        fn_values.append(x_tuple + (result.fun, 'Differential Evolution', total_time))
 
-        # Append callback results
-        callbacks.append(callback)
+        # NOTE: For differential evolution there is no status returned
+        # only success = True / False. So I will turn this into the status
+        # by turning it into an int
+        results = {
+            'xs': xs,
+            'popsize': popsize,
+            'mutation': mutation,
+            'recombination': recombination,
+            'f_init': f_init,
+            'total_time': total_time,
+            'f_final': result.fun,
+            'iterations': result.nit,
+            'fn_evals': result.nfev,
+            'termination_code': int(result.success),
+            'objective_values': np.array(callback.f_history),
+        }
+        trial_results.append(results)
 
-    return {'results': results, 'final_results': fn_values, 'callbacks': callbacks}
-
-
-def pygranso_fn(X_struct, objective, bounds):
-    """
-    Function to run PyGranso without a neural
-    network approximation to the inputs
-    """
-    x1, x2 = X_struct.x1, X_struct.x2
-    x = torch.cat((x1, x2))
-    f = objective(x)
-
-    # Setup the bounds for the inequality
-    # a <= x <= b
-    # -> a - x <= 0
-    # -> x - b <= 0
-    x1_bounds, x2_bounds = bounds
-    a1, b1 = x1_bounds
-    a2, b2 = x2_bounds
-
-    c1 = a1 - x1
-    c2 = x1 - b1
-    c3 = a2 - x2
-    c4 = x2 - b2
-
-    # Inequality constraints
-    ci = pygransoStruct()
-    ci.c1 = c1
-    ci.c2 = c2
-    ci.c3 = c3
-    ci.c4 = c4
-
-    # Equality constraints
-    ce = None
-
-    return f, ci, ce
+    return pd.DataFrame(trial_results)
 
 
 def pygranso_nd_fn(X_struct, objective, bounds):
@@ -398,50 +405,24 @@ def pygranso_nd_fn(X_struct, objective, bounds):
     Function to run PyGranso without a neural
     network approximation to the inputs
     """
-    x_values = []
-    for key, value in X_struct.__dict__.items():
-        x_values.append(value)
-    x = torch.stack(x_values)
+    # list comprehensions more performant?
+    x_values = [value for key, value in X_struct.__dict__.items()]
 
-    # Box constraints
-    if len(bounds) > 2:
-        a, b = bounds[0]
-        x_scaled = a + (b - a) / 2.0 * (torch.sin(x) + 1)
-    else:
-        scaled_x_values = []
-        for index, constr in enumerate(bounds):
-            a, b = constr
-            x_constr = a + (b - a) / 2.0 * (torch.sin(x[index]) + 1)
-            scaled_x_values.append(x_constr)
-        x_scaled = torch.stack(scaled_x_values)
+    # Need to iterate over the struct to get the values
+    x = torch.stack(x_values).flatten()
 
-    f = objective(x_scaled)
+    # Get the bounds from the dictionary
+    a = torch.tensor(bounds['lower_bounds'])
+    b = torch.tensor(bounds['upper_bounds'])
 
-    # # Setup the bounds for the inequality
-    # # a <= x <= b
-    # # -> a - x <= 0
-    # # -> x - b <= 0
-    # # Inequality constraints
-    # # In some cases all of the bounds will be
-    # # None so we will need to set the ci struct
-    # # to None
+    # Get the scaled x-values
+    x = torch.tanh(x)
+    x = a + ((b - a) / 2.0 * (x + 1))
+
+    f = objective(x)
+
+    # Inequality constraints
     ci = None
-
-    # # TODO: I will leave this for now but it was not working - is there
-    # # an implementation issue?
-    # if np.any(np.array(bounds).flatten() != None):  # noqa
-    #     ci = pygransoStruct()
-    #     for index, cnstr in enumerate(bounds):
-    #         a, b = cnstr
-    #         if a is None and b is None:
-    #             pass
-    #         elif a is None:
-    #             setattr(ci, f'ca{index}', a - x[index])
-    #         elif b is None:
-    #             setattr(ci, f'cb{index}', x[index] - b)
-    #         else:
-    #             setattr(ci, f'ca{index}', a - x[index])
-    #             setattr(ci, f'cb{index}', x[index] - b)
 
     # Equality constraints
     ce = None
@@ -456,18 +437,17 @@ def run_pygranso(problem: Dict, trials: int):
     """
     # Get the device (CPU for now)
     device = torch.device('cpu')
-    fn_values = []
-    interim_results = []
 
-    # Get the maximum iterations
-    max_iterations = problem['max_iterations']
+    # Objective function
+    objective = problem['objective']
 
-    # Get the number of dimensions for the problem
+    # Get the number of dimensions
     dimensions = problem['dimensions']
 
-    # results
-    results = np.zeros((trials, max_iterations * 100, dimensions + 1)) * np.nan
+    # Get the bounds of the problem
+    bounds = problem['bounds']
 
+    trial_results = []
     for trial in range(trials):
         # Seed everything
         set_seed(trial)
@@ -481,28 +461,22 @@ def run_pygranso(problem: Dict, trials: int):
         # options
         opts = pygransoStruct()
 
-        # Get the bounds of the problem
-        if dimensions <= 2:
-            bounds = problem['bounds']
-        else:
-            bounds = problem['bounds']
-
-            if len(bounds) > 1:
-                bounds = bounds
-
-            else:
-                bounds = bounds * dimensions
-
         # Create x0 based on the bounds
         # Initial point
         x0 = initialize_vector(size=dimensions, bounds=bounds)
+
+        # Create the initial xs before we turn into a torch
+        # tensor
+        columns = [f'x{i + 1}' for i in range(dimensions)]
+        xs = json.dumps(dict(zip(columns, x0)))
+
+        # Convert x0 into a torch tensor
         x0 = torch.tensor(x0).reshape(dimensions, 1)
         x0 = x0.to(device=device, dtype=torch.double)
 
         # Pygranso options
         opts.x0 = x0
         opts.torch_device = device
-        # opts.print_frequency = 100
         opts.print_level = 0
         opts.limited_mem_size = 5
         opts.stat_l2_model = False
@@ -511,13 +485,12 @@ def run_pygranso(problem: Dict, trials: int):
         opts.opt_tol = 1e-10
         opts.maxit = 2000
 
-        # Objective function
-        objective = problem['objective']
-
         # Set up the function with the results
-        fn = lambda x: objective(  # noqa
-            x, results=results, trial=trial, version='pytorch'
-        )
+        fn = lambda x: objective(x, version='pytorch')  # noqa
+
+        # Get the initial objective value
+        f_init = fn(x0)
+        f_init = float(f_init)
 
         # Combined function
         comb_fn = lambda x: pygranso_nd_fn(x, fn, bounds)  # noqa
@@ -540,57 +513,44 @@ def run_pygranso(problem: Dict, trials: int):
         # obtained by calling get_log_fn()
         log = get_log_fn()
 
-        # Final structure
-        indexes = (pd.Series(log.fn_evals).cumsum() - 1).values.tolist()
-
-        # Index results
-        interim_results.append(results[trial, indexes, :dimensions])
+        # Get the f history
+        f_history = np.array(log.f)
 
         # Get final x we will also need to map
         # it to the same bounds
         x = soln.final.x.cpu().numpy().flatten()
 
+        # Final objective function value
         f = soln.final.f
-        b = soln.best.f
 
-        x_tuple = tuple(x)
-        fn_values.append(x_tuple + (f, 'PyGRANSO', total_time))
+        results = {
+            'xs': xs,
+            'f_init': f_init,
+            'total_time': total_time,
+            'f_final': f,
+            'iterations': soln.iters + 1,
+            'fn_evals': soln.fn_evals,
+            'termination_code': soln.termination_code,
+            'objective_values': f_history,
+        }
+        trial_results.append(results)
 
-        del (var_in, x0, opts, soln, x, f, b)
+        # Delete objects to free memory
+        del (var_in, x0, opts, soln, x, f)
         gc.collect()
         torch.cuda.empty_cache()
 
-    return {'results': None, 'final_results': fn_values, 'callbacks': interim_results}
+    return pd.DataFrame(trial_results)
 
 
-def deeplifting_predictions(x, objective, method='particle'):
+def deeplifting_predictions(x, objective):
     """
     Convert scaled values to the objective function
     """
-    if method == 'particle':
-        # Iterate over the objective values
-        objective_values = []
-        for i in range(len(x)):
-            f = objective(x[i, :])
-            objective_values.append(f)
+    f = objective(x)
 
-        objective_values = torch.stack(objective_values)
-        f = torch.min(objective_values)
-
-        # Need to get the minimum of f
-        idx_min = torch.argmin(objective_values)
-        x = x[idx_min, :]
-        x = x.detach().cpu().numpy().flatten()
-
-    elif method == 'single-value':
-        x = x.mean(axis=0)
-        f = objective(x)
-
-        # Detach and return x
-        x = x.detach().cpu().numpy().flatten()
-
-    else:
-        raise ValueError(f'{method} does not exist!')
+    # Detach and return x
+    x = x.detach().cpu().numpy().flatten()
 
     return x, f
 
@@ -598,31 +558,15 @@ def deeplifting_predictions(x, objective, method='particle'):
 def deeplifting_nd_fn(
     model,
     objective,
-    trial,
-    dimensions,
-    deeplifting_results,
-    problem_name,
-    method='particle',
-    inputs=None,
+    inputs,
 ):
     """
     Combined funtion used for PyGranso
     """
     outputs = model(inputs=inputs)
 
-    # Get x1 and x2 so we can add the bounds
-    # outputs = torch.sigmoid(outputs)
-    # x = outputs.mean(axis=0)
-    # print(f'Output x {x}')
-    x, f = deeplifting_predictions(outputs, objective, method=method)
-    # print(x, f)
-    # f_copy = f.detach().cpu().numpy()
-
-    # # Fill in the intermediate results
-    # if problem_name not in EXCLUDE_PROBLEMS:
-    #     iteration = np.argmin(~np.any(np.isnan(deeplifting_results[trial]), axis=1))
-    #     deeplifting_results[trial, iteration, :dimensions] = x
-    #     deeplifting_results[trial, iteration, -1] = f_copy
+    # Get the predictions and x-values
+    x, f = deeplifting_predictions(outputs, objective)
 
     # Inequality constraint
     ci = None
@@ -633,384 +577,111 @@ def deeplifting_nd_fn(
     return f, ci, ce
 
 
-def run_deeplifting(
-    problem: Dict,
-    problem_name: str,
-    trials: int,
-    input_size=512,
-    hidden_sizes=(512, 512, 512),
-    activation='sine',
-    output_activation='sine',
-    agg_function='sum',
-    include_bn=False,
-    method='particle',
-    save_model_path=None,
-):
+def run_pygranso_deeplifting(
+    model: ReLUDeepliftingMLP,
+    model_inputs: torch.Tensor,
+    start_position: torch.Tensor,
+    objective: Callable,
+    device: torch.device,
+    max_iterations: int,
+) -> Dict[str, Any]:
     """
-    Function that runs our preimer method of deeplifting.
-    The idea here is to reparmeterize an optimization objective
-    so we can have better optimization and convergence
+    Function that runs the pygranso version of deeplifting.
     """
-    # Get the device (CPU for now)
-    output_size = problem['dimensions']
-    device = get_devices()
-    fn_values = []
-    iterim_results: List[Any] = []  # noqa
+    # # The first thing we do when training this model is align the
+    # # outputs of the model with a randomly initialized starting position
+    train_model_to_output(
+        inputs=model_inputs,
+        model=model,
+        x0=start_position,
+        tolerance=1e-3,
+    )
 
-    # Get the initial starting point for each trial
-    initial_values = []
+    # Get the number of training variables for the model
+    nvar = getNvarTorch(model.parameters())
 
-    # Keep the termination codes for each of the trials
-    termination_codes = []
+    # Get the starting parameters for the neural network
+    x0 = (
+        torch.nn.utils.parameters_to_vector(model.parameters())
+        .detach()
+        .reshape(nvar, 1)
+        .to(device=device, dtype=torch.double)
+    )
 
-    for trial in range(trials):
-        set_seed(trial)
-        # Objective function
-        objective = problem['objective']
+    # Gather the starting information for the problem
+    model.eval()
+    outputs = model(inputs=model_inputs)
+    _, f_init = deeplifting_predictions(outputs, objective)
+    f_init = f_init.detach().cpu().numpy()
 
-        # Get the bounds of the problem
-        if output_size <= 2:
-            bounds = problem['bounds']
-        else:
-            bounds = problem['bounds']
+    # Build the combination function - a paradigm specific to
+    # PyGranso
+    comb_fn = lambda model: deeplifting_nd_fn(  # noqa
+        model=model,
+        objective=objective,
+        inputs=model_inputs,
+    )  # noqa
 
-            if len(bounds) > 1:
-                bounds = bounds
+    # Run the main algorithm
+    # Set up the PyGranso configuation
+    pygranso_config = PyGransoConfig(
+        device=device,
+        x0=x0,
+        max_iterations=max_iterations,
+    )
 
-            else:
-                bounds = bounds * output_size
+    # Put the model back in training mode
+    model.train()
 
-        # Fix the inputs for deeplifting
-        inputs = torch.randn(1, 5 * output_size)
-        inputs = inputs.to(device=device, dtype=torch.double)
+    # Start the timer
+    start = time.time()
 
-        x0 = initialize_vector(size=output_size, bounds=bounds)
-        x0 = torch.tensor(x0)
-        x0 = x0.to(device=device, dtype=torch.double)
+    # Initiate halt log
+    mHLF_obj = HaltLog()
+    halt_log_fn, get_log_fn = mHLF_obj.makeHaltLogFunctions(max_iterations)
 
-        # Deeplifting model with skip connections
-        model = DeepliftingSkipMLP(
-            input_size=input_size,
-            hidden_sizes=hidden_sizes,
-            output_size=output_size,
-            bounds=bounds,
-            skip_every_n=1,
-            activation=activation,
-            output_activation=output_activation,
-            agg_function=agg_function,
-            include_bn=include_bn,
-            seed=trial,
-        )
+    #  Set PyGRANSO's logging function in opts
+    pygranso_config.opts.halt_log_fn = halt_log_fn
 
-        model = model.to(device=device, dtype=torch.double)
+    # Run PyGranso
+    soln = pygranso(var_spec=model, combined_fn=comb_fn, user_opts=pygranso_config.opts)
 
-        # # Let's make sure that all methods have the same x0
-        # train_model_to_output(
-        #     inputs=inputs, model=model, x0=x0, epochs=100000, lr=1e-4, tolerance=1e-3
-        # )
-        nvar = getNvarTorch(model.parameters())
+    # GET THE HISTORY OF ITERATES
+    # Even if an error is thrown, the log generated until the error can be
+    # obtained by calling get_log_fn()
+    log = get_log_fn()
 
-        # Setup a pygransoStruct for the algorithm
-        # options
-        opts = pygransoStruct()
+    # Get the objective values
+    objective_values = np.array(log.f)
 
-        # Print the model outputs and check against x0 also
-        # want to use a print out to make sure all models have the same starting
-        # point
-        model.eval()
-        outputs = model(inputs=inputs)
-        outputs = outputs.mean(axis=0)
+    # Get the total time
+    end = time.time()
+    total_time = end - start
 
-        print(f'Initial x0 = {x0}')
-        print(f'Fitted x0 = {outputs}')
-        initial_values.append(outputs.detach().cpu().numpy())
-
-        # Inital x0
-        x0 = (
-            torch.nn.utils.parameters_to_vector(model.parameters())
-            .detach()
-            .reshape(nvar, 1)
-            .to(device=device, dtype=torch.double)
-        )
-
-        opts.x0 = x0
-        opts.torch_device = device
-        # opts.print_level = 0
-        opts.print_frequency = 1
-        opts.limited_mem_size = 100
-        opts.stat_l2_model = False
-        opts.double_precision = True
-        # opts.disable_terminationcode_6 = True
-        # opts.halt_on_linesearch_bracket = False
-        opts.opt_tol = 1e-10
-        opts.maxit = 5000
-
-        # Get the maximum iterations
-        max_iterations = problem['max_iterations']  # noqa
-
-        # TODO: Clean up meaningless variables
-        results = None
-        deeplifting_results = None
-
-        # Set up the function with the results
-        fn = lambda x: objective(  # noqa
-            x, results=results, trial=trial, version='pytorch'
-        )
-
-        # Get the objective value at the initial point
-        outputs = model(inputs=inputs)
-
-        init_fn = lambda x: objective(  # noqa
-            x, results=None, trial=0, version='pytorch'
-        )
-        x_init, f_init = deeplifting_predictions(outputs, init_fn, method=method)
-        f_init = f_init.detach().cpu().numpy()
-
-        # Combined function
-        comb_fn = lambda model: deeplifting_nd_fn(  # noqa
-            model,
-            fn,
-            trial,
-            output_size,
-            deeplifting_results,
-            problem_name=problem_name,
-            method=method,
-            inputs=inputs,
-        )  # noqa
-
-        # Run the main algorithm
-        model.train()
-        start_time = time.time()
-        soln = pygranso(var_spec=model, combined_fn=comb_fn, user_opts=opts)
-        end_time = time.time()
-        total_time = end_time - start_time
-
-        # Save the termination code
-        termination_codes.append(soln.termination_code)
-
-        # Get final x we will also need to map
-        # it to the same bounds
-        outputs = model(inputs=inputs)
-
-        # Get the final results
-        final_results = None
-        final_fn = lambda x: objective(  # noqa
-            x, results=final_results, trial=0, version='pytorch'
-        )
-        xf, f = deeplifting_predictions(outputs, final_fn, method=method)
-
-        f = f.detach().cpu().numpy()
-        data_point = tuple(xf) + (float(f), float(f_init), 'Deeplifting', total_time)
-        fn_values.append(data_point)
-
-        # If save model then we need to save the configuration of the
-        # model and the model weights
-        if save_model_path is not None:
-            # Add success criteria to the file name
-            status = np.abs(f - problem['global_minimum']) <= 1e-4
-
-            # Get the configuration
-            config = {}
-            config['input_size'] = input_size
-            config['hidden_sizes'] = hidden_sizes
-            config['dimensions'] = output_size
-            config['bounds'] = bounds
-            config['activation'] = activation
-            config['output_activation'] = output_activation
-            config['agg_function'] = agg_function
-            config['seed'] = trial
-            config['global_minimum'] = problem['global_minimum']
-
-            # Save the model
-            model_file_name = os.path.join(
-                save_model_path, f'{problem_name}-{trial}-{status}.pt'
-            )
-            torch.save(model.state_dict(), model_file_name)
-
-            # Save model config json
-            json_file_name = os.path.join(
-                save_model_path, f'config-{problem_name}-{trial}-{status}.json'
-            )
-            with open(json_file_name, 'w') as json_file:
-                json.dump(config, json_file, indent=4)
-
-        # Collect garbage and empty cache
-        del (model, nvar, x0, opts, soln, outputs, xf, f, data_point, final_fn)
-        gc.collect()
-        torch.cuda.empty_cache()
-
-    return {
-        'results': None,
-        'final_results': fn_values,
-        'callbacks': iterim_results,
-        'initial_values': initial_values,
-        'termination_codes': termination_codes,
+    # We will run this iteratively. Every run of this function will
+    # be responsible for a single record towards analysis
+    results = {
+        'soln': soln,
+        'f_init': f_init,
+        'total_time': total_time,
+        'f_final': soln.best.f,
+        'iterations': soln.iters,
+        'fn_evals': soln.fn_evals,
+        'termination_code': soln.termination_code,
+        'objective_values': objective_values,
     }
 
-
-def deeplifting_high_dimension_fn(model, objective, inputs=None):
-    """
-    Combined funtion used for PyGranso
-    """
-    outputs = model(inputs=inputs)
-    outputs = outputs.mean(axis=0)
-    f = objective(outputs, version='pytorch')
-
-    # Inequality constraint
-    ci = None
-
-    # Equality constraing
-    ce = None
-
-    return f, ci, ce
-
-
-def run_high_dimensional_deeplifting(
-    problem: Dict,
-    problem_name: str,
-    trials: int,
-    input_size=512,
-    hidden_sizes=(512, 512, 512),
-    activation='sine',
-    output_activation='sine',
-    agg_function='sum',
-    include_bn=False,
-):
-    """
-    Function that runs our preimer method of deeplifting.
-    The idea here is to reparmeterize an optimization objective
-    so we can have better optimization and convergence
-    """
-    # Get the device (CPU for now)
-    output_size = problem['dimensions']
-    device = get_devices()
-    fn_values = []
-
-    for trial in range(trials):
-        set_seed(trial)
-        # Objective function
-        objective = problem['objective']
-
-        # Get the bounds of the problem
-        if output_size <= 2:
-            bounds = problem['bounds']
-        else:
-            bounds = problem['bounds']
-
-            if len(bounds) > 1:
-                bounds = bounds
-
-            else:
-                bounds = bounds * output_size
-
-        # Fix the inputs for deeplifting
-        inputs = torch.randn(1, 5 * output_size)
-        inputs = inputs.to(device=device, dtype=torch.double)
-
-        x0 = initialize_vector(size=output_size, bounds=bounds)
-        x0 = torch.tensor(x0)
-        x0 = x0.to(device=device, dtype=torch.double)
-
-        # Deeplifting model with skip connections
-        model = DeepliftingSkipMLP(
-            input_size=input_size,
-            hidden_sizes=hidden_sizes,
-            output_size=output_size,
-            bounds=bounds,
-            skip_every_n=1,
-            activation=activation,
-            output_activation=output_activation,
-            agg_function=agg_function,
-            include_bn=include_bn,
-            seed=trial,
-        )
-
-        model = model.to(device=device, dtype=torch.double)
-
-        # Let's make sure that all methods have the same x0
-        print('Set weights to match x0')
-        train_model_to_output(
-            inputs=inputs, model=model, x0=x0, epochs=100000, lr=1e-4, tolerance=1e-10
-        )
-
-        # Let's also get the initial values of the objective
-        # so we can normalize the results
-        model.eval()
-        outputs = model(inputs=inputs)
-        outputs = outputs.mean(axis=0)
-        f_init = objective(outputs, version='pytorch')
-
-        # put model back in training mode
-        model.train()
-        nvar = getNvarTorch(model.parameters())
-
-        # Setup a pygransoStruct for the algorithm
-        # options
-        opts = pygransoStruct()
-
-        # Inital x0
-        x0 = (
-            torch.nn.utils.parameters_to_vector(model.parameters())
-            .detach()
-            .reshape(nvar, 1)
-            .to(device=device, dtype=torch.double)
-        )
-
-        opts.x0 = x0
-        opts.torch_device = device
-        opts.print_level = 0
-        # opts.print_frequency = 1
-        opts.limited_mem_size = 100
-        opts.stat_l2_model = False
-        opts.double_precision = True
-        opts.disable_terminationcode_6 = True
-        opts.halt_on_linesearch_bracket = False
-        opts.linesearch_maxit = 50
-        opts.opt_tol = 1e-10
-        opts.maxit = 5
-
-        # # Combined function
-        comb_fn = lambda model: deeplifting_high_dimension_fn(
-            model, objective, inputs
-        )  # noqa
-
-        # Run the main algorithm
-        start_time = time.time()
-        soln = pygranso(var_spec=model, combined_fn=comb_fn, user_opts=opts)
-        end_time = time.time()
-        total_time = end_time - start_time
-
-        # Get final x we will also need to map
-        # it to the same bounds
-        outputs = model(inputs=inputs)
-        outputs = outputs.mean(axis=0)
-        final_fn = objective(outputs, version='pytorch')
-        f = final_fn.detach().cpu().numpy()
-        xf = outputs.detach().cpu().numpy()
-        print(f'Final value = {f}')
-
-        data_point = tuple(xf) + (float(f), float(f_init), 'Deeplifting', total_time)
-        fn_values.append(data_point)
-
-        # Collect garbage and empty cache
-        del (model, nvar, x0, opts, soln, outputs, xf, f, data_point, final_fn)
-        gc.collect()
-        torch.cuda.empty_cache()
-
-    return {'results': None, 'final_results': fn_values, 'callbacks': []}
+    return results
 
 
 def run_lbfgs_deeplifting(
-    problem: Dict,
-    problem_name: str,
-    trials: int,
-    input_size=512,
-    hidden_sizes=(512, 512, 512),
-    activation='sine',
-    output_activation='sine',
-    agg_function='sum',
-    include_bn=False,
-):
+    model: ReLUDeepliftingMLP,
+    model_inputs: torch.Tensor,
+    start_position: torch.Tensor,
+    objective: Callable,
+    device: torch.device,
+    max_iterations: int,
+) -> Dict[str, Any]:
     """
     Function that runs our preimer method of deeplifting.
     The idea here is to reparmeterize an optimization objective
@@ -1018,302 +689,374 @@ def run_lbfgs_deeplifting(
     with this version of deeplifting is we will use
     pytorch's built in LBFGS algorithm
     """
-    # Get the device (CPU for now)
-    output_size = problem['dimensions']
-    device = get_devices()
-    fn_values = []  # noqa
+    # The first thing we do when training this model is align the
+    # outputs of the model with a randomly initialized starting position
+    train_model_to_output(
+        inputs=model_inputs,
+        model=model,
+        x0=start_position,
+        tolerance=1e-3,
+    )
 
-    for trial in range(trials):
-        set_seed(trial)
-        # Objective function
-        objective = problem['objective']
+    # Set up the LBFGS optimizer for the problem
+    # This is a pytorch provided implementation
+    optimizer = optim.LBFGS(
+        model.parameters(),
+        lr=0.1,
+        history_size=25,
+        max_iter=25,
+        line_search_fn='strong_wolfe',
+    )
 
-        # Get the bounds of the problem
-        if output_size <= 2:
-            bounds = problem['bounds']
-        else:
-            bounds = problem['bounds']
+    # Let's keep the same steps as the other method defined
+    # (pygranso deeplifting)
 
-            if len(bounds) > 1:
-                bounds = bounds
+    # Gather the starting information for the problem
+    model.eval()
+    outputs = model(inputs=model_inputs)
+    _, f_init = deeplifting_predictions(outputs, objective)
 
-            else:
-                bounds = bounds * output_size
+    # Start clocking on the training loop
+    start = time.time()
 
-        # Fix the inputs for deeplifting
-        inputs = torch.randn(1, 5 * output_size)
-        inputs = inputs.to(device=device, dtype=torch.double)
+    # Count for early exit
+    count = 0
 
-        x0 = initialize_vector(size=output_size, bounds=bounds)
-        x0 = torch.tensor(x0)
-        x0 = x0.to(device=device, dtype=torch.double)
+    # Total iterations
+    iterations = 0
 
-        # Deeplifting model with skip connections
-        model = DeepliftingSkipMLP(
-            input_size=input_size,
-            hidden_sizes=hidden_sizes,
-            output_size=output_size,
-            bounds=bounds,
-            skip_every_n=1,
-            activation=activation,
-            output_activation=output_activation,
-            agg_function=agg_function,
-            include_bn=include_bn,
-            seed=trial,
-        )
+    # Create terminations codes like pygranso
+    termination_code = None
 
-        model = model.to(device=device, dtype=torch.double)
+    # Set current loss as well
+    current_loss = f_init
 
-        # Let's make sure that all methods have the same x0
-        print('Set weights to match x0')
-        train_model_to_output(
-            inputs=inputs, model=model, x0=x0, epochs=100000, lr=1e-4, tolerance=1e-3
-        )
+    # Train the model
+    epochs = 1000
+    model.train()
+    for epoch in range(epochs):
 
-        # Set up the optimizer for the problem
-        optimizer = optim.LBFGS(
-            model.parameters(),
-            lr=1.0,
-            history_size=200,
-            max_iter=50,
-            line_search_fn='strong_wolfe',
-        )
-
-        # Set up a training loop
-        start = time.time()
-
-        # Get starting loss
-        outputs = model(inputs=inputs)
-        outputs = outputs.mean(axis=0)
-        f_init = current_loss = objective(outputs, version='pytorch')
-        print(f'Initial loss = {current_loss}')
-
-        count = 0
-        for epoch in range(100000):
-
-            def closure():
-                # Zero out the gradients
-                optimizer.zero_grad()
-
-                # The loss is the sum of the compliance
-                outputs = model(inputs=inputs)
-                outputs = outputs.mean(axis=0)
-                loss = objective(outputs, version='pytorch')
-
-                # Go through the backward pass and create the gradients
-                loss.backward()
-
-                return loss
-
-            # Step through the optimzer to update the data with the gradients
-            optimizer.step(closure)
-
-            outputs = model(inputs=inputs)
-            outputs = outputs.mean(axis=0)
-            updated_loss = objective(outputs, version='pytorch')
-
-            # Break loop if tolerance is met
-            flat_grad = optimizer._gather_flat_grad()  # type: ignore
-            opt_cond = flat_grad.abs().max() <= 1e-10
-            if opt_cond:
-                break
-
-            if torch.abs(updated_loss - current_loss) <= 1e-10:
-                count += 1
-            else:
-                current_loss = updated_loss
-
-            if count > 10000:
-                break
-
-            if epoch % 1000 == 0:
-                print(
-                    f'loss = {updated_loss.detach()},'
-                    f'gradient_norm = {flat_grad.abs().max()}'
-                )
-
-        end = time.time()
-        total_time = end - start
-
-        # Get final x we will also need to map
-        # it to the same bounds
-        outputs = model(inputs=inputs)
-        outputs = outputs.mean(axis=0)
-        final_fn = objective(outputs, version='pytorch')
-        f = final_fn.detach().cpu().numpy()
-        xf = outputs.detach().cpu().numpy()
-        data_point = tuple(xf.flatten()) + (
-            float(f),
-            float(f_init),
-            'Deeplifting-LBFGS',
-            total_time,
-        )
-        fn_values.append(data_point)
-
-        # Collect garbage and empty cache
-        del (outputs, xf, f, data_point, final_fn)
-        gc.collect()
-        torch.cuda.empty_cache()
-
-    return {'results': None, 'final_results': fn_values, 'callbacks': []}
-
-
-def run_adam_deeplifting(
-    problem: Dict,
-    problem_name: str,
-    trials: int,
-    input_size=512,
-    hidden_sizes=(512, 512, 512),
-    activation='sine',
-    output_activation='sine',
-    agg_function='sum',
-    include_bn=False,
-):
-    """
-    Function that runs our preimer method of deeplifting.
-    The idea here is to reparmeterize an optimization objective
-    so we can have better optimization and convergence. The difference
-    with this version of deeplifting is we will use
-    pytorch's built in LBFGS algorithm
-    """
-    # Get the device (CPU for now)
-    output_size = problem['dimensions']
-    device = get_devices()
-
-    # Final values
-    fn_values = []
-
-    for trial in range(trials):
-        set_seed(trial)
-        # Objective function
-        objective = problem['objective']
-
-        # Get the bounds of the problem
-        if output_size <= 2:
-            bounds = problem['bounds']
-        else:
-            bounds = problem['bounds']
-
-            if len(bounds) > 1:
-                bounds = bounds
-
-            else:
-                bounds = bounds * output_size
-
-        # Fix the inputs for deeplifting
-        inputs = torch.randn(1, 5 * output_size)
-        inputs = inputs.to(device=device, dtype=torch.double)
-
-        x0 = initialize_vector(size=output_size, bounds=bounds)
-        x0 = torch.tensor(x0)
-        x0 = x0.to(device=device, dtype=torch.double)
-
-        # Deeplifting model with skip connections
-        model = DeepliftingSkipMLP(
-            input_size=input_size,
-            hidden_sizes=hidden_sizes,
-            output_size=output_size,
-            bounds=bounds,
-            skip_every_n=1,
-            activation=activation,
-            output_activation=output_activation,
-            agg_function=agg_function,
-            include_bn=include_bn,
-            seed=trial,
-        )
-
-        model = model.to(device=device, dtype=torch.double)
-
-        # Let's make sure that all methods have the same x0
-        print('Set weights to match x0')
-        train_model_to_output(
-            inputs=inputs, model=model, x0=x0, epochs=100000, lr=1e-4, tolerance=1e-3
-        )
-
-        # Set up the optimizer for the problem
-        epochs = 10000
-        optimizer = optim.Adam(
-            model.parameters(),
-            lr=1e-4,
-        )
-        scheduler = OneCycleLR(
-            optimizer,
-            max_lr=1e-4,
-            epochs=epochs,
-            steps_per_epoch=1,
-            pct_start=0.0,
-        )
-
-        # Set up a training loop
-        start = time.time()
-
-        # Get starting loss
-        outputs = model(inputs=inputs)
-        outputs = outputs.mean(axis=0)
-        f_init = objective(outputs, version='pytorch')
-
-        # Check
-        print('Check that outputs match ... \n')
-        print(torch.norm(outputs - x0, p=2).item())
-
-        early_stopping_count = 0
-        for epoch in range(epochs):
+        def closure():
             # Zero out the gradients
             optimizer.zero_grad()
 
             # The loss is the sum of the compliance
-            outputs = model(inputs=inputs)
-            outputs = outputs.mean(axis=0)
-            loss = objective(outputs, version='pytorch')
+            outputs = model(inputs=model_inputs)
+            loss = objective(outputs)
 
             # Go through the backward pass and create the gradients
             loss.backward()
 
-            outputs = model(inputs=inputs)
-            outputs = outputs.mean(axis=0)
-            updated_loss = objective(outputs, version='pytorch')
+            return loss
 
-            if epoch % 1000 == 0:
-                print(f'loss = {updated_loss.detach()},')
+        # Step through the optimzer to update the data with the gradients
+        optimizer.step(closure)
 
-            delta = f_init.item() - updated_loss.item()
-            if epoch >= 10000 and delta < 1e-10:
-                early_stopping_count += 1
+        outputs = model(inputs=model_inputs)
+        updated_loss = objective(outputs)
 
-            if early_stopping_count == 10000:
-                break
+        # Update the iteration count
+        iterations += 1
 
-            # Step through the optimzer to update the data with the gradients
-            optimizer.step()
-            scheduler.step()
+        # Break loop if tolerance is met
+        # Under this condition we check the L_inf norm
+        flat_grad = optimizer._gather_flat_grad()  # type: ignore
+        opt_cond = flat_grad.abs().max() <= 1e-10  # Same tolerance as pygranso
+        if opt_cond:
+            termination_code = 0
+            break
 
-        # Get the final results
-        end = time.time()
-        total_time = end - start  # noqa
+        # If the difference between the current objective values
+        # and the previous do no change over a period then exit
+        if (
+            np.abs(
+                updated_loss.detach().cpu().numpy()
+                - current_loss.detach().cpu().numpy()
+            )
+            <= 1e-10
+        ):
+            count += 1
+        else:
+            # If this is not true we need to restart the count
+            count = 0
+            current_loss = updated_loss
 
-        # Get final x we will also need to map
-        # it to the same bounds
-        outputs = model(inputs=inputs)
-        outputs = outputs.mean(axis=0)
-        final_fn = objective(outputs, version='pytorch')
-        f = final_fn.detach().cpu().numpy()
-        xf = outputs.detach().cpu().numpy()
+        if count > 100:
+            termination_code = 0
+            break
 
-        # Make sure f_init is detached from graph
-        f_init = f_init.detach().cpu().numpy()
-        data_point = tuple(xf.flatten()) + (
-            float(f),
-            float(f_init),
-            'Deeplifting-Adam',
-            total_time,
-        )
-        fn_values.append(data_point)
+        if epoch % 50 == 0:
+            print(
+                f'loss = {updated_loss.detach()},'
+                f' gradient_norm = {flat_grad.abs().max()}'
+            )
 
-        # Collect garbage and empty cache
-        gc.collect()
-        torch.cuda.empty_cache()
+    # Maximum iterations reached
+    if iterations >= len(range(epochs)):
+        termination_code = 4
 
-    return {'results': None, 'final_results': fn_values, 'callbacks': []}
+    # Total time to run algorithm
+    end = time.time()
+    total_time = end - start
+
+    # Get final x we will also need to map
+    # it to the same bounds
+    model.eval()
+    outputs = model(inputs=model_inputs)
+
+    # Get the final objective value
+    f_final = objective(outputs)
+    f_final = f_final.detach().cpu().numpy()
+
+    # Get total function evaluations
+    fn_evals = list(optimizer.state.items())[0][1]['func_evals']
+
+    results = {
+        'f_init': f_init.detach().cpu().numpy(),
+        'total_time': total_time,
+        'f_final': f_final,
+        'iterations': iterations,
+        'fn_evals': fn_evals,
+        'termination_code': termination_code,
+    }
+
+    return results
+
+
+def run_adam_deeplifting(
+    model: ReLUDeepliftingMLP,
+    model_inputs: torch.Tensor,
+    start_position: torch.Tensor,
+    objective: Callable,
+    device: torch.device,
+    max_iterations: int = 1000,
+    *,
+    lr: float = 1e-2,
+) -> Dict[str, Any]:
+    """
+    Function that runs our preimer method of deeplifting.
+    The idea here is to reparmeterize an optimization objective
+    so we can have better optimization and convergence. The difference
+    with this version of deeplifting is we will use
+    pytorch's built in Adam optimizer
+    """
+    # The first thing we do when training this model is align the
+    # outputs of the model with a randomly initialized starting position
+    train_model_to_output(
+        inputs=model_inputs,
+        model=model,
+        x0=start_position,
+        tolerance=1e-3,
+    )
+
+    # Total epochs
+    epochs = max_iterations
+
+    # Set up the LBFGS optimizer for the problem
+    # This is a pytorch provided implementation
+    optimizer = optim.Adam(
+        model.parameters(),
+        lr=lr,
+        amsgrad=True,
+    )
+
+    # Reduce learning rate on plateau
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer,
+        mode='min',
+        factor=0.9,
+        patience=1,
+        verbose=False,
+    )
+
+    # Let's keep the same steps as the other method defined
+    # (pygranso deeplifting)
+
+    # Gather the starting information for the problem
+    model.eval()
+    outputs = model(inputs=model_inputs)
+    _, f_init = deeplifting_predictions(outputs, objective)
+
+    # Start clocking on the training loop
+    start = time.time()
+
+    # Total iterations
+    iterations = 0
+
+    # Create terminations codes like pygranso
+    termination_code = None
+
+    # Set up a training loop
+    start = time.time()
+
+    # Let's try using the minimum loss found during the
+    # optimization
+    losses = []
+
+    # Train the model
+    model.train()
+    for epoch in range(epochs):
+        # Zero out the gradients
+        optimizer.zero_grad()
+
+        # The loss is the sum of the compliance
+        outputs = model(inputs=model_inputs)
+        loss = objective(outputs)
+
+        # Go through the backward pass and create the gradients
+        loss.backward()
+        losses.append(loss.item())
+
+        # Step through the optimzer to update the data with the gradients
+        optimizer.step()
+        scheduler.step(loss)
+
+        iterations += 1
+
+    # Maximum iterations reached
+    if iterations >= len(range(epochs)):
+        termination_code = 4
+
+    # Get the final results
+    end = time.time()
+    total_time = end - start  # noqa
+
+    # Get final values
+    outputs = model(inputs=model_inputs)
+    f_final = objective(outputs)  # noqa
+    f_final = f_final.detach().cpu().numpy()  # noqa
+
+    # F-min
+    f_min = np.min(np.array(losses))  # noqa
+
+    results = {
+        'f_init': f_init.detach().cpu().numpy(),
+        'total_time': total_time,
+        'f_final': f_final,
+        'iterations': iterations,
+        'fn_evals': None,  # Does not apply to this method
+        'termination_code': termination_code,
+        'objective_values': np.array(losses),
+    }
+
+    return results
+
+
+def run_sgd_deeplifting(
+    model: ReLUDeepliftingMLP,
+    model_inputs: torch.Tensor,
+    start_position: torch.Tensor,
+    objective: Callable,
+    device: torch.device,
+    max_iterations: int = 3000,
+    *,
+    lr: float = 1e-2,
+    momentum: float = 0.99,
+) -> Dict[str, Any]:
+    """
+    Function that runs our preimer method of deeplifting.
+    The idea here is to reparmeterize an optimization objective
+    so we can have better optimization and convergence. The difference
+    with this version of deeplifting is we will use
+    pytorch's built in Adam optimizer
+    """
+    # The first thing we do when training this model is align the
+    # outputs of the model with a randomly initialized starting position
+    # For now we will not worry about the alignment
+    train_model_to_output(
+        inputs=model_inputs,
+        model=model,
+        x0=start_position,
+        tolerance=1e-3,
+    )
+
+    # Total epochs
+    epochs = max_iterations
+
+    # Set up the LBFGS optimizer for the problem
+    # This is a pytorch provided implementation
+    optimizer = optim.SGD(model.parameters(), lr=lr)
+
+    # Reduce learning rate on plateau
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer,
+        mode='min',
+        factor=0.9,
+        patience=1,
+        verbose=False,
+    )
+
+    # Let's keep the same steps as the other method defined
+    # (pygranso deeplifting)
+
+    # Gather the starting information for the problem
+    model.eval()
+    outputs = model(inputs=model_inputs)
+    _, f_init = deeplifting_predictions(outputs, objective)
+
+    # Start clocking on the training loop
+    start = time.time()
+
+    # Total iterations
+    iterations = 0
+
+    # Create terminations codes like pygranso
+    termination_code = None
+
+    # Set up a training loop
+    start = time.time()
+
+    # Let's try using the minimum loss found during the
+    # optimization
+    losses = []
+
+    # Train the model
+    model.train()
+    for epoch in range(epochs):
+        # Zero out the gradients
+        optimizer.zero_grad()
+
+        # The loss is the sum of the compliance
+        outputs = model(inputs=model_inputs)
+        loss = objective(outputs)
+
+        # Go through the backward pass and create the gradients
+        loss.backward()
+        losses.append(loss.item())
+
+        # Step through the optimzer to update the data with the gradients
+        optimizer.step()
+        scheduler.step(loss)
+
+        iterations += 1
+
+    # Maximum iterations reached
+    if iterations >= len(range(epochs)):
+        termination_code = 4
+
+    # Get the final results
+    end = time.time()
+    total_time = end - start  # noqa
+
+    # Get final values
+    outputs = model(inputs=model_inputs)
+    f_final = objective(outputs)  # noqa
+    f_final = f_final.detach().cpu().numpy()  # noqa
+
+    # F-min
+    f_min = np.min(np.array(losses))  # noqa
+
+    results = {
+        'f_init': f_init.detach().cpu().numpy(),
+        'total_time': total_time,
+        'f_final': f_final,
+        'iterations': iterations,
+        'fn_evals': None,  # Does not apply to this method
+        'termination_code': termination_code,
+        'objective_values': np.array(losses),
+    }
+
+    return results
 
 
 def run_pyomo(problem, trials, method):

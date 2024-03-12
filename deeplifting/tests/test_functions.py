@@ -7,18 +7,14 @@ import torch
 
 # first party
 from deeplifting.problems import (
-    ackley,
     ackley2,
     ackley2_config,
     ackley3,
     ackley3_config,
-    ackley_config,
     adjiman,
     adjiman_config,
     alpine1,
     alpine1_config,
-    alpine2,
-    alpine2_config,
     bartels_conn,
     bartels_conn_config,
     beale,
@@ -65,12 +61,6 @@ from deeplifting.problems import (
     griewank_config,
     holder_table,
     holder_table_config,
-    levy,
-    levy_config,
-    levy_n13,
-    levy_n13_config,
-    mathopt6,
-    mathopt6_config,
     rastrigin,
     rastrigin_config,
     rosenbrock,
@@ -88,6 +78,10 @@ from deeplifting.problems import (
     xinsheyang_n3,
     xinsheyang_n3_config,
 )
+from deeplifting.problems_2d.ackley import Ackley
+from deeplifting.problems_2d.alpine2 import Alpine2
+from deeplifting.problems_2d.levy import Levy, LevyN13
+from deeplifting.problems_2d.mathopt6 import MathOpt6
 
 
 def test_ackley_has_correct_global_minimum():
@@ -98,20 +92,23 @@ def test_ackley_has_correct_global_minimum():
     The global minimum exits as point x*=(0, 0) and
     f(x*) = 0
     """
+    ackley = Ackley()
+    ackley_config = ackley.config()
+
     global_minimum = ackley_config['global_minimum']
 
     # Test the numpy version
     x = np.array([0.0, 0.0])
-    result = ackley(x, version='numpy')
+    result = ackley.objective(x, version='numpy')
     assert math.isclose(result, global_minimum, abs_tol=1e-7)
 
     # Test the pyomo version
-    result = ackley(x, version='pyomo')
+    result = ackley.objective(x, version='pyomo')
     assert math.isclose(result, global_minimum, abs_tol=1e-7)
 
     # Test the torch version
     x = torch.tensor([0.0, 0.0], dtype=torch.float64)
-    torch_result = ackley(x, version='pytorch').numpy()
+    torch_result = ackley.objective(x, version='pytorch').numpy()
     assert math.isclose(torch_result, global_minimum, abs_tol=1e-7)
 
 
@@ -305,19 +302,21 @@ def test_levy_has_correct_global_minimum():
     x*=(1.0, 1.0)
     f(x*) = 0
     """
+    levy = Levy()
+    levy_config = levy.config()
     global_minimum = levy_config['global_minimum']
 
     # Test the numpy version
     x = np.array([1.0, 1.0])
-    result = levy(x, version='numpy')
+    result = levy.objective(x, version='numpy')
     assert math.isclose(result, global_minimum, abs_tol=1e-4)
 
-    result = levy(x, version='pyomo')
+    result = levy.objective(x, version='pyomo')
     assert math.isclose(result, global_minimum, abs_tol=1e-4)
 
     # Test the torch version
     x = torch.tensor([1.0, 1.0], dtype=torch.float64)
-    torch_result = levy(x, version='pytorch').numpy()
+    torch_result = levy.objective(x, version='pytorch').numpy()
     assert math.isclose(torch_result, global_minimum, abs_tol=1e-4)
 
 
@@ -330,19 +329,21 @@ def test_levy_n13_has_correct_global_minimum():
     x*=(1.0, 1.0)
     f(x*) = 0
     """
+    levy_n13 = LevyN13()
+    levy_n13_config = levy_n13.config()
     global_minimum = levy_n13_config['global_minimum']
 
     # Test the numpy version
     x = np.array([1.0, 1.0])
-    result = levy_n13(x, version='numpy')
+    result = levy_n13.objective(x, version='numpy')
     assert math.isclose(result, global_minimum, abs_tol=1e-4)
 
-    result = levy_n13(x, version='pyomo')
+    result = levy_n13.objective(x, version='pyomo')
     assert math.isclose(result, global_minimum, abs_tol=1e-4)
 
     # Test the torch version
     x = torch.tensor([1.0, 1.0], dtype=torch.float64)
-    torch_result = levy_n13(x, version='pytorch').numpy()
+    torch_result = levy_n13.objective(x, version='pytorch').numpy()
     assert math.isclose(torch_result, global_minimum, abs_tol=1e-4)
 
 
@@ -511,19 +512,21 @@ def test_mathopt6_has_correct_global_minimum():
     x*=(-0.024399, 0.210612)
     f(x*) = -3.306869
     """
+    mathopt6 = MathOpt6()
+    mathopt6_config = mathopt6.config()
     global_minimum = mathopt6_config['global_minimum']
 
     # Test the numpy version
     x = np.array([-0.024399, 0.210612])
-    result = mathopt6(x, version='numpy')
+    result = mathopt6.objective(x, version='numpy')
     assert math.isclose(result, global_minimum, abs_tol=1e-4)
 
-    result = mathopt6(x, version='pyomo')
+    result = mathopt6.objective(x, version='pyomo')
     assert math.isclose(result, global_minimum, abs_tol=1e-4)
 
     # Test the torch version
     x = torch.tensor([-0.024399, 0.210612], dtype=torch.float64)
-    torch_result = mathopt6(x, version='pytorch').numpy()
+    torch_result = mathopt6.objective(x, version='pytorch').numpy()
     assert math.isclose(torch_result, global_minimum, abs_tol=1e-4)
 
 
@@ -661,26 +664,27 @@ def test_alpine1_has_correct_global_minimum():
 def test_alpine2_has_correct_global_minimum():
     """
     Function that tests if our implementation of the
-    Ex Alpine 2 function has the correct global minimum.
+    Alpine 2 function has the correct global minimum.
 
-    The function has many global minimum values: Here is
-    one example
-    x*=(7.917, 7.917)
+    The function has one global minima
+    x* = (7.917, 7.917)
     f(x*) = -2.808 ** 2 for 2D
     """
+    alpine2 = Alpine2()
+    alpine2_config = alpine2.config()
     global_minimum = alpine2_config['global_minimum']
 
     # Test the numpy version
     x = np.array([7.917, 7.917])
-    result = alpine2(x, version='numpy')
+    result = alpine2.objective(x, version='numpy')
     assert math.isclose(result, global_minimum, abs_tol=1e-2)
 
-    result = alpine2(x, version='pyomo')
+    result = alpine2.objective(x, version='pyomo')
     assert math.isclose(result, global_minimum, abs_tol=1e-2)
 
     # Test the torch version
     x = torch.tensor([7.917, 7.917], dtype=torch.float64)
-    torch_result = alpine2(x, version='pytorch').numpy()
+    torch_result = alpine2.objective(x, version='pytorch').numpy()
     assert math.isclose(torch_result, global_minimum, abs_tol=1e-2)
 
 

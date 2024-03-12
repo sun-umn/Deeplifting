@@ -24,6 +24,7 @@ click==8.1.3
 polars==0.18.8
 scikit-learn==1.3.0
 pyarrow
+seaborn==0.12.2
 
 # PyGranso Solver
 git+https://github.com/sun-umn/PyGRANSO.git

@@ -5,23 +5,266 @@ import os
 import random
 import uuid
 from functools import partial
+from typing import Dict
 
 # third party
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import seaborn as sns
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from pygranso.pygransoStruct import pygransoStruct
 from torch.optim.lr_scheduler import OneCycleLR
 
-# first party
-from deeplifting.models import DeepliftingSkipMLP
+
+class PyGransoConfig:
+    """
+    Configuration class for the pygranso options. The
+    options stay fairly consistent and can be used mutiple times.
+    The things that we need to set are device, x0 and the maximum
+    number of iterations
+    """
+
+    def __init__(self, device, x0, max_iterations, printing=False):
+        # Set up pygranso structure
+        self.opts = pygransoStruct()
+
+        # PyGranso options
+        self.opts.x0 = x0
+        self.opts.torch_device = device
+
+        # Keep the print freqency at 1 so we can
+        # view every iteration
+        if printing:
+            self.opts.print_frequency = 10
+
+        else:
+            # Use this option to turn off printing
+            # TODO: May want to observe the t (step size)
+            self.opts.print_level = 0
+
+        # LBFGS lookback history size
+        self.opts.limited_mem_size = 100
+
+        # Set's the stopping criterion to either L2 or
+        # L_inf norm
+        self.opts.stat_l2_model = False
+        self.opts.double_precision = True
+
+        # Optimization tolerance and stopping criterion
+        self.opts.opt_tol = 1e-12
+
+        # Maximum number of iterations will be defined by the
+        # problem instance
+        self.opts.maxit = max_iterations
+
+
+class Results:
+    """
+    Function that combines and concatenates results and saves intermediate
+    information during a run.
+    TODO: All runs should have the same information so this should be useable
+    across all of the different algorithms that we are using.
+    """
+
+    def __init__(self, method='deeplifting-pygranso'):
+        self.method = method
+        self.results = []
+
+    def append_record(
+        self,
+        global_minimum: float,
+        f_init: float,
+        f_final: float,
+        total_time: float,
+        iterations: int,
+        fn_evals: int,
+        termination_code: int,
+        problem_config: Dict[str, int],
+        xs: str,
+        method: str,
+        lr: float,
+        objective_values: np.ndarray,
+        distance: float,
+    ) -> None:
+        """
+        Utility function that we can use to keep track
+        of information that is contained in a record
+        """
+        solution_tolerance = 1e-4
+        # Based on the input information let's compute if the trial
+        # was a success or not
+        success = int(
+            np.abs((global_minimum - f_final) / (global_minimum - f_init))
+            <= solution_tolerance
+        )
+
+        if self.method in (
+            'deeplifting-pygranso',
+            'deeplifting-lbfgs',
+            'deeplifting-adam',
+            'deeplifting-sgd',
+        ):
+            # Get the neural network configuration information
+            self.num_layers = problem_config['num_layers']
+            self.num_neurons = problem_config['num_neurons']
+            self.lr = problem_config['lr']
+            self.input_dimension = problem_config['input_dimension']
+
+            # Save all of the results to a list
+            self.results.append(
+                (
+                    method,
+                    xs,
+                    global_minimum,
+                    np.round(
+                        f_init, 6
+                    ),  # Seems to be some issue with this at the moment
+                    np.round(f_final, 6),
+                    total_time,
+                    iterations,
+                    fn_evals,
+                    termination_code,
+                    self.num_layers,
+                    self.num_neurons,
+                    success,
+                    lr,
+                    objective_values,
+                    distance,
+                )
+            )
+
+        else:
+            raise ValueError('Other methods coming soon!')
+
+    def build_and_save_dataframe(self, save_path: str, problem_name: str) -> None:
+        """
+        Method used to build a dataframe from the current
+        data in the lists and save it to a directory.
+
+        user: Input is specific to the directory of the user
+        """
+        if self.method in (
+            'deeplifting-pygranso',
+            'deeplifting-lbfgs',
+            'deeplifting-adam',
+            'deeplifting-sgd',
+        ):
+            columns = [
+                'method',
+                'start_position',
+                'global_minimum',
+                'f_init',
+                'f_final',
+                'total_time',
+                'iterations',
+                'fn_evals',
+                'termination_code',
+                'num_layers',
+                'num_neurons',
+                'success',
+                'learning_rate',
+                'objective_values',
+                'distance',
+            ]
+
+            # Set up the results dataframe
+            results_df = pd.DataFrame(self.results, columns=columns)
+
+            # Save the results
+            if self.lr is None:
+                filename = os.path.join(
+                    save_path,
+                    f'{problem_name}-relu-{self.num_layers}-{self.num_neurons}-'
+                    f'.parquet',
+                )
+            else:
+                filename = os.path.join(
+                    save_path,
+                    f'{problem_name}-relu-{self.num_layers}-{self.num_neurons}-'
+                    f'lr-{self.lr}-input-dim-{self.input_dimension}.parquet',
+                )
+            results_df.to_parquet(filename)
+
+        else:
+            raise ValueError('Other methods coming soon!')
+
+
+def build_model_complexity_plots(
+    path: str, problem: str, weight_initialization: bool, dimension: str
+) -> None:
+    """
+    Function that will take as input a string path and a problem
+    name and compile the results to create the success rate vs.
+    model complexity plots
+
+    The data should have columns:
+    success;
+    f_init;
+    global_minimum;
+    f;
+    num_layers;
+    units;
+    index;
+    total_time;
+    xs;
+
+    Forgot the termination codes!
+    At the moment this assumes low-dimension
+    """
+    files = os.path.join(path, f'{problem}-relu-*-{weight_initialization}*')
+    problem_files = glob.glob(files)
+    data = pd.read_parquet(problem_files)
+
+    # Create the results
+    results_df = (
+        data.groupby(
+            ['xs', 'num_layers', 'units']
+        )  # Group by each starting point, layers, units  # noqa
+        .agg(
+            {'success': 'max'}
+        )  # This is actual a binary check either there was a success or not  # noqa
+        .reset_index()
+        .groupby(
+            ['num_layers', 'units']
+        )  # Now we want to know the percentage of optimization successes  # noqa
+        .agg({'success': 'mean'})
+        .reset_index()
+    )
+
+    # Turn results df into heatmap format
+    heatmap_df = results_df.pivot_table(
+        index='units', columns='num_layers', values='success'
+    )
+
+    # Now create the heatmap with seaborn
+    base_save_path = '/panfs/jay/groups/15/jusun/dever120/Deeplifting'
+    image_results_path = f'image-results/{dimension}/deeplifting-pygranso/'
+    image_save_path = os.path.join(
+        base_save_path, image_results_path, f'{problem}-{weight_initialization}.png'
+    )
+
+    # Set up figure and create image and save
+    fig, ax = plt.subplots(1, 1, figsize=(10, 4))
+    sns.heatmap(
+        heatmap_df.sort_index(ascending=False), annot=True, cmap='Spectral_r', ax=ax
+    )
+    ax.set_title(f'{problem.capitalize()}: Success Rate Vs. Network Complexity')
+    ax.set_xlabel('Number of Layers')
+    ax.set_ylabel('Number of Neurons Per Layer')
+
+    # Save figure
+    fig.savefig(image_save_path)
+    plt.close()
 
 
 def create_unique_experiment_directory():
-    # Generate a UUID
+    """
+    Generate a UUID
+    """
+
     unique_id = str(uuid.uuid4())
 
     # Define the path to the experiments folder and the new UUID directory
@@ -77,61 +320,6 @@ def create_unique_experiment_directory():
     return new_dir_path
 
 
-def build_deeplifting_results(file_structure, epsilon=5.5e-4):
-    """
-    Function that can help us easily create results.
-    file_structure is the naming convention of the file.
-    We can use a wild-card and load in multiple files at
-    once.
-    """
-    directory = os.getcwd()
-    results_path = os.path.join(directory, file_structure)
-
-    # Get all files
-    files = glob.glob(results_path)
-
-    # Load in the parquet files
-    df = pd.read_parquet(files)
-
-    # Create the hit variable
-    df['hits'] = np.abs(df['global_minimum'] - df['f']) <= epsilon
-
-    # Return the aggregated results
-    return df.groupby('problem_name').agg({'hits': 'mean'})
-
-
-def load_deeplifting_model(model_path, config):
-    """
-    Load a saved model from path. The input config
-    will be the parameters of the neural network
-    and will contain a path with the saved file
-    """
-    input_size = config['input_size']
-    hidden_sizes = config['hidden_sizes']
-    dimensions = config['dimensions']
-    bounds = config['bounds']
-    activation = config['activation']
-    output_activation = config['output_activation']
-    agg_function = config['agg_function']
-    seed = config['seed']
-
-    # Initialize the model
-    model = DeepliftingSkipMLP(
-        input_size=input_size,
-        hidden_sizes=hidden_sizes,
-        output_size=dimensions,
-        bounds=bounds,
-        skip_every_n=1,
-        activation=activation,
-        output_activation=output_activation,
-        agg_function=agg_function,
-        seed=seed,
-    )
-
-    # Load the model
-    model.load_state_dict(torch.load(model_path))
-
-
 def set_seed(seed):
     """
     Function to set the seed for the run
@@ -146,12 +334,23 @@ def set_seed(seed):
 
 
 def initialize_vector(size, bounds):
+    """
+    Function to initialize a random point of optimization
+    for different algorithms
+    """
     if bounds is not None:
+        # Get the upper and lower bounds
+        lower_bounds = bounds['lower_bounds']
+        upper_bounds = bounds['upper_bounds']
+
+        # Redefine bounds
+        bounds = list(zip(lower_bounds, upper_bounds))
+
         if len(bounds) != size:
             raise ValueError("The number of bounds must match the size of the vector")
 
         vector = [np.random.uniform(low, high) for low, high in bounds]
-        vector = np.array(vector)
+        vector = np.array(vector).flatten()
     else:
         vector = np.random.randn(size)
 
@@ -160,7 +359,7 @@ def initialize_vector(size, bounds):
 
 def train_model_to_output(inputs, model, x0, epochs=10000, lr=1e-4, tolerance=1e-3):
     """
-    This function takes a model, input tensor, and target output (x0),
+    Function takes a model, input tensor, and target output (x0),
     and trains the model's output layer to produce x0 for the given input.
 
     Parameters:
@@ -172,12 +371,12 @@ def train_model_to_output(inputs, model, x0, epochs=10000, lr=1e-4, tolerance=1e
         tolerance: threshold for L2 distance to stop training (default: 1e-10)
     """
 
-    # Freeze all layers except the output layer
-    for name, parameters in model.named_parameters():
-        if (
-            'linear_scaling' not in name
-        ):  # assuming 'layer2' is the output layer, adjust if otherwise
-            parameters.requires_grad = False
+    # # Freeze all layers except the output layer
+    # for name, parameters in model.named_parameters():
+    #     if (
+    #         'alignment_layer' not in name
+    #     ):  # assuming 'layer2' is the output layer, adjust if otherwise
+    #         parameters.requires_grad = False
 
     # Begin training
     model.train()
@@ -196,36 +395,35 @@ def train_model_to_output(inputs, model, x0, epochs=10000, lr=1e-4, tolerance=1e
     for epoch in range(epochs):
         optimizer.zero_grad()  # Zero gradients
         outputs = model(inputs)  # Get model outputs for the input
-        outputs = outputs.mean(axis=0).flatten()  # Flatten the output tensor if needed
+        outputs = outputs.flatten()  # Flatten the output tensor if needed
         loss = criterion(x0, outputs)  # Compute loss
         loss.backward()  # Backward pass
         optimizer.step()  # Update parameters
         scheduler.step()
 
-        # Check L2 distance
-        l2_distance = torch.norm(outputs - x0, p=2).item()
+        # # Check L2 distance
+        # l2_distance = torch.norm(outputs - x0, p=2).item()
 
-        # Print loss and L2 distance every 100 epochs
-        if (epoch + 1) % 10000 == 0:
-            print(
-                f'Epoch [{epoch+1}/{epochs}], Loss: {loss.item():.4f}'
-                f', L2 Distance: {l2_distance:.4e}'
-            )
+    #     # Print loss and L2 distance every 100 epochs
+    #     if (epoch + 1) % 1000 == 0:
+    #         print(
+    #             f'Epoch [{epoch+1}/{epochs}], Loss: {loss.item():.4f}'
+    #             f', L2 Distance: {l2_distance:.4e}'
+    #         )
 
-        # Check the stopping criterion
-        if l2_distance < tolerance:
-            print(
-                f'Training converged at epoch {epoch+1} with'
-                f' L2 Distance: {l2_distance:.4e}'
-            )
-            break
+    #     # Check the stopping criterion
+    #     if l2_distance < tolerance:
+    #         print(
+    #             f'Training converged at epoch {epoch+1} with'
+    #             f' L2 Distance: {l2_distance:.4e}'
+    #         )
+    #         break
 
-    print(f'Initial x0 in fn = {x0}')
-    print(f'Fitted x0 in fn = {outputs}')
+    # print(f'Final L2 distance {l2_distance:.4e}')
 
-    # Unfreeze all layers
-    for parameters in model.parameters():
-        parameters.requires_grad = True
+    # # Unfreeze all layers
+    # for parameters in model.parameters():
+    #     parameters.requires_grad = True
 
     del (optimizer, scheduler, outputs)
     gc.collect()
@@ -233,6 +431,10 @@ def train_model_to_output(inputs, model, x0, epochs=10000, lr=1e-4, tolerance=1e
 
 
 def add_jitter(points, jitter_amount=0.05):
+    """
+    Function that adds a small amount of noise with main
+    use case for a scatter plot
+    """
     jitter = np.random.uniform(-jitter_amount, jitter_amount, points.shape)
     return points + jitter
 
@@ -347,7 +549,7 @@ def create_contour_plot(problem_name, problem, models, trajectories, colormap='G
 
 
 def create_optimization_plot(
-    problem_name, problem, final_results, add_contour_plot=True, colormap='Wistia'
+    problem_name, problem, add_contour_plot=False, colormap='Wistia'
 ):
     """
     Function that will build out the plots and the solution
@@ -358,11 +560,13 @@ def create_optimization_plot(
     objective = problem['objective']
 
     # Get the bounds for the problem
-    x_bounds, y_bounds = problem['bounds']
 
-    # Separate into the minimum and maximum bounds
-    x_min, x_max = x_bounds
-    y_min, y_max = y_bounds
+    # Get the upper bounds & lower bounds
+    lower_bounds = problem['bounds']['lower_bounds']
+    upper_bounds = problem['bounds']['upper_bounds']
+
+    x_min, y_min = lower_bounds
+    x_max, y_max = upper_bounds
 
     # Some of the problems that we are exploring do not
     # have bounds but we will want to plot them
@@ -380,13 +584,8 @@ def create_optimization_plot(
     y = np.linspace(y_min, y_max, 1000)
     x, y = np.meshgrid(x, y)
 
-    # For the function inputs we need results and a trial
-    # Create dummy data
-    results = np.zeros((1, 1, 3))
-    trial = 0
-
     # Put objective function in a wrapper
-    objective_f = partial(objective, results=results, trial=trial, version='numpy')
+    objective_f = partial(objective, version='numpy')
 
     # Create a grid of vectors
     grid = np.stack((x, y), axis=-1)
@@ -395,7 +594,7 @@ def create_optimization_plot(
     z = np.apply_along_axis(objective_f, 2, grid)
 
     # Create a figure
-    fig = plt.figure(figsize=(10, 4.5))
+    fig = plt.figure(figsize=(10, 5))
 
     # Specify 3D plot
     if add_contour_plot:
@@ -420,16 +619,6 @@ def create_optimization_plot(
         # Plot the contour
         contour = ax2.contour(x, y, z, cmap=colormap)
         fig.colorbar(contour, ax=ax2)
-
-        # Add the minimum point
-        for result in final_results:
-            min_x, min_y, _, _, _ = result
-            ax2.plot(min_x, min_y, 'ko')  # plot the minimum point as a black dot
-
-        # Add title and labels
-        ax2.set_title(f'Contour Plot of the {problem_name} Function')
-        ax2.set_xlabel('X')
-        ax2.set_ylabel('Y')
 
     # Show the plots
     plt.tight_layout()
@@ -458,17 +647,52 @@ def get_devices():
     return device
 
 
-class DifferentialEvolutionCallback(object):
+class BasinHoppingCallback:
+    """
+    Callback to save intermediate results for
+    Basinhopping
+    """
+
     def __init__(self):
         self.x_history = []
+        self.f_history = []
+        self.accecpt_history = []
+
+    def record_intermediate_data(self, x, f, accept):
+        self.x_history.append(x)
+        self.f_history.append(f)
+        self.accecpt_history.append(accept)
+
+
+class DifferentialEvolutionCallback:
+    """
+    Callback to save intermediate results for
+    Differential Evolution
+    """
+
+    def __init__(self):
+        self.x_history = []
+        self.f_history = []
         self.convergence_history = []
 
-    def record_intermediate_data(self, xk, convergence):
-        self.x_history.append(xk)
+    def record_intermediate_data(self, intermediate_result):
+        # Get the values from OptimizedResult
+        x = intermediate_result.x
+        f = intermediate_result.fun
+        convergence = intermediate_result.convergence
+
+        # Now append the values to the list
+        self.x_history.append(x)
+        self.f_history.append(f)
         self.convergence_history.append(convergence)
 
 
-class DualAnnealingCallback(object):
+class DualAnnealingCallback:
+    """
+    Callback to save intermediate results for
+    Dual Annealing
+    """
+
     def __init__(self):
         self.x_history = []
         self.f_history = []
@@ -478,6 +702,32 @@ class DualAnnealingCallback(object):
         self.x_history.append(x)
         self.f_history.append(f)
         self.context_history.append(algorithm_context)
+
+
+class IPOPTCallback:
+    """
+    Callback to save intermediate results for
+    IPOPT
+    """
+
+    def __init__(self):
+        self.x_history = []
+        self.f_history = []
+
+    def record_intermediate_data(
+        self,
+        alg_mod,
+        iter_count,
+        obj_value,
+        inf_pr,
+        inf_du,
+        mu,
+        d_norm,
+        regularization_size,
+        alpha_du,
+        alpha_pr,
+    ):
+        pass
 
 
 class HaltLog:
