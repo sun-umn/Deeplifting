@@ -21,6 +21,7 @@ from deeplifting.problems_nd.alpine2 import Alpine2
 from deeplifting.problems_nd.levy import Levy, LevyN13
 from deeplifting.problems_nd.mathopt6 import MathOpt6
 from deeplifting.problems_nd.rastrigin import Rastrigin
+from deeplifting.problems_nd.schaffer import SchafferN2
 
 
 def build_2d_intermediate_results(x1, x2, result, version, results, trial):
@@ -571,65 +572,6 @@ def langermann(x, results=None, trial=None, version='numpy'):
             + 3
             * torch.exp((-1 / np.pi) * (torch.square(x1 - 7) + torch.square(x2 - 9)))
             * torch.cos(np.pi * (torch.square(x1 - 7) + torch.square(x2 - 9)))
-        )
-
-    # Fill in the intermediate results if results and trial
-    # are provided
-    if results is not None and trial is not None:
-        build_2d_intermediate_results(
-            x1=x1,
-            x2=x2,
-            result=result,
-            version=version,
-            results=results,
-            trial=trial,
-        )
-
-    return result
-
-
-def schaffer_n2(x, results=None, trial=None, version='numpy'):
-    """
-    Implementation of the 2D Schaffer function N.2.
-    This function has a global minimum at x1 = x2 = 0.
-
-    Parameters:
-    x1 : np.ndarray or torch.Tensor
-        The x1 values (first dimension of the input space).
-    x2 : np.ndarray or torch.Tensor
-        The x2 values (second dimension of the input space).
-    version : str
-        The version to use for the function's computation.
-        Options are 'numpy' and 'pytorch'.
-
-    Returns:
-    result : np.ndarray or torch.Tensor
-        The computed Schaffer N.2 function values
-        corresponding to the inputs (x1, x2).
-
-    Raises:
-    ValueError
-        If the version is not 'numpy' or 'pytorch'.
-    """
-    x1, x2 = x.flatten()
-    if version == 'numpy':
-        result = (
-            0.5
-            + (np.sin(x1**2 - x2**2) ** 2 - 0.5) / (1 + 0.001 * (x1**2 + x2**2)) ** 2
-        )
-    elif version == 'pyomo':
-        result = (
-            0.5
-            + (pyo.sin(x1**2 - x2**2) ** 2 - 0.5) / (1 + 0.001 * (x1**2 + x2**2)) ** 2
-        )
-    elif version == 'pytorch':
-        result = (
-            0.5
-            + (torch.sin(x1**2 - x2**2) ** 2 - 0.5) / (1 + 0.001 * (x1**2 + x2**2)) ** 2
-        )
-    else:
-        raise ValueError(
-            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
     # Fill in the intermediate results if results and trial
@@ -5832,20 +5774,6 @@ langermann_config = {
     'dimensions': 2,
 }
 
-# Schaffer N2
-schaffer_n2_config = {
-    'objective': schaffer_n2,
-    'bounds': {
-        'lower_bounds': [-100.0, -100.0],
-        'upper_bounds': [100.0, 100.0],
-    },
-    'max_iterations': 100,
-    'global_minimum': 0.0,
-    'dimensions': 2,
-    'global_x': np.array([0.0, 0.0]),
-    'trials': 50,
-}
-
 # Schaffer N4
 schaffer_n4_config = {
     'objective': schaffer_n4,
@@ -7698,6 +7626,7 @@ levy_config = Levy().config()
 levy_n13_config = LevyN13().config()
 mathopt6_config = MathOpt6().config()
 rastrigin_config = Rastrigin().config()
+schaffer_n2_config = SchafferN2().config()
 
 # ND Problem Configurations
 # ND Ackley

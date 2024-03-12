@@ -63,8 +63,6 @@ from deeplifting.problems import (
     holder_table_config,
     rosenbrock,
     rosenbrock_config,
-    schaffer_n2,
-    schaffer_n2_config,
     schaffer_n4,
     schaffer_n4_config,
     schwefel,
@@ -81,6 +79,7 @@ from deeplifting.problems_nd.alpine2 import Alpine2
 from deeplifting.problems_nd.levy import Levy, LevyN13
 from deeplifting.problems_nd.mathopt6 import MathOpt6
 from deeplifting.problems_nd.rastrigin import Rastrigin
+from deeplifting.problems_nd.schaffer import SchafferN2
 
 
 def test_ackley_has_correct_global_minimum():
@@ -382,19 +381,21 @@ def test_schaffer_n2_has_correct_global_minimum():
     x*=(0.0, 0.0)
     f(x*) = 0
     """
+    schaffer_n2 = SchafferN2()
+    schaffer_n2_config = schaffer_n2.config()
     global_minimum = schaffer_n2_config['global_minimum']
 
     # Test the numpy version
     x = np.array([0.0, 0.0])
-    result = schaffer_n2(x, version='numpy')
+    result = schaffer_n2.objective(x, version='numpy')
     assert math.isclose(result, global_minimum, abs_tol=1e-4)
 
-    result = schaffer_n2(x, version='pyomo')
+    result = schaffer_n2.objective(x, version='pyomo')
     assert math.isclose(result, global_minimum, abs_tol=1e-4)
 
     # Test the torch version
     x = torch.tensor([0.0, 0.0], dtype=torch.float64)
-    torch_result = schaffer_n2(x, version='pytorch').numpy()
+    torch_result = schaffer_n2.objective(x, version='pytorch').numpy()
     assert math.isclose(torch_result, global_minimum, abs_tol=1e-4)
 
 
