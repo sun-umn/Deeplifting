@@ -1322,7 +1322,8 @@ def run_deeplifting_parallel(inputs, debug=False):
         units = inputs[2]
         input_dimension = inputs[3]
         problem = inputs[4]
-        save_path = inputs[5]
+        method = inputs[5]
+        save_path = inputs[6]
 
         # Get the available device
         device = get_devices()  # noqa
@@ -1337,9 +1338,6 @@ def run_deeplifting_parallel(inputs, debug=False):
             False: range(10, 20, 10),
             True: range(10, 110, 10),
         }
-
-        # method
-        method = 'deeplifting-adam'
 
         # Initial layer type
         initial_layer_type = 'linear'  # noqa
@@ -1450,15 +1448,15 @@ def run_deeplifting_parallel(inputs, debug=False):
                         max_iterations=max_iterations,
                     )
 
-                elif method == 'deeplifting-lbfgs':
-                    # Run LBFGS Based Deeplifting
-                    deeplifting_outputs = run_lbfgs_deeplifting(
+                elif method == 'deeplifting-sgd':
+                    # Run SGD Based Deeplifting
+                    deeplifting_outputs = run_sgd_deeplifting(
                         model=model,
                         model_inputs=inputs,
                         start_position=x_start,
                         objective=fn,
                         device=device,
-                        max_iterations=max_iterations,
+                        lr=lr,
                     )
 
                 elif method == 'deeplifting-adam':
@@ -1506,12 +1504,14 @@ def run_deeplifting_parallel(inputs, debug=False):
         print('Deeplifting completed! 🎉')
 
 
-@cli.command('test-parallel')
+@cli.command('deeplifting-parallel-task')
 @click.option('--problem_name', default='damavandi')
+@click.option('--method', default='deeplifting-pygranso')
 @click.option('--dimensionality', default='low-dimensional')
 @click.option('--experimentation', default=True)
-def test_parallel(
+def run_deeplifting_parallel_task(
     problem_name,
+    method,
     dimensionality,
     experimentation,
 ):
@@ -1562,9 +1562,11 @@ def test_parallel(
     )
     save_path = [save_path]
 
-    # Get the problem information
+    # Get the problem information - so we can pass it
+    # to the parallel jobs
     problem = PROBLEMS[problem_name]
     problem = [problem]
+    method = [method]
 
     # Layer search
     layers = [2, 3, 4, 5, 7, 10]
@@ -1578,18 +1580,29 @@ def test_parallel(
     input_dimensions = [1, 2, 4, 8]
 
     # Learning rates
-    learning_rates = [1.0, 1e-1, 1e-2, 1e-3]
+    learning_rate_config = {
+        'deeplifting-pygranso': [1.0],
+        'deeplifting-adam': [1.0, 1e-1, 1e-2],
+        'deeplifting-sgd': [1e-2, 1e-3, 1e-4],
+    }
+    learning_rates = learning_rate_config[method]
 
     # Configs
     configuration = product(
-        learning_rates, layers, units_search, input_dimensions, problem, save_path
+        learning_rates,
+        layers,
+        units_search,
+        input_dimensions,
+        problem,
+        method,
+        save_path,
     )
     config = list(configuration)
     print(f'There are {len(config)} configurations ✅')
 
     # Start ray process
     start = time.time()
-    with Pool(8) as pool:
+    with Pool(16) as pool:
         for _ in tqdm.tqdm(pool.imap(run_deeplifting_parallel, config)):
             pass
     end = time.time()

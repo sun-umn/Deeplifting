@@ -198,9 +198,7 @@ def cross_in_tray(x, version='numpy'):
                     torch.sin(x1)
                     * torch.sin(x2)
                     * torch.exp(
-                        torch.abs(
-                            100 - torch.sqrt(x1**2 + x2**2) / torch.tensor(np.pi)
-                        )
+                        torch.abs(100 - torch.sqrt(x1**2 + x2**2) / torch.tensor(np.pi))
                     )
                     + 1
                 )
@@ -293,9 +291,7 @@ def cross_leg_table(x, version='numpy'):
             / (
                 (
                     torch.abs(
-                        torch.exp(
-                            torch.abs(100 - (((x1**2 + x2**2) ** 0.5) / (np.pi)))
-                        )
+                        torch.exp(torch.abs(100 - (((x1**2 + x2**2) ** 0.5) / (np.pi))))
                         * torch.sin(x1)
                         * torch.sin(x2)
                     )
@@ -443,9 +439,7 @@ def griewank(x, version='numpy'):
     if version == 'numpy':
         result = 1 + ((x1**2 + x2**2) / 4000) - np.cos(x1) * np.cos(x2 / np.sqrt(2))
     elif version == 'pyomo':
-        result = (
-            1 + ((x1**2 + x2**2) / 4000) - pyo.cos(x1) * pyo.cos(x2 / (2) ** 0.5)
-        )
+        result = 1 + ((x1**2 + x2**2) / 4000) - pyo.cos(x1) * pyo.cos(x2 / (2) ** 0.5)
     elif version == 'pytorch':
         result = (
             1
@@ -486,9 +480,7 @@ def holder_table(x, results=None, trial=None, version='numpy'):
     x1, x2 = x.flatten()
     if version == 'numpy':
         result = -np.abs(
-            np.sin(x1)
-            * np.cos(x2)
-            * np.exp(np.abs(1 - np.sqrt(x1**2 + x2**2) / np.pi))
+            np.sin(x1) * np.cos(x2) * np.exp(np.abs(1 - np.sqrt(x1**2 + x2**2) / np.pi))
         )
     elif version == 'pyomo':
         result = -np.abs(
@@ -684,20 +676,17 @@ def schaffer_n2(x, results=None, trial=None, version='numpy'):
     if version == 'numpy':
         result = (
             0.5
-            + (np.sin(x1**2 - x2**2) ** 2 - 0.5)
-            / (1 + 0.001 * (x1**2 + x2**2)) ** 2
+            + (np.sin(x1**2 - x2**2) ** 2 - 0.5) / (1 + 0.001 * (x1**2 + x2**2)) ** 2
         )
     elif version == 'pyomo':
         result = (
             0.5
-            + (pyo.sin(x1**2 - x2**2) ** 2 - 0.5)
-            / (1 + 0.001 * (x1**2 + x2**2)) ** 2
+            + (pyo.sin(x1**2 - x2**2) ** 2 - 0.5) / (1 + 0.001 * (x1**2 + x2**2)) ** 2
         )
     elif version == 'pytorch':
         result = (
             0.5
-            + (torch.sin(x1**2 - x2**2) ** 2 - 0.5)
-            / (1 + 0.001 * (x1**2 + x2**2)) ** 2
+            + (torch.sin(x1**2 - x2**2) ** 2 - 0.5) / (1 + 0.001 * (x1**2 + x2**2)) ** 2
         )
     else:
         raise ValueError(
@@ -2774,9 +2763,7 @@ def bartels_conn(x, results=None, trial=None, version='numpy'):
         )
     elif version == 'pyomo':
         result = (
-            np.abs(x1**2 + x2**2 + x1 * x2)
-            + np.abs(pyo.sin(x1))
-            + np.abs(pyo.cos(x2))
+            np.abs(x1**2 + x2**2 + x1 * x2) + np.abs(pyo.sin(x1)) + np.abs(pyo.cos(x2))
         )
     elif version == 'pytorch':
         result = (
@@ -4189,9 +4176,7 @@ def el_attar(x, results, trial, version='numpy'):
     x1, x2 = x.flatten()
     if version == 'numpy' or version == 'pytorch':
         result = (
-            (x1**2 + x2 - 10) ** 2
-            + (x1 + x2**2 - 7) ** 2
-            + (x1**2 + x2**3 - 1) ** 2
+            (x1**2 + x2 - 10) ** 2 + (x1 + x2**2 - 7) ** 2 + (x1**2 + x2**3 - 1) ** 2
         )
     else:
         raise ValueError(
@@ -4220,9 +4205,7 @@ def el_attar(x, results, trial, version='numpy'):
 def egg_crate(x, results, trial, version='numpy'):
     x1, x2 = x.flatten()
     if version == 'numpy':
-        result = (
-            x1**2 + x2**2 + 25 * (np.square(np.sin(x1)) + np.square(np.sin(x2)))
-        )
+        result = x1**2 + x2**2 + 25 * (np.square(np.sin(x1)) + np.square(np.sin(x2)))
     elif version == 'pytorch':
         result = (
             x1**2
@@ -4471,8 +4454,7 @@ def helical_valley(x, results, trial, version='numpy'):
         else:
             theta = (1 / (2 * torch.pi)) * torch.atan(x1 / x2 + 0.5)
         result = 100 * (
-            torch.square(x2 - 10 * theta)
-            + torch.square(torch.sqrt(x1**2 + x2**2) - 1)
+            torch.square(x2 - 10 * theta) + torch.square(torch.sqrt(x1**2 + x2**2) - 1)
         ) + torch.square(x3)
     else:
         raise ValueError(
@@ -5057,9 +5039,7 @@ def mishra9(x, results, trial, version='numpy'):
         a = 2 * x1**3 + 5 * x1 * x2 + 4 * x3 - 2 * x1**2 * x3 - 18
         b = x1 + x2**3 + x1 * x3**2 - 22
         c = 8 * x1**2 + 2 * x2 * x3 + 2 * x2**2 + 3 * x2**3 - 52
-        result = (
-            a * (b**2) * c + a * b * (c**2) + b**2 + (x1 + x2 + x3) ** 2
-        ) ** 2
+        result = (a * (b**2) * c + a * b * (c**2) + b**2 + (x1 + x2 + x3) ** 2) ** 2
     else:
         raise ValueError(
             "Unknown version specified. Available options are 'numpy' and 'pytorch'."
@@ -5172,23 +5152,16 @@ def xinsheyang_n3(x, results=None, trial=None, version='numpy'):
     m = 5
     if version == 'numpy':
         component1 = np.exp(-((x1 / beta) ** (2 * m) + (x2 / beta) ** (2 * m)))
-        component2 = (
-            2 * np.exp(-(x1**2 + x2**2)) * np.cos(x1) ** 2 * np.cos(x2) ** 2
-        )
+        component2 = 2 * np.exp(-(x1**2 + x2**2)) * np.cos(x1) ** 2 * np.cos(x2) ** 2
         result = component1 - component2
     elif version == 'pyomo':
         component1 = pyo.exp(-((x1 / beta) ** (2 * m) + (x2 / beta) ** (2 * m)))
-        component2 = (
-            2 * pyo.exp(-(x1**2 + x2**2)) * pyo.cos(x1) ** 2 * pyo.cos(x2) ** 2
-        )
+        component2 = 2 * pyo.exp(-(x1**2 + x2**2)) * pyo.cos(x1) ** 2 * pyo.cos(x2) ** 2
         result = component1 - component2
     elif version == 'pytorch':
         component1 = torch.exp(-((x1 / beta) ** (2 * m) + (x2 / beta) ** (2 * m)))
         component2 = (
-            2
-            * torch.exp(-(x1**2 + x2**2))
-            * torch.cos(x1) ** 2
-            * torch.cos(x2) ** 2
+            2 * torch.exp(-(x1**2 + x2**2)) * torch.cos(x1) ** 2 * torch.cos(x2) ** 2
         )
         result = component1 - component2
     else:
@@ -5255,9 +5228,7 @@ def layeb3(x, results, trial, version='numpy'):
         result = np.abs(component1 * component2 + component3 + 1) ** -0.1
     elif version == 'pytorch':
         component1 = torch.sin(x1)
-        component2 = torch.exp(
-            torch.abs(100.0 - torch.sqrt(x1**2 + x2**2) / torch.pi)
-        )
+        component2 = torch.exp(torch.abs(100.0 - torch.sqrt(x1**2 + x2**2) / torch.pi))
         component3 = torch.sin(x2)
         result = torch.abs(component1 * component2 + component3 + 1) ** -0.1
     else:

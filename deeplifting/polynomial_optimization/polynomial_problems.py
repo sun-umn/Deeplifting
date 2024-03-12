@@ -30,9 +30,7 @@ def motzkin(x1, x2):
 
 
 def styblinzki_tang(x1, x2):
-    p = (0.5 * x1**4 - 8 * x1**2 + 2.5 * x1) + (
-        0.5 * x2**4 - 8 * x2**2 + 2.5 * x2
-    )
+    p = (0.5 * x1**4 - 8 * x1**2 + 2.5 * x1) + (0.5 * x2**4 - 8 * x2**2 + 2.5 * x2)
     bounds = [x1 - 5, x1 + 5, x2 - 5, x2 + 5]
     deg = 4
     return {'p': p, 'bounds': bounds, 'deg': deg}
