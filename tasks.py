@@ -1505,7 +1505,7 @@ def run_deeplifting_parallel(inputs, debug=False):
 
 
 @cli.command('deeplifting-parallel-task')
-@click.option('--problem_name', default='damavandi')
+@click.option('--problem_name', default='ackley')
 @click.option('--method', default='deeplifting-pygranso')
 @click.option('--dimensionality', default='low-dimensional')
 @click.option('--experimentation', default=True)
@@ -1522,7 +1522,6 @@ def run_deeplifting_parallel_task(
     """
     print('Starting slurm output ⏳')
     os.environ['OMP_NUM_THREADS'] = '1'
-    method = 'deeplifting-adam'
 
     # Setup the problem
     if dimensionality == 'low-dimensional':
@@ -1566,7 +1565,7 @@ def run_deeplifting_parallel_task(
     # to the parallel jobs
     problem = PROBLEMS[problem_name]
     problem = [problem]
-    method = [method]
+    method_list = [method]
 
     # Layer search
     layers = [2, 3, 4, 5, 7, 10]
@@ -1594,7 +1593,7 @@ def run_deeplifting_parallel_task(
         units_search,
         input_dimensions,
         problem,
-        method,
+        method_list,
         save_path,
     )
     config = list(configuration)
