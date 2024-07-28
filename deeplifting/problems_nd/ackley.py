@@ -82,7 +82,7 @@ class Ackley:
             },
             'max_iterations': 1000,
             'global_minimum': 0.0,
-            'dimensions': 2,
+            'dimensions': dimensions,
             'global_x': np.array([0.0] * dimensions),
             'trials': 15,
             'name': f'ackley_{dimensions}d',

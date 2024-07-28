@@ -63,8 +63,6 @@ from deeplifting.problems import (
     holder_table_config,
     rosenbrock,
     rosenbrock_config,
-    schwefel,
-    schwefel_config,
     shubert,
     shubert_config,
     xinsheyang_n2,
@@ -78,6 +76,7 @@ from deeplifting.problems_nd.levy import Levy, LevyN13
 from deeplifting.problems_nd.mathopt6 import MathOpt6
 from deeplifting.problems_nd.rastrigin import Rastrigin
 from deeplifting.problems_nd.schaffer import SchafferN2, SchafferN4
+from deeplifting.problems_nd.schwefel import Schwefel
 
 
 def test_ackley_has_correct_global_minimum():
@@ -433,19 +432,21 @@ def test_schwefel_has_correct_global_minimum():
     x*=(420.9687, 420.9687)
     f(x*) = 0.0
     """
+    schwefel = Schwefel()
+    schwefel_config = schwefel.config()
     global_minimum = schwefel_config['global_minimum']
 
     # Test the numpy version
     x = np.array([420.9687, 420.9687])
-    result = schwefel(x, version='numpy')
+    result = schwefel.objective(x, version='numpy')
     assert math.isclose(result, global_minimum, abs_tol=1e-4)
 
-    result = schwefel(x, version='pyomo')
+    result = schwefel.objective(x, version='pyomo')
     assert math.isclose(result, global_minimum, abs_tol=1e-4)
 
     # Test the torch version
     x = torch.tensor([420.9687, 420.9687], dtype=torch.float64)
-    torch_result = schwefel(x, version='pytorch').numpy()
+    torch_result = schwefel.objective(x, version='pytorch').numpy()
     assert math.isclose(torch_result, global_minimum, abs_tol=1e-4)
 
 

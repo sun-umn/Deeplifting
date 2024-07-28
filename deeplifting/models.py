@@ -123,7 +123,7 @@ class ReluDeepliftingBlock(nn.Module):
                 nonlinearity='relu',
             )
 
-        # Initailize the bias to zero
+        # Initialize the bias to zero
         nn.init.zeros_(self.linear.bias)
 
         # Define the Batch Normalization layer

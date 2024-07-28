@@ -7,30 +7,30 @@ import pyomo.environ as pyo
 import torch
 
 
-# File for ND Rastrigin test function
-class Rastrigin:
+# File for ND Schwefel test function
+class Schwefel:
     """
-    Function that implements the Rastrigin function in
+    Function that implements the Schwefel function in
     numpy, pytorch or pyomo interface. We will use this
     for our deeplifting experiments.
 
-    Rastrigin has a global minimum @ (0, 0) with
+    Schwefel has a global minimum @ (420.9697, 420.9687) with
     f(x) = 0
     """
 
     def objective(self, x, version='numpy') -> float:
         """
-        Rastrigin method
+        Schwefel method
         """
         x = x.flatten()
         d = len(x)
         if version == 'numpy':
-            result = 10 * d + np.sum(np.square(x) - 10 * np.cos(2 * np.pi * x))
+            result = 418.982887 * d - np.sum(x * np.sin(np.sqrt(np.abs(x))))
         elif version == 'pyomo':
-            values = [value**2 - 10 * pyo.cos(2.0 * np.pi * value) for value in x]
-            result = 10 * d + np.sum(values)
+            values = [value * pyo.sin(np.abs(value) ** 0.5) for value in x]
+            result = 418.982887 * d - np.sum(values)
         elif version == 'pytorch':
-            result = 10 * d + torch.sum(torch.square(x) - 10 * torch.cos(2 * np.pi * x))
+            result = 418.982887 * d - torch.sum(x * torch.sin(torch.abs(x) ** 0.5))
         else:
             raise ValueError(
                 'Unknown version specified.'
@@ -41,20 +41,20 @@ class Rastrigin:
 
     def config(self) -> Dict[str, Any]:
         """
-        Configuration to run Rastrigin problem
+        Configuration to run Schwefel problem
         """
         config = {
             'objective': self.objective,
             'bounds': {
-                'lower_bounds': [-5.12, -5.12],
-                'upper_bounds': [5.12, 5.12],
+                'lower_bounds': [-500.0, -500.0],
+                'upper_bounds': [500.0, 500.0],
             },
             'max_iterations': 1000,
             'global_minimum': 0.0,
             'dimensions': 2,
-            'global_x': np.array([0.0, 0.0]),
+            'global_x': np.array([420.9687, 420.9687]),
             'trials': 25,
-            'name': 'rastrigin',
+            'name': 'schwefel',
         }
 
         return config
@@ -66,8 +66,8 @@ class Rastrigin:
         config = {
             'objective': self.objective,
             'bounds': {
-                'lower_bounds': [-5.12] * dimensions,
-                'upper_bounds': [5.12] * dimensions,
+                'lower_bounds': [-500] * dimensions,
+                'upper_bounds': [500] * dimensions,
             },
             'max_iterations': 1000,
             'global_minimum': 0.0,
