@@ -22,6 +22,7 @@ from deeplifting.problems_nd.levy import Levy, LevyN13
 from deeplifting.problems_nd.mathopt6 import MathOpt6
 from deeplifting.problems_nd.rastrigin import Rastrigin
 from deeplifting.problems_nd.schaffer import SchafferN2, SchafferN4
+from deeplifting.problems_nd.schwefel import Schwefel
 
 
 def build_2d_intermediate_results(x1, x2, result, version, results, trial):
@@ -572,68 +573,6 @@ def langermann(x, results=None, trial=None, version='numpy'):
             + 3
             * torch.exp((-1 / np.pi) * (torch.square(x1 - 7) + torch.square(x2 - 9)))
             * torch.cos(np.pi * (torch.square(x1 - 7) + torch.square(x2 - 9)))
-        )
-
-    # Fill in the intermediate results if results and trial
-    # are provided
-    if results is not None and trial is not None:
-        build_2d_intermediate_results(
-            x1=x1,
-            x2=x2,
-            result=result,
-            version=version,
-            results=results,
-            trial=trial,
-        )
-
-    return result
-
-
-def schwefel(x, results=None, trial=None, version='numpy'):
-    """
-    Implementation of the 2D Schwefel function.
-    This function has a global minimum at x1 = x2 = 420.9687.
-
-    Parameters:
-    x1 : np.ndarray or torch.Tensor
-        The x1 values (first dimension of the input space).
-    x2 : np.ndarray or torch.Tensor
-        The x2 values (second dimension of the input space).
-    version : str
-        The version to use for the function's computation.
-        Options are 'numpy' and 'pytorch'.
-
-    Returns:
-    result : np.ndarray or torch.Tensor
-        The computed Schwefel function values
-        corresponding to the inputs (x1, x2).
-
-    Raises:
-    ValueError
-        If the version is not 'numpy' or 'pytorch'.
-    """
-    x1, x2 = x.flatten()
-    if version == 'numpy':
-        result = (
-            418.982887 * 2
-            - x1 * np.sin(np.sqrt(np.abs(x1)))
-            - x2 * np.sin(np.sqrt(np.abs(x2)))
-        )
-    elif version == 'pyomo':
-        result = (
-            418.982887 * 2
-            - x1 * pyo.sin(np.abs(x1) ** 0.5)
-            - x2 * pyo.sin(np.abs(x2) ** 0.5)
-        )
-    elif version == 'pytorch':
-        result = (
-            418.982887 * 2
-            - x1 * torch.sin(torch.sqrt(torch.abs(x1)))
-            - x2 * torch.sin(torch.sqrt(torch.abs(x2)))
-        )
-    else:
-        raise ValueError(
-            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
         )
 
     # Fill in the intermediate results if results and trial
@@ -5363,34 +5302,6 @@ def ndqing(x, results=None, trial=None, version='numpy'):
     return result
 
 
-def ndschwefel(x, results=None, trial=None, version='numpy'):
-    """
-    Implemention of the n-dimensional levy function
-
-    Args:
-    x: A d-dimensional array or tensor
-    version: A string, either 'numpy' or 'pytorch'
-
-    Returns:
-    result: Value of the Schwefel function
-    """
-    x = x.flatten()
-    d = len(x)
-    if version == 'numpy':
-        result = 418.982887 * d - np.sum(x * np.sin(np.sqrt(np.abs(x))))
-    elif version == 'pyomo':
-        values = [value * pyo.sin(np.abs(value) ** 0.5) for value in x]
-        result = 418.982887 * d - np.sum(values)
-    elif version == 'pytorch':
-        result = 418.982887 * d - torch.sum(x * torch.sin(torch.abs(x) ** 0.5))
-    else:
-        raise ValueError(
-            "Unknown version specified. Available options are 'numpy' and 'pytorch'."
-        )
-
-    return result
-
-
 # Let's place the Lennard-Jones problem here
 def lennard_jones(x, results=None, trial=None, version='numpy'):
     """
@@ -5712,21 +5623,6 @@ langermann_config = {
     'dimensions': 2,
 }
 
-# Schwefel
-schwefel_config = {
-    'objective': schwefel,
-    'bounds': {
-        'lower_bounds': [-500.0, -500.0],
-        'upper_bounds': [500.0, 500.0],
-    },
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 2,
-    'global_x': np.array([420.9687, 420.9687]),
-    'trials': 25,
-    'name': 'schwefel',
-}
-
 # Shubert
 shubert_config = {
     'objective': shubert,
@@ -5914,62 +5810,6 @@ layeb4_2500d_config = {
     'bounds': [(-10, 10)],  # Will use a single level bound and then expand
     'max_iterations': 1000,
     'global_minimum': 2499 * (np.log(1e-3) + 1),
-    'dimensions': 2500,
-}
-
-schwefel_3d_config = {
-    'objective': ndschwefel,
-    'bounds': [(-500, 500)],  # Will use a single level bound and then expand
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 3,
-}
-
-schwefel_5d_config = {
-    'objective': ndschwefel,
-    'bounds': [(-500, 500)],  # Will use a single level bound and then expand
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 5,
-}
-
-schwefel_30d_config = {
-    'objective': ndschwefel,
-    'bounds': [(-500, 500)],  # Will use a single level bound and then expand
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 30,
-}
-
-schwefel_100d_config = {
-    'objective': ndschwefel,
-    'bounds': [(-500, 500)],  # Will use a single level bound and then expand
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 100,
-}
-
-schwefel_500d_config = {
-    'objective': ndschwefel,
-    'bounds': [(-500, 500)],  # Will use a single level bound and then expand
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 500,
-}
-
-schwefel_1000d_config = {
-    'objective': ndschwefel,
-    'bounds': {'lower_bounds': [-500.0] * 1000, 'upper_bounds': [500.0] * 1000},
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
-    'dimensions': 1000,
-}
-
-schwefel_2500d_config = {
-    'objective': ndschwefel,
-    'bounds': [(-500, 500)],  # Will use a single level bound and then expand
-    'max_iterations': 1000,
-    'global_minimum': 0.0,
     'dimensions': 2500,
 }
 
@@ -7552,6 +7392,7 @@ mathopt6_config = MathOpt6().config()
 rastrigin_config = Rastrigin().config()
 schaffer_n2_config = SchafferN2().config()
 schaffer_n4_config = SchafferN4().config()
+schwefel_config = Schwefel().config()
 
 # ND Problem Configurations
 # ND Ackley
@@ -7569,6 +7410,14 @@ rastrigin_30d_config = Rastrigin().config_nd(dimensions=30)
 rastrigin_100d_config = Rastrigin().config_nd(dimensions=100)
 rastrigin_500d_config = Rastrigin().config_nd(dimensions=500)
 rastrigin_1000d_config = Rastrigin().config_nd(dimensions=1000)
+
+# ND Schwefel
+schwefel_3d_config = Schwefel().config_nd(dimensions=3)
+schwefel_5d_config = Schwefel().config_nd(dimensions=5)
+schwefel_30d_config = Schwefel().config_nd(dimensions=30)
+schwefel_100d_config = Schwefel().config_nd(dimensions=100)
+schwefel_500d_config = Schwefel().config_nd(dimensions=500)
+schwefel_1000d_config = Schwefel().config_nd(dimensions=1000)
 
 PROBLEMS_BY_NAME = {
     'ackley': ackley_config,
